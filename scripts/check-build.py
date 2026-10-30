@@ -41,6 +41,18 @@ def main() -> None:
         assert result.count("RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt") == 1
         assert "COPY --chown=ckan:ckan install-pages.py /tmp/portal-install-pages.py" in result
         assert "&& python /tmp/portal-install-pages.py" in result
+        assert 'ENV EXTRA_UWSGI_OPTS=""' in result, "runtime image must define EXTRA_UWSGI_OPTS for upstream start_ckan.sh"
+        # Reproduce the upstream strict-shell expansion: unset fails, empty is valid.
+        upstream_expansion = 'UWSGI_OPTS=default; if [ -n "$EXTRA_UWSGI_OPTS" ]; then UWSGI_OPTS="$UWSGI_OPTS $EXTRA_UWSGI_OPTS"; fi'
+        import os
+        missing_option = subprocess.run(["bash", "-uc", upstream_expansion], env={k: v for k, v in os.environ.items() if k != "EXTRA_UWSGI_OPTS"}, capture_output=True, text=True)
+        assert missing_option.returncode != 0, "fixture must reproduce upstream nounset failure when EXTRA_UWSGI_OPTS is absent"
+        subprocess.run(
+            ["bash", "-uc", upstream_expansion],
+            check=True,
+            env={**os.environ, "EXTRA_UWSGI_OPTS": ""},
+        )
+        assert result.index('ENV EXTRA_UWSGI_OPTS=""') < result.index("USER ckan"), "uWSGI default must be part of the final runtime image"
         assert sum(line.strip() == "USER root" for line in result.splitlines()) == 2, "root must be explicit for extension install, after the fixture's initial root user"
         assert sum(line.strip() == "USER ckan" for line in result.splitlines()) == 1, "the original CKAN runtime user boundary must be preserved"
         requirements = (ckan / "extensions/requirements.txt").read_text()
@@ -102,6 +114,7 @@ def main() -> None:
         workflow = (ROOT / ".github/workflows/ci.yml").read_text()
         assert "COPY deploy/ckan/install-pages.py /tmp/install-pages.py" in workflow
         assert "&& python /tmp/install-pages.py" in workflow
+        assert 'ENV EXTRA_UWSGI_OPTS=""' in workflow and "RUN test \"${EXTRA_UWSGI_OPTS+x}\" = x" in workflow, "Docker smoke test must verify the uWSGI default is defined"
         init_script = ckan / "docker-entrypoint.d/50-portal-extensions.sh"
         assert init_script.is_file() and init_script.stat().st_mode & 0o111
 

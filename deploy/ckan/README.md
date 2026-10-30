@@ -100,6 +100,10 @@ Jalankan ulang bootstrap setelah pembaruan source agar ID lama pada `.env.ckan`
 dibersihkan. Jangan menghapus volume database atau filestore untuk mengatasi
 container yang tidak sehat.
 
+### uWSGI startup environment
+
+Image CKAN Wajo mendefinisikan `EXTRA_UWSGI_OPTS` sebagai string kosong secara default. CKAN 2.12.1 upstream membaca variabel ini saat menyusun argumen uWSGI; tanpa nilai default, shell dengan `nounset` dapat menghentikan startup dengan pesan `EXTRA_UWSGI_OPTS: unbound variable`. Isi variabel hanya bila diperlukan untuk menambahkan opsi uWSGI khusus.
+
 ## 3. Akses admin dan keamanan
 
 `CKAN_ADMIN_GATE_MODE=none` adalah default: hostname admin langsung membuka form login CKAN tanpa prompt Basic Auth tambahan. Login dan izin CKAN tetap berlaku. Root redirect tidak menjadikan seluruh UI CKAN privat; jika ingin menambah lapisan perimeter, pilih satu mode di `.env.ckan`:

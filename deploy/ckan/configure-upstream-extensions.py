@@ -51,6 +51,9 @@ RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp
     && python /tmp/portal-install-pages.py \
     && rm -f /tmp/portal-ckan-extensions.txt /tmp/portal-install-pages.py \
     && rm -rf /tmp/portal-ckan-theme
+# The upstream start_ckan.sh reads EXTRA_UWSGI_OPTS without a nounset-safe fallback.
+# Define an empty default; an explicit runtime environment may still override it.
+ENV EXTRA_UWSGI_OPTS=""
 
 '''
 if marker in text:

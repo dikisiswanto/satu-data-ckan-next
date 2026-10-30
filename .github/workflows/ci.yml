@@ -88,6 +88,8 @@ jobs:
         run: |
           cat > Dockerfile.ckan-extension-smoke <<'DOCKER'
           FROM ckan/ckan-base:2.12.1
+          ENV EXTRA_UWSGI_OPTS=""
+          RUN test "${EXTRA_UWSGI_OPTS+x}" = x && test -z "$EXTRA_UWSGI_OPTS"
           USER root
           COPY deploy/ckan/extensions/requirements.txt /tmp/portal-ckan-extensions.txt
           COPY deploy/ckan/theme/ /tmp/portal-ckan-theme/
