@@ -54,24 +54,74 @@
         name="template_type"
         class="form-control"
       >
-        {% set selected_template = data.template_type or 'standard' %} {% for
-        value, label in [('standard', _('Standar')), ('landing', _('Landing
-        page')), ('policy', _('Kebijakan / regulasi')), ('guide', _('Panduan')),
-        ('article', _('Artikel'))] %}
         <option
-          value="{{ value }}"
+          value="standard"
           {%
           if
-          selected_template=""
-          ="value"
+          not
+          data.template_type
+          or
+          data.template_type=""
+          ="standard"
           %}selected="selected"
           {%
           endif
           %}
         >
-          {{ label }}
+          {{ _('Standar') }}
         </option>
-        {% endfor %}
+        <option
+          value="landing"
+          {%
+          if
+          data.template_type=""
+          ="landing"
+          %}selected="selected"
+          {%
+          endif
+          %}
+        >
+          {{ _('Landing page') }}
+        </option>
+        <option
+          value="policy"
+          {%
+          if
+          data.template_type=""
+          ="policy"
+          %}selected="selected"
+          {%
+          endif
+          %}
+        >
+          {{ _('Kebijakan / regulasi') }}
+        </option>
+        <option
+          value="guide"
+          {%
+          if
+          data.template_type=""
+          ="guide"
+          %}selected="selected"
+          {%
+          endif
+          %}
+        >
+          {{ _('Panduan') }}
+        </option>
+        <option
+          value="article"
+          {%
+          if
+          data.template_type=""
+          ="article"
+          %}selected="selected"
+          {%
+          endif
+          %}
+        >
+          {{ _('Artikel') }}
+        </option>
       </select>
     </div>
   </div>

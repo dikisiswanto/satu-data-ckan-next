@@ -62,8 +62,11 @@ for expected in (
     require(expected in plugin_source, f"Registrasi theme CKAN tidak lengkap: {expected}")
 
 require("{% ckan_extends %}" in base_source, "base.html harus mewarisi template base CKAN, bukan menggantikannya.")
-require("{% block styles %}" in base_source and "{{ super() }}" in base_source, "base.html harus mempertahankan CSS bawaan CKAN melalui block styles + super().")
-require("{% asset 'wajo_theme/wajo_theme' %}" in base_source, "Bundle WebAssets tidak dimuat pada base template.")
+styles_block = re.search(r"{%\s*block\s+styles\s*%}([\s\S]*?){%\s*endblock\s*%}", base_source)
+styles_body = styles_block.group(1) if styles_block else ""
+require(bool(styles_block) and "{{ super() }}" in styles_body, "base.html harus mempertahankan CSS bawaan CKAN melalui block styles + super().")
+asset_call = re.compile(r"{%\s*asset\s+(['\"])wajo_theme/wajo_theme\1\s*%}")
+require(bool(asset_call.search(styles_body)), "Bundle WebAssets wajo_theme harus dimuat di dalam block styles pada base.html.")
 require("{% ckan_extends %}" in header_source, "header.html harus mewarisi header CKAN.")
 require("{% block header_logo %}" in header_source, "Override header harus memakai block header_logo CKAN 2.12.1.")
 require("h.url_for('dashboard.datasets') if c.userobj else h.url_for('user.login')" in header_source, "Tautan logo harus aman untuk pengguna login maupun belum login.")
@@ -143,9 +146,11 @@ try:
         try:
             env.parse(normalized)
         except Exception as error:  # Jinja exceptions differ by version.
-            ERRORS.append(f"Template Jinja tidak valid di {path.relative_to(ROOT)}: {error}")
+            line = getattr(error, "lineno", "?")
+            detail = getattr(error, "message", str(error))
+            ERRORS.append(f"Template Jinja tidak valid di {path.relative_to(ROOT)}:{line}: {detail}")
 except ImportError:
-    pass
+    ERRORS.append("Jinja2 diperlukan untuk memvalidasi template CKAN; pasang dependency pemeriksaan sebelum menjalankan check-theme.py.")
 
 try:
     import tinycss2

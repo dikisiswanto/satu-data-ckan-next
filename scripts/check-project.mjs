@@ -361,8 +361,8 @@ const checks = [
   ],
   [
     "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
-    /ckan_extends[\s\S]*asset 'wajo_theme\/wajo_theme'/,
-    "Theme CSS harus ditambahkan melalui WebAssets dan mewarisi template CKAN.",
+    /ckan_extends[\s\S]*block\s+styles[\s\S]*super\(\)[\s\S]*asset\s+['\"]wajo_theme\/wajo_theme['\"]/,
+    "Theme CSS harus ditambahkan melalui WebAssets di block styles dan mewarisi template CKAN.",
   ],
   [
     "deploy/ckan/theme/ckanext/wajo_theme/templates/header.html",
