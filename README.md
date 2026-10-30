@@ -4,10 +4,12 @@ Portal data publik Kabupaten Wajo dengan **Next.js** sebagai frontend dan **CKAN
 
 ## Domain dan layanan
 
-| Domain                    | Layanan       | Tujuan                                                     |
-| ------------------------- | ------------- | ---------------------------------------------------------- |
-| `data.wajokab.go.id`      | Portal publik | Next.js, katalog, statistik, publikasi, dan API baca       |
-| `ckan.data.wajokab.go.id` | Administrasi  | Login dan seluruh antarmuka CKAN; respons diberi `noindex` |
+| Domain               | Layanan       | Tujuan                                                     |
+| -------------------- | ------------- | ---------------------------------------------------------- |
+| `data.wajokab.go.id` | Portal publik | Next.js, katalog, statistik, publikasi, dan API baca       |
+| `ckan.wajokab.go.id` | Administrasi  | Login dan seluruh antarmuka CKAN; respons diberi `noindex` |
+
+Hostname admin menggunakan `ckan.wajokab.go.id`, satu tingkat di bawah domain utama agar tercakup oleh Cloudflare Universal SSL standar pada Full DNS Setup. `CKAN_HOST` dapat diganti melalui `.env.ckan`; URL Portal Pengelola dan routing Caddy diselaraskan saat bootstrap/build. Detail migrasi staging dan TLS tersedia di [`deploy/ckan/README.md`](deploy/ckan/README.md).
 
 API publik tersedia melalui `https://data.wajokab.go.id/api/3/action/*`. API facade hanya meneruskan action baca yang diizinkan. Hostname API terpisah tidak diperlukan.
 

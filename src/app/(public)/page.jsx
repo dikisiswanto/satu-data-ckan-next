@@ -20,6 +20,7 @@ import {
   Network,
   Sprout,
   UsersRound,
+  FolderOpen,
 } from "lucide-react";
 import { SearchForm } from "@/components/search-form";
 import {
@@ -39,6 +40,7 @@ import { getPublishedIndicatorsResult } from "@/lib/data/public-indicators";
 import { getPublishedInfographicsResult } from "@/lib/data/public-infographics";
 import { getPublishedPublicationsResult } from "@/lib/data/public-publications";
 import { getPublicCmsBlogPostsResult } from "@/lib/cms/pages";
+import { normalizePublicCategoryFacets } from "@/lib/public-categories";
 
 export const metadata = {
   title: siteConfig.name,
@@ -209,7 +211,8 @@ function HomeHeroContent({
       <div className="page-container home-hero-inner">
         <div className="home-hero-copy">
           <p className="home-hero-kicker">
-            <span /> {`DATA TERBUKA ${siteConfig.regionName.toUpperCase()}`}
+            <span />{" "}
+            {`PORTAL DATA TERPADU ${siteConfig.regionName.toUpperCase()}`}
           </p>
           <h1>
             Temukan Data,
@@ -221,16 +224,19 @@ function HomeHeroContent({
             daerah, menyusun perencanaan, dan mendukung keputusan berbasis data.
           </p>
           <div className="home-hero-search">
-            <SearchForm placeholder="Cari topik, mis. sekolah, kesehatan, anggaran…" />
+            <SearchForm
+              placeholder="Cari dataset, tema, atau kata kunci…"
+              submitLabel="Cari"
+            />
           </div>
           <nav
             className="home-search-suggestions"
             aria-label="Contoh pencarian berdasarkan topik"
           >
-            <span>Topik populer</span>
+            <span>Coba cari</span>
             {topicLinks.slice(0, 4).map((topic) => (
               <Link key={topic.label} href={topic.href}>
-                {topic.label.toLowerCase()}
+                {topic.label}
               </Link>
             ))}
           </nav>
@@ -249,7 +255,7 @@ function HomeHeroContent({
             <span className="home-live-dot" />
             <span>
               <strong>{siteConfig.shortName}</strong>
-              <small>Satu portal untuk menemukan data daerah</small>
+              <small>Satu tempat untuk menemukan data daerah</small>
             </span>
           </div>
           <Link
@@ -268,7 +274,7 @@ function HomeHeroContent({
                   displayStat(stats?.organizations)
                 )}
               </strong>
-              <small>Perangkat daerah</small>
+              <small>Organisasi aktif</small>
             </span>
           </Link>
           <Link
@@ -287,7 +293,7 @@ function HomeHeroContent({
                   displayStat(stats?.indicators)
                 )}
               </strong>
-              <small>Indikator tersedia</small>
+              <small>Indikator publik</small>
             </span>
           </Link>
         </div>
@@ -309,7 +315,7 @@ function HomeHeroContent({
                   displayStat(stats?.datasets)
                 )}
               </strong>
-              <small>Dataset tersedia</small>
+              <small>Dataset terbuka</small>
             </span>
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
@@ -374,17 +380,120 @@ function HomeHeroContent({
           </Link>
         </section>
         <p className="home-stats-note">
-          Angka pada ringkasan ini berasal dari data yang telah dipublikasikan.
-          Tanda pisah menunjukkan informasi yang sementara belum tersedia.
+          Ringkasan dihitung dari data yang tersedia untuk publik. Jumlah
+          indikator mengikuti data statistik yang diterbitkan.
         </p>
       </div>
     </section>
   );
 }
 
+function getCategoryVisual(category) {
+  const normalized = `${category.name} ${category.id}`.toLocaleLowerCase(
+    "id-ID",
+  );
+  const match = topics.find((topic) => {
+    const label = topic.label.toLocaleLowerCase("id-ID");
+    return normalized.includes(label) || label.includes(normalized);
+  });
+  return { Icon: match?.icon || FolderOpen };
+}
+
+function HomeCategoryCards({ categories = [], unavailable = false }) {
+  const normalizedCategories = normalizePublicCategoryFacets(categories);
+  return (
+    <SectionReveal as="section" className="home-section home-topic-section">
+      <div className="home-section-heading">
+        <div>
+          <p className="eyebrow">JELAJAHI KATALOG</p>
+          <h2>Data berdasarkan kategori</h2>
+          <p>
+            Pilih kategori untuk melihat dataset yang diterbitkan perangkat
+            daerah.
+          </p>
+        </div>
+        <Link href="/dataset" className="home-section-link">
+          Semua dataset <ArrowRight size={16} aria-hidden="true" />
+        </Link>
+      </div>
+      {normalizedCategories.length ? (
+        <div className="home-topic-grid">
+          {normalizedCategories.slice(0, 10).map((category) => {
+            const { Icon } = getCategoryVisual(category);
+            return (
+              <Link
+                key={category.id}
+                href={`/dataset?kategori=${encodeURIComponent(category.id)}`}
+                className="home-topic-card group"
+                aria-label={`${category.name}, ${displayStat(category.count)} dataset`}
+              >
+                <span className="home-topic-icon">
+                  <Icon size={22} strokeWidth={1.9} aria-hidden="true" />
+                </span>
+                <span className="home-topic-name">{category.name}</span>
+                <span className="home-topic-count">
+                  <strong>{displayStat(category.count)}</strong> dataset
+                </span>
+                <span className="home-topic-arrow">
+                  <ArrowUpRight size={16} aria-hidden="true" />
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      ) : (
+        <div
+          className="home-topic-empty"
+          role={unavailable ? "alert" : "status"}
+        >
+          {unavailable
+            ? "Kategori data belum dapat dimuat. Silakan coba kembali beberapa saat lagi."
+            : "Kategori akan muncul setelah dataset publik dikelompokkan di CKAN."}
+        </div>
+      )}
+      {normalizedCategories.length > 10 ? (
+        <p className="home-topic-note">
+          Menampilkan 10 kategori dengan dataset terbanyak. Seluruh kategori
+          tersedia melalui filter katalog.
+        </p>
+      ) : null}
+    </SectionReveal>
+  );
+}
+
+function HomeCategoryCardsSkeleton() {
+  return (
+    <section
+      className="home-section home-topic-section"
+      aria-busy="true"
+      aria-label="Memuat kategori dataset"
+    >
+      <div className="home-section-heading">
+        <div>
+          <p className="eyebrow">JELAJAHI KATALOG</p>
+          <h2>Data berdasarkan kategori</h2>
+          <p>
+            Pilih kategori untuk melihat dataset yang diterbitkan perangkat
+            daerah.
+          </p>
+        </div>
+      </div>
+      <div className="home-topic-grid" aria-hidden="true">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div key={index} className="home-topic-card home-topic-card-skeleton">
+            <span className="loading-skeleton size-11 rounded-xl" />
+            <span className="loading-skeleton mt-4 h-4 w-4/5" />
+            <span className="loading-skeleton mt-2 h-3 w-2/5" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 async function HomeHero() {
-  // The headline counts are live public aggregates; render this section per
-  // request instead of freezing the successful build-time values into HTML.
+  // Headline statistics and category facets are fetched together so the counts
+  // shown in the hero and category cards use one CKAN response per request.
   await connection();
   const [statsResult, facetsResult] = await Promise.all([
     getPublicPortalStatsResult(),
@@ -394,11 +503,19 @@ async function HomeHero() {
     ? facetsResult.data.categories
     : [];
   return (
-    <HomeHeroContent
-      stats={statsResult.data}
-      availableCategories={availableCategories}
-      facetsUnavailable={facetsResult.unavailable}
-    />
+    <>
+      <HomeHeroContent
+        stats={statsResult.data}
+        availableCategories={availableCategories}
+        facetsUnavailable={facetsResult.unavailable}
+      />
+      <div className="page-container home-content">
+        <HomeCategoryCards
+          categories={availableCategories}
+          unavailable={facetsResult.unavailable}
+        />
+      </div>
+    </>
   );
 }
 
@@ -1014,41 +1131,19 @@ function HomeLatestDatasetsSkeleton() {
 export default function HomePage() {
   return (
     <main className="public-home">
-      <Suspense fallback={<HomeHeroContent loading />}>
+      <Suspense
+        fallback={
+          <>
+            <HomeHeroContent loading />
+            <div className="page-container home-content">
+              <HomeCategoryCardsSkeleton />
+            </div>
+          </>
+        }
+      >
         <HomeHero />
       </Suspense>
       <div className="page-container home-content">
-        <SectionReveal as="section" className="home-section home-topic-section">
-          <div className="home-section-heading">
-            <div>
-              <p className="eyebrow">JELAJAHI KATALOG</p>
-              <h2>Data berdasarkan tema</h2>
-              <p>Mulai dari bidang yang paling dekat dengan kebutuhan Anda.</p>
-            </div>
-            <Link href="/dataset" className="home-section-link">
-              Semua dataset <ArrowRight size={16} aria-hidden="true" />
-            </Link>
-          </div>
-          <div className="home-topic-grid">
-            {topics.map(({ label, query, icon: Icon }) => (
-              <Link
-                key={label}
-                href={`/dataset?q=${encodeURIComponent(query)}`}
-                className="home-topic-card"
-              >
-                <span className="home-topic-icon mb-4 flex size-11 items-center justify-center rounded-xl">
-                  <Icon size={23} strokeWidth={1.9} aria-hidden="true" />
-                </span>
-                <span className="mr-[.15rem] pr-4 text-xs font-bold leading-5 text-[#263f52] sm:text-sm">
-                  {label}
-                </span>
-                <span className="home-topic-arrow">
-                  <ArrowUpRight size={16} aria-hidden="true" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </SectionReveal>
         <Suspense fallback={<HomeLatestDatasetsSkeleton />}>
           <HomeLatestDatasetsSection />
         </Suspense>

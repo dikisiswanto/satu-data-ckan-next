@@ -7,9 +7,12 @@ function getGeoPortalUrl() {
 }
 
 export function GeoPortalStatisticsPromo() {
+  const geoPortalUrl = getGeoPortalUrl();
+  if (!geoPortalUrl) return null;
+
   return (
     <section
-      className="surface-panel mb-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+      className="geoportal-promo surface-panel mb-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5 sm:p-5"
       aria-labelledby="thematic-map-heading"
     >
       <div className="flex items-start gap-3">
@@ -21,24 +24,20 @@ export function GeoPortalStatisticsPromo() {
             Jelajahi data berbasis lokasi
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">
-            Gunakan {`GeoPortal ${siteConfig.regionShortName}`} untuk melihat
-            fasilitas dan data tematik di peta. Informasi dan sumber resmi
-            dataset tetap tersedia di Portal Satu Data. Ketersediaan setiap
-            lapisan peta mengikuti data yang telah disiapkan di GeoPortal.
+            Lihat fasilitas dan sebaran data tematik di peta. Metadata dan
+            sumber dataset tetap tersedia di Portal Satu Data.
           </p>
         </div>
       </div>
-      {getGeoPortalUrl() ? (
-        <a
-          href={getGeoPortalUrl()}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-control bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
-        >
-          Buka {`GeoPortal ${siteConfig.regionShortName}`}
-          <ExternalLink size={15} aria-hidden="true" />
-        </a>
-      ) : null}
+      <a
+        href={geoPortalUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-control bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
+      >
+        Buka {`GeoPortal ${siteConfig.regionShortName}`}
+        <ExternalLink size={15} aria-hidden="true" />
+      </a>
     </section>
   );
 }

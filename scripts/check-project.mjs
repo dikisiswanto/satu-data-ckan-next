@@ -72,6 +72,8 @@ const required = [
   "src/app/api/cms/media/[filename]/route.js",
   "src/lib/data/public.js",
   "src/lib/data/organizations.js",
+  "src/lib/public-categories.js",
+  "src/lib/public-organizations.js",
   "src/lib/data/public-indicators.js",
   "src/lib/data/public-infographics.js",
   "src/lib/data/public-publications.js",
@@ -100,6 +102,7 @@ const required = [
   "src/app/(public)/publikasi/[slug]/page.jsx",
   "src/components/indicator-trend-chart.jsx",
   "tests/unit/ckan-public-content.test.js",
+  "tests/unit/public-organizations.test.js",
   "tests/unit/ckan-cms.test.js",
   "tests/unit/geojson-preview.test.js",
   "tests/e2e/public-portal.spec.js",
@@ -196,8 +199,8 @@ const checks = [
   ],
   [
     "src/components/site-footer.jsx",
-    /data\.go\.id[\s\S]*logo-satu-data-indonesia\.svg[\s\S]*Satu Data Indonesia/,
-    "Footer harus menampilkan penanda Satu Data Indonesia dan tautan portal resminya.",
+    /data\.go\.id[\s\S]*logo-satu-data-indonesia\.svg[\s\S]*alt="Logo Satu Data Indonesia"[\s\S]*width=\{82\}/,
+    "Footer harus menampilkan logo SDI kecil dan menautkan ke portal resminya.",
   ],
   [
     "deploy/ckan/docker-compose.override.yml",
@@ -213,6 +216,41 @@ const checks = [
     "src/lib/data/public.js",
     /indicatorTag[\s\S]*indicators\.count/,
     "Ringkasan homepage harus menghitung indikator dari CKAN, tidak menyembunyikan fitur.",
+  ],
+  [
+    "src/lib/data/public.js",
+    /count: Number\(item\.count \|\| 0\)/,
+    "Kategori publik harus membawa jumlah dataset dari CKAN group facets.",
+  ],
+  [
+    "src/app/(public)/page.jsx",
+    /(?=[\s\S]*normalizePublicCategoryFacets)(?=[\s\S]*category\.count)(?=[\s\S]*kategori=\$\{encodeURIComponent\(category\.id\)\})[\s\S]*/,
+    "Kartu kategori homepage harus memakai kategori, slug, dan count CKAN; bukan daftar topik hardcoded.",
+  ],
+  [
+    "tests/e2e/public-portal.spec.js",
+    /CKAN-driven category cards[\s\S]*organization directory searches[\s\S]*filter penerbit|Memiliki dataset/,
+    "E2E harus memverifikasi count kategori CKAN serta pencarian/filter perangkat daerah.",
+  ],
+  [
+    "src/components/organization-directory.jsx",
+    /filterAndSortPublicOrganizations[\s\S]*organization-search[\s\S]*organization-sort[\s\S]*datasetState[\s\S]*organizationDatasetCount/,
+    "Direktori perangkat daerah harus memiliki pencarian kata kunci, filter penerbit dataset, pengurutan, dan count CKAN.",
+  ],
+  [
+    "src/lib/public-organizations.js",
+    /package_count[\s\S]*withDatasets[\s\S]*withoutDatasets[\s\S]*terms\.every/,
+    "Logika direktori harus menghitung data CKAN dan mendukung pencarian multi-kata berbasis seluruh istilah yang dimasukkan.",
+  ],
+  [
+    "src/components/page-heading.jsx",
+    /compact[\s\S]*space-y-1\.5/,
+    "PageHeading harus mendukung jarak judul dan subheading yang lebih rapat pada halaman Informasi.",
+  ],
+  [
+    "src/app/styles/public-layout-stability.css",
+    /informasi-directory-page \.public-page-heading[\s\S]*gap: 0\.45rem[\s\S]*padding-block-end/,
+    "Halaman Informasi harus memakai jarak editorial yang rapat antara judul dan deskripsi.",
   ],
   [
     "src/lib/data/public.js",

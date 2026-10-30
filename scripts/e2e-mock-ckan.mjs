@@ -233,6 +233,8 @@ const orgs = [
     id: "org-bappeda",
     name: "bappeda-wajo",
     title: "Bappeda Wajo",
+    description:
+      "Perencanaan pembangunan dan pengelolaan data pembangunan daerah.",
     state: "active",
     package_count: 2,
   },
@@ -240,8 +242,17 @@ const orgs = [
     id: "org-dinkes",
     name: "dinas-kesehatan",
     title: "Dinas Kesehatan Kabupaten Wajo",
+    description: "Informasi kesehatan masyarakat dan layanan kesehatan daerah.",
     state: "active",
     package_count: 1,
+  },
+  {
+    id: "org-setda",
+    name: "sekretariat-daerah",
+    title: "Sekretariat Daerah Kabupaten Wajo",
+    description: "Koordinasi penyelenggaraan pemerintahan daerah.",
+    state: "active",
+    package_count: 0,
   },
 ];
 const indicatorRecords = [
@@ -870,39 +881,33 @@ const server = createServer((request, response) => {
   }
   const match = url.pathname.match(/^\/api\/3\/action\/([a-z][a-z0-9_]*)$/);
   if (!match) {
-    response
-      .writeHead(404)
-      .end(
-        JSON.stringify({
-          success: false,
-          error: { message: "Not found", __type: "Not Found" },
-        }),
-      );
+    response.writeHead(404).end(
+      JSON.stringify({
+        success: false,
+        error: { message: "Not found", __type: "Not Found" },
+      }),
+    );
     return;
   }
   const action = match[1];
   const sendActionResult = () => {
     const result = actionResult(action, url.searchParams);
     if (result?.__not_found) {
-      response
-        .writeHead(200)
-        .end(
-          JSON.stringify({
-            success: false,
-            error: { message: "Not found", __type: "Not Found" },
-          }),
-        );
-      return;
-    }
-    response
-      .writeHead(200)
-      .end(
+      response.writeHead(200).end(
         JSON.stringify({
-          help: `https://docs.ckan.org/en/2.12/api/index.html#${action}`,
-          success: true,
-          result,
+          success: false,
+          error: { message: "Not found", __type: "Not Found" },
         }),
       );
+      return;
+    }
+    response.writeHead(200).end(
+      JSON.stringify({
+        help: `https://docs.ckan.org/en/2.12/api/index.html#${action}`,
+        success: true,
+        result,
+      }),
+    );
   };
   // Deliberately delay public Action API responses in E2E so loading boundaries
   // and layout-shift reservations are exercised instead of only warm responses.

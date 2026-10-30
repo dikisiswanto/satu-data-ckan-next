@@ -184,59 +184,6 @@ body:has(.public-home) .site-header-scrolled {
   box-shadow: 0 8px 26px rgb(15 35 50 / 10%) !important;
 }
 
-body:has(.public-home) .home-hero {
-  margin-top: 0 !important;
-  padding-top: 8.5rem !important;
-  background-color: #102a43 !important;
-  background-image:
-    linear-gradient(
-      90deg,
-      rgb(5 21 39 / 88%) 0%,
-      rgb(8 30 52 / 76%) 48%,
-      rgb(9 31 52 / 50%) 100%
-    ),
-    var(--home-hero-image, url("/portal-social.svg")) !important;
-  background-position:
-    center,
-    center 48% !important;
-  background-size: cover !important;
-  background-repeat: no-repeat !important;
-}
-
-body:has(.public-home) .home-hero-kicker,
-body:has(.public-home) .home-hero h1,
-body:has(.public-home) .home-hero-description,
-body:has(.public-home) .home-search-suggestions {
-  color: #ffffff !important;
-}
-
-body:has(.public-home) .home-hero-kicker > span {
-  background: #ffffff !important;
-  box-shadow: 0 0 0 4px rgb(255 255 255 / 18%) !important;
-}
-
-body:has(.public-home) .home-visual-chip,
-body:has(.public-home) .home-visual-caption {
-  background: #ffffff !important;
-  border-color: rgb(255 255 255 / 92%) !important;
-  color: #1d5fa7 !important;
-  box-shadow: 0 12px 32px rgb(4 20 36 / 22%) !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-
-body:has(.public-home) .home-visual-chip strong,
-body:has(.public-home) .home-visual-caption strong {
-  color: #173b5b !important;
-}
-
-body:has(.public-home) .home-visual-chip small,
-body:has(.public-home) .home-visual-caption small {
-  color: #526777 !important;
-}
-
-/* Keep dashboard sections and form panels aligned to the full main-column width. */
-
 /* Shared typography scale across public pages and navigation. */
 .public-interior-page .public-page-heading h1 {
   font-size: var(--type-h1);
@@ -250,17 +197,24 @@ body:has(.public-home) .home-visual-caption small {
   line-height: var(--leading-body);
 }
 
-@media (min-width: 1280px) {
-  body:has(.public-home) .home-hero {
-    padding-top: 9rem !important;
-  }
+/* Homepage category cards show live CKAN group counts, not static topic labels. */
+.public-home .home-topic-card {
+  min-height: 9.25rem;
+  gap: 0.15rem;
 }
 
-@media (max-width: 639px) {
-  body:has(.public-home) .home-hero {
-    padding-top: 7.5rem !important;
-    background-position:
-      center,
-      56% center !important;
-  }
+.public-home .home-topic-card .home-topic-icon {
+  display: flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.65rem;
+  border-radius: 0.8rem;
+}
+
+.public-home .home-topic-card-skeleton {
+  pointer-events: none;
+  transform: none !important;
+  box-shadow: none !important;
 }

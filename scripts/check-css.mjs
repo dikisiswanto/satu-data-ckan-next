@@ -116,12 +116,14 @@ const orderedImports = [
   "foundation.css",
   "shared-components.css",
   "public-home-catalog.css",
+  "public-organizations.css",
   "public-pages-motion.css",
   "component-styles.css",
   "overrides.css",
   "quality-pass.css",
   "public-responsive.css",
   "public-layout-stability.css",
+  "public-home-hero.css",
 ];
 const actualImports = [
   ...globalCss.matchAll(/@import\s+["']\.\/styles\/([^"']+\.css)["']/g),

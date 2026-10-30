@@ -134,16 +134,3 @@
     transition-duration: 0.01ms !important;
   }
 }
-
-.home-hero {
-  @apply relative overflow-hidden bg-[#123e42] text-[#fffefa];
-}
-
-.home-hero-inner {
-  @apply relative grid grid-cols-[minmax(0,_1/**/.08fr)_minmax(280px,_/**/.72fr)] gap-[3rem_5rem] items-center pt-[4.25rem]
-  pb-[1.5rem];
-}
-
-.home-hero-copy {
-  @apply p-[1.25rem_0_2/**/.25rem];
-}

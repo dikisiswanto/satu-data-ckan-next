@@ -5,8 +5,6 @@ from __future__ import annotations
 import ast
 import re
 import sys
-from html.parser import HTMLParser
-from types import SimpleNamespace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -128,10 +126,10 @@ form_source = read(CMS_FORM)
 require("{% ckan_extends %}" in form_source and "{% block extra_pages_form %}" in form_source, "Form CMS harus mewarisi form upstream dan mengisi block extra_pages_form.")
 require(all(f'name=\"{field}\"' in form_source for field in ("excerpt", "category", "template_type", "featured", "show_in_menu", "seo_title", "seo_description", "og_image", "content_blocks")), "Form CMS belum menampilkan semua field editorial penting.")
 require("errors.content_blocks" in form_source, "Form CMS harus menampilkan kesalahan validasi JSON content blocks.")
-require(not re.search(r"{%\s*set\b", form_source), "Form CMS tidak boleh memakai assignment tag Jinja; gunakan conditional yang eksplisit.")
-require(not re.search(r"<option\b[^>]*{{", form_source), "Ekspresi Jinja tidak boleh ditempatkan di dalam tag pembuka option; gunakan conditional untuk elemen option utuh.")
+require(not re.search(r"{%\s*set\b", form_source), "Form CMS tidak boleh memakai assignment tag Jinja; gunakan ekspresi inline agar kompatibilitas template tetap sederhana.")
 prettierignore = read(ROOT / ".prettierignore")
-require("deploy/ckan/theme/**/*.html" in prettierignore, "Template HTML CKAN berbasis Jinja harus dikecualikan dari Prettier HTML parser.")
+require("deploy/ckan/theme/**/*.html" in prettierignore, "Template CKAN Jinja harus dikecualikan dari Prettier HTML parser.")
+require(not re.search(r"<option\b[^>]*\{\{", form_source), "Form CMS tidak boleh menaruh ekspresi Jinja tanpa kutip di atribut option; gunakan conditional yang membungkus option utuh.")
 
 # The CSS must remain parseable and preserve the responsive login fallback.
 require(css_source.count("{") == css_source.count("}"), "CSS memiliki jumlah kurung blok yang tidak seimbang.")
@@ -143,9 +141,10 @@ require("position: fixed" not in css_source, "Theme tidak boleh membuat overlay 
 
 # Parse Jinja and CSS with the parsers already present in a CKAN dev environment.
 try:
-    from jinja2 import Environment
+    from jinja2 import DictLoader, Environment
 
     env = Environment()
+    normalized_form = form_source.replace("{% ckan_extends %}", '{% extends "base.html" %}')
     for path, source in ((BASE, base_source), (HEADER, header_source), (CMS_FORM, form_source)):
         normalized = source.replace("{% ckan_extends %}", '{% extends "base.html" %}')
         normalized = re.sub(r"{%\s*asset\s+(['\"]).*?\1\s*%}", "{% set wajo_theme_asset_loaded = true %}", normalized)
@@ -156,46 +155,31 @@ try:
             detail = getattr(error, "message", str(error))
             ERRORS.append(f"Template Jinja tidak valid di {path.relative_to(ROOT)}:{line}: {detail}")
 
-    class OptionSelectionParser(HTMLParser):
-        def __init__(self):
-            super().__init__()
-            self.current_select = None
-            self.selected = {}
-
-        def handle_starttag(self, tag, attrs):
-            attributes = dict(attrs)
-            if tag == "select":
-                self.current_select = attributes.get("name")
-                if self.current_select:
-                    self.selected[self.current_select] = []
-            elif tag == "option" and self.current_select and "selected" in attributes:
-                self.selected[self.current_select].append(attributes.get("value"))
-
-        def handle_endtag(self, tag):
-            if tag == "select":
-                self.current_select = None
-
-    renderable_form = form_source.replace("{% ckan_extends %}", "")
-    renderable_form = renderable_form.replace("{% block extra_pages_form %}", "").replace("{% endblock %}", "")
-    renderable_form = renderable_form.replace("{{ super() }}", "")
-    render_env = Environment(autoescape=True)
-    render_env.globals["_"] = lambda value: value
-    for data, expected in (
-        ({"template_type": "", "featured": False, "show_in_menu": False}, {
-            "template_type": ["standard"], "featured": ["false"], "show_in_menu": ["false"]
-        }),
-        ({"template_type": "landing", "featured": "true", "show_in_menu": "true"}, {
-            "template_type": ["landing"], "featured": ["true"], "show_in_menu": ["true"]
-        }),
-        ({"template_type": "policy", "featured": "false", "show_in_menu": "0"}, {
-            "template_type": ["policy"], "featured": ["false"], "show_in_menu": ["false"]
-        }),
-    ):
-        rendered = render_env.from_string(renderable_form).render(data=data, errors=SimpleNamespace(content_blocks=[]))
-        parser = OptionSelectionParser()
-        parser.feed(rendered)
-        for select_name, selected_values in expected.items():
-            require(parser.selected.get(select_name) == selected_values, f"Pilihan CMS {select_name} tidak mempertahankan nilai terpilih {selected_values}.")
+    # Exercise select rendering so the selected options remain correct on create/edit.
+    render_env = Environment(loader=DictLoader({
+        "base.html": '{% block extra_pages_form %}{% endblock %}',
+        "form.html": normalized_form,
+    }))
+    form_template = render_env.get_template("form.html")
+    base_data = {
+        "excerpt": "", "category": "", "template_type": "standard", "featured": False,
+        "show_in_menu": False, "menu_label": "", "menu_order": "", "seo_title": "",
+        "seo_description": "", "og_image": "", "content_blocks": "[]",
+    }
+    for template_type in ("standard", "landing", "policy", "guide", "article", ""):
+        data = {**base_data, "template_type": template_type}
+        rendered = form_template.render(data=data, errors={"content_blocks": []}, _=lambda value: value)
+        expected = template_type or "standard"
+        selected = [value for value in ("standard", "landing", "policy", "guide", "article") if f'<option value="{value}" selected="selected">' in rendered]
+        if selected != [expected]:
+            ERRORS.append(f"Form CMS memilih tata letak yang salah untuk nilai {template_type!r}: {selected}")
+    for flag in (False, True, "false", "true", "0", "1", 0, 1, None):
+        data = {**base_data, "featured": flag, "show_in_menu": flag}
+        rendered = form_template.render(data=data, errors={"content_blocks": []}, _=lambda value: value)
+        expected = "true" if flag in (True, "true", "1", 1) else "false"
+        if rendered.count(f'<option value="{expected}" selected="selected">') != 2:
+            ERRORS.append(f"Form CMS gagal mempertahankan nilai boolean {flag!r}.")
+            break
 except ImportError:
     ERRORS.append("Jinja2 diperlukan untuk memvalidasi template CKAN; pasang dependency pemeriksaan sebelum menjalankan check-theme.py.")
 

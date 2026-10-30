@@ -3,12 +3,14 @@
 @import "./styles/foundation.css";
 @import "./styles/shared-components.css";
 @import "./styles/public-home-catalog.css";
+@import "./styles/public-organizations.css";
 @import "./styles/public-pages-motion.css";
 @import "./styles/component-styles.css";
 @import "./styles/overrides.css";
 @import "./styles/quality-pass.css";
 @import "./styles/public-responsive.css";
 @import "./styles/public-layout-stability.css";
+@import "./styles/public-home-hero.css";
 @plugin "@tailwindcss/forms";
 
 /* Editorial pages are rendered by Next.js from the CKAN Pages headless CMS. */

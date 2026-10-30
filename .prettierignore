@@ -10,5 +10,6 @@ dist/
 coverage/
 playwright-report/
 test-results/
-# CKAN Jinja templates use template syntax that Prettier HTML cannot parse.
+
+# CKAN Jinja templates are not plain HTML; preserve Jinja syntax.
 deploy/ckan/theme/**/*.html

@@ -8,7 +8,7 @@ Browser tidak memanggil action Pages secara langsung. Token admin CKAN tidak dip
 
 ## Alur editorial
 
-Di `https://ckan.data.wajokab.go.id`:
+Kelola konten melalui hostname admin yang ditetapkan pada `CKAN_HOST` (contoh: `https://ckan.silirdev.com` untuk staging atau `https://ckan.wajokab.go.id` untuk produksi):
 
 1. Buka menu **Pages**.
 2. Buat **Page** untuk profil, kebijakan, panduan, FAQ, dan halaman informasi permanen.

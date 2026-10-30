@@ -1,3 +1,18 @@
+/* Breadcrumb background spans the page; the breadcrumb control stays content-width
+   inside the same max-width container as every public page. */
+.public-breadcrumb-band {
+  border-bottom: 1px solid #e3eaee;
+  background: linear-gradient(180deg, #f4f8fa 0%, #f8fafb 100%);
+}
+.public-breadcrumb-band > nav {
+  display: block;
+  min-width: 0;
+}
+.public-breadcrumb-band ol {
+  width: fit-content;
+  max-width: 100%;
+}
+
 /* Reserve geometry for asynchronous public content before CKAN/CMS responses arrive. */
 .public-heading-title-reserved {
   display: -webkit-box;
@@ -340,4 +355,108 @@
 
 .public-publication-meta-panel {
   min-block-size: 30rem;
+}
+
+/* Unified public layout rhythm: reduce blank bands without compressing content. */
+.public-app-shell main.public-interior-page.section-space {
+  padding-block: clamp(1.75rem, 3vw, 2.75rem);
+}
+
+.public-app-shell .public-interior-page .public-page-heading {
+  margin-block-end: 1.5rem;
+  padding-block-end: 1.1rem;
+}
+
+.public-app-shell .public-interior-page .public-empty-panel {
+  padding-block: 2rem;
+}
+
+.public-app-shell .statistics-card {
+  min-block-size: 17.5rem;
+  padding: 1.1rem;
+}
+
+.public-app-shell .cms-directory-section {
+  min-block-size: 0;
+}
+
+.public-app-shell .cms-directory-card {
+  min-block-size: 12rem;
+}
+
+.public-app-shell .cms-directory-empty {
+  min-block-size: 8rem;
+}
+
+.public-app-shell .public-news-list-slot {
+  min-block-size: 0;
+}
+
+/* Compact public directory and data-list rhythm; detail content keeps its reading width. */
+.public-app-shell .public-interior-page .cms-directory-nav {
+  margin-top: 1rem;
+}
+.public-app-shell .public-interior-page .cms-directory-section {
+  margin-top: 1.75rem;
+}
+.public-app-shell .public-interior-page .cms-directory-section > :first-child {
+  margin-bottom: 0.85rem;
+}
+.public-app-shell .public-interior-page .statistics-card {
+  min-block-size: 0;
+  padding: 1.15rem;
+}
+.public-app-shell .public-interior-page .public-empty-panel {
+  gap: 0.25rem;
+}
+.public-app-shell .public-interior-page .public-empty-panel > p {
+  max-width: 42rem;
+}
+.public-app-shell .public-interior-page .public-page-heading p:not(.eyebrow) {
+  max-width: 48rem;
+}
+.public-app-shell .public-interior-page .publication-card,
+.public-app-shell .public-interior-page .infographic-card {
+  min-block-size: 0;
+}
+
+@media (min-width: 1280px) {
+  .home-hero-inner {
+    gap: clamp(2rem, 3.8vw, 3.75rem);
+  }
+  .home-hero-visual {
+    min-height: 20rem;
+  }
+}
+
+/* The information index uses a tighter editorial heading rhythm. */
+.public-app-shell .informasi-directory-page .public-page-heading {
+  gap: 0.45rem;
+  margin-block-end: 1rem;
+  padding-block-end: 0.9rem;
+}
+
+.public-app-shell .informasi-directory-page .public-page-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.public-app-shell .informasi-directory-page .public-page-heading > div > * {
+  margin-block-start: 0;
+}
+
+.public-app-shell .informasi-directory-page .public-page-heading .eyebrow {
+  margin: 0;
+}
+
+.public-app-shell
+  .informasi-directory-page
+  .public-page-heading
+  p:not(.eyebrow) {
+  margin-block-start: 0;
+}
+
+.public-app-shell .informasi-directory-page .cms-directory-nav {
+  margin-block-start: 0.5rem;
 }

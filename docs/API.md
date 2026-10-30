@@ -166,7 +166,7 @@ Portal disiapkan untuk kemungkinan diambil oleh harvester CKAN lain, tanpa membu
 https://data.wajokab.go.id
 ```
 
-Jangan menggunakan `https://ckan.data.wajokab.go.id`; hostname tersebut khusus administrasi. Harvester CKAN standar memanggil `package_search` dengan `rows`, `start`, `sort=id asc`, lalu memakai filter `fq` untuk membatasi organisasi/grup atau mengambil metadata yang berubah sejak proses sebelumnya. Facade publik kini mendukung subset parameter tersebut secara terbatas. Action baca seperti `package_show`, `organization_show`, dan `group_show` tetap tersedia untuk metadata yang bersifat publik.
+Jangan menggunakan `CKAN_HOST` (misalnya `https://ckan.silirdev.com`); hostname tersebut khusus administrasi. Gunakan `PUBLIC_HOST` (misalnya `https://data.silirdev.com`) sebagai alamat harvesting publik. Harvester CKAN standar memanggil `package_search` dengan `rows`, `start`, `sort=id asc`, lalu memakai filter `fq` untuk membatasi organisasi/grup atau mengambil metadata yang berubah sejak proses sebelumnya. Facade publik kini mendukung subset parameter tersebut secara terbatas. Action baca seperti `package_show`, `organization_show`, dan `group_show` tetap tersedia untuk metadata yang bersifat publik.
 
 Contoh request awal:
 

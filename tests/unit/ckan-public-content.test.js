@@ -34,7 +34,9 @@ import {
 import {
   buildPublicCatalogQuery,
   getPublicPortalStatsResult,
+  getPublishedDatasetFacetsResult,
 } from "@/lib/data/public";
+import { normalizePublicCategoryFacets } from "@/lib/public-categories";
 
 const indicatorPackage = {
   id: "package-id-ipm",
@@ -459,5 +461,64 @@ describe("public CKAN API response sanitization", () => {
         },
       ]),
     ).toEqual([{ id: "activity", activity_type: "changed package" }]);
+  });
+});
+
+describe("CKAN-driven public category cards", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("keeps CKAN group IDs and exact public dataset counts, ordered by count", () => {
+    expect(
+      normalizePublicCategoryFacets([
+        { id: "pendidikan", name: "Pendidikan", count: 8 },
+        { id: "kesehatan", name: "Kesehatan", count: "14" },
+        { id: "ekonomi", name: "Ekonomi", count: 0 },
+      ]),
+    ).toEqual([
+      { id: "kesehatan", name: "Kesehatan", count: 14 },
+      { id: "pendidikan", name: "Pendidikan", count: 8 },
+      { id: "ekonomi", name: "Ekonomi", count: 0 },
+    ]);
+  });
+
+  it("rejects invalid category identifiers and normalizes missing counts", () => {
+    expect(
+      normalizePublicCategoryFacets([
+        { id: "../admin", name: "Tidak valid", count: 999 },
+        { id: "kependudukan", name: "Kependudukan" },
+        null,
+      ]),
+    ).toEqual([{ id: "kependudukan", name: "Kependudukan", count: 0 }]);
+  });
+
+  it("reads dataset counts from CKAN package_search group facets", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          success: true,
+          result: {
+            results: [],
+            search_facets: {
+              groups: {
+                items: [
+                  { name: "kesehatan", display_name: "Kesehatan", count: 12 },
+                  { name: "pendidikan", display_name: "Pendidikan", count: 7 },
+                ],
+              },
+              organization: { items: [] },
+              extras_portal_reference_period: { items: [] },
+            },
+          },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      ),
+    );
+
+    const response = await getPublishedDatasetFacetsResult();
+    expect(response.unavailable).toBe(false);
+    expect(response.data.categories).toEqual([
+      { id: "kesehatan", name: "Kesehatan", count: 12 },
+      { id: "pendidikan", name: "Pendidikan", count: 7 },
+    ]);
   });
 });

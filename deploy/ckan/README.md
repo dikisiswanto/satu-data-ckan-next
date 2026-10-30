@@ -21,7 +21,7 @@ Dari root repo:
 cp .env.ckan.example .env.ckan
 ```
 
-Edit `.env.ckan` sekurangnya untuk `PUBLIC_HOST`, `CKAN_HOST`, dan `CLOUDFLARE_TUNNEL_TOKEN`. Nilai default hostname adalah `data.wajokab.go.id` dan `ckan.data.wajokab.go.id`. URL turunan disinkronkan dari dua hostname tersebut. `.env.ckan` harus privat dan tidak boleh dimasukkan ke Git.
+Edit `.env.ckan` sekurangnya untuk `PUBLIC_HOST`, `CKAN_HOST`, dan `CLOUDFLARE_TUNNEL_TOKEN`. Nilai default hostname adalah `data.wajokab.go.id` dan `ckan.wajokab.go.id`. URL turunan disinkronkan dari dua hostname tersebut. `.env.ckan` harus privat dan tidak boleh dimasukkan ke Git.
 
 Jalankan bootstrap:
 
@@ -42,18 +42,45 @@ Bootstrap hanya mengambil dan memvalidasi source serta menghasilkan `.env.genera
 
 ## 2. Tunnel untuk dua subdomain
 
+Gunakan hostname admin satu tingkat agar sertifikat Cloudflare Universal SSL standar dapat mencakupnya. Contoh konfigurasi staging:
+
+```ini
+PUBLIC_HOST=data.silirdev.com
+CKAN_HOST=ckan.silirdev.com
+```
+
+Untuk staging `silirdev.com`, konfigurasi yang disarankan adalah `PUBLIC_HOST=data.silirdev.com` dan `CKAN_HOST=ckan.silirdev.com`. Saat memindahkan hostname admin dari `ckan.data.silirdev.com`, cukup ubah satu baris `CKAN_HOST` di `.env.ckan`; `sync-env.py` akan menyelaraskan `NEXT_PUBLIC_CKAN_ADMIN_URL` dan `CKAN_ADMIN_URL`. `PUBLIC_HOST`, `NEXT_PUBLIC_SITE_URL`, `PUBLIC_SITE_ORIGIN`, dan `CKAN_SITE_URL` tetap memakai domain portal publik. Jalankan ulang bootstrap dan Compose dengan `--build` agar Caddy serta tautan admin Next.js menggunakan hostname baru. Cloudflare Public Hostname juga harus diperbarui ke hostname baru; pengaturan DNS/Tunnel tersebut tidak dapat diubah dari `.env.ckan`.
+
+Untuk lingkungan resmi, gunakan hostname yang ditetapkan pengelola domain, misalnya `data.wajokab.go.id` dan `ckan.wajokab.go.id`. Keduanya adalah subdomain tingkat pertama dari `wajokab.go.id`.
+
+**Penting untuk TLS:** gunakan hostname admin satu tingkat, misalnya `ckan.silirdev.com`, jika zona memakai Cloudflare Full DNS Setup. Sertifikat Universal SSL standar mencakup domain utama dan subdomain tingkat pertama, sehingga `data.silirdev.com` dan `ckan.silirdev.com` dapat memakai sertifikat gratis selama DNS keduanya berstatus Proxied dan zona aktif. Hostname bertingkat seperti `ckan.data.silirdev.com` tidak tercakup Universal SSL standar. Untuk hostname bertingkat yang tetap menggunakan Cloudflare Tunnel, jangan mengandalkan Total TLS: Cloudflare menyatakan Total TLS tidak menerbitkan sertifikat untuk hostname yang digunakan dengan Cloudflare Tunnel. Gunakan salah satu dari: (1) beralih ke hostname satu tingkat (direkomendasikan), (2) pesan Advanced Certificate secara manual dengan SAN hostname lengkap, (3) unggah custom certificate dengan SAN yang sesuai, atau (4) gunakan CNAME/Partial Setup yang menyediakan Universal SSL per subdomain. Rujukan: [Universal SSL hostname coverage](https://developers.cloudflare.com/ssl/edge-certificates/universal-ssl/limitations/) dan [Total TLS limitations for Cloudflare Tunnel](https://developers.cloudflare.com/ssl/edge-certificates/additional-options/total-tls/).
+
+Untuk hostname bertingkat yang wajib dipertahankan, gunakan Advanced Certificate yang dipesan manual dengan SAN yang tepat, custom certificate, atau ubah zona ke CNAME/Partial Setup yang mendukung Universal SSL per subdomain. Total TLS bukan pilihan untuk hostname yang digunakan dengan Cloudflare Tunnel. Pada semua opsi, record DNS hostname harus **Proxied** (awan oranye) dan route Tunnel tetap menunjuk ke `http://edge-tunnel:80`. Sertifikat browser diterbitkan di sisi Cloudflare; origin HTTP internal `cloudflared` ke Caddy bukan alasan untuk mengganti hostname. Jangan mengaktifkan DNS-only untuk hostname Tunnel.
+
+Setelah sertifikat mencakup hostname, verifikasi:
+
+```bash
+openssl s_client -connect ckan.silirdev.com:443 -servername ckan.silirdev.com </dev/null 2>/dev/null \
+  | openssl x509 -noout -subject -issuer -dates -ext subjectAltName
+curl -Iv https://ckan.silirdev.com/
+```
+
+Pastikan SAN mencantumkan `ckan.silirdev.com`, masa berlaku aktif, dan request tidak dialihkan ke hostname lama yang lain. `sync-env.py` akan mempertahankan host yang ada dan hanya memberi peringatan cakupan sertifikat. **Biarkan `CKAN_SITE_URL` mengikuti `PUBLIC_HOST`** agar metadata katalog, ekspor, dan tautan unduhan CKAN tetap menunjuk ke portal publik. `CKAN_ADMIN_URL` dan `NEXT_PUBLIC_CKAN_ADMIN_URL` mengikuti `CKAN_HOST` secara terpisah untuk tombol Portal Pengelola dan normalisasi URL resource admin.
+
 Gunakan **satu named/remote-managed Cloudflare Tunnel** untuk kedua hostname. `cloudflared` di Docker menghubungkan Tunnel ke Caddy internal pada `edge-tunnel:80`; Caddy memilih aplikasi berdasarkan hostname. Tidak perlu menerbitkan port 80/443 dari VPS pada mode ini.
 
-1. Pada Cloudflare, pastikan zona `wajokab.go.id` aktif menggunakan nameserver Cloudflare.
+1. Pada Cloudflare, pastikan zona domain yang dipakai (`silirdev.com` untuk staging atau `wajokab.go.id` untuk produksi) aktif dan record hostname Tunnel berstatus Proxied. Periksa juga Edge Certificates sebelum menguji HTTPS.
 2. Buka **Cloudflare Zero Trust → Networks → Tunnels** lalu buat tunnel bertipe Docker/remote-managed. Salin token tunnel ke `CLOUDFLARE_TUNNEL_TOKEN` pada `.env.ckan`. Jangan masukkan token ke Git, screenshot, atau log.
 3. Pada tunnel tersebut, tambahkan dua **Published application routes / Public Hostnames** berikut. Jika UI memisahkan konfigurasi hostname dan service, isi keduanya sesuai tabel ini:
 
-   | Hostname                  | Service origin          | Fungsi                                                |
-   | ------------------------- | ----------------------- | ----------------------------------------------------- |
-   | `data.wajokab.go.id`      | `http://edge-tunnel:80` | Portal Next.js, API baca, ekspor DCAT, unduhan publik |
-   | `ckan.data.wajokab.go.id` | `http://edge-tunnel:80` | Login dan administrasi CKAN                           |
+   | Hostname            | Service origin          | Fungsi                                                                 |
+   | ------------------- | ----------------------- | ---------------------------------------------------------------------- |
+   | `data.silirdev.com` | `http://edge-tunnel:80` | Portal Next.js, API baca, ekspor DCAT, unduhan publik (contoh staging) |
+   | `ckan.silirdev.com` | `http://edge-tunnel:80` | Login dan administrasi CKAN (contoh staging)                           |
 
-   Keduanya sengaja menuju origin yang sama. Caddy yang memisahkan route; jangan arahkan `ckan.data` langsung ke service `ckan`, `nginx`, atau port PostgreSQL.
+   Untuk produksi, gunakan nilai `PUBLIC_HOST` dan `CKAN_HOST` yang telah ditentukan di `.env.ckan.example` atau file `.env.ckan` aktif. Jangan menambahkan route yang berbeda dari hostname pada konfigurasi tersebut.
+
+   Keduanya sengaja menuju origin yang sama. Caddy yang memisahkan route; jangan arahkan `ckan` langsung ke service `ckan`, `nginx`, atau port PostgreSQL.
 
 4. Jalankan validasi lalu start:
 
@@ -66,9 +93,12 @@ Gunakan **satu named/remote-managed Cloudflare Tunnel** untuk kedua hostname. `c
 5. Verifikasi route:
 
    ```bash
-   curl -sSI https://data.wajokab.go.id/
-   curl -sSI https://ckan.data.wajokab.go.id/
-   curl -sS 'https://data.wajokab.go.id/api/3/action/status_show'
+   # Staging
+   curl -sSI https://data.silirdev.com/
+   curl -sSI https://ckan.silirdev.com/
+   curl -sS 'https://data.silirdev.com/api/3/action/status_show'
+
+   # Ganti kedua hostname dengan PUBLIC_HOST dan CKAN_HOST pada .env.ckan bila memakai domain produksi.
    ```
 
    Homepage pertama harus berasal dari Next.js. Host admin kedua seharusnya mengembalikan redirect ke `/user/login?came_from=%2Fdashboard%2Fdatasets`. Setelah login berhasil, pengguna kembali ke dashboard dataset (bukan layar konfigurasi yang hanya dapat diakses sysadmin). Setelah itu buka URL admin di browser; halaman login harus memakai tema Wajo. Kalau `502` muncul, cek status dan log `cloudflared`, `edge-tunnel`, `nextjs`, `ckan`, dan `nginx` dengan `bash ./deploy/ckan/compose.sh cloudflare logs --tail=150 cloudflared edge-tunnel nextjs ckan nginx`.
@@ -173,7 +203,7 @@ Sebelum menyatakan UI admin siap produksi, verifikasi melalui browser desktop da
 | Harvest/Pages   | Daftar sumber, job, log, halaman statis                                | Extension UI tetap tampil; worker/job tidak dipengaruhi theme                                |
 | Responsif/a11y  | Lebar 1440, 1024, 768, 390, 320 px; keyboard-only                      | Tidak ada overflow horizontal; login menumpuk rapi; focus terlihat; reduced motion dihormati |
 
-Periksa juga `https://ckan.data.wajokab.go.id/logo-kabupaten-wajo.webp` harus merespons `200` dengan `Content-Type: image/webp`, dan asset CSS hasil WebAssets harus merespons `200`. Bila logo 404, pastikan `CKAN__SITE_LOGO=/logo-kabupaten-wajo.webp`; `add_public_directory()` memang mengekspos isi folder `public` pada URL root, bukan di bawah `/base/`.
+Periksa juga `https://ckan.silirdev.com/logo-kabupaten-wajo.webp` harus merespons `200` dengan `Content-Type: image/webp`, dan asset CSS hasil WebAssets harus merespons `200`. Bila logo 404, pastikan `CKAN__SITE_LOGO=/logo-kabupaten-wajo.webp`; `add_public_directory()` memang mengekspos isi folder `public` pada URL root, bukan di bawah `/base/`.
 
 Validasi source yang tersedia: `bash scripts/check-static.sh` menjalankan guard theme, packaging overlay, route publik, API contract, dan pemeriksaan CSS. `npm run check:static` memakai entry point yang sama; `npm run check` menambahkan ESLint. `npm run test`, `npm run test:e2e`, dan `npm run build` menguji aplikasi publik Next.js. CI smoke image memasang package theme lokal sebelum memeriksa entry point. Pengujian visual semua halaman CKAN tetap wajib dilakukan pada container CKAN yang benar-benar berjalan; pemeriksaan source/CI tidak menggantikan browser acceptance test.
 

@@ -29,6 +29,16 @@ else:
     duplicates = [key for key in keys if len(re.findall(rf"^{re.escape(key)}=", env_text, re.M)) > 1]
     if duplicates:
         errors.append("Variabel duplikat di .env.ckan.example: " + ", ".join(sorted(duplicates)))
+    example_public_host = re.search(r"^PUBLIC_HOST=(.+)$", env_text, re.M)
+    example_ckan_host = re.search(r"^CKAN_HOST=(.+)$", env_text, re.M)
+    if example_public_host and example_ckan_host:
+        public_labels = example_public_host.group(1).strip().split(".")
+        apex = ".".join(public_labels[1:])
+        admin_host = example_ckan_host.group(1).strip().lower()
+        prefix = admin_host[: -(len(apex) + 1)] if admin_host.endswith("." + apex) else ""
+        if prefix and len(prefix.split(".")) > 1:
+            if "sertifikat" not in env_text.lower() and "ssl" not in env_text.lower():
+                errors.append("Hostname admin bertingkat harus disertai catatan cakupan sertifikat Cloudflare")
 
     # These are supplied by bootstrap only after upstream defaults are merged.
     generated = {
@@ -69,6 +79,12 @@ else:
 syncer = root / "deploy/ckan/sync-env.py"
 if not syncer.is_file() or "PUBLIC_HOST" not in syncer.read_text() or "CKAN_SITE_URL" not in syncer.read_text():
     errors.append("sync-env.py harus menurunkan URL publik/admin dari hostname di .env.ckan")
+else:
+    sync_text = syncer.read_text()
+    if "will be preserved" not in sync_text or "Total TLS does not issue certificates" not in sync_text or "first-level hostname" not in sync_text:
+        errors.append("sync-env.py harus memberi peringatan TLS yang akurat untuk host bertingkat pada Cloudflare Tunnel dan merekomendasikan host satu tingkat")
+if "CKAN_HOST=ckan.wajokab.go.id" not in env_example.read_text():
+    errors.append("Contoh konfigurasi harus memakai hostname admin satu tingkat agar tercakup Universal SSL standar")
 if "sync-env.py" not in wrapper.read_text() or "sync-env.py" not in bootstrap:
     errors.append("Bootstrap dan wrapper Compose harus menyinkronkan URL turunan dari hostname")
 if env_example.is_file():
@@ -86,8 +102,28 @@ else:
         test_env.write_text("PUBLIC_HOST=portal.example.test\nCKAN_HOST=admin.example.test\nNEXT_PUBLIC_SITE_URL=https://old.example.test\nCKAN_SITE_URL=https://old.example.test\n")
         result = subprocess.run([sys.executable, str(syncer), str(test_env)], capture_output=True, text=True)
         synced = test_env.read_text()
-        if result.returncode != 0 or "NEXT_PUBLIC_SITE_URL=https://portal.example.test" not in synced or "CKAN_SITE_URL=https://portal.example.test" not in synced or "CKAN_ADMIN_URL=https://admin.example.test" not in synced:
-            errors.append("sync-env.py tidak menyelaraskan URL turunan setelah hostname diubah")
+        expected_urls = (
+            "NEXT_PUBLIC_SITE_URL=https://portal.example.test",
+            "NEXT_PUBLIC_CKAN_ADMIN_URL=https://admin.example.test",
+            "PUBLIC_SITE_ORIGIN=https://portal.example.test",
+            "CKAN_ADMIN_URL=https://admin.example.test",
+            "CKAN_SITE_URL=https://portal.example.test",
+        )
+        if result.returncode != 0 or any(value not in synced for value in expected_urls):
+            errors.append("sync-env.py tidak memisahkan URL publik dan URL admin setelah hostname diubah")
+
+        staging_env = Path(tmp) / ".env.silirdev.ckan"
+        staging_env.write_text("PUBLIC_HOST=data.silirdev.com\nCKAN_HOST=ckan.silirdev.com\n")
+        staging_result = subprocess.run([sys.executable, str(syncer), str(staging_env)], capture_output=True, text=True)
+        staging_synced = staging_env.read_text()
+        if staging_result.returncode != 0 or "NEXT_PUBLIC_CKAN_ADMIN_URL=https://ckan.silirdev.com" not in staging_synced or "CKAN_ADMIN_URL=https://ckan.silirdev.com" not in staging_synced or "NEXT_PUBLIC_SITE_URL=https://data.silirdev.com" not in staging_synced:
+            errors.append("Perubahan CKAN_HOST ke ckan.silirdev.com harus otomatis menyelaraskan seluruh tautan admin tanpa mengubah origin portal publik")
+
+        deep_env = Path(tmp) / ".env.deep-host.ckan"
+        deep_env.write_text("PUBLIC_HOST=data.silirdev.com\nCKAN_HOST=ckan.data.silirdev.com\n")
+        deep_result = subprocess.run([sys.executable, str(syncer), str(deep_env)], capture_output=True, text=True)
+        if deep_result.returncode != 0 or "multi-level hostname" not in deep_result.stderr or "Universal SSL" not in deep_result.stderr or "Cloudflare Tunnel" not in deep_result.stderr or "Total TLS does not issue" not in deep_result.stderr:
+            errors.append("sync-env.py harus memberi peringatan TLS yang akurat untuk hostname bertingkat pada Cloudflare Tunnel")
 if 'render-upstream-env.py' not in bootstrap or 'rm -f "$UPSTREAM/.env"' not in bootstrap:
     errors.append("Bootstrap harus menghasilkan env CKAN terfilter dari .env.ckan dan menghapus .env upstream independen")
 if 'env_file_count == 0' not in bootstrap or '.env.generated' not in bootstrap:

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 export function SearchForm({
   defaultValue = "",
   placeholder = "Cari judul dataset, topik, atau kata kunci…",
+  submitLabel = "Cari data",
 }) {
   return (
     <form
@@ -35,8 +36,7 @@ export function SearchForm({
         size="lg"
         className="min-h-12 w-full shrink-0 sm:w-auto"
       >
-        <span className="hidden sm:inline">Cari data</span>
-        <span className="sm:hidden">Cari</span>
+        <span>{submitLabel}</span>
       </Button>
     </form>
   );

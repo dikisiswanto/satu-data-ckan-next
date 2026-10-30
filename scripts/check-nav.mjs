@@ -42,12 +42,24 @@ for (const route of uniqueRoutes) {
     );
 }
 
-for (const [name, source] of [
-  ["SiteHeader", header],
-  ["SiteFooter", footer],
-]) {
-  if (!source.includes('from "@/lib/public-navigation"'))
-    errors.push(`${name} harus memakai sumber navigasi bersama.`);
+if (!header.includes('from "@/lib/public-navigation"')) {
+  errors.push("SiteHeader harus memakai sumber navigasi bersama.");
+}
+if (
+  footer.includes('from "@/lib/public-navigation"') ||
+  /<nav\b/.test(footer)
+) {
+  errors.push(
+    "SiteFooter tidak boleh mengulang navigasi utama; tautan halaman sudah tersedia pada header dan breadcrumb.",
+  );
+}
+if (
+  !footer.includes('href="https://data.go.id"') ||
+  !footer.includes("width={82}")
+) {
+  errors.push(
+    "Footer harus menampilkan penanda SDI berukuran kecil dan tautan ke portal resmi data.go.id.",
+  );
 }
 if (
   !layout.includes("<PublicBreadcrumbs />") ||
@@ -161,5 +173,5 @@ if (errors.length) {
   process.exit(1);
 }
 process.stdout.write(
-  `Public navigation check passed: ${uniqueRoutes.length} configured route(s), header/footer share one route map, breadcrumbs and API cross-links are present.\n`,
+  `Public navigation check passed: ${uniqueRoutes.length} configured route(s), one primary header route map, non-duplicated footer, breadcrumbs and API cross-links are present.\n`,
 );

@@ -157,6 +157,7 @@ export async function getPublishedDatasetFacetsResult() {
       .map((item) => ({
         id: item.name,
         name: item.display_name || item.name,
+        count: Number(item.count || 0),
       }))
       .filter((item) => item.id && item.name);
     const organizations = (facets.organization?.items || [])

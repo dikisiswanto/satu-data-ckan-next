@@ -50,14 +50,6 @@
   @apply [color:var(--app-primary)];
 }
 
-.home-hero {
-  @apply relative overflow-hidden bg-[#edf3f4] border-b-[#d5e1e3];
-}
-
-.home-hero::before {
-  @apply [background:var(--app-primary)] content-[''] absolute inset-[0_auto_0_0] w-[4px];
-}
-
 .home-stats {
   @apply border-[#d8e4ee] shadow-[0_2px_7px_rgb(24_58_68_/_3%)];
 }

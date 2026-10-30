@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" role="img" aria-labelledby="title desc">
+  <!-- Local vector reproduction of the official SDI identity proportions; official reference: data.go.id and Juklak 6/JUKLAK/SESMEN/12/2022. -->
   <title id="title">Satu Data Indonesia</title>
   <desc id="desc">Logo Satu Data Indonesia dengan simbol geometris merah dan wordmark abu-abu.</desc>
   <rect width="1000" height="600" fill="#fff"/>
@@ -8,7 +9,7 @@
     <path d="M0 397 197 597 397 397 197 397Z" fill="#e51f2a"/>
     <path d="M197 198 197 397 0 397Z" fill="#c71925"/>
   </g>
-  <g fill="#414144" font-family="Arial, Helvetica, sans-serif" font-size="119" font-weight="300" letter-spacing="-4">
+  <g fill="#414144" font-family="Arial, Helvetica, sans-serif" font-size="108" font-weight="300" letter-spacing="-4">
     <text x="426" y="484">SATU DATA</text>
     <text x="426" y="585">INDONESIA</text>
   </g>

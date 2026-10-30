@@ -36,45 +36,44 @@ export function PublicBreadcrumbs() {
   }
 
   return (
-    <nav
-      aria-label="Breadcrumb"
-      className="border-b border-line/70 bg-white/80"
-    >
-      <ol className="page-container flex min-w-0 items-center gap-1.5 overflow-x-auto py-2.5 text-xs text-muted sm:gap-2 sm:py-3 sm:text-sm">
-        {items.map((item, index) => (
-          <li
-            key={`${item.label}-${index}`}
-            className="flex shrink-0 items-center gap-1.5 sm:gap-2"
-          >
-            {index > 0 ? (
-              <ChevronRight
-                size={14}
-                className="text-muted/70"
-                aria-hidden="true"
-              />
-            ) : null}
-            {item.current ? (
-              <span
-                aria-current="page"
-                className="max-w-[48vw] truncate font-semibold text-ink sm:max-w-none"
-              >
-                {item.label}
-              </span>
-            ) : (
-              <Link
-                href={item.href}
-                className={cn(
-                  "inline-flex min-h-7 items-center gap-1.5 rounded-sm hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-                  item.home && "font-medium",
-                )}
-              >
-                {item.home ? <Home size={14} aria-hidden="true" /> : null}
-                {item.label}
-              </Link>
-            )}
-          </li>
-        ))}
-      </ol>
-    </nav>
+    <div className="public-breadcrumb-band">
+      <nav aria-label="Breadcrumb" className="page-container py-2.5 sm:py-3">
+        <ol className="inline-flex w-fit max-w-full min-w-0 items-center gap-1.5 overflow-x-auto rounded-lg border border-line/80 bg-white/90 px-3 py-2 text-xs text-muted shadow-sm sm:gap-2 sm:px-3.5 sm:py-2 sm:text-sm">
+          {items.map((item, index) => (
+            <li
+              key={`${item.label}-${index}`}
+              className="flex shrink-0 items-center gap-1.5 sm:gap-2"
+            >
+              {index > 0 ? (
+                <ChevronRight
+                  size={14}
+                  className="text-muted/70"
+                  aria-hidden="true"
+                />
+              ) : null}
+              {item.current ? (
+                <span
+                  aria-current="page"
+                  className="max-w-[48vw] truncate font-semibold text-ink sm:max-w-none"
+                >
+                  {item.label}
+                </span>
+              ) : (
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "inline-flex min-h-7 items-center gap-1.5 rounded-sm hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                    item.home && "font-medium",
+                  )}
+                >
+                  {item.home ? <Home size={14} aria-hidden="true" /> : null}
+                  {item.label}
+                </Link>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </div>
   );
 }

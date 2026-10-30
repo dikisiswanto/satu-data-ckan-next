@@ -1,5 +1,82 @@
 import { expect, test } from "@playwright/test";
 
+test("homepage exposes CKAN-driven category cards with exact public dataset counts", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const categories = page.locator(".home-topic-card");
+  await expect(categories).toHaveCount(4);
+  const education = categories.filter({ hasText: "Pendidikan" });
+  await expect(education).toContainText("1 dataset");
+  await expect(education).toHaveAttribute(
+    "href",
+    "/dataset?kategori=pendidikan",
+  );
+  const health = categories.filter({ hasText: "Kesehatan" });
+  await expect(health).toContainText("1 dataset");
+  await expect(health).toHaveAttribute("href", "/dataset?kategori=kesehatan");
+});
+
+test("information page keeps a compact title and description rhythm", async ({
+  page,
+}) => {
+  await page.goto("/informasi");
+  const heading = page.locator(
+    ".informasi-directory-page .public-page-heading",
+  );
+  await expect(
+    heading.getByRole("heading", { name: "Informasi" }),
+  ).toBeVisible();
+  const titleDescriptionGap = await heading.evaluate((element) => {
+    const title = element.querySelector("h1");
+    const description = element.querySelector("p:not(.eyebrow)");
+    if (!title || !description) return Number.POSITIVE_INFINITY;
+    return (
+      description.getBoundingClientRect().top -
+      title.getBoundingClientRect().bottom
+    );
+  });
+  expect(titleDescriptionGap).toBeGreaterThanOrEqual(0);
+  expect(titleDescriptionGap).toBeLessThanOrEqual(8);
+});
+
+test("organization directory searches, filters and sorts CKAN organizations by dataset count", async ({
+  page,
+}) => {
+  await page.goto("/organisasi");
+  await expect(
+    page.getByRole("heading", { name: "Temukan perangkat daerah" }),
+  ).toBeVisible();
+  await expect(page.getByText("3", { exact: true }).first()).toBeVisible();
+
+  const search = page.getByRole("searchbox", { name: "Cari perangkat daerah" });
+  await search.fill("kesehatan dinas");
+  await expect(
+    page.getByRole("heading", { name: "Dinas Kesehatan Kabupaten Wajo" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Bappeda Wajo" })).toHaveCount(
+    0,
+  );
+  await expect(page.getByText(/Ditemukan 1 perangkat daerah/)).toBeVisible();
+
+  await search.fill("");
+  await page.getByRole("button", { name: /Belum menerbitkan/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "Sekretariat Daerah Kabupaten Wajo" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Bappeda Wajo" })).toHaveCount(
+    0,
+  );
+
+  await page.getByRole("button", { name: /Memiliki dataset/ }).click();
+  await page.getByLabel("Urutkan daftar").selectOption("datasets-desc");
+  const cards = page.locator(".organization-directory-card");
+  await expect(cards).toHaveCount(2);
+  await expect(cards.first()).toContainText("Bappeda Wajo");
+  await expect(cards.first()).toContainText("2 dataset");
+  await expect(cards.nth(1)).toContainText("Dinas Kesehatan Kabupaten Wajo");
+});
+
 test("homepage exposes public catalog, statistics, and infographic routes", async ({
   page,
 }) => {
@@ -287,10 +364,8 @@ test("public breadcrumbs and shared navigation make every section discoverable",
   await expect(
     page.getByRole("button", { name: /salin contoh kode/i }).first(),
   ).toBeVisible();
-  const footerNavigation = page.getByRole("navigation", {
-    name: "Navigasi kaki halaman",
-  });
-  for (const [label, href] of [
+  const primaryHeader = page.locator(".site-header");
+  for (const [_label, href] of [
     ["Dataset", "/dataset"],
     ["Statistik", "/statistik"],
     ["Infografik", "/infografik"],
@@ -300,9 +375,13 @@ test("public breadcrumbs and shared navigation make every section discoverable",
     ["API data", "/api-data"],
   ]) {
     await expect(
-      footerNavigation.getByRole("link", { name: label, exact: true }),
-    ).toHaveAttribute("href", href);
+      primaryHeader.locator(`a[href="${href}"]`).first(),
+    ).toBeAttached();
   }
+  await expect(page.locator("footer nav")).toHaveCount(0);
+  await expect(
+    page.locator('footer a[href="https://data.go.id"]'),
+  ).toBeVisible();
 });
 
 test("same-origin Action API is read-only and marked noindex", async ({

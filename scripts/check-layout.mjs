@@ -142,6 +142,22 @@ requireText(
   "homepage CMS section needs a geometry-matched fallback",
 );
 requireText(
+  "src/app/styles/public-responsive.css",
+  ".public-app-shell .home-feature-visualization .home-data-art",
+  "mobile Pahami Data illustration needs a dedicated responsive layout",
+);
+requireText(
+  "src/app/styles/public-responsive.css",
+  "position: relative;",
+  "mobile Pahami Data artwork must remain in document flow",
+);
+requireText(
+  "src/app/styles/public-responsive.css",
+  "grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr)",
+  "mobile artwork must use a readable two-column composition",
+);
+
+requireText(
   "src/app/(public)/page.jsx",
   "home-metric-value",
   "homepage dynamic numbers must use tabular reserved-width metrics",
@@ -165,6 +181,95 @@ requireText(
   "tests/e2e/public-layout-stability.spec.js",
   "toBeLessThanOrEqual(0.1)",
   "public CLS regression test must enforce the 0.10 target",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "body:has(.public-home) .home-hero {",
+  "homepage hero must have one canonical layout owner",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  ".home-hero-visual {",
+  "hero illustration must have explicit layout dimensions",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "z-index: 0;",
+  "hero visual pattern must stay above the background and below content",
+);
+requireText(
+  "src/components/public-breadcrumbs.jsx",
+  'className="page-container py-2.5 sm:py-3"',
+  "breadcrumb container must share the public content max width",
+);
+requireText(
+  "src/components/public-breadcrumbs.jsx",
+  "inline-flex w-fit max-w-full",
+  "breadcrumb surface must size to its content, not stretch across the full container",
+);
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  ".public-breadcrumb-band {",
+  "breadcrumb background must be separated from the content-width breadcrumb control",
+);
+const homePage = read("src/app/(public)/page.jsx");
+for (const token of [
+  "PORTAL DATA TERPADU",
+  "Temukan Data,",
+  "Pahami {siteConfig.regionShortName}.",
+  "Cari dataset, tema, atau kata kunci…",
+  'submitLabel="Cari"',
+  "Coba cari",
+  "Satu tempat untuk menemukan data daerah",
+  "Organisasi aktif",
+  "Indikator publik",
+  "Dataset terbuka",
+  "Ringkasan dihitung dari data yang tersedia untuk publik.",
+]) {
+  if (!homePage.includes(token))
+    failures.push(`homepage hero: reference content missing "${token}"`);
+}
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "grid-template-columns: minmax(0, 1.08fr) minmax(19rem, 0.92fr)",
+  "hero must use a balanced two-column desktop composition",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "background-position: center, center, center 47%",
+  "Wajo panorama crop must be deliberate and stable",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  ".home-hero-visual {",
+  "hero data illustration must keep an explicit frame",
+);
+if (
+  homePage.includes("Topik populer") ||
+  homePage.includes("Satu portal untuk menemukan data daerah")
+)
+  failures.push("homepage hero: outdated reference copy must not return");
+if (
+  read("src/app/styles/quality-pass.css").includes(
+    "padding-top: 9rem !important",
+  ) ||
+  read("src/app/styles/quality-pass.css").includes(
+    "padding-top: 7.5rem !important",
+  )
+) {
+  failures.push(
+    "hero: legacy oversized top-padding overrides must not compete with the canonical layout",
+  );
+}
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  ".public-app-shell main.public-interior-page.section-space",
+  "interior pages must use the compact shared vertical rhythm",
+);
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  "min-block-size: 17.5rem",
+  "statistics cards must not reserve excessive empty height",
 );
 
 requireText(

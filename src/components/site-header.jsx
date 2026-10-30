@@ -179,7 +179,7 @@ export function SiteHeader() {
           <a
             href={
               process.env.NEXT_PUBLIC_CKAN_ADMIN_URL ||
-              "https://ckan.data.wajokab.go.id"
+              "https://ckan.wajokab.go.id"
             }
             target="_blank"
             rel="noopener noreferrer"
@@ -249,7 +249,7 @@ export function SiteHeader() {
               <a
                 href={
                   process.env.NEXT_PUBLIC_CKAN_ADMIN_URL ||
-                  "https://ckan.data.wajokab.go.id"
+                  "https://ckan.wajokab.go.id"
                 }
                 target="_blank"
                 rel="noopener noreferrer"
