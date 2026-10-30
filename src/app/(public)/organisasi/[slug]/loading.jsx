@@ -19,15 +19,14 @@ export default function OrganizationDetailLoading() {
           >
             <ArrowLeft size={16} aria-hidden="true" /> Daftar perangkat daerah
           </Link>
-          <header className="public-page-heading mb-4 flex flex-col gap-4">
-            <p className="eyebrow">Profil pengampu data</p>
-            <Skeleton className="h-10 w-4/5 max-w-3xl sm:h-12" />
-            <Skeleton className="h-4 w-full max-w-2xl" />
-            <Skeleton className="h-4 w-5/6 max-w-xl" />
+          <header className="public-page-heading public-dynamic-heading mb-4 flex flex-col gap-4">
+            <p className="eyebrow">Profil perangkat daerah</p>
+            <Skeleton className="public-heading-title-reserved h-10 w-4/5 max-w-3xl sm:h-12" />
+            <Skeleton className="public-heading-description-reserved h-4 w-full max-w-2xl" />
           </header>
           <div className="organization-detail-meta">
             <span>
-              Kode organisasi:{" "}
+              Kode perangkat daerah:{" "}
               <Skeleton className="inline-block h-4 w-24 align-middle" />
             </span>
             <span>
@@ -40,7 +39,7 @@ export default function OrganizationDetailLoading() {
       <section className="page-container section-space organization-datasets-section">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="eyebrow">DATA YANG DITERBITKAN</p>
+            <p className="eyebrow">DATA YANG DIPUBLIKASIKAN</p>
             <h2 className="mt-3 flex flex-wrap items-center gap-2 text-2xl font-semibold">
               Dataset dari{" "}
               <Skeleton className="inline-block h-7 w-56 max-w-full" />
@@ -55,8 +54,8 @@ export default function OrganizationDetailLoading() {
           </div>
           <Skeleton className="h-10 w-40 rounded-lg" />
         </div>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }, (_, index) => (
+        <div className="public-loading-grid-md grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
             <article
               key={index}
               className="home-dataset-card home-dataset-card-skeleton"

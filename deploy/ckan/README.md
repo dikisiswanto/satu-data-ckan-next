@@ -2,6 +2,17 @@
 
 Panduan ini untuk Portal Satu Data Kabupaten Wajo: Next.js melayani website publik dan CKAN 2.12.1 mengelola metadata serta data. Bootstrap mengambil source image resmi `ckan/ckan-docker-base` dan menyiapkan stack Compose resmi `ckan/ckan-docker`; kedua checkout generated tidak disertakan di repositori.
 
+## Pratinjau dan visualisasi resource
+
+Konfigurasi CKAN 2.12 menggunakan `datatables_view` untuk tabel DataStore dan
+`geo_view`, `geojson_view`, `wmts_view`, serta `shp_view` untuk data geospasial.
+`image_view` dan `text_view` menangani berkas gambar, JSON, XML, dan teks.
+
+CKAN 2.12 sudah menghapus seluruh plugin berbasis Recline (`recline_view`,
+`recline_grid_view`, dan turunannya). Jangan menambahkan plugin tersebut ke
+`CKAN__PLUGINS` atau `CKAN__VIEWS__DEFAULT_VIEWS`. Plugin shapefile dari
+`ckanext-geoview` bernama `shp_view`, bukan `esri_shapefile_view`.
+
 ## 1. Siapkan konfigurasi
 
 Dari root repo:
@@ -63,6 +74,31 @@ Gunakan **satu named/remote-managed Cloudflare Tunnel** untuk kedua hostname. `c
    Homepage pertama harus berasal dari Next.js. Host admin kedua seharusnya mengembalikan redirect ke `/user/login?came_from=%2Fdashboard%2Fdatasets`. Setelah login berhasil, pengguna kembali ke dashboard dataset (bukan layar konfigurasi yang hanya dapat diakses sysadmin). Setelah itu buka URL admin di browser; halaman login harus memakai tema Wajo. Kalau `502` muncul, cek status dan log `cloudflared`, `edge-tunnel`, `nextjs`, `ckan`, dan `nginx` dengan `bash ./deploy/ckan/compose.sh cloudflare logs --tail=150 cloudflared edge-tunnel nextjs ckan nginx`.
 
 **DNS:** untuk remote-managed Tunnel, penambahan hostname pada konfigurasi Tunnel biasanya membuat record DNS tunnel otomatis. Pastikan kedua hostname ditampilkan di daftar routes Tunnel, dan DNS masing-masing mengarah ke target `*.cfargotunnel.com` milik Tunnel tersebut. Jangan membuat record A ke IP VPS untuk kedua hostname pada mode Tunnel.
+
+## Diagnostik CKAN tidak sehat
+
+Jika `compose up` melaporkan `ckan is unhealthy`, ambil log aplikasi dan hasil
+healthcheck sebelum mengulang deployment:
+
+```bash
+bash ./deploy/ckan/compose.sh cloudflare logs --tail=200 ckan
+
+docker inspect upstream-ckan-1 \
+  --format '{{range .State.Health.Log}}{{println .Output}}{{end}}'
+```
+
+Periksa juga konfigurasi plugin yang sudah dinormalisasi bootstrap:
+
+```bash
+grep '^CKAN__PLUGINS=' .env.ckan
+grep '^CKAN__VIEWS__DEFAULT_VIEWS=' .env.ckan
+```
+
+CKAN 2.12 tidak mendukung plugin Recline. Daftar plugin tidak boleh memuat
+`recline_view` atau `esri_shapefile_view`; gunakan `datatables_view` dan `shp_view`.
+Jalankan ulang bootstrap setelah pembaruan source agar ID lama pada `.env.ckan`
+dibersihkan. Jangan menghapus volume database atau filestore untuk mengatasi
+container yang tidak sehat.
 
 ## 3. Akses admin dan keamanan
 

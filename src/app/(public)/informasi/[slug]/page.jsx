@@ -70,8 +70,7 @@ export default async function InformasiDetailPage({ params }) {
             Informasi belum dapat dimuat
           </h1>
           <p className="mt-3 text-sm text-muted">
-            Layanan CMS CKAN sementara tidak dapat diakses. Silakan coba
-            kembali.
+            Silakan coba kembali beberapa saat lagi.
           </p>
           <Link
             href={`/informasi/${encodeURIComponent(slug)}`}
@@ -107,22 +106,28 @@ export default async function InformasiDetailPage({ params }) {
         href="/informasi"
         className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-primary"
       >
-        <ArrowLeft size={16} aria-hidden="true" /> Kembali ke informasi
+        <ArrowLeft size={16} aria-hidden="true" /> Kembali ke pusat informasi
       </Link>
       <PageHeading
-        eyebrow={page.category || "Informasi resmi"}
+        className="public-dynamic-heading"
+        reserveTitle
+        reserveDescription
+        eyebrow={page.category || "Informasi"}
         title={page.title}
-        description={page.excerpt}
+        description={page.excerpt || "Ringkasan informasi belum tersedia."}
       />
-      {page.publishDate ? (
-        <p className="mt-3 inline-flex items-center gap-2 text-xs text-muted">
-          <CalendarDays size={14} aria-hidden="true" /> Diterbitkan{" "}
-          {formatDate(page.publishDate)}
-        </p>
-      ) : null}
-      {image ? (
-        <figure className="relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-slate-100">
-          {" "}
+      <p className="public-publish-date mt-3 inline-flex min-h-5 items-center gap-2 text-xs text-muted">
+        {page.publishDate ? (
+          <>
+            <CalendarDays size={14} aria-hidden="true" /> Diterbitkan{" "}
+            {formatDate(page.publishDate)}
+          </>
+        ) : (
+          "Tanggal terbit belum dicantumkan"
+        )}
+      </p>
+      <figure className="public-cms-cover relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#e7eff0,#eaf1f8)]">
+        {image ? (
           <Image
             src={image}
             alt={page.title}
@@ -131,8 +136,13 @@ export default async function InformasiDetailPage({ params }) {
             sizes="100vw"
             className="object-cover"
           />
-        </figure>
-      ) : null}
+        ) : (
+          <div
+            className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgb(255_255_255_/_70%),transparent_40%),linear-gradient(135deg,#e7eff0,#eaf1f8)]"
+            aria-hidden="true"
+          />
+        )}
+      </figure>
       <article className="cms-document mt-8 rounded-2xl border border-line bg-white p-5 sm:p-8 lg:p-10">
         <CmsPageBody page={page} />
       </article>

@@ -98,7 +98,13 @@ for expected in (
 configurator = read(ROOT / "deploy/ckan/configure-upstream-extensions.py")
 require("shutil.copytree(theme_source, theme_destination)" in configurator, "Bootstrap tidak menyalin source extension theme ke build context.")
 require("USER root\nRUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in configurator, "Docker build harus memasang extension/theme secara global sebagai root sebelum kembali ke user runtime CKAN.")
-require('for plugin in ("scheming_datasets", "wajo_pages", "pages"' in bootstrap_source, "wajo_pages harus dimuat setelah Scheming dan sebelum plugin pages.")
+plugin_order_match = re.search(r"for plugin in \(\s*([\s\S]*?)\s*\):", bootstrap_source)
+plugin_order = re.findall(r'"([a-z0-9_]+)"', plugin_order_match.group(1)) if plugin_order_match else []
+require(
+    all(name in plugin_order for name in ("scheming_datasets", "wajo_pages", "pages"))
+    and plugin_order.index("scheming_datasets") < plugin_order.index("wajo_pages") < plugin_order.index("pages"),
+    "wajo_pages harus dimuat setelah Scheming dan sebelum plugin pages.",
+)
 require("plugins.append(\"wajo_theme\")" in bootstrap_source, "Plugin theme harus diaktifkan setelah extension yang juga menyediakan template.")
 require('plugins.append("envvars")' in bootstrap_source, "Plugin envvars harus tetap berada terakhir.")
 workflow = read(ROOT / ".github/workflows/ci.yml")

@@ -60,8 +60,8 @@ export default async function IndicatorDetailPage({ params }) {
             Indikator belum dapat dimuat
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted">
-            Katalog CKAN sedang tidak dapat diakses. Coba lagi beberapa saat
-            lagi.
+            Data statistik belum dapat ditampilkan saat ini. Silakan coba
+            kembali beberapa saat lagi.
           </p>
           <Link
             href={`/statistik/${encodeURIComponent(slug)}`}
@@ -88,31 +88,40 @@ export default async function IndicatorDetailPage({ params }) {
         <ArrowLeft size={16} aria-hidden="true" /> Kembali ke statistik
       </Link>
       <PageHeading
+        className="public-dynamic-heading"
+        reserveTitle
+        reserveDescription
         eyebrow="Indikator statistik"
         title={indicator.title}
-        description={indicator.metadata.definition}
+        description={
+          indicator.metadata.definition ||
+          "Definisi indikator belum dicantumkan."
+        }
       />
 
       <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
           ["Satuan", indicator.metadata.unit],
           [
-            "Periode acuan",
+            "Periode data",
             indicator.metadata.referencePeriod ||
               observations.at(-1)?.period ||
               "Belum dicantumkan",
           ],
-          ["Frekuensi", indicator.metadata.periodicity || "Belum dicantumkan"],
+          [
+            "Frekuensi pembaruan",
+            indicator.metadata.periodicity || "Belum dicantumkan",
+          ],
           ["Cakupan", indicator.metadata.geography],
         ].map(([label, value]) => (
           <div
             key={label}
-            className="rounded-xl border border-line bg-white p-4"
+            className="indicator-metadata-card rounded-xl border border-line bg-white p-4"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">
               {label}
             </p>
-            <p className="mt-2 text-sm font-semibold leading-6">
+            <p className="indicator-metadata-value mt-2 text-sm font-semibold leading-6">
               {value || "Belum dicantumkan"}
             </p>
           </div>
@@ -128,28 +137,24 @@ export default async function IndicatorDetailPage({ params }) {
           />
           <section className="overflow-hidden rounded-2xl border border-line bg-white">
             <div className="border-b border-line p-5">
-              <h2 className="text-lg font-semibold">Riwayat nilai</h2>
-              <p className="mt-1 text-sm text-muted">
-                {Number(indicator.totalObservations || 0).toLocaleString(
-                  "id-ID",
-                )}{" "}
-                baris tersedia pada DataStore. Tabel menampilkan maksimum 100
-                baris terbaru.
+              <h2 className="text-lg font-semibold">Riwayat nilai indikator</h2>
+              <p className="public-indicator-table-summary mt-1 text-sm text-muted">
+                Tabel menampilkan hingga 100 baris data terbaru.
               </p>
             </div>
-            {visibleRows.length ? (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-left text-sm">
-                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-muted">
-                    <tr>
-                      <th className="px-4 py-3">Periode</th>
-                      <th className="px-4 py-3">Wilayah</th>
-                      <th className="px-4 py-3 text-right">Nilai</th>
-                      <th className="px-4 py-3">Satuan</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visibleRows.map((row, index) => (
+            <div className="public-indicator-table-frame overflow-auto">
+              <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-muted">
+                  <tr>
+                    <th className="px-4 py-3">Periode</th>
+                    <th className="px-4 py-3">Wilayah</th>
+                    <th className="px-4 py-3 text-right">Nilai</th>
+                    <th className="px-4 py-3">Satuan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleRows.length ? (
+                    visibleRows.map((row, index) => (
                       <tr
                         key={`${row.id}-${index}`}
                         className="border-t border-line"
@@ -169,23 +174,27 @@ export default async function IndicatorDetailPage({ params }) {
                           {row.unit || indicator.metadata.unit}
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="p-6 text-sm leading-6 text-muted">
-                Belum ada baris observasi yang tersedia. Pastikan resource
-                indikator sudah diaktifkan pada CKAN DataStore dan menggunakan
-                kolom <code>period</code>, <code>region</code>, dan{" "}
-                <code>value</code>.
-              </div>
-            )}
+                    ))
+                  ) : (
+                    <tr className="border-t border-line">
+                      <td
+                        colSpan={4}
+                        className="p-6 text-sm leading-6 text-muted"
+                      >
+                        Nilai indikator belum tersedia. Anda dapat melihat
+                        dataset sumber atau menghubungi perangkat daerah
+                        penerbit untuk informasi lebih lanjut.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </section>
         </div>
 
         <aside className="space-y-4">
-          <section className="rounded-2xl border border-line bg-white p-5">
+          <section className="public-indicator-meta-panel rounded-2xl border border-line bg-white p-5">
             <h2 className="text-base font-semibold">Metodologi dan sumber</h2>
             <dl className="mt-4 space-y-4 text-sm">
               <div>
@@ -203,7 +212,7 @@ export default async function IndicatorDetailPage({ params }) {
                 </div>
               ) : null}
               <div>
-                <dt className="text-muted">Metadata CKAN diperbarui</dt>
+                <dt className="text-muted">Terakhir diperbarui</dt>
                 <dd className="mt-1 font-medium">
                   {formatDate(
                     indicator.package.metadata_modified ||
@@ -212,7 +221,7 @@ export default async function IndicatorDetailPage({ params }) {
                 </dd>
               </div>
               <div>
-                <dt className="text-muted">Identitas dataset</dt>
+                <dt className="text-muted">Kode dataset</dt>
                 <dd className="mt-1 break-all font-mono text-xs">
                   {indicator.name}
                 </dd>
@@ -261,7 +270,7 @@ export default async function IndicatorDetailPage({ params }) {
             {indicator.metadata.revisionNote ? (
               <div className="mt-5 rounded-xl bg-amber-50 p-4">
                 <h3 className="text-sm font-semibold text-amber-950">
-                  Catatan revisi/rilis
+                  Catatan pembaruan
                 </h3>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-amber-950">
                   {indicator.metadata.revisionNote}
@@ -275,7 +284,7 @@ export default async function IndicatorDetailPage({ params }) {
                 rel="noreferrer"
                 className="mt-5 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
               >
-                Unduh resource sumber{" "}
+                Unduh berkas sumber{" "}
                 <ArrowUpRight size={15} aria-hidden="true" />
               </a>
             ) : null}
@@ -283,16 +292,17 @@ export default async function IndicatorDetailPage({ params }) {
               href={`/dataset/${indicator.name}`}
               className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-line px-4 py-2 text-sm font-semibold hover:bg-accent"
             >
-              Buka metadata dataset{" "}
+              Lihat informasi dataset{" "}
               <ArrowUpRight size={15} aria-hidden="true" />
             </Link>
           </section>
-          <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-950">
+          <div className="public-indicator-note-panel rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-950">
             <Info size={17} className="mb-2" aria-hidden="true" />
             <p>
-              Nilai dan grafik diambil langsung dari resource DataStore yang
-              terhubung dengan dataset CKAN ini. Pastikan periode, definisi, dan
-              metode perhitungan diperiksa sebelum digunakan untuk keputusan.
+              Nilai dan grafik bersumber dari dataset yang tercantum pada
+              halaman ini. Periksa periode, definisi, dan metode perhitungan
+              sebelum menggunakan angka sebagai bahan analisis atau dasar
+              pengambilan keputusan.
             </p>
           </div>
         </aside>

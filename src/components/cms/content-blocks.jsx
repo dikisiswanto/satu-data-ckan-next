@@ -88,7 +88,7 @@ async function DatasetLinks({ block }) {
               {item.title || item.name}
             </span>
             <span className="mt-2 line-clamp-2 block text-sm leading-6 text-muted">
-              {item.notes || "Metadata dataset belum dilengkapi."}
+              {item.notes || "Deskripsi dataset belum tersedia."}
             </span>
             <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
               {item.linkLabel || "Lihat dataset"}{" "}
@@ -264,8 +264,8 @@ async function ContentBlock({ block, index }) {
           ))}
         </div>
         <p className="mt-2 text-xs text-muted">
-          Angka pada komponen ini merupakan nilai editorial yang dimasukkan
-          pengelola konten.
+          Angka ini merupakan ringkasan informasi. Untuk rincian dan konteks,
+          periksa dataset sumber yang tercantum pada halaman terkait.
         </p>
       </section>
     );

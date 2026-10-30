@@ -19,6 +19,7 @@ export default defineConfig({
       url: "http://127.0.0.1:8010/health",
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,
+      env: { E2E_CKAN_DELAY_MS: "180" },
     },
     {
       command: "npm run dev -- --hostname 127.0.0.1 --port 3100",

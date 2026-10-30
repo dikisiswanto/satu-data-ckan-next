@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { fieldStyles } from "@/components/ui/input";
-import { siteConfig } from "@/lib/site-config";
 import { PageHeading } from "@/components/page-heading";
+import { publicPageCopy } from "@/lib/public-copy";
 import { Search } from "lucide-react";
 
 function Skeleton({ className = "" }) {
@@ -14,12 +14,7 @@ export default function OrganizationDirectoryLoading() {
       className="page-container section-space public-interior-page organization-directory-page"
       aria-busy="true"
     >
-      <PageHeading
-        className="mb-6 sm:mb-6"
-        eyebrow="Pengampu data"
-        title="Perangkat daerah"
-        description={`Temukan perangkat daerah aktif yang mengampu data ${siteConfig.regionName}, termasuk organisasi yang sedang menyiapkan publikasi pertamanya.`}
-      />
+      <PageHeading {...publicPageCopy.organisasi} className="mb-6 sm:mb-6" />
       <section
         className="organization-search-panel"
         aria-label="Memuat pencarian perangkat daerah"
@@ -32,10 +27,13 @@ export default function OrganizationDirectoryLoading() {
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
           />
           <div
-            className={cn(fieldStyles, "flex h-11 min-w-0 items-center pl-10 pr-3 text-sm text-muted")}
+            className={cn(
+              fieldStyles,
+              "flex h-11 min-w-0 items-center pl-10 pr-3 text-sm text-muted",
+            )}
             aria-hidden="true"
           >
-            Nama OPD, kode, atau keterangan…
+            Nama perangkat daerah, kode, atau keterangan…
           </div>
         </div>
         <p
@@ -44,12 +42,16 @@ export default function OrganizationDirectoryLoading() {
         >
           Menampilkan <Skeleton className="inline-block h-3 w-8 align-middle" />{" "}
           dari <Skeleton className="inline-block h-3 w-8 align-middle" />{" "}
-          organisasi aktif.
+          perangkat daerah.
         </p>
       </section>
-      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 9 }, (_, index) => (
-          <article key={index} className="flex min-h-[180px] min-w-0 max-w-full flex-col rounded-lg border-t-[3px] border-t-[#a9c7e9] border-r border-b border-l border-[#d6e0e5] bg-white p-4 shadow-[0_1px_2px_rgb(24_58_68_/_0.02)]" aria-hidden="true">
+      <div className="public-loading-grid-md mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 3 }, (_, index) => (
+          <article
+            key={index}
+            className="flex min-h-[180px] min-w-0 max-w-full flex-col rounded-lg border-t-[3px] border-t-[#a9c7e9] border-r border-b border-l border-[#d6e0e5] bg-white p-4 shadow-[0_1px_2px_rgb(24_58_68_/_0.02)]"
+            aria-hidden="true"
+          >
             <div className="flex items-start gap-3">
               <Skeleton className="size-10 shrink-0 rounded-lg" />
               <div className="min-w-0 flex-1">

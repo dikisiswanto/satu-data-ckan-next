@@ -8,6 +8,7 @@
 @import "./styles/overrides.css";
 @import "./styles/quality-pass.css";
 @import "./styles/public-responsive.css";
+@import "./styles/public-layout-stability.css";
 @plugin "@tailwindcss/forms";
 
 /* Editorial pages are rendered by Next.js from the CKAN Pages headless CMS. */

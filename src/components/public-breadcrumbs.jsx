@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 const routeLabels = {
   dataset: { label: "Dataset", detail: "Detail dataset" },
   organisasi: { label: "Perangkat Daerah", detail: "Profil perangkat daerah" },
-  statistik: { label: "Statistik", detail: "Detail indikator" },
+  statistik: { label: "Statistik", detail: "Rincian indikator" },
   infografik: { label: "Infografik", detail: "Detail infografik" },
   publikasi: { label: "Publikasi", detail: "Detail publikasi" },
-  informasi: { label: "Informasi", detail: "Detail informasi" },
+  informasi: { label: "Informasi", detail: "Rincian informasi" },
   berita: { label: "Berita dan artikel", detail: "Detail artikel" },
   "api-data": { label: "Dokumentasi API" },
   bantuan: { label: "Bantuan" },

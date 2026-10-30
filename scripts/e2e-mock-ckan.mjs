@@ -319,6 +319,92 @@ const cmsPages = [
     ]),
   },
   {
+    name: "panduan-portal",
+    title:
+      "Panduan Lengkap Menggunakan Portal Satu Data Kabupaten Wajo untuk Menemukan, Memahami, dan Memanfaatkan Data Terbuka",
+    page_type: "page",
+    private: false,
+    publish_date: "2026-10-20",
+    content:
+      "# Panduan Portal\n\nPetunjuk menemukan dan menggunakan data publik Kabupaten Wajo.\n\nPengguna dapat menelusuri katalog berdasarkan topik, perangkat daerah, periode, dan kata kunci. Periksa metadata, definisi, satuan, serta sumber sebelum mengolah data.\n\nSetiap dataset menyediakan informasi berkas, format, tanggal pemutakhiran, dan keterangan lisensi jika tersedia.",
+    excerpt:
+      "Panduan lengkap untuk menelusuri katalog, memahami metadata, memeriksa sumber dan periode, mengunduh berkas, serta memanfaatkan data resmi Kabupaten Wajo secara tepat.",
+    category: "Panduan",
+    template_type: "landing",
+    featured: true,
+    show_in_menu: true,
+    menu_label: "Panduan",
+    menu_order: "2",
+    seo_title: "Panduan Portal Satu Data Wajo",
+    seo_description: "Panduan penggunaan portal data daerah.",
+  },
+  {
+    name: "kebijakan-satu-data",
+    title: "Kebijakan Satu Data Kabupaten Wajo",
+    page_type: "page",
+    private: false,
+    publish_date: "2026-10-18",
+    content:
+      "# Kebijakan Satu Data\n\nPrinsip tata kelola data pemerintah daerah.",
+    excerpt:
+      "Prinsip, standar, dan tata kelola penyelenggaraan Satu Data Kabupaten Wajo.",
+    category: "Kebijakan",
+    template_type: "landing",
+    featured: true,
+    show_in_menu: true,
+    menu_label: "Kebijakan",
+    menu_order: "3",
+    seo_title: "Kebijakan Satu Data Wajo",
+    seo_description: "Kebijakan tata kelola data daerah.",
+  },
+  {
+    name: "panduan-unduh-data",
+    title: "Cara Mengunduh dan Menggunakan Data",
+    page_type: "page",
+    private: false,
+    publish_date: "2026-10-15",
+    content:
+      "# Unduh Data\n\nPilih berkas dan periksa lisensi sebelum digunakan.",
+    excerpt:
+      "Panduan singkat mengunduh dataset dan menggunakan data sesuai lisensinya.",
+    category: "Panduan",
+    template_type: "article",
+    featured: false,
+    show_in_menu: false,
+    menu_order: "10",
+  },
+  {
+    name: "pedoman-metadata",
+    title: "Pedoman Metadata Dataset",
+    page_type: "page",
+    private: false,
+    publish_date: "2026-10-12",
+    content:
+      "# Metadata Dataset\n\nMetadata membantu pengguna memahami isi dan cakupan data.",
+    excerpt:
+      "Informasi metadata yang perlu diperhatikan saat menerbitkan dataset.",
+    category: "Dokumen",
+    template_type: "article",
+    featured: false,
+    show_in_menu: false,
+    menu_order: "11",
+  },
+  {
+    name: "kamus-data",
+    title: "Kamus Data Kabupaten Wajo",
+    page_type: "page",
+    private: false,
+    publish_date: "2026-10-10",
+    content: "# Kamus Data\n\nIstilah dan definisi elemen data sektoral.",
+    excerpt:
+      "Daftar istilah dan definisi elemen data untuk mendukung keseragaman pemahaman.",
+    category: "Referensi",
+    template_type: "article",
+    featured: false,
+    show_in_menu: false,
+    menu_order: "12",
+  },
+  {
     name: "warta-data-wajo",
     title: "Warta Data Wajo",
     page_type: "blog",
@@ -342,6 +428,55 @@ const cmsPages = [
         markdown: "Konten ini bersumber dari CKAN Pages.",
       },
     ]),
+  },
+  {
+    name: "pembaruan-katalog-data",
+    title:
+      "Pembaruan Katalog Data Daerah untuk Memperluas Akses dan Memudahkan Penelusuran Informasi Publik",
+    page_type: "blog",
+    private: false,
+    publish_date: "2026-10-26",
+    content:
+      "# Pembaruan Katalog\n\nKatalog data diperbarui untuk memudahkan pencarian informasi.\n\nPembaruan mencakup penyempurnaan metadata, pengelompokan topik, informasi perangkat daerah, dan keterangan periode. Perubahan ini membantu pengguna memahami konteks setiap dataset sebelum mengunduh atau mengolahnya.\n\nPengelola data dapat memperbarui keterangan dan berkas melalui sistem pengelolaan CKAN.",
+    excerpt:
+      "Penyempurnaan metadata, pengelompokan topik, informasi perangkat daerah, dan navigasi katalog dilakukan agar masyarakat lebih mudah menemukan serta memahami data publik.",
+    category: "Pembaruan",
+    template_type: "article",
+    featured: false,
+    show_in_menu: false,
+    menu_order: "20",
+  },
+  {
+    name: "rilis-statistik-wajo",
+    title: "Rilis Indikator Statistik Kabupaten Wajo",
+    page_type: "blog",
+    private: false,
+    publish_date: "2026-10-24",
+    content:
+      "# Rilis Statistik\n\nRingkasan indikator statistik yang telah diterbitkan.",
+    excerpt:
+      "Informasi terbaru mengenai indikator dan seri statistik yang tersedia pada portal.",
+    category: "Statistik",
+    template_type: "article",
+    featured: false,
+    show_in_menu: false,
+    menu_order: "21",
+  },
+  {
+    name: "publikasi-data-sektoral",
+    title: "Publikasi Data Sektoral Terbaru",
+    page_type: "blog",
+    private: false,
+    publish_date: "2026-10-22",
+    content:
+      "# Publikasi Data Sektoral\n\nDokumen publikasi yang melengkapi dataset sektoral.",
+    excerpt:
+      "Daftar publikasi resmi sebagai rujukan tambahan untuk memahami data sektoral.",
+    category: "Publikasi",
+    template_type: "article",
+    featured: false,
+    show_in_menu: false,
+    menu_order: "22",
   },
   {
     name: "artikel-terjadwal",
@@ -746,27 +881,36 @@ const server = createServer((request, response) => {
     return;
   }
   const action = match[1];
-  const result = actionResult(action, url.searchParams);
-  if (result?.__not_found) {
+  const sendActionResult = () => {
+    const result = actionResult(action, url.searchParams);
+    if (result?.__not_found) {
+      response
+        .writeHead(200)
+        .end(
+          JSON.stringify({
+            success: false,
+            error: { message: "Not found", __type: "Not Found" },
+          }),
+        );
+      return;
+    }
     response
       .writeHead(200)
       .end(
         JSON.stringify({
-          success: false,
-          error: { message: "Not found", __type: "Not Found" },
+          help: `https://docs.ckan.org/en/2.12/api/index.html#${action}`,
+          success: true,
+          result,
         }),
       );
+  };
+  // Deliberately delay public Action API responses in E2E so loading boundaries
+  // and layout-shift reservations are exercised instead of only warm responses.
+  if (E2E_CKAN_DELAY_MS > 0) {
+    setTimeout(sendActionResult, E2E_CKAN_DELAY_MS);
     return;
   }
-  response
-    .writeHead(200)
-    .end(
-      JSON.stringify({
-        help: `https://docs.ckan.org/en/2.12/api/index.html#${action}`,
-        success: true,
-        result,
-      }),
-    );
+  sendActionResult();
 });
 server.listen(PORT, "127.0.0.1", () =>
   process.stdout.write(`CKAN 2.12 E2E mock listening on 127.0.0.1:${PORT}\n`),

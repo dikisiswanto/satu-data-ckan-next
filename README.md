@@ -138,3 +138,10 @@ E2E publik menggunakan CKAN Action API mock. Smoke test image extension dijalank
 `.env.ckan` adalah satu-satunya sumber konfigurasi deployment dan berisi credential serta secret. File ini tidak boleh dikomit atau dibagikan. Source upstream di `deploy/ckan/upstream/` dan lock build di `deploy/ckan/` dibuat oleh bootstrap.
 
 Pembaruan source tidak memerlukan penghapusan volume PostgreSQL, Solr, Redis, atau filestore. Backup database, filestore, dan indeks Solr sebelum perubahan versi atau migrasi. Jangan menjalankan `docker compose down -v` pada deployment produksi.
+
+## CKAN 2.12 resource views
+
+Pratinjau tabel memakai `datatables_view`; pratinjau geospasial memakai `geo_view`,
+`geojson_view`, `wmts_view`, dan `shp_view`. Plugin berbasis Recline telah dihapus
+dari CKAN 2.12 dan tidak boleh diaktifkan. Bootstrap membersihkan ID lama dari
+`.env.ckan` dan menormalisasi daftar plugin saat dijalankan ulang.

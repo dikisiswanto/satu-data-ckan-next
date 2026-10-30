@@ -17,8 +17,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { getPublishedDatasetBySlugResult } from "@/lib/data/public";
 import { formatDate, formatBytes, safeHttpUrl } from "@/lib/utils";
-import { ckanAction, ckanExtraValue, ckanPackageCategory, ckanResourceFormat, ckanResourceName, isGeospatialServiceResource } from "@/lib/ckan/client";
-import { publicResourceUrl, ckanResourceExtra } from "@/lib/ckan/public-resource-url";
+import {
+  ckanAction,
+  ckanExtraValue,
+  ckanPackageCategory,
+  ckanResourceFormat,
+  ckanResourceName,
+  isGeospatialServiceResource,
+} from "@/lib/ckan/client";
+import {
+  publicResourceUrl,
+  ckanResourceExtra,
+} from "@/lib/ckan/public-resource-url";
 import {
   getCanonicalMetadata,
   getPublicSiteOrigin,
@@ -29,23 +39,37 @@ import { serializeJsonLd } from "@/lib/seo/json-ld";
 import { DatasetResourcePreview } from "@/components/dataset-resource-preview";
 import { GeoJSONResourcePreview } from "@/components/geojson-resource-preview";
 
-
 function getGeoPortalUrl() {
   return safeHttpUrl(process.env.NEXT_PUBLIC_GEOPORTAL_URL) || null;
 }
 
 function isGeoJSONResource(resource = {}) {
-  const format = String(resource.format || "").toLowerCase().replace(/[^a-z]/g, "");
-  const mime = String(resource.mimetype || resource.mimetype_inner || "").toLowerCase();
-  const url = String(resource.url || resource.name || "").toLowerCase().split(/[?#]/, 1)[0];
-  return format === "geojson" || mime === "application/geo+json" || mime === "application/vnd.geo+json" || url.endsWith(".geojson");
+  const format = String(resource.format || "")
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
+  const mime = String(
+    resource.mimetype || resource.mimetype_inner || "",
+  ).toLowerCase();
+  const url = String(resource.url || resource.name || "")
+    .toLowerCase()
+    .split(/[?#]/, 1)[0];
+  return (
+    format === "geojson" ||
+    mime === "application/geo+json" ||
+    mime === "application/vnd.geo+json" ||
+    url.endsWith(".geojson")
+  );
 }
 
 function isGeospatialDataset(dataset) {
   const resources = Array.isArray(dataset.resources) ? dataset.resources : [];
   if (resources.some(isGeoJSONResource)) return true;
-  const tags = (dataset.tags || []).map((tag) => tag.display_name || tag.name || "");
-  const groups = (dataset.groups || []).map((group) => group.title || group.display_name || group.name || "");
+  const tags = (dataset.tags || []).map(
+    (tag) => tag.display_name || tag.name || "",
+  );
+  const groups = (dataset.groups || []).map(
+    (group) => group.title || group.display_name || group.name || "",
+  );
   const searchableText = [
     ckanPackageCategory(dataset),
     dataset.name,
@@ -53,8 +77,13 @@ function isGeospatialDataset(dataset) {
     dataset.notes,
     ...tags,
     ...groups,
-  ].filter(Boolean).join(" ").toLocaleLowerCase("id-ID");
-  return /geospasial|spasial|peta|geojson|shapefile|\bshp\b|koordinat|lintang|bujur|sungai|danau|jaringan jalan|tutupan lahan/.test(searchableText);
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLocaleLowerCase("id-ID");
+  return /geospasial|spasial|peta|geojson|shapefile|\bshp\b|koordinat|lintang|bujur|sungai|danau|jaringan jalan|tutupan lahan/.test(
+    searchableText,
+  );
 }
 
 export async function generateMetadata({ params }) {
@@ -63,7 +92,7 @@ export async function generateMetadata({ params }) {
   if (result.unavailable) {
     return {
       title: "Dataset belum dapat dimuat",
-      description: "Informasi dataset sementara tidak dapat diakses.",
+      description: "Informasi dataset belum dapat dimuat.",
       robots: { index: false, follow: false },
     };
   }
@@ -76,14 +105,14 @@ export async function generateMetadata({ params }) {
   return {
     title: dataset.title || dataset.name,
     description: (
-      dataset.notes || `Metadata dataset resmi ${siteConfig.regionName}.`
+      dataset.notes || `Dataset resmi ${siteConfig.regionName}.`
     ).slice(0, 160),
     ...getCanonicalMetadata(`/dataset/${dataset.name}`),
     ...getSocialMetadata({
       path: `/dataset/${dataset.name}`,
       title: dataset.title || dataset.name,
       description: (
-        dataset.notes || `Metadata dataset resmi ${siteConfig.regionName}.`
+        dataset.notes || `Dataset resmi ${siteConfig.regionName}.`
       ).slice(0, 160),
       type: "article",
     }),
@@ -101,14 +130,13 @@ export default async function DatasetDetailPage({ params }) {
           className="public-empty-panel mx-auto max-w-3xl p-8 text-center sm:p-12"
           role="alert"
         >
-          <p className="eyebrow">Layanan katalog sedang bermasalah</p>
+          <p className="eyebrow">Informasi katalog</p>
           <h1 className="mt-3 text-2xl font-semibold">
             Informasi dataset belum dapat ditampilkan
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted">
-            Kami belum dapat mengambil informasi dataset dari katalog. Ini belum
-            berarti datanya dihapus atau tidak diterbitkan. Coba lagi beberapa
-            saat lagi.
+            Terjadi kendala saat memuat informasi dataset. Silakan coba kembali
+            beberapa saat lagi.
           </p>
           <a
             href={`/dataset/${encodeURIComponent(slug)}`}
@@ -130,28 +158,83 @@ export default async function DatasetDetailPage({ params }) {
   if (!dataset) notFound();
   const siteOrigin = getPublicSiteOrigin();
   const apiOrigin = siteOrigin || "";
-  const resources = (Array.isArray(dataset.resources) ? dataset.resources : []).filter((resource) =>
-    resource && (!resource.state || resource.state === "active") && resource.private !== true,
+  const resources = (
+    Array.isArray(dataset.resources) ? dataset.resources : []
+  ).filter(
+    (resource) =>
+      resource &&
+      (!resource.state || resource.state === "active") &&
+      resource.private !== true,
   );
-  const publicResources = resources.filter((resource) => publicResourceUrl(resource.url));
-  const tags = (dataset.tags || []).map((tag) => tag.display_name || tag.name).filter(Boolean);
+  const publicResources = resources.filter((resource) =>
+    publicResourceUrl(resource.url),
+  );
+  const tags = (dataset.tags || [])
+    .map((tag) => tag.display_name || tag.name)
+    .filter(Boolean);
   const primaryGroup = Array.isArray(dataset.groups) ? dataset.groups[0] : null;
-  const organizationName = dataset.organization?.title || dataset.organization?.name || null;
-  const sourceUrl = safeHttpUrl(ckanExtraValue(dataset, ["source_url", "source_url_original"]));
-  const referencePeriod = ckanExtraValue(dataset, ["portal_reference_period", "portal_period", "temporal_coverage", "temporal_period", "periode_data"]);
-  const periodStart = ckanExtraValue(dataset, ["portal_data_start", "data_start", "temporal_start"]);
-  const periodEnd = ckanExtraValue(dataset, ["portal_data_end", "data_end", "temporal_end"]);
-  const periodicity = ckanExtraValue(dataset, ["portal_periodicity", "periodicity", "frekuensi_data"]);
-  const updateFrequency = ckanExtraValue(dataset, ["portal_update_frequency", "update_frequency"]);
-  const publicationDate = ckanExtraValue(dataset, ["portal_publication_date", "publication_date"]);
-  const releaseVersion = ckanExtraValue(dataset, ["portal_version", "version_release"]) || dataset.version || null;
-  const revisionNote = ckanExtraValue(dataset, ["portal_revision_note", "revision_note"]);
-  const methodology = ckanExtraValue(dataset, ["portal_methodology", "methodology", "methodology_description"]);
-  const temporalCoverage = referencePeriod || [periodStart, periodEnd].filter(Boolean).join("/") || undefined;
+  const organizationName =
+    dataset.organization?.title || dataset.organization?.name || null;
+  const sourceUrl = safeHttpUrl(
+    ckanExtraValue(dataset, ["source_url", "source_url_original"]),
+  );
+  const referencePeriod = ckanExtraValue(dataset, [
+    "portal_reference_period",
+    "portal_period",
+    "temporal_coverage",
+    "temporal_period",
+    "periode_data",
+  ]);
+  const periodStart = ckanExtraValue(dataset, [
+    "portal_data_start",
+    "data_start",
+    "temporal_start",
+  ]);
+  const periodEnd = ckanExtraValue(dataset, [
+    "portal_data_end",
+    "data_end",
+    "temporal_end",
+  ]);
+  const periodicity = ckanExtraValue(dataset, [
+    "portal_periodicity",
+    "periodicity",
+    "frekuensi_data",
+  ]);
+  const updateFrequency = ckanExtraValue(dataset, [
+    "portal_update_frequency",
+    "update_frequency",
+  ]);
+  const publicationDate = ckanExtraValue(dataset, [
+    "portal_publication_date",
+    "publication_date",
+  ]);
+  const releaseVersion =
+    ckanExtraValue(dataset, ["portal_version", "version_release"]) ||
+    dataset.version ||
+    null;
+  const revisionNote = ckanExtraValue(dataset, [
+    "portal_revision_note",
+    "revision_note",
+  ]);
+  const methodology = ckanExtraValue(dataset, [
+    "portal_methodology",
+    "methodology",
+    "methodology_description",
+  ]);
+  const temporalCoverage =
+    referencePeriod ||
+    [periodStart, periodEnd].filter(Boolean).join("/") ||
+    undefined;
   let activities = [];
   try {
-    const activityResult = await ckanAction("package_activity_list", { id: dataset.name, include_data: false }, { revalidate: 30 });
-    activities = Array.isArray(activityResult) ? activityResult.slice(0, 8) : [];
+    const activityResult = await ckanAction(
+      "package_activity_list",
+      { id: dataset.name, include_data: false },
+      { revalidate: 30 },
+    );
+    activities = Array.isArray(activityResult)
+      ? activityResult.slice(0, 8)
+      : [];
   } catch {
     // Activity support is additive: a hidden/disabled activity endpoint must not break dataset details.
     activities = [];
@@ -160,9 +243,7 @@ export default async function DatasetDetailPage({ params }) {
     "@context": "https://schema.org",
     "@type": "Dataset",
     name: dataset.title || dataset.name,
-    description:
-      dataset.notes ||
-      `Dataset resmi dari ${siteConfig.name}.`,
+    description: dataset.notes || `Dataset resmi dari ${siteConfig.name}.`,
     ...(siteOrigin ? { url: `${siteOrigin}/dataset/${dataset.name}` } : {}),
     identifier: dataset.name,
     ...(organizationName
@@ -172,8 +253,10 @@ export default async function DatasetDetailPage({ params }) {
       "@type": "GovernmentOrganization",
       name: siteConfig.organizationName,
     },
-    ...(dataset.metadata_created ? { datePublished: dataset.metadata_created } : {}),
-    ...(dataset.metadata_modified ? { dateModified: dataset.metadata_modified } : {}),
+    ...(publicationDate ? { datePublished: publicationDate } : {}),
+    ...(dataset.metadata_modified
+      ? { dateModified: dataset.metadata_modified }
+      : {}),
     ...(tags.length ? { keywords: tags } : {}),
     ...(temporalCoverage ? { temporalCoverage } : {}),
     isAccessibleForFree: true,
@@ -181,28 +264,49 @@ export default async function DatasetDetailPage({ params }) {
       "@type": "DataDownload",
       name: ckanResourceName(resource),
       encodingFormat: resource.mimetype || resource.format || undefined,
-      ...(publicResourceUrl(resource.url) ? { contentUrl: publicResourceUrl(resource.url) } : {}),
+      ...(publicResourceUrl(resource.url)
+        ? { contentUrl: publicResourceUrl(resource.url) }
+        : {}),
     })),
   };
   const metadata = [
     {
-      label: "Organisasi pengampu",
-      value: organizationName && dataset.organization?.name ? (
-        <Link className="font-semibold text-primary underline-offset-4 hover:underline" href={`/organisasi/${dataset.organization.name}`}>
-          {organizationName}
-        </Link>
-      ) : organizationName,
+      label: "Perangkat daerah penerbit",
+      value:
+        organizationName && dataset.organization?.name ? (
+          <Link
+            className="font-semibold text-primary underline-offset-4 hover:underline"
+            href={`/organisasi/${dataset.organization.name}`}
+          >
+            {organizationName}
+          </Link>
+        ) : (
+          organizationName
+        ),
     },
-    { label: "Metadata dibuat", value: formatDate(dataset.metadata_created) },
-    { label: "Metadata diperbarui", value: formatDate(dataset.metadata_modified) },
+    {
+      label: "Ditambahkan ke portal",
+      value: formatDate(dataset.metadata_created),
+    },
+    {
+      label: "Terakhir diperbarui",
+      value: formatDate(dataset.metadata_modified),
+    },
     { label: "Lisensi", value: dataset.license_title || dataset.license_id },
-    { label: "Periode acuan", value: referencePeriod },
+    { label: "Periode data", value: referencePeriod },
     { label: "Frekuensi data", value: periodicity },
     { label: "Jadwal pemutakhiran", value: updateFrequency },
-    { label: "Tanggal rilis", value: publicationDate ? formatDate(publicationDate) : null },
+    {
+      label: "Tanggal rilis",
+      value: publicationDate ? formatDate(publicationDate) : null,
+    },
     { label: "Versi rilis", value: releaseVersion },
-    { label: "ID CKAN", value: dataset.name },
-    { label: "Status", value: dataset.state },
+    { label: "Kode dataset", value: dataset.name },
+    {
+      label: "Status publikasi",
+      value:
+        dataset.state === "active" ? "Dipublikasikan" : "Belum dipublikasikan",
+    },
   ];
   return (
     <>
@@ -220,45 +324,64 @@ export default async function DatasetDetailPage({ params }) {
         </Link>
         <div className="max-w-4xl">
           {primaryGroup?.name ? (
-            <Link href={`/dataset?kategori=${encodeURIComponent(primaryGroup.name)}`} className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2">
-              <Badge variant="primary" className="transition-colors hover:bg-blue-100">{ckanPackageCategory(dataset)}</Badge>
+            <Link
+              href={`/dataset?kategori=${encodeURIComponent(primaryGroup.name)}`}
+              className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
+            >
+              <Badge
+                variant="primary"
+                className="transition-colors hover:bg-blue-100"
+              >
+                {ckanPackageCategory(dataset)}
+              </Badge>
             </Link>
-          ) : <Badge variant="primary">{ckanPackageCategory(dataset)}</Badge>}
-          <h1 className="mt-5 text-3xl font-semibold leading-tight sm:text-4xl">
+          ) : (
+            <Badge variant="primary">{ckanPackageCategory(dataset)}</Badge>
+          )}
+          <h1 className="dataset-detail-title mt-5 text-3xl font-semibold leading-tight sm:text-4xl">
             {dataset.title || dataset.name}
           </h1>
-          <p className="mt-5 text-base leading-8 text-muted sm:text-lg">
-            {dataset.notes ||
-              "Deskripsi dataset belum dicantumkan oleh organisasi pengampu."}
+          <p className="dataset-detail-description mt-5 text-base leading-8 text-muted sm:text-lg">
+            {dataset.notes || "Deskripsi dataset belum tersedia."}
           </p>
           <p className="mt-5 text-sm text-muted">
-            Metadata dibuat {formatDate(dataset.metadata_created)} · Terakhir diubah {formatDate(dataset.metadata_modified)}
+            Ditambahkan ke portal {formatDate(dataset.metadata_created)} ·
+            Diperbarui {formatDate(dataset.metadata_modified)}
           </p>
-          <section className="mt-6 grid max-w-4xl gap-3 sm:grid-cols-3" aria-label="Ringkasan dataset">
+          <section
+            className="mt-6 grid max-w-4xl gap-3 sm:grid-cols-3"
+            aria-label="Ringkasan dataset"
+          >
             <div className="rounded-xl border border-line bg-white/80 p-3.5">
-              <p className="text-xs text-muted">Resource publik</p>
-              <p className="mt-1 text-lg font-semibold tabular-nums">{publicResources.length.toLocaleString("id-ID")}</p>
+              <p className="text-xs text-muted">Berkas publik</p>
+              <p className="mt-1 text-lg font-semibold tabular-nums">
+                {publicResources.length.toLocaleString("id-ID")}
+              </p>
             </div>
             <div className="rounded-xl border border-line bg-white/80 p-3.5">
               <p className="text-xs text-muted">Kata kunci</p>
-              <p className="mt-1 text-lg font-semibold tabular-nums">{tags.length.toLocaleString("id-ID")}</p>
+              <p className="mt-1 text-lg font-semibold tabular-nums">
+                {tags.length.toLocaleString("id-ID")}
+              </p>
             </div>
             <div className="rounded-xl border border-line bg-white/80 p-3.5">
-              <p className="text-xs text-muted">Periode acuan</p>
-              <p className="mt-1 break-words text-sm font-semibold">{referencePeriod || "Belum dicantumkan"}</p>
+              <p className="text-xs text-muted">Periode data</p>
+              <p className="mt-1 break-words text-sm font-semibold">
+                {referencePeriod || "Belum dicantumkan"}
+              </p>
             </div>
           </section>
         </div>
         <div className="mt-10 grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <section className="space-y-8">
             <div className="surface-panel p-5 sm:p-7">
-              <h2 className="text-xl font-semibold">Informasi dataset</h2>
+              <h2 className="text-xl font-semibold">Rincian dataset</h2>
               <dl className="mt-5 grid gap-5 sm:grid-cols-2">
                 {metadata.map((item) => (
                   <div key={item.label} className="border-b pb-4">
                     <dt className="text-sm text-muted">{item.label}</dt>
                     <dd className="mt-1.5 break-words text-sm font-medium leading-6">
-                      {item.value || "Belum tersedia"}
+                      {item.value || "Belum dicantumkan"}
                     </dd>
                   </div>
                 ))}
@@ -271,10 +394,31 @@ export default async function DatasetDetailPage({ params }) {
                   </p>
                 </div>
               ) : null}
-              {(periodStart || periodEnd || revisionNote) ? (
+              {periodStart || periodEnd || revisionNote ? (
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {(periodStart || periodEnd) ? <div className="rounded-xl bg-slate-50 p-4"><p className="flex items-center gap-2 text-sm font-semibold"><CalendarRange size={16} aria-hidden="true" /> Cakupan periode data</p><p className="mt-2 text-sm leading-6 text-muted">{periodStart || "Awal tidak dicantumkan"} — {periodEnd || "Akhir tidak dicantumkan"}</p></div> : null}
-                  {revisionNote ? <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 sm:col-span-2"><p className="flex items-center gap-2 text-sm font-semibold text-amber-950"><FileClock size={16} aria-hidden="true" /> Catatan revisi/rilis</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-amber-950">{revisionNote}</p></div> : null}
+                  {periodStart || periodEnd ? (
+                    <div className="rounded-xl bg-slate-50 p-4">
+                      <p className="flex items-center gap-2 text-sm font-semibold">
+                        <CalendarRange size={16} aria-hidden="true" /> Cakupan
+                        periode data
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-muted">
+                        {periodStart || "Awal tidak dicantumkan"} —{" "}
+                        {periodEnd || "Akhir tidak dicantumkan"}
+                      </p>
+                    </div>
+                  ) : null}
+                  {revisionNote ? (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 sm:col-span-2">
+                      <p className="flex items-center gap-2 text-sm font-semibold text-amber-950">
+                        <FileClock size={16} aria-hidden="true" /> Catatan
+                        perubahan
+                      </p>
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-amber-950">
+                        {revisionNote}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
               {tags.length ? (
@@ -295,16 +439,72 @@ export default async function DatasetDetailPage({ params }) {
                 </div>
               ) : null}
             </div>
-            <section className="overflow-hidden rounded-2xl border border-line bg-white" aria-labelledby="dataset-activity-heading">
-              <div className="border-b border-line p-5"><div className="flex items-center gap-2"><Activity size={18} className="text-primary" aria-hidden="true" /><h2 id="dataset-activity-heading" className="text-lg font-semibold">Riwayat perubahan CKAN</h2></div><p className="mt-1 text-sm leading-6 text-muted">Aktivitas publik yang tercatat di CKAN. Ini adalah jejak perubahan metadata, bukan salinan versi penuh untuk pemulihan.</p></div>
-              {activities.length ? <ol className="divide-y divide-line px-5">{activities.map((activity, index) => {
-                const rawType = String(activity.activity_type || activity.activity || "updated").toLowerCase();
-                const label = /new|create/.test(rawType) ? "Dataset diterbitkan" : /delete|remove/.test(rawType) ? "Dataset dihapus" : /change|update|edit/.test(rawType) ? "Metadata diperbarui" : rawType.replaceAll("_", " ");
-                // Public history should not expose CKAN login names or internal user IDs.
-                const who = "Pengelola data";
-                const when = activity.timestamp || activity.created_at || activity.time;
-                return <li key={activity.id || `${rawType}-${when || index}`} className="flex gap-3 py-4 first:pt-5 last:pb-5"><span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-primary"><Clock3 size={16} aria-hidden="true" /></span><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{label}</p><p className="mt-1 text-xs text-muted">{who}{when ? ` · ${formatDate(when)}` : ""}</p></div></li>;
-              })}</ol> : <p className="p-5 text-sm leading-6 text-muted">Riwayat aktivitas belum tersedia untuk dataset ini, atau Activity API dibatasi oleh konfigurasi CKAN.</p>}
+            <section
+              className="overflow-hidden rounded-2xl border border-line bg-white"
+              aria-labelledby="dataset-activity-heading"
+            >
+              <div className="border-b border-line p-5">
+                <div className="flex items-center gap-2">
+                  <Activity
+                    size={18}
+                    className="text-primary"
+                    aria-hidden="true"
+                  />
+                  <h2
+                    id="dataset-activity-heading"
+                    className="text-lg font-semibold"
+                  >
+                    Riwayat pembaruan
+                  </h2>
+                </div>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  Riwayat ini merangkum perubahan informasi dataset. Riwayat ini
+                  tidak memuat seluruh versi berkas yang pernah diterbitkan.
+                </p>
+              </div>
+              {activities.length ? (
+                <ol className="divide-y divide-line px-5">
+                  {activities.map((activity, index) => {
+                    const rawType = String(
+                      activity.activity_type || activity.activity || "updated",
+                    ).toLowerCase();
+                    const label = /new|create/.test(rawType)
+                      ? "Dataset diterbitkan"
+                      : /delete|remove/.test(rawType)
+                        ? "Dataset dihapus"
+                        : /change|update|edit/.test(rawType)
+                          ? "Informasi dataset diperbarui"
+                          : rawType.replaceAll("_", " ");
+                    // Public history should not expose CKAN login names or internal user IDs.
+                    const who = "Pengelola data";
+                    const when =
+                      activity.timestamp ||
+                      activity.created_at ||
+                      activity.time;
+                    return (
+                      <li
+                        key={activity.id || `${rawType}-${when || index}`}
+                        className="flex gap-3 py-4 first:pt-5 last:pb-5"
+                      >
+                        <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-primary">
+                          <Clock3 size={16} aria-hidden="true" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold">{label}</p>
+                          <p className="mt-1 text-xs text-muted">
+                            {who}
+                            {when ? ` · ${formatDate(when)}` : ""}
+                          </p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              ) : (
+                <p className="p-5 text-sm leading-6 text-muted">
+                  Riwayat pembaruan belum tersedia untuk dataset ini.
+                </p>
+              )}
             </section>
             {isGeospatialDataset(dataset) ? (
               <section
@@ -320,12 +520,13 @@ export default async function DatasetDetailPage({ params }) {
                       id="geospatial-viewer-title"
                       className="text-lg font-semibold"
                     >
-                      Jelajahi melalui Peta Interaktif {siteConfig.regionShortName}
+                      Jelajahi melalui Peta Interaktif{" "}
+                      {siteConfig.regionShortName}
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-muted">
                       {getGeoPortalUrl()
-                        ? `Untuk melihat konteks lokasi dan peta tematik, buka GeoPortal ${siteConfig.regionShortName}. Metadata resmi CKAN dan berkas dataset tetap tersedia dari katalog Satu Data ini.`
-                        : "Tautan GeoPortal untuk instansi ini belum dikonfigurasi. Metadata resmi CKAN dan berkas dataset tetap tersedia dari katalog Satu Data ini."}
+                        ? `Untuk melihat lokasi dan peta tematik, buka GeoPortal ${siteConfig.regionShortName}. Informasi dan berkas dataset tetap tersedia pada halaman ini.`
+                        : "Peta interaktif untuk dataset ini belum tersedia. Anda tetap dapat membaca informasi dan mengunduh berkas melalui halaman ini."}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-3">
                       {getGeoPortalUrl() ? (
@@ -347,14 +548,14 @@ export default async function DatasetDetailPage({ params }) {
                         className="inline-flex min-h-10 items-center gap-2 rounded-control border border-line bg-white px-4 py-2.5 text-sm font-semibold text-ink hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
                       >
                         <Code2 size={16} aria-hidden="true" />
-                        Metadata API (JSON)
+                        Lihat informasi lengkap (JSON)
                       </a>
                     </div>
                     <p className="mt-3 text-xs leading-5 text-muted">
-                      Integrasi layer GeoPortal perlu menggunakan URL distribusi
-                      atau API dataset yang stabil. Membuka peta tidak
-                      menggantikan proses publikasi atau pengambilan metadata
-                      otomatis dari Portal Satu Data.
+                      Peta interaktif menampilkan konteks lokasi dari data yang
+                      dipublikasikan. Untuk mengutip atau mengolah data, gunakan
+                      informasi dan berkas sumber yang tersedia pada halaman
+                      ini.
                     </p>
                   </div>
                 </div>
@@ -363,52 +564,94 @@ export default async function DatasetDetailPage({ params }) {
             <div>
               <h2 className="text-xl font-semibold">Berkas unduhan</h2>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Berkas dan status pratinjau mengikuti resource yang dipublikasikan di CKAN.
+                Daftar ini memuat berkas dan layanan data yang telah dibuka
+                untuk umum.
               </p>
               <div className="mt-4 space-y-3">
                 {publicResources.length ? (
                   publicResources.map((resource) => (
-                      <div
-                        key={resource.id}
-                        className="surface-panel flex items-center gap-4 p-4"
-                      >
-                        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
-                          {isGeospatialServiceResource(resource) ? <MapPinned size={20} aria-hidden="true" /> : <FileSpreadsheet size={20} aria-hidden="true" />}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-medium">
-                            {ckanResourceName(resource)}
-                          </p>
-                          <p className="mt-1 text-xs uppercase text-muted">
-                            {String(ckanResourceFormat(resource) || resource.mimetype || "berkas").toUpperCase()} · {formatBytes(resource.size)}
-                            {ckanResourceExtra(resource, "portal_resource_period") ? ` · Periode ${ckanResourceExtra(resource, "portal_resource_period")}` : ""}
-                            {ckanResourceExtra(resource, "portal_resource_version") ? ` · Versi ${ckanResourceExtra(resource, "portal_resource_version")}` : ""}
-                          </p>
-                        </div>
-                        <a
-                          href={publicResourceUrl(resource.url) || "#"}
-                          target={isGeospatialServiceResource(resource) ? "_blank" : undefined}
-                          rel={isGeospatialServiceResource(resource) ? "noopener noreferrer" : undefined}
-                          className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-control border bg-white px-3 text-sm font-semibold text-ink transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
-                        >
-                          {isGeospatialServiceResource(resource) ? <ExternalLink size={15} aria-hidden="true" /> : <Download size={15} aria-hidden="true" />}
-                          {isGeospatialServiceResource(resource) ? "Buka layanan" : "Unduh"}
-                        </a>
+                    <div
+                      key={resource.id}
+                      className="surface-panel flex items-center gap-4 p-4"
+                    >
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
+                        {isGeospatialServiceResource(resource) ? (
+                          <MapPinned size={20} aria-hidden="true" />
+                        ) : (
+                          <FileSpreadsheet size={20} aria-hidden="true" />
+                        )}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">
+                          {ckanResourceName(resource)}
+                        </p>
+                        <p className="mt-1 text-xs uppercase text-muted">
+                          {String(
+                            ckanResourceFormat(resource) ||
+                              resource.mimetype ||
+                              "berkas",
+                          ).toUpperCase()}{" "}
+                          · {formatBytes(resource.size)}
+                          {ckanResourceExtra(resource, "portal_resource_period")
+                            ? ` · Periode ${ckanResourceExtra(resource, "portal_resource_period")}`
+                            : ""}
+                          {ckanResourceExtra(
+                            resource,
+                            "portal_resource_version",
+                          )
+                            ? ` · Versi ${ckanResourceExtra(resource, "portal_resource_version")}`
+                            : ""}
+                        </p>
                       </div>
-                    ))
+                      <a
+                        href={publicResourceUrl(resource.url) || "#"}
+                        target={
+                          isGeospatialServiceResource(resource)
+                            ? "_blank"
+                            : undefined
+                        }
+                        rel={
+                          isGeospatialServiceResource(resource)
+                            ? "noopener noreferrer"
+                            : undefined
+                        }
+                        className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-control border bg-white px-3 text-sm font-semibold text-ink transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
+                      >
+                        {isGeospatialServiceResource(resource) ? (
+                          <ExternalLink size={15} aria-hidden="true" />
+                        ) : (
+                          <Download size={15} aria-hidden="true" />
+                        )}
+                        {isGeospatialServiceResource(resource)
+                          ? "Buka layanan"
+                          : "Unduh"}
+                      </a>
+                    </div>
+                  ))
                 ) : (
                   <div className="surface-panel p-5 text-sm text-muted">
-                    Belum ada resource publik pada dataset ini.
+                    Belum ada berkas publik pada dataset ini.
                   </div>
                 )}
               </div>
               {resources
-                .filter((resource) => resource.datastore_active === true && resource.id)
+                .filter(
+                  (resource) =>
+                    resource.datastore_active === true && resource.id,
+                )
                 .map((resource) => (
-                  <DatasetResourcePreview key={resource.id} datasetName={dataset.name} resource={resource} />
+                  <DatasetResourcePreview
+                    key={resource.id}
+                    datasetName={dataset.name}
+                    resource={resource}
+                  />
                 ))}
               {resources
-                .filter((resource) => isGeoJSONResource(resource) && publicResourceUrl(resource.url))
+                .filter(
+                  (resource) =>
+                    isGeoJSONResource(resource) &&
+                    publicResourceUrl(resource.url),
+                )
                 .map((resource) => (
                   <GeoJSONResourcePreview
                     key={`geojson-${resource.id}`}
@@ -416,21 +659,91 @@ export default async function DatasetDetailPage({ params }) {
                     url={publicResourceUrl(resource.url)}
                   />
                 ))}
-              {resources.some((resource) => ["pdf"].includes(ckanResourceFormat(resource)) && publicResourceUrl(resource.url)) ? (
+              {resources.some(
+                (resource) =>
+                  ["pdf"].includes(ckanResourceFormat(resource)) &&
+                  publicResourceUrl(resource.url),
+              ) ? (
                 <section className="mt-6 overflow-hidden rounded-2xl border border-line bg-white">
-                  <div className="border-b border-line p-4"><h3 className="font-semibold">Pratinjau PDF</h3><p className="mt-1 text-sm text-muted">Pratinjau dokumen dari resource publik CKAN.</p></div>
-                  {resources.filter((resource) => ckanResourceFormat(resource) === "pdf" && publicResourceUrl(resource.url)).slice(0, 1).map((resource) => <iframe key={resource.id} title={`Pratinjau ${ckanResourceName(resource)}`} src={publicResourceUrl(resource.url)} className="h-[70vh] min-h-[420px] w-full bg-slate-50" loading="lazy" />)}
+                  <div className="border-b border-line p-4">
+                    <h3 className="font-semibold">Pratinjau PDF</h3>
+                    <p className="mt-1 text-sm text-muted">
+                      Pratinjau dokumen yang tersedia untuk umum.
+                    </p>
+                  </div>
+                  {resources
+                    .filter(
+                      (resource) =>
+                        ckanResourceFormat(resource) === "pdf" &&
+                        publicResourceUrl(resource.url),
+                    )
+                    .slice(0, 1)
+                    .map((resource) => (
+                      <iframe
+                        key={resource.id}
+                        title={`Pratinjau ${ckanResourceName(resource)}`}
+                        src={publicResourceUrl(resource.url)}
+                        className="h-[70vh] min-h-[420px] w-full bg-slate-50"
+                        loading="lazy"
+                      />
+                    ))}
                 </section>
               ) : null}
-              {resources.some((resource) => ["png", "jpg", "jpeg", "webp", "gif", "avif"].includes(ckanResourceFormat(resource)) && publicResourceUrl(resource.url)) ? (
-                <section className="mt-6 rounded-2xl border border-line bg-white p-4 sm:p-5"><h3 className="font-semibold">Pratinjau gambar</h3><div className="mt-4 grid gap-4 sm:grid-cols-2">{resources.filter((resource) => ["png", "jpg", "jpeg", "webp", "gif", "avif"].includes(ckanResourceFormat(resource)) && publicResourceUrl(resource.url)).slice(0, 4).map((resource) => <figure key={resource.id} className="overflow-hidden rounded-xl bg-slate-50"><Image src={publicResourceUrl(resource.url)} alt={resource.description || resource.name || dataset.title} width={1200} height={900} unoptimized className="h-auto max-h-[500px] w-full object-contain" /><figcaption className="p-3 text-sm text-muted">{ckanResourceName(resource)}</figcaption></figure>)}</div></section>
+              {resources.some(
+                (resource) =>
+                  ["png", "jpg", "jpeg", "webp", "gif", "avif"].includes(
+                    ckanResourceFormat(resource),
+                  ) && publicResourceUrl(resource.url),
+              ) ? (
+                <section className="mt-6 rounded-2xl border border-line bg-white p-4 sm:p-5">
+                  <h3 className="font-semibold">Pratinjau gambar</h3>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    {resources
+                      .filter(
+                        (resource) =>
+                          [
+                            "png",
+                            "jpg",
+                            "jpeg",
+                            "webp",
+                            "gif",
+                            "avif",
+                          ].includes(ckanResourceFormat(resource)) &&
+                          publicResourceUrl(resource.url),
+                      )
+                      .slice(0, 4)
+                      .map((resource) => (
+                        <figure
+                          key={resource.id}
+                          className="overflow-hidden rounded-xl bg-slate-50"
+                        >
+                          <Image
+                            src={publicResourceUrl(resource.url)}
+                            alt={
+                              resource.description ||
+                              resource.name ||
+                              dataset.title
+                            }
+                            width={1200}
+                            height={900}
+                            unoptimized
+                            className="h-auto max-h-[500px] w-full object-contain"
+                          />
+                          <figcaption className="p-3 text-sm text-muted">
+                            {ckanResourceName(resource)}
+                          </figcaption>
+                        </figure>
+                      ))}
+                  </div>
+                </section>
               ) : null}
             </div>
           </section>
           <aside className="h-fit rounded-card border bg-white p-5 lg:sticky lg:top-24">
             <h2 className="font-semibold">Menggunakan data ini</h2>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Cantumkan judul dataset, organisasi pengampu, identifier CKAN, tanggal metadata, dan tanggal akses saat mengutip data.
+              Saat menggunakan data ini, cantumkan judul dataset, perangkat
+              daerah penerbit, periode data, sumber, dan tanggal akses.
             </p>
             {sourceUrl ? (
               <a
@@ -439,7 +752,7 @@ export default async function DatasetDetailPage({ params }) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Sumber asli <ExternalLink size={14} />
+                Lihat sumber data <ExternalLink size={14} />
               </a>
             ) : null}
             <p className="mt-5 border-t pt-4 text-xs leading-5 text-muted">

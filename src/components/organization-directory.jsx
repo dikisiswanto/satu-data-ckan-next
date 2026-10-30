@@ -70,14 +70,14 @@ export function OrganizationDirectory({ organizations }) {
               setQuery(event.target.value);
               setPage(1);
             }}
-            placeholder="Nama perangkat daerah atau keterangan…"
+            placeholder="Cari nama perangkat daerah…"
             className="h-11 pl-10 pr-11"
           />
           {query ? (
             <button
               type="button"
               onClick={() => setQuery("")}
-              aria-label="Hapus pencarian organisasi"
+              aria-label="Hapus pencarian perangkat daerah"
               className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded border border-line text-muted hover:bg-canvas"
             >
               <X size={15} aria-hidden="true" />
@@ -86,7 +86,7 @@ export function OrganizationDirectory({ organizations }) {
         </div>
         <p className="mt-2 text-xs text-muted" aria-live="polite">
           Menampilkan {formatCount(filteredOrganizations.length)} dari{" "}
-          {formatCount(organizations.length)} organisasi aktif.
+          {formatCount(organizations.length)} perangkat daerah.
         </p>
       </div>
 
@@ -98,7 +98,10 @@ export function OrganizationDirectory({ organizations }) {
             className="grid scroll-mt-24 gap-3 md:grid-cols-2 xl:grid-cols-3"
           >
             {paginatedOrganizations.map((organization) => (
-              <article key={organization.id} className="flex min-h-[180px] min-w-0 max-w-full flex-col rounded-lg border border-[#d6e0e5] bg-white p-4 border-t-[3px] border-t-[#a9c7e9] shadow-[0_1px_2px_rgb(24_58_68_/_0.02)] transition-[border-color,box-shadow] duration-[160ms] ease-out hover:border-r-[#b5cccf] hover:border-b-[#b5cccf] hover:border-l-[#b5cccf] hover:shadow-[0_4px_14px_rgb(25_55_72_/_0.06)] max-[359px]:p-3.5">
+              <article
+                key={organization.id}
+                className="flex min-h-[180px] min-w-0 max-w-full flex-col rounded-lg border border-[#d6e0e5] bg-white p-4 border-t-[3px] border-t-[#a9c7e9] shadow-[0_1px_2px_rgb(24_58_68_/_0.02)] transition-[border-color,box-shadow] duration-[160ms] ease-out hover:border-r-[#b5cccf] hover:border-b-[#b5cccf] hover:border-l-[#b5cccf] hover:shadow-[0_4px_14px_rgb(25_55_72_/_0.06)] max-[359px]:p-3.5"
+              >
                 <div className="flex items-start gap-3">
                   <span className="grid size-10 shrink-0 place-items-center rounded-[0.4rem] border border-[#d3e2f0] bg-[#eaf2ff] text-[#1d5fa7]">
                     <Building2 size={19} aria-hidden="true" />
@@ -113,7 +116,7 @@ export function OrganizationDirectory({ organizations }) {
                       </Link>
                     </h2>
                     <p className="mt-1 text-xs text-muted">
-                      ID CKAN: {organization.name}
+                      Kode: {organization.name}
                     </p>
                   </div>
                 </div>
@@ -124,7 +127,9 @@ export function OrganizationDirectory({ organizations }) {
                 ) : null}
                 <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-4 max-[639px]:items-start max-[639px]:gap-2">
                   <span className="min-w-0 break-words text-xs text-[#647985]">
-                    <strong className="text-sm tabular-nums text-[#214b62]">{formatCount(organization.package_count)}</strong>{" "}
+                    <strong className="text-sm tabular-nums text-[#214b62]">
+                      {formatCount(organization.package_count)}
+                    </strong>{" "}
                     dataset publik
                   </span>
                   <Link
@@ -173,13 +178,13 @@ export function OrganizationDirectory({ organizations }) {
         <div className="surface-panel min-w-0 px-5 py-8 text-center">
           <h2 className="font-semibold">
             {query
-              ? "Organisasi tidak ditemukan"
-              : "Belum ada organisasi aktif yang tersedia"}
+              ? "Perangkat daerah tidak ditemukan"
+              : "Belum ada perangkat daerah yang tersedia"}
           </h2>
           <p className="mt-1 text-sm text-muted">
             {query
               ? "Coba kata kunci lain atau hapus pencarian."
-              : "Informasi organisasi aktif akan ditampilkan di sini saat tersedia."}
+              : "Informasi perangkat daerah akan ditampilkan setelah tersedia."}
           </p>
           {query ? (
             <button

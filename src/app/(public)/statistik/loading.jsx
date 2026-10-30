@@ -1,4 +1,5 @@
 import { PageHeading } from "@/components/page-heading";
+import { publicPageCopy } from "@/lib/public-copy";
 import { GeoPortalStatisticsPromo } from "@/components/geoportal-statistics-promo";
 
 function Skeleton({ className = "" }) {
@@ -11,11 +12,7 @@ export default function PublicStatisticsLoading() {
       className="page-container section-space public-interior-page public-statistics-page"
       aria-busy="true"
     >
-      <PageHeading
-        eyebrow="Data makro"
-        title="Statistik dan indikator"
-        description="Telusuri indikator yang telah diterbitkan, termasuk arti angka, satuan, periode, dan sumber datanya."
-      />
+      <PageHeading {...publicPageCopy.statistik} />
       <GeoPortalStatisticsPromo />
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="h-5 w-60 max-w-full" aria-hidden="true">
@@ -25,8 +22,8 @@ export default function PublicStatisticsLoading() {
           Data terpublikasi
         </span>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 6 }, (_, index) => (
+      <div className="public-loading-grid-md grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 3 }, (_, index) => (
           <article key={index} className="statistics-card" aria-hidden="true">
             <div className="flex items-start justify-between gap-3">
               <Skeleton className="h-4 w-32" />

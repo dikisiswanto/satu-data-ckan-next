@@ -21,9 +21,8 @@ export function SiteFooter() {
             </p>
             <p className="mt-1 font-semibold">{siteConfig.shortName}</p>
             <p className="mt-2 max-w-md text-sm leading-6 text-muted">
-              Satu pintu untuk menemukan, memahami, dan menggunakan data publik
-              daerah. Informasi dataset yang belum tersedia ditandai secara
-              terbuka.
+              Temukan, unduh, dan manfaatkan data resmi daerah melalui satu
+              portal.
             </p>
           </div>
         </div>
@@ -36,7 +35,9 @@ export function SiteFooter() {
             aria-label="Portal Satu Data Indonesia (situs resmi, terbuka di tab baru)"
           >
             <span className="text-left">
-              <span className="block text-[10px] font-semibold uppercase tracking-[0.13em] text-muted">Portal nasional</span>
+              <span className="block text-[10px] font-semibold uppercase tracking-[0.13em] text-muted">
+                Portal nasional
+              </span>
               <Image
                 src="/logo-satu-data-indonesia.svg"
                 alt="Logo Satu Data Indonesia"
@@ -45,23 +46,36 @@ export function SiteFooter() {
                 className="mt-1 h-auto w-[146px] max-w-full object-contain object-left"
               />
             </span>
-            <ExternalLink size={14} className="shrink-0 text-muted" aria-hidden="true" />
+            <ExternalLink
+              size={14}
+              className="shrink-0 text-muted"
+              aria-hidden="true"
+            />
           </a>
-          <nav aria-label="Navigasi kaki halaman" className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted sm:justify-end">
+          <nav
+            aria-label="Navigasi kaki halaman"
+            className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted sm:justify-end"
+          >
             {footerNavigation.map((item) => (
               <Link key={item.href} href={item.href} className="public-link">
                 {item.label}
               </Link>
             ))}
-            <a href={process.env.NEXT_PUBLIC_CKAN_ADMIN_URL || "https://ckan.data.wajokab.go.id"} target="_blank" rel="noopener noreferrer" className="public-link">
-              Kelola data (CKAN)
+            <a
+              href={
+                process.env.NEXT_PUBLIC_CKAN_ADMIN_URL ||
+                "https://ckan.data.wajokab.go.id"
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="public-link"
+            >
+              Portal Pengelola
             </a>
           </nav>
         </div>
         <p className="text-xs text-muted sm:col-span-2">
-          © {new Date().getFullYear()} {siteConfig.name}. Data
-          resmi hanya ditampilkan setelah dipublikasikan oleh pengelola
-          berwenang.
+          © {new Date().getFullYear()} {siteConfig.name}
         </p>
       </div>
     </footer>

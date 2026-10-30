@@ -12,9 +12,10 @@ import {
   getSocialMetadata,
   siteConfig,
 } from "@/lib/site-config";
+import { publicPageCopy } from "@/lib/public-copy";
 
 const pageTitle = `Informasi ${siteConfig.regionName}`;
-const pageDescription = `Halaman informasi, panduan, kebijakan, dan berita resmi ${siteConfig.regionName} yang dikelola melalui CMS CKAN.`;
+const pageDescription = `Informasi, panduan, kebijakan, dan berita resmi ${siteConfig.regionName}.`;
 
 export const metadata = {
   title: "Informasi",
@@ -34,7 +35,7 @@ export default async function InformasiPage() {
     getPublicCmsNavigationResult(),
   ]);
   const pages = pagesResult.data || [];
-  const posts = (postsResult.data || []).slice(0, 6);
+  const posts = (postsResult.data || []).slice(0, 3);
   const featuredPages = pages
     .filter((page) => page.featured || page.showInMenu)
     .sort(
@@ -52,102 +53,99 @@ export default async function InformasiPage() {
 
   return (
     <main className="page-container section-space public-interior-page">
-      <PageHeading
-        eyebrow="Pusat informasi"
-        title="Informasi"
-        description={`Temukan kebijakan, panduan, profil, berita, dan artikel resmi ${siteConfig.regionName}. Konten dikelola oleh pengelola berwenang melalui CKAN.`}
-      />
+      <PageHeading {...publicPageCopy.informasi} />
 
-      {unavailable ? (
-        <section
-          className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"
-          role="status"
-        >
-          <strong>Konten belum lengkap.</strong> Sebagian informasi dari CMS
-          CKAN sementara tidak dapat dimuat. Konten lain yang berhasil diambil
-          tetap ditampilkan.
-        </section>
-      ) : null}
+      <p
+        className="cms-directory-status"
+        role={unavailable ? "status" : undefined}
+      >
+        {unavailable
+          ? "Sebagian informasi belum dapat dimuat. Konten yang tersedia tetap dapat dibaca."
+          : ""}
+      </p>
 
-      {navigationResult.data.length ? (
-        <nav
-          className="mt-7 flex flex-wrap gap-2"
-          aria-label="Navigasi informasi"
-        >
-          {navigationResult.data.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="inline-flex min-h-10 items-center rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-primary/40 hover:bg-accent hover:text-primary"
+      <nav
+        className="cms-directory-nav mt-7 flex min-h-10 flex-wrap gap-2"
+        aria-label="Navigasi informasi"
+      >
+        {navigationResult.data.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="inline-flex min-h-10 items-center rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-primary/40 hover:bg-accent hover:text-primary"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+
+      <section
+        className="cms-directory-section mt-9"
+        aria-labelledby="information-featured-heading"
+      >
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="eyebrow">HALAMAN UTAMA</p>
+            <h2
+              id="information-featured-heading"
+              className="text-xl font-semibold"
             >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      ) : null}
-
-      {featuredPages.length ? (
-        <section
-          className="mt-9"
-          aria-labelledby="information-featured-heading"
-        >
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="eyebrow">HALAMAN UTAMA</p>
-              <h2
-                id="information-featured-heading"
-                className="text-xl font-semibold"
-              >
-                Informasi pilihan
-              </h2>
-            </div>
+              Informasi pilihan
+            </h2>
           </div>
+        </div>
+        {featuredPages.length ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {featuredPages.map((page) => (
               <Link
                 key={page.name}
                 href={`/informasi/${encodeURIComponent(page.name)}`}
-                className="rounded-2xl border border-line bg-white p-5 transition hover:border-primary/40 hover:shadow-sm"
+                className="cms-directory-card rounded-2xl border border-line bg-white p-5 transition hover:border-primary/40 hover:shadow-sm"
               >
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted">
                   {page.category || "Informasi"}
                 </span>
-                <h3 className="mt-2 font-semibold leading-6">
+                <h3 className="mt-2 line-clamp-2 min-h-12 font-semibold leading-6">
                   {page.menuLabel || page.title}
                 </h3>
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">
+                <p className="mt-2 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-muted">
                   {page.excerpt}
                 </p>
                 <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
-                  Buka halaman <ArrowRight size={15} aria-hidden="true" />
+                  Baca informasi <ArrowRight size={15} aria-hidden="true" />
                 </span>
               </Link>
             ))}
           </div>
-        </section>
-      ) : null}
-
-      {posts.length ? (
-        <section className="mt-12" aria-labelledby="information-news-heading">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="eyebrow">KABAR DAN PUBLIKASI</p>
-              <h2
-                id="information-news-heading"
-                className="text-xl font-semibold"
-              >
-                Berita dan artikel terbaru
-              </h2>
-            </div>
-            <Link
-              href="#berita-lainnya"
-              className="text-sm font-semibold text-primary hover:underline"
-            >
-              Lihat daftar berita
-            </Link>
+        ) : (
+          <div className="cms-directory-empty" role="status">
+            Halaman pilihan akan ditampilkan setelah diterbitkan oleh pengelola
+            portal.
           </div>
+        )}
+      </section>
+
+      <section
+        className="cms-directory-section mt-12"
+        aria-labelledby="information-news-heading"
+      >
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="eyebrow">KABAR TERBARU</p>
+            <h2 id="information-news-heading" className="text-xl font-semibold">
+              Berita dan artikel terbaru
+            </h2>
+          </div>
+          <Link
+            href="/berita"
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            Lihat semua berita
+          </Link>
+        </div>
+        {posts.length ? (
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {posts.slice(0, 3).map((page) => (
+            {posts.map((page) => (
               <CmsContentCard
                 key={page.name}
                 page={page}
@@ -156,20 +154,29 @@ export default async function InformasiPage() {
               />
             ))}
           </div>
-        </section>
-      ) : null}
-
-      {generalPages.length ? (
-        <section className="mt-12" aria-labelledby="information-pages-heading">
-          <div className="mb-5">
-            <p className="eyebrow">DOKUMEN DAN PANDUAN</p>
-            <h2
-              id="information-pages-heading"
-              className="text-xl font-semibold"
-            >
-              Halaman informasi lainnya
-            </h2>
+        ) : (
+          <div
+            className="cms-directory-empty"
+            role={postsResult.unavailable ? "alert" : "status"}
+          >
+            {postsResult.unavailable
+              ? "Berita belum dapat dimuat saat ini."
+              : "Belum ada berita yang dipublikasikan."}
           </div>
+        )}
+      </section>
+
+      <section
+        className="cms-directory-section mt-12"
+        aria-labelledby="information-pages-heading"
+      >
+        <div className="mb-5">
+          <p className="eyebrow">DOKUMEN DAN PANDUAN</p>
+          <h2 id="information-pages-heading" className="text-xl font-semibold">
+            Halaman informasi lainnya
+          </h2>
+        </div>
+        {generalPages.length ? (
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {generalPages.map((page) => (
               <CmsContentCard
@@ -179,8 +186,17 @@ export default async function InformasiPage() {
               />
             ))}
           </div>
-        </section>
-      ) : null}
+        ) : (
+          <div
+            className="cms-directory-empty"
+            role={pagesResult.unavailable ? "alert" : "status"}
+          >
+            {pagesResult.unavailable
+              ? "Halaman informasi belum dapat dimuat saat ini."
+              : "Panduan dan dokumen akan ditampilkan setelah diterbitkan."}
+          </div>
+        )}
+      </section>
 
       <section
         id="berita-lainnya"
@@ -194,8 +210,8 @@ export default async function InformasiPage() {
             <h2 className="text-lg font-semibold">Berita dan artikel</h2>
             <p className="mt-1 text-sm leading-6 text-muted">
               {posts.length
-                ? `${posts.length} konten terbaru dimuat dari CKAN Pages.`
-                : "Belum ada berita yang dipublikasikan. Pengelola dapat membuat artikel melalui menu Pages di CKAN Admin."}
+                ? `${posts.length} berita dan artikel terbaru ditampilkan.`
+                : "Belum ada berita yang dipublikasikan. Berita akan ditampilkan setelah diterbitkan oleh pengelola portal."}
             </p>
             <Link
               href="/berita"
@@ -207,9 +223,8 @@ export default async function InformasiPage() {
         </div>
       </section>
       <p className="mt-6 text-xs leading-5 text-muted">
-        Konten publik di halaman ini bersumber dari CKAN Pages. Halaman privat
-        tetap dilindungi oleh pemeriksaan hak akses CKAN dan tidak dirender oleh
-        portal publik.
+        Halaman ini hanya menampilkan informasi yang telah dipublikasikan untuk
+        umum.
       </p>
     </main>
   );

@@ -6,6 +6,8 @@ export function PageHeading({
   description,
   children,
   className,
+  reserveTitle = false,
+  reserveDescription = false,
 }) {
   return (
     <header
@@ -16,11 +18,21 @@ export function PageHeading({
     >
       <div className="max-w-3xl space-y-3">
         {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-        <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+        <h1
+          className={cn(
+            "text-3xl font-semibold leading-tight sm:text-4xl",
+            reserveTitle && "public-heading-title-reserved",
+          )}
+        >
           {title}
         </h1>
         {description ? (
-          <p className="max-w-2xl text-base leading-7 text-muted">
+          <p
+            className={cn(
+              "max-w-2xl text-base leading-7 text-muted",
+              reserveDescription && "public-heading-description-reserved",
+            )}
+          >
             {description}
           </p>
         ) : null}

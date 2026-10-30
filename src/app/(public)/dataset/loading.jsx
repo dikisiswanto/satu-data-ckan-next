@@ -1,5 +1,6 @@
 import { Filter, Search } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
+import { publicPageCopy } from "@/lib/public-copy";
 
 function Skeleton({ className = "" }) {
   return <div aria-hidden="true" className={`loading-skeleton ${className}`} />;
@@ -7,17 +8,10 @@ function Skeleton({ className = "" }) {
 
 export default function DatasetCatalogLoading() {
   return (
-    <main
-      aria-busy="true"
-      aria-label="Memuat hasil katalog dataset"
-    >
+    <main aria-busy="true" aria-label="Memuat hasil katalog dataset">
       <section className="relative z-10 [overflow:visible] border-b border-[#d9e1dc] bg-[linear-gradient(135deg,#eef3ee_0%,#edf4f6_60%,#f7f9fb_100%)]">
         <div className="page-container py-10 sm:py-14">
-          <PageHeading
-            eyebrow="Jelajahi data publik"
-            title="Katalog dataset"
-            description="Jelajahi data berdasarkan maksud pencarian, topik terkait, metadata, kata kunci, sumber, dan perangkat daerah—bukan hanya kecocokan judul."
-          />
+          <PageHeading {...publicPageCopy.dataset} />
           <div className="relative flex min-w-0 flex-col items-stretch gap-3 rounded-2xl border border-[#d5e0e8] bg-white p-3 shadow-[0_8px_28px_rgb(20_55_60_/_0.07)] sm:flex-row sm:items-end sm:p-4">
             <div className="min-w-0 flex-1">
               <p className="mb-2 block text-sm font-semibold">Kata kunci</p>
@@ -52,8 +46,8 @@ export default function DatasetCatalogLoading() {
           </div>
           <Skeleton className="h-7 w-28 rounded-full" />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }, (_, index) => (
+        <div className="public-loading-grid-md grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
             <div
               key={index}
               className="rounded-card border border-line bg-surface p-5 sm:p-6"

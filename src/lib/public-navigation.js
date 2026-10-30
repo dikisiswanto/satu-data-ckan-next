@@ -46,7 +46,7 @@ export const publicNavigation = [
     match: ["/organisasi"],
   },
   { href: "/bantuan", label: "Bantuan", icon: LifeBuoy, match: ["/bantuan"] },
-  { href: "/api-data", label: "API data", icon: Code2, match: ["/api-data"] },
+  { href: "/api-data", label: "API", icon: Code2, match: ["/api-data"] },
 ];
 
 export const footerNavigation = publicNavigation.filter(

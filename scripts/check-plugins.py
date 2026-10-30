@@ -5,10 +5,16 @@ import sys
 
 registered = {entry.name for entry in entry_points(group="ckan.plugins")}
 required = {
+    # CKAN 2.12 core plugins.
+    "datastore",
+    "datatables_view",
+    "image_view",
+    "text_view",
+    "resource_proxy",
+    # Installed CKAN extensions.
     "scheming_datasets",
     "pages",
-    "datastore",
-    "envvars",
+    "wajo_pages",
     "wajo_theme",
     "dcat",
     "dcat_rdf_harvester",
@@ -16,17 +22,13 @@ required = {
     "geo_view",
     "geojson_view",
     "wmts_view",
-    "esri_shapefile_view",
+    "shp_view",
     "harvest",
     "ckan_harvester",
-    "resource_proxy",
-    "geojson_view",
-    "wmts_view",
-    "esri_shapefile_view",
-    "image_view",
-    "text_view",
-    "recline_view",
+    "xloader",
+    "envvars",
 }
+
 missing = sorted(required - registered)
 if missing:
     sys.exit("Missing CKAN plugin entry points: " + ", ".join(missing))

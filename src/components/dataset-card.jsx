@@ -16,11 +16,16 @@ import {
 } from "@/lib/ckan/client";
 
 export function DatasetCard({ dataset }) {
-  const organizationName = dataset.organization?.title || dataset.organization?.name;
+  const organizationName =
+    dataset.organization?.title || dataset.organization?.name;
   const resources = Array.isArray(dataset.resources)
-    ? dataset.resources.filter((resource) => resource && typeof resource === "object")
+    ? dataset.resources.filter(
+        (resource) => resource && typeof resource === "object",
+      )
     : [];
-  const formats = [...new Set(resources.map(ckanResourceFormat).filter(Boolean))]
+  const formats = [
+    ...new Set(resources.map(ckanResourceFormat).filter(Boolean)),
+  ]
     .slice(0, 3)
     .map((format) => format.toUpperCase());
   const referencePeriod = ckanExtraValue(dataset, [
@@ -52,23 +57,25 @@ export function DatasetCard({ dataset }) {
           </Link>
         </h2>
         <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">
-          {dataset.notes || "Deskripsi dataset belum dicantumkan."}
+          {dataset.notes || "Deskripsi dataset belum tersedia."}
         </p>
       </CardHeader>
       <CardContent className="mt-auto space-y-3 text-xs text-muted">
         <p className="flex min-w-0 items-start gap-2">
-          <Building2
-            size={14}
-            aria-hidden="true"
-            className="mt-0.5 shrink-0"
-          />
-          <span className="line-clamp-2">{organizationName || "Organisasi belum dicantumkan"}</span>
+          <Building2 size={14} aria-hidden="true" className="mt-0.5 shrink-0" />
+          <span className="line-clamp-2">
+            {organizationName || "Perangkat daerah belum dicantumkan"}
+          </span>
         </p>
         {referencePeriod || formats.length ? (
           <div className="flex flex-wrap gap-1.5">
             {referencePeriod ? (
               <span className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-canvas px-2 py-1 leading-5">
-                <CalendarRange size={13} aria-hidden="true" className="shrink-0" />
+                <CalendarRange
+                  size={13}
+                  aria-hidden="true"
+                  className="shrink-0"
+                />
                 <span className="break-words">Periode {referencePeriod}</span>
               </span>
             ) : null}
@@ -77,7 +84,9 @@ export function DatasetCard({ dataset }) {
                 <FileType size={13} aria-hidden="true" className="shrink-0" />
                 <span>{formats.join(" · ")}</span>
                 {resources.length > formats.length ? (
-                  <span className="text-muted/80">+{resources.length - formats.length} resource</span>
+                  <span className="text-muted/80">
+                    +{resources.length - formats.length} berkas
+                  </span>
                 ) : null}
               </span>
             ) : null}

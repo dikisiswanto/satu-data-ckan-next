@@ -21,10 +21,10 @@ export function GeoPortalStatisticsPromo() {
             Jelajahi data berbasis lokasi
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">
-            Gunakan {`GeoPortal ${siteConfig.regionShortName}`} untuk melihat fasilitas dan data tematik di
-            peta. Metadata dan sumber resmi dataset tetap dikelola di Portal
-            Satu Data; ketersediaan setiap layer mengikuti konfigurasi
-            GeoPortal.
+            Gunakan {`GeoPortal ${siteConfig.regionShortName}`} untuk melihat
+            fasilitas dan data tematik di peta. Informasi dan sumber resmi
+            dataset tetap tersedia di Portal Satu Data. Ketersediaan setiap
+            lapisan peta mengikuti data yang telah disiapkan di GeoPortal.
           </p>
         </div>
       </div>

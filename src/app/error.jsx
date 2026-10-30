@@ -25,10 +25,9 @@ export default function ErrorPage({ error, reset }) {
         Halaman belum dapat ditampilkan.
       </h1>
       <p role="alert" className="mt-3 max-w-xl text-sm leading-7 text-muted">
-        Data atau layanan yang diperlukan belum berhasil dimuat. Ini tidak
-        berarti data telah terhapus. Periksa koneksi, lalu coba lagi. Jika
-        masalah berlanjut, catat waktu kejadian dan halaman yang dibuka untuk
-        disampaikan kepada pengelola portal.
+        Halaman ini belum dapat ditampilkan saat ini. Periksa koneksi internet,
+        lalu coba kembali. Jika kendala berlanjut, hubungi pengelola portal dan
+        sertakan alamat halaman yang dibuka.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <PendingActionButton

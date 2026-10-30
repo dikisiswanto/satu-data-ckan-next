@@ -3,6 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { ArrowUpRight, Images, Info } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
+import { publicPageCopy } from "@/lib/public-copy";
 import { getPublishedInfographicsResult } from "@/lib/data/public-infographics";
 import {
   getCanonicalMetadata,
@@ -13,7 +14,7 @@ import { safeHttpUrl } from "@/lib/utils";
 
 export const metadata = {
   title: "Infografik",
-  description: `Infografik resmi dan visualisasi data ${siteConfig.regionName} yang diterbitkan melalui katalog CKAN.`,
+  description: `Infografik resmi dan visualisasi data ${siteConfig.regionName}.`,
   ...getCanonicalMetadata("/infografik"),
   ...getSocialMetadata({
     path: "/infografik",
@@ -37,22 +38,18 @@ export default async function InfografikPage({ searchParams }) {
 
   return (
     <main className="page-container section-space public-interior-page">
-      <PageHeading
-        eyebrow="Data dalam visual"
-        title="Infografik"
-        description="Temukan ringkasan data dan informasi daerah dalam bentuk visual. Konten di halaman ini bersumber dari dataset publik CKAN yang ditandai sebagai infografik."
-      />
+      <PageHeading {...publicPageCopy.infografik} />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted">
           {result.unavailable
-            ? "Katalog infografik sementara tidak dapat diakses."
-            : `${Number(result.meta?.total || 0).toLocaleString("id-ID")} infografik diterbitkan.`}
+            ? null
+            : `${Number(result.meta?.total || 0).toLocaleString("id-ID")} infografik tersedia.`}
         </p>
         <Link
           href="/dataset"
           className="inline-flex items-center gap-2 text-sm font-semibold text-primary underline underline-offset-4"
         >
-          Telusuri dataset sumber <ArrowUpRight size={15} aria-hidden="true" />
+          Telusuri katalog data <ArrowUpRight size={15} aria-hidden="true" />
         </Link>
       </div>
 
@@ -97,7 +94,7 @@ export default async function InfografikPage({ searchParams }) {
                       {item.title}
                     </h2>
                     <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">
-                      {item.notes || "Ringkasan infografik belum dilengkapi."}
+                      {item.notes || "Deskripsi infografik belum tersedia."}
                     </p>
                     <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
                       Buka infografik{" "}
@@ -118,36 +115,28 @@ export default async function InfografikPage({ searchParams }) {
             <Images size={23} aria-hidden="true" />
           </span>
           <p className="eyebrow mt-5">
-            {result.unavailable
-              ? "Katalog sementara terganggu"
-              : "Belum tersedia"}
+            {result.unavailable ? "Informasi sementara" : "Belum tersedia"}
           </p>
           <h2 className="mt-2 text-xl font-semibold">
             {result.unavailable
-              ? "Infografik belum dapat dimuat"
-              : "Belum ada infografik yang dipublikasikan"}
+              ? "Infografik belum dapat ditampilkan"
+              : "Belum ada infografik yang tersedia"}
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
             {result.unavailable
-              ? "Coba lagi saat layanan CKAN kembali tersedia."
-              : "Buat dataset publik melalui CKAN, tambahkan tag portal-infografik, lalu unggah resource gambar PNG, JPG atau WebP dan lengkapi judul, deskripsi, organisasi, serta periode."}
+              ? "Silakan coba kembali beberapa saat lagi."
+              : "Infografik akan ditampilkan setelah diterbitkan untuk umum oleh perangkat daerah. Dataset yang menjadi sumbernya dapat ditelusuri melalui katalog data."}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
             <Link href="/dataset" className="public-empty-action">
               Jelajahi katalog dataset{" "}
               <ArrowUpRight size={16} aria-hidden="true" />
             </Link>
-            <Link
-              href="/api-data#infografik"
-              className="text-sm font-semibold text-primary underline underline-offset-4"
-            >
-              Panduan penerbitan
-            </Link>
           </div>
           <p className="mt-5 flex items-start justify-center gap-2 text-xs leading-5 text-muted">
             <Info size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
-            Infografik dan file unduh hanya ditampilkan dari resource publik
-            CKAN.
+            Infografik dan berkas unduhan hanya menampilkan materi yang telah
+            dipublikasikan.
           </p>
         </section>
       )}

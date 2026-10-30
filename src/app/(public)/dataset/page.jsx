@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { DatasetCard } from "@/components/dataset-card";
 import { PageHeading } from "@/components/page-heading";
+import { publicPageCopy } from "@/lib/public-copy";
 import {
   getPublishedDatasetFacetsResult,
   getPublishedDatasetsResult,
@@ -17,18 +18,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input, fieldStyles } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { getCanonicalMetadata, getSocialMetadata, siteConfig } from "@/lib/site-config";
+import {
+  getCanonicalMetadata,
+  getSocialMetadata,
+  siteConfig,
+} from "@/lib/site-config";
 
 export const metadata = {
   title: "Katalog Dataset",
-  description:
-    `Temukan dataset ${siteConfig.regionName} melalui pencarian judul, isi, metadata, sumber, dan kata kunci dengan filter organisasi serta topik.`,
+  description: `Temukan dataset ${siteConfig.regionName} berdasarkan judul, uraian, kata kunci, perangkat daerah, topik, tahun, dan format berkas.`,
   ...getCanonicalMetadata("/dataset"),
   ...getSocialMetadata({
     path: "/dataset",
     title: `Katalog Dataset | ${siteConfig.shortName}`,
-    description:
-      `Telusuri data resmi ${siteConfig.regionName} berdasarkan topik, organisasi, periode, dan format berkas.`,
+    description: `Telusuri data resmi ${siteConfig.regionName} berdasarkan topik, perangkat daerah, tahun data, dan format berkas.`,
   }),
 };
 
@@ -45,10 +48,11 @@ export default async function DatasetCatalogPage({ searchParams }) {
     typeof params?.organisasi === "string"
       ? params.organisasi.slice(0, 36)
       : "";
-  const organizationId =
-    /^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(requestedOrganization)
-      ? requestedOrganization
-      : "";
+  const organizationId = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(
+    requestedOrganization,
+  )
+    ? requestedOrganization
+    : "";
   const requestedSort = typeof params?.urut === "string" ? params.urut : "";
   const sort = ["relevance", "updated", "title"].includes(requestedSort)
     ? requestedSort
@@ -56,10 +60,13 @@ export default async function DatasetCatalogPage({ searchParams }) {
       ? "relevance"
       : "updated";
   const requestedYear = typeof params?.tahun === "string" ? params.tahun : "";
-  const parsedYear = /^\d{4}$/.test(requestedYear) ? Number(requestedYear) : null;
-  const year = parsedYear !== null && parsedYear >= 1900 && parsedYear <= 2200
-    ? parsedYear
+  const parsedYear = /^\d{4}$/.test(requestedYear)
+    ? Number(requestedYear)
     : null;
+  const year =
+    parsedYear !== null && parsedYear >= 1900 && parsedYear <= 2200
+      ? parsedYear
+      : null;
   const requestedFormat =
     typeof params?.format === "string" ? params.format : "";
   const format = ["csv", "xlsx", "pdf", "json", "geojson"].includes(
@@ -117,14 +124,16 @@ export default async function DatasetCatalogPage({ searchParams }) {
   };
   const activeFilters = [
     query ? { key: "q", label: `Kata kunci: ${query}` } : null,
-    category ? { key: "kategori", label: `Topik: ${categoryLabel || category}` } : null,
+    category
+      ? { key: "kategori", label: `Topik: ${categoryLabel || category}` }
+      : null,
     organizationId
       ? {
           key: "organisasi",
-          label: `Organisasi: ${organizationLabel || "Dipilih"}`,
+          label: `Perangkat daerah: ${organizationLabel || "Dipilih"}`,
         }
       : null,
-    year ? { key: "tahun", label: `Periode acuan: ${year}` } : null,
+    year ? { key: "tahun", label: `Tahun data: ${year}` } : null,
     format
       ? { key: "format", label: `Format: ${formatLabels[format] || format}` }
       : null,
@@ -158,11 +167,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
     <main>
       <section className="relative z-10 [overflow:visible] border-b border-[#d9e1dc] bg-[linear-gradient(135deg,#eef3ee_0%,#edf4f6_60%,#f7f9fb_100%)] has-[details[open]]:z-40">
         <div className="page-container py-10 sm:py-14">
-          <PageHeading
-            eyebrow="Jelajahi data publik"
-            title="Katalog dataset"
-            description="Jelajahi data berdasarkan maksud pencarian, topik terkait, metadata, kata kunci, sumber, dan perangkat daerah—bukan hanya kecocokan judul."
-          />
+          <PageHeading {...publicPageCopy.dataset} />
           <form action="/dataset" method="get" role="search" className="mt-8">
             <div className="relative flex min-w-0 flex-col items-stretch gap-3 rounded-2xl border border-[#d5e0e8] bg-white p-3 shadow-[0_8px_28px_rgb(20_55_60_/_0.07)] sm:flex-row sm:items-end sm:p-4">
               <div className="min-w-0 flex-1">
@@ -188,8 +193,9 @@ export default async function DatasetCatalogPage({ searchParams }) {
                   />
                 </div>
                 <p className="mt-2 text-xs leading-5 text-muted">
-                  Contoh: “sekolah atau puskesmas” atau “realisasi anggaran kecamatan”.
-                  Setiap kata kunci dapat mencocokkan judul, deskripsi, tag, organisasi, grup, dan metadata resource pada indeks CKAN.
+                  Contoh: “sekolah atau puskesmas” atau “realisasi anggaran
+                  kecamatan”. Pencarian mencakup judul, uraian, kata kunci,
+                  perangkat daerah, topik, dan nama berkas.
                 </p>
               </div>
               <Button
@@ -223,7 +229,9 @@ export default async function DatasetCatalogPage({ searchParams }) {
                         Filter dataset
                       </h2>
                       <p className="mt-1 text-xs text-muted">
-                        Filter memakai facet CKAN. Tahun yang dipilih mengacu pada Periode acuan yang dicatat pengelola, bukan tanggal metadata dibuat.
+                        Pilihan filter mengikuti informasi yang tersedia. Tahun
+                        data menunjukkan periode yang dicakup, bukan tanggal
+                        dataset diterbitkan.
                       </p>
                     </div>
                     {hasFilters ? (
@@ -231,7 +239,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
                         href="/dataset"
                         className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                       >
-                        Reset
+                        Hapus filter
                       </Link>
                     ) : null}
                   </div>
@@ -262,7 +270,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
                         htmlFor="catalog-organization"
                         className="mb-2 block text-sm font-semibold"
                       >
-                        Organisasi
+                        Perangkat daerah
                       </label>
                       <select
                         id="catalog-organization"
@@ -270,7 +278,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
                         defaultValue={organizationId}
                         className={cn(fieldStyles, "h-11 py-0")}
                       >
-                        <option value="">Semua organisasi</option>
+                        <option value="">Semua perangkat daerah</option>
                         {organizations.map((item) => (
                           <option key={item.id} value={item.id}>
                             {item.name}
@@ -283,7 +291,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
                         htmlFor="catalog-year"
                         className="mb-2 block text-sm font-semibold"
                       >
-                        Periode acuan
+                        Tahun data
                       </label>
                       <select
                         id="catalog-year"
@@ -334,7 +342,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
                         className={cn(fieldStyles, "h-11 py-0")}
                       >
                         <option value="relevance">Paling relevan</option>
-                        <option value="updated">Terbaru diperbarui</option>
+                        <option value="updated">Pembaruan terbaru</option>
                         <option value="title">Nama A–Z</option>
                       </select>
                     </div>
@@ -349,7 +357,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
                         ? `${filterCount} filter aktif`
                         : query
                           ? "Pencarian aktif"
-                          : "Belum ada filter aktif"}
+                          : "Belum ada filter yang dipilih"}
                     </span>
                   </div>
                 </div>
@@ -368,9 +376,9 @@ export default async function DatasetCatalogPage({ searchParams }) {
             role="status"
             className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950"
           >
-            Sebagian opsi filter belum dapat dimuat. Anda masih dapat mencari
-            berdasarkan kata kunci; coba muat ulang halaman untuk memperbarui
-            filter.
+            Sebagian pilihan filter belum dapat ditampilkan. Anda tetap dapat
+            mencari berdasarkan kata kunci; coba muat ulang halaman untuk
+            memperbarui filter.
           </p>
         ) : null}
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -381,14 +389,14 @@ export default async function DatasetCatalogPage({ searchParams }) {
             </h2>
             <p className="mt-2 text-sm text-muted" aria-live="polite">
               {datasetResult.unavailable
-                ? "Kami belum dapat menampilkan jumlah hasil karena katalog sedang bermasalah."
-                : `${Number(datasetResult.meta?.total ?? datasets.length).toLocaleString("id-ID")} hasil tersedia · ${datasets.length} ditampilkan di halaman ${page}${hasFilters ? " sesuai filter" : ""}.`}
+                ? "Hasil pencarian belum dapat ditampilkan. Silakan coba kembali beberapa saat lagi."
+                : `${Number(datasetResult.meta?.total ?? datasets.length).toLocaleString("id-ID")} hasil ditemukan · Menampilkan ${datasets.length} dataset pada halaman ${page}${hasFilters ? " sesuai filter" : ""}.`}
             </p>
           </div>
           <div className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-2 text-xs font-medium text-muted">
             <Filter size={14} aria-hidden="true" />
             {filterCount && query
-              ? `${filterCount} filter + pencarian aktif`
+              ? `${filterCount} filter · pencarian aktif`
               : filterCount
                 ? `${filterCount} filter aktif`
                 : query
@@ -401,7 +409,9 @@ export default async function DatasetCatalogPage({ searchParams }) {
             className="mb-6 flex flex-wrap items-center gap-2"
             aria-label="Filter dan pencarian aktif"
           >
-            <span className="text-xs font-semibold text-muted">Aktif:</span>
+            <span className="text-xs font-semibold text-muted">
+              Filter dipilih:
+            </span>
             {activeFilters.map((item) => (
               <span
                 key={item.key}
@@ -432,12 +442,12 @@ export default async function DatasetCatalogPage({ searchParams }) {
               <Search size={22} aria-hidden="true" />
             </span>
             <h2 className="mt-4 text-lg font-semibold">
-              Katalog dataset belum dapat ditampilkan
+              Katalog data sementara tidak dapat ditampilkan
             </h2>
             <p className="mx-auto mt-2 w-full max-w-xl text-sm leading-6 text-[#526777]">
-              Katalog sedang sulit diakses. Coba lagi beberapa saat lagi. Filter
-              hanya menampilkan dataset yang telah diterbitkan; dataset yang
-              belum dipublikasikan tetap tidak ditampilkan.
+              Katalog data sedang mengalami kendala. Silakan coba kembali
+              beberapa saat lagi. Hanya dataset yang telah dipublikasikan untuk
+              umum yang ditampilkan.
             </p>
             <a href={pageHref(page)} className="public-empty-action">
               Coba lagi
@@ -458,13 +468,13 @@ export default async function DatasetCatalogPage({ searchParams }) {
               {page > 1
                 ? "Tidak ada dataset pada halaman ini"
                 : hasFilters
-                  ? "Belum ditemukan data yang cocok"
-                  : "Belum ada dataset yang diterbitkan"}
+                  ? "Data yang sesuai belum ditemukan"
+                  : "Belum ada dataset yang dipublikasikan"}
             </h2>
             <p className="mx-auto mt-2 w-full max-w-xl text-sm leading-6 text-[#526777]">
               {hasFilters
-                ? "Coba gunakan kata kunci yang lebih singkat, periksa ejaan, atau ubah filter. Anda juga dapat menghapus semua filter untuk melihat seluruh katalog."
-                : "Dataset akan muncul setelah informasinya diperiksa dan diterbitkan oleh pengelola."}
+                ? "Coba gunakan kata kunci yang lebih singkat, periksa ejaan, atau ubah pilihan filter. Anda juga dapat menghapus semua filter untuk melihat seluruh katalog."
+                : "Dataset akan tampil setelah informasinya diperiksa dan dipublikasikan oleh perangkat daerah."}
             </p>
             {hasFilters ? (
               <Button href="/dataset" variant="secondary" className="mt-5">
@@ -472,7 +482,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
               </Button>
             ) : (
               <Link href="/organisasi" className="public-empty-action">
-                Lihat perangkat daerah{" "}
+                Lihat daftar perangkat daerah{" "}
                 <ArrowUpRight size={16} aria-hidden="true" />
               </Link>
             )}

@@ -19,15 +19,38 @@ export default function DatasetDetailLoading() {
       </Link>
       <div className="max-w-4xl">
         <Skeleton className="h-6 w-28 rounded-full" />
-        <Skeleton className="mt-5 h-10 w-4/5 max-w-3xl sm:h-12" />
-        <Skeleton className="mt-5 h-4 w-full max-w-3xl" />
-        <Skeleton className="mt-2 h-4 w-11/12 max-w-2xl" />
-        <p className="mt-5 inline-flex flex-wrap items-center gap-1 text-sm text-muted">
-          Dipublikasikan{" "}
+        <Skeleton className="dataset-detail-title-skeleton mt-5 h-10 w-4/5 max-w-3xl sm:h-12" />
+        <div
+          className="dataset-detail-description-skeleton mt-5 space-y-2"
+          aria-hidden="true"
+        >
+          <Skeleton className="h-4 w-full max-w-3xl" />
+          <Skeleton className="h-4 w-11/12 max-w-3xl" />
+          <Skeleton className="h-4 w-5/6 max-w-3xl" />
+          <Skeleton className="h-4 w-4/5 max-w-2xl" />
+        </div>
+        <p className="mt-5 flex flex-wrap items-center gap-1 text-sm text-muted">
+          Ditambahkan ke portal{" "}
           <Skeleton className="inline-block h-4 w-24 align-middle" />
-          <span aria-hidden="true">·</span> Versi{" "}
-          <Skeleton className="inline-block h-4 w-8 align-middle" />
+          <span aria-hidden="true">·</span> Diperbarui{" "}
+          <Skeleton className="inline-block h-4 w-24 align-middle" />
         </p>
+        <section
+          className="mt-6 grid max-w-4xl gap-3 sm:grid-cols-3"
+          aria-hidden="true"
+        >
+          {Array.from({ length: 3 }, (_, index) => (
+            <div
+              key={index}
+              className="rounded-xl border border-line bg-white/80 p-3.5"
+            >
+              <p className="text-xs text-muted">
+                {["Berkas publik", "Kata kunci", "Periode data"][index]}
+              </p>
+              <Skeleton className="mt-2 h-6 w-12" />
+            </div>
+          ))}
+        </section>
       </div>
       <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section className="space-y-8">
@@ -35,7 +58,7 @@ export default function DatasetDetailLoading() {
             <h2 className="text-xl font-semibold">Informasi dataset</h2>
             <dl className="mt-5 grid gap-5 sm:grid-cols-2">
               {[
-                "Organisasi pengampu",
+                "Perangkat daerah penerbit",
                 "Periode data",
                 "Cakupan wilayah",
                 "Frekuensi pembaruan",
@@ -56,7 +79,7 @@ export default function DatasetDetailLoading() {
           <section>
             <h2 className="text-xl font-semibold">Berkas unduhan</h2>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Berkas hanya tersedia jika versi publik telah selesai diproses.
+              Berkas unduhan akan tampil setelah data siap dipublikasikan.
             </p>
             <div className="mt-4 space-y-3">
               {Array.from({ length: 2 }, (_, index) => (
@@ -79,8 +102,8 @@ export default function DatasetDetailLoading() {
         <aside className="h-fit rounded-card border bg-white p-5">
           <h2 className="font-semibold">Menggunakan data ini</h2>
           <p className="mt-2 text-sm leading-6 text-muted">
-            Cantumkan judul dataset, organisasi pengampu, versi, dan tanggal
-            akses saat mengutip data.
+            Cantumkan judul dataset, perangkat daerah penerbit, versi, dan
+            tanggal akses saat mengutip data.
           </p>
           <p className="mt-5 border-t pt-4 text-xs leading-5 text-muted">
             Periksa kembali definisi indikator dan cakupan wilayah sebelum

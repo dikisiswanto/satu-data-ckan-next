@@ -267,9 +267,26 @@ for key in ("CKAN___API_TOKEN__JWT__ENCODE__SECRET", "CKAN___API_TOKEN__JWT__DEC
 # Enable CKAN's supported XLoader extension instead of the deprecated DataPusher service.
 # `envvars` stays last. The API token is created post-startup by enable-xloader.sh.
 plugin_raw = values.get("CKAN__PLUGINS", "").strip().strip('"').strip("'")
-portal_plugins = {"envvars", "wajo_pages", "wajo_theme", "scheming_datasets", "pages", "dcat", "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view", "geojson_view", "wmts_view", "esri_shapefile_view", "harvest", "ckan_harvester", "image_view", "text_view", "recline_view", "datastore", "xloader"}
+# Remove obsolete/mistyped view IDs from previous bootstrap runs. CKAN 2.12
+# removed every Recline view; ckanext-geoview calls its shapefile plugin shp_view.
+legacy_view_plugins = {
+    "recline_view", "recline_grid_view", "recline_graph_view", "recline_map_view",
+    "esri_shapefile_view",
+}
+portal_plugins = {
+    "envvars", "wajo_pages", "wajo_theme", "scheming_datasets", "pages", "dcat",
+    "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view",
+    "geojson_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
+    "datatables_view", "image_view", "text_view", "datastore", "xloader",
+    *legacy_view_plugins,
+}
 plugins = [plugin for plugin in (plugin_raw.split() if plugin_raw else []) if plugin not in portal_plugins and plugin != "datapusher"]
-for plugin in ("scheming_datasets", "wajo_pages", "pages", "dcat", "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view", "geojson_view", "wmts_view", "esri_shapefile_view", "harvest", "ckan_harvester", "image_view", "text_view", "recline_view", "datastore", "xloader"):
+for plugin in (
+    "scheming_datasets", "wajo_pages", "pages", "dcat", "dcat_rdf_harvester",
+    "structured_data", "resource_proxy", "datatables_view", "image_view", "text_view",
+    "geojson_view", "geo_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
+    "datastore", "xloader",
+):
     if plugin not in plugins:
         plugins.append(plugin)
 # Schema extension must load before Pages; the visual theme loads last so its
@@ -304,7 +321,7 @@ values["CKAN__HARVEST__MQ__PORT"] = "6379"
 values["CKAN__HARVEST__MQ__REDIS_DB"] = "1"
 values["CKAN__HARVEST__LOG_SCOPE"] = "1"
 values["CKAN__HARVEST__TIMEOUT"] = "1440"
-values["CKAN__VIEWS__DEFAULT_VIEWS"] = "image_view text_view recline_view geojson_view geo_view wmts_view esri_shapefile_view"
+values["CKAN__VIEWS__DEFAULT_VIEWS"] = "datatables_view image_view text_view geojson_view geo_view wmts_view shp_view"
 
 # Append missing keys and replace existing keys without destroying comments/order.
 written = set()

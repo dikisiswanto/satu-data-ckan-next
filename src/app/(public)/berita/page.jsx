@@ -8,6 +8,7 @@ import {
   publicCmsImageUrl,
 } from "@/lib/cms/pages";
 import { getPublicSiteOrigin } from "@/lib/site-config";
+import { publicPageCopy } from "@/lib/public-copy";
 import {
   getCanonicalMetadata,
   getSocialMetadata,
@@ -36,76 +37,73 @@ export default async function BeritaPage() {
 
   return (
     <main className="page-container section-space public-interior-page">
-      <PageHeading
-        eyebrow="Kabar daerah dan data"
-        title="Berita dan artikel"
-        description={`Ikuti berita, pengumuman, dan artikel resmi ${siteConfig.regionName}. Semua konten dikelola melalui CKAN Pages.`}
-      />
-      {result.unavailable ? (
-        <section className="public-empty-panel" role="alert">
-          <Newspaper
-            size={28}
-            className="mx-auto text-muted"
-            aria-hidden="true"
-          />
-          <h2 className="mt-4 text-xl font-semibold">
-            Berita belum dapat dimuat
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            Layanan CMS CKAN sementara tidak dapat diakses.
-          </p>
-        </section>
-      ) : null}
-      {featured ? (
-        <section className="mt-8 grid overflow-hidden rounded-3xl border border-line bg-white shadow-sm lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="flex flex-col justify-center p-6 sm:p-9">
-            <span className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
-              {featured.category || "Artikel pilihan"}
-            </span>
-            <h2 className="mt-3 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-              {featured.title}
-            </h2>
-            <p className="mt-4 line-clamp-4 leading-7 text-muted">
-              {featured.excerpt}
-            </p>
-            <Link
-              href={`/berita/${encodeURIComponent(featured.name)}`}
-              className="mt-6 inline-flex min-h-11 w-fit items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-            >
-              Baca artikel <ArrowUpRight size={16} aria-hidden="true" />
-            </Link>
-          </div>
-          {publicCmsImageUrl(
-            featured.ogImage || featured.image,
-            getPublicSiteOrigin(),
-          ) ? (
-            <div className="relative min-h-56 bg-slate-100">
-              <Image
-                src={publicCmsImageUrl(
-                  featured.ogImage || featured.image,
-                  getPublicSiteOrigin(),
-                )}
-                alt={featured.title}
-                fill
-                unoptimized
-                sizes="(max-width: 1024px) 100vw, 40vw"
-                className="object-cover"
-              />
+      <PageHeading {...publicPageCopy.berita} />
+      <section className="public-news-featured-slot mt-8 grid overflow-hidden rounded-3xl border border-line bg-white shadow-sm lg:grid-cols-[1.1fr_0.9fr]">
+        {featured ? (
+          <>
+            <div className="flex flex-col justify-center p-6 sm:p-9">
+              <span className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
+                {featured.category || "Artikel pilihan"}
+              </span>
+              <h2 className="mt-3 line-clamp-2 min-h-[2.4em] text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+                {featured.title}
+              </h2>
+              <p className="mt-4 line-clamp-4 min-h-[7rem] leading-7 text-muted">
+                {featured.excerpt}
+              </p>
+              <Link
+                href={`/berita/${encodeURIComponent(featured.name)}`}
+                className="mt-6 inline-flex min-h-11 w-fit items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+              >
+                Baca artikel <ArrowUpRight size={16} aria-hidden="true" />
+              </Link>
             </div>
-          ) : (
-            <div
-              className="min-h-56 bg-gradient-to-br from-emerald-100 via-slate-100 to-blue-100"
-              aria-hidden="true"
-            />
-          )}
-        </section>
-      ) : null}
-      {remaining.length ? (
-        <section className="mt-10">
-          <div className="mb-5">
-            <p className="eyebrow">TERBIT TERBARU</p>
-            <h2 className="text-xl font-semibold">Semua berita</h2>
+            {publicCmsImageUrl(
+              featured.ogImage || featured.image,
+              getPublicSiteOrigin(),
+            ) ? (
+              <div className="public-news-feature-media relative min-h-56 bg-slate-100">
+                <Image
+                  src={publicCmsImageUrl(
+                    featured.ogImage || featured.image,
+                    getPublicSiteOrigin(),
+                  )}
+                  alt={featured.title}
+                  fill
+                  unoptimized
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div
+                className="public-news-feature-media min-h-56 bg-gradient-to-br from-emerald-100 via-slate-100 to-blue-100"
+                aria-hidden="true"
+              />
+            )}
+          </>
+        ) : (
+          <div className="col-span-full flex min-h-[18rem] flex-col items-center justify-center p-8 text-center">
+            <Newspaper size={28} className="text-muted" aria-hidden="true" />
+            <h2 className="mt-4 text-xl font-semibold">
+              {result.unavailable
+                ? "Berita belum dapat dimuat"
+                : "Belum ada berita pilihan"}
+            </h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
+              {result.unavailable
+                ? "Daftar berita belum dapat ditampilkan. Silakan coba kembali beberapa saat lagi."
+                : "Berita pilihan akan muncul setelah diterbitkan oleh pengelola portal."}
+            </p>
           </div>
+        )}
+      </section>
+      <section className="public-news-list-slot mt-10">
+        <div className="mb-5">
+          <p className="eyebrow">TERBIT TERBARU</p>
+          <h2 className="text-xl font-semibold">Semua berita</h2>
+        </div>
+        {remaining.length ? (
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {remaining.map((post) => (
               <CmsContentCard
@@ -116,27 +114,19 @@ export default async function BeritaPage() {
               />
             ))}
           </div>
-        </section>
-      ) : null}
-      {!result.unavailable && !posts.length ? (
-        <section className="public-empty-panel mt-8" role="status">
-          <Newspaper
-            size={30}
-            className="mx-auto text-muted"
-            aria-hidden="true"
-          />
-          <h2 className="mt-4 text-xl font-semibold">
-            Belum ada berita diterbitkan
-          </h2>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
-            Pengelola dapat membuat artikel baru melalui CKAN Admin → Pages →
-            Blog. Pastikan visibilitas Public dan tanggal publikasi sudah diisi.
-          </p>
-          <Link href="/informasi" className="public-empty-action mt-5">
-            Kembali ke pusat informasi
-          </Link>
-        </section>
-      ) : null}
+        ) : (
+          <div
+            className="cms-directory-empty"
+            role={result.unavailable ? "alert" : "status"}
+          >
+            {result.unavailable
+              ? "Daftar berita lainnya belum dapat dimuat."
+              : posts.length
+                ? "Belum ada berita lainnya."
+                : "Berita lainnya akan ditampilkan setelah diterbitkan."}
+          </div>
+        )}
+      </section>
     </main>
   );
 }

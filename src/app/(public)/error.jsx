@@ -24,7 +24,7 @@ export default function PublicError({ error, reset }) {
       >
         <AlertTriangle size={22} />
       </span>
-      <p className="eyebrow mt-5">Layanan data sementara terganggu</p>
+      <p className="eyebrow mt-5">Terjadi kendala sementara</p>
       <h1
         id="public-error-title"
         className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl"
@@ -32,8 +32,8 @@ export default function PublicError({ error, reset }) {
         Halaman belum dapat ditampilkan
       </h1>
       <p role="alert" className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-        Permintaan belum berhasil diselesaikan. Ini tidak berarti dataset telah
-        dihapus atau tidak tersedia. Coba kembali, atau lanjutkan ke katalog
+        Sebagian informasi belum dapat ditampilkan saat ini. Dataset yang telah
+        dipublikasikan tetap tersimpan. Silakan coba kembali atau buka katalog
         untuk mencari data lain.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
@@ -49,7 +49,7 @@ export default function PublicError({ error, reset }) {
           href="/dataset"
           className="inline-flex min-h-11 items-center gap-2 rounded-control border border-line bg-surface px-4 py-3 text-sm font-semibold text-ink hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
         >
-          <Search size={16} aria-hidden="true" /> Buka katalog dataset
+          <Search size={16} aria-hidden="true" /> Buka katalog data
         </Link>
       </div>
     </main>

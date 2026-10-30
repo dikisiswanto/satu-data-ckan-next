@@ -345,7 +345,7 @@ const checks = [
   ],
   [
     "src/app/(public)/api-data/page.jsx",
-    /API itu cara aplikasi mengambil data secara otomatis[\s\S]*Coba pencarian contoh[\s\S]*Coba di browser[\s\S]*DataStore/,
+    /API membantu aplikasi mengambil data secara otomatis[\s\S]*Coba pencarian contoh[\s\S]*Coba di browser[\s\S]*DataStore/,
     "Halaman API publik harus menyediakan pengantar manusiawi, contoh langsung, dan penjelasan istilah.",
   ],
   [

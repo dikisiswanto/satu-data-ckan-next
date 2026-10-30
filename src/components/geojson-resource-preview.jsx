@@ -18,7 +18,7 @@ async function readBoundedBody(response, limit, signal) {
     const text = await response.text();
     if (new TextEncoder().encode(text).byteLength > limit) {
       throw new Error(
-        "Berkas melebihi batas pratinjau 5 MiB. Unduh resource untuk mengolah data lengkap.",
+        "Ukuran berkas melebihi batas pratinjau 5 MB. Unduh berkas untuk mengolah seluruh data.",
       );
     }
     return text;
@@ -35,7 +35,7 @@ async function readBoundedBody(response, limit, signal) {
       if (total > limit) {
         await reader.cancel("Batas pratinjau terlampaui.").catch(() => {});
         throw new Error(
-          "Berkas melebihi batas pratinjau 5 MiB. Unduh resource untuk mengolah data lengkap.",
+          "Ukuran berkas melebihi batas pratinjau 5 MB. Unduh berkas untuk mengolah seluruh data.",
         );
       }
       chunks.push(value);
@@ -61,7 +61,7 @@ export function GeoJSONResourcePreview({ resource, url }) {
   const payload = currentPreview?.payload || null;
   const status = !url ? "error" : currentPreview?.status || "loading";
   const message = !url
-    ? "URL resource publik tidak tersedia."
+    ? "Tautan berkas publik tidak tersedia."
     : currentPreview?.message || "";
 
   useEffect(() => {
@@ -79,13 +79,13 @@ export function GeoJSONResourcePreview({ resource, url }) {
           headers: { Accept: "application/geo+json, application/json;q=0.9" },
         });
         if (!response.ok)
-          throw new Error(`Resource merespons HTTP ${response.status}.`);
+          throw new Error("Berkas peta tidak dapat diakses saat ini.");
         const contentLength = Number(
           response.headers.get("content-length") || 0,
         );
         if (contentLength > GEOJSON_PREVIEW_LIMITS.maxBytes) {
           throw new Error(
-            "Berkas melebihi batas pratinjau 5 MB. Unduh resource untuk mengolah data lengkap.",
+            "Ukuran berkas melebihi batas pratinjau 5 MB. Unduh berkas untuk mengolah seluruh data.",
           );
         }
         const text = await readBoundedBody(
@@ -97,7 +97,9 @@ export function GeoJSONResourcePreview({ resource, url }) {
         try {
           parsed = JSON.parse(text);
         } catch {
-          throw new Error("Resource tidak berisi JSON yang valid.");
+          throw new Error(
+            "Format berkas tidak dikenali atau isi berkas tidak dapat dibaca.",
+          );
         }
         const normalized = normalizeGeoJson(parsed);
         if (!cancelled) {
@@ -116,8 +118,8 @@ export function GeoJSONResourcePreview({ resource, url }) {
             status: "error",
             message:
               error?.name === "AbortError"
-                ? "Permintaan pratinjau melewati batas waktu."
-                : error?.message || "Resource tidak dapat dipratinjau.",
+                ? "Pratinjau membutuhkan waktu terlalu lama. Coba lagi atau unduh berkasnya."
+                : error?.message || "Berkas tidak dapat ditampilkan.",
           });
         }
       } finally {
@@ -157,19 +159,17 @@ export function GeoJSONResourcePreview({ resource, url }) {
               id={`geojson-heading-${resource?.id || "resource"}`}
               className="font-semibold"
             >
-              Pratinjau geospasial
+              Pratinjau peta
             </h3>
             <p className="mt-1 break-words text-sm text-muted">
-              {resource?.name ||
-                resource?.description ||
-                "Resource GeoJSON CKAN"}
+              {resource?.name || resource?.description || "Data peta GeoJSON"}
             </p>
           </div>
         </div>
         {payload ? (
           <div className="flex flex-wrap gap-2 text-xs text-muted">
             <span className="rounded-full bg-slate-100 px-2.5 py-1">
-              {payload.featureCount.toLocaleString("id-ID")} fitur
+              {payload.featureCount.toLocaleString("id-ID")} objek peta
             </span>
             <span className="rounded-full bg-slate-100 px-2.5 py-1">
               {payload.coordinateCount.toLocaleString("id-ID")} koordinat
@@ -183,7 +183,7 @@ export function GeoJSONResourcePreview({ resource, url }) {
           role="status"
         >
           <LoaderCircle size={18} className="animate-spin" aria-hidden="true" />
-          Memuat geometri dari resource CKAN…
+          Memuat data peta…
         </div>
       ) : status === "error" ? (
         <div
@@ -201,7 +201,7 @@ export function GeoJSONResourcePreview({ resource, url }) {
             </p>
             <p className="mt-1">{message}</p>
             <p className="mt-1">
-              Resource tetap bisa diunduh melalui daftar berkas dataset.
+              Berkas tetap dapat diunduh melalui daftar berkas dataset.
             </p>
           </div>
         </div>
@@ -282,7 +282,7 @@ export function GeoJSONResourcePreview({ resource, url }) {
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-3 text-xs text-muted sm:px-5">
             <span className="inline-flex items-center gap-1.5">
               <Globe2 size={14} aria-hidden="true" />
-              WGS84 / longitude-latitude
+              WGS 84 · koordinat bujur dan lintang
             </span>
             <span>
               Rentang: {payload.bounds.minLon.toFixed(4)},{" "}
@@ -294,16 +294,16 @@ export function GeoJSONResourcePreview({ resource, url }) {
           {payload.truncated ? (
             <p className="px-4 pb-4 text-xs leading-5 text-muted sm:px-5">
               Peta menampilkan{" "}
-              {payload.renderedFeatureCount.toLocaleString("id-ID")} fitur
-              pertama untuk menjaga kinerja. Unduh resource untuk memperoleh
-              seluruh data.
+              {payload.renderedFeatureCount.toLocaleString("id-ID")} objek
+              pertama agar tetap ringan. Unduh berkas untuk memperoleh seluruh
+              data.
             </p>
           ) : null}
           {payload.ignoredFeatureCount > 0 ? (
             <p className="px-4 pb-4 text-xs leading-5 text-muted sm:px-5">
-              {payload.ignoredFeatureCount.toLocaleString("id-ID")} fitur tidak
-              dipratinjau karena geometri tidak valid atau tidak memiliki
-              geometri yang didukung.
+              {payload.ignoredFeatureCount.toLocaleString("id-ID")} objek peta
+              tidak ditampilkan karena bentuk geografinya tidak valid atau belum
+              didukung.
             </p>
           ) : null}
         </>

@@ -121,6 +121,7 @@ const orderedImports = [
   "overrides.css",
   "quality-pass.css",
   "public-responsive.css",
+  "public-layout-stability.css",
 ];
 const actualImports = [
   ...globalCss.matchAll(/@import\s+["']\.\/styles\/([^"']+\.css)["']/g),

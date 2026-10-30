@@ -46,8 +46,7 @@ export function CmsContentCard({ page, href, kind = "Halaman informasi" }) {
             {page.title}
           </h2>
           <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">
-            {page.excerpt ||
-              "Ringkasan belum dilengkapi oleh pengelola konten."}
+            {page.excerpt || "Ringkasan belum tersedia."}
           </p>
           <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
             Baca selengkapnya <ArrowUpRight size={15} aria-hidden="true" />

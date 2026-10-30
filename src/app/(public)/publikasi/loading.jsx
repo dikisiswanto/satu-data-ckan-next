@@ -1,4 +1,5 @@
 import { PageHeading } from "@/components/page-heading";
+import { publicPageCopy } from "@/lib/public-copy";
 
 function Skeleton({ className = "" }) {
   return <div aria-hidden="true" className={`loading-skeleton ${className}`} />;
@@ -6,15 +7,27 @@ function Skeleton({ className = "" }) {
 
 export default function PublicationCatalogLoading() {
   return (
-    <main className="page-container section-space public-interior-page" aria-busy="true">
-      <PageHeading eyebrow="Pengetahuan dan analisis" title="Publikasi dan laporan" description="Temukan laporan statistik, buku daerah, analisis sektoral, metodologi, dan dokumen resmi." />
-      <div className="mb-6 flex items-center justify-between gap-3" aria-hidden="true">
+    <main
+      className="page-container section-space public-interior-page"
+      aria-busy="true"
+    >
+      <PageHeading {...publicPageCopy.publikasi} />
+      <div
+        className="mb-6 flex items-center justify-between gap-3"
+        aria-hidden="true"
+      >
         <Skeleton className="h-4 w-44 max-w-full" />
         <Skeleton className="h-9 w-36 max-w-full rounded-control" />
       </div>
-      <div className="grid gap-4 lg:grid-cols-2" aria-hidden="true">
-        {Array.from({ length: 6 }, (_, index) => (
-          <article key={index} className="flex min-w-0 gap-4 rounded-2xl border border-line bg-white p-5 sm:p-6">
+      <div
+        className="public-loading-grid-lg grid gap-4 lg:grid-cols-2"
+        aria-hidden="true"
+      >
+        {Array.from({ length: 2 }, (_, index) => (
+          <article
+            key={index}
+            className="flex min-w-0 gap-4 rounded-2xl border border-line bg-white p-5 sm:p-6"
+          >
             <Skeleton className="size-12 shrink-0 rounded-xl" />
             <div className="min-w-0 flex-1">
               <Skeleton className="h-3 w-40 max-w-full" />
@@ -26,7 +39,9 @@ export default function PublicationCatalogLoading() {
           </article>
         ))}
       </div>
-      <p className="sr-only" role="status">Memuat katalog publikasi dan laporan.</p>
+      <p className="sr-only" role="status">
+        Memuat katalog publikasi dan laporan.
+      </p>
     </main>
   );
 }

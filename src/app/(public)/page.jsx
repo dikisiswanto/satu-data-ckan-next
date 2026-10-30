@@ -143,14 +143,14 @@ function DatasetPreviewCard({ dataset, index }) {
           </Link>
         </h3>
         <p className="home-dataset-description">
-          {dataset.notes || "Metadata ringkas belum tersedia."}
+          {dataset.notes || "Deskripsi dataset belum tersedia."}
         </p>
         <div className="home-dataset-meta">
           <span>
             <Building2 size={13} aria-hidden="true" />
             {dataset.organization?.title ||
               dataset.organization?.name ||
-              "Organisasi belum dicantumkan"}
+              "Perangkat daerah belum dicantumkan"}
           </span>
           <span>
             <CalendarDays size={13} aria-hidden="true" />
@@ -195,7 +195,6 @@ function getTopicLinks(availableCategories) {
 function HomeHeroContent({
   stats = null,
   availableCategories = [],
-  statsUnavailable = false,
   facetsUnavailable = false,
   loading = false,
 }) {
@@ -210,8 +209,7 @@ function HomeHeroContent({
       <div className="page-container home-hero-inner">
         <div className="home-hero-copy">
           <p className="home-hero-kicker">
-            <span />{" "}
-            {`PORTAL DATA TERPADU ${siteConfig.regionName.toUpperCase()}`}
+            <span /> {`DATA TERBUKA ${siteConfig.regionName.toUpperCase()}`}
           </p>
           <h1>
             Temukan Data,
@@ -229,7 +227,7 @@ function HomeHeroContent({
             className="home-search-suggestions"
             aria-label="Contoh pencarian berdasarkan topik"
           >
-            <span>Coba cari</span>
+            <span>Topik populer</span>
             {topicLinks.slice(0, 4).map((topic) => (
               <Link key={topic.label} href={topic.href}>
                 {topic.label.toLowerCase()}
@@ -251,7 +249,7 @@ function HomeHeroContent({
             <span className="home-live-dot" />
             <span>
               <strong>{siteConfig.shortName}</strong>
-              <small>Satu tempat untuk menemukan data daerah</small>
+              <small>Satu portal untuk menemukan data daerah</small>
             </span>
           </div>
           <Link
@@ -260,7 +258,7 @@ function HomeHeroContent({
           >
             <Building2 size={17} aria-hidden="true" />
             <span>
-              <strong>
+              <strong className="home-metric-value">
                 {loading ? (
                   <span
                     className="loading-skeleton home-metric-skeleton"
@@ -270,30 +268,28 @@ function HomeHeroContent({
                   displayStat(stats?.organizations)
                 )}
               </strong>
-              <small>Organisasi aktif</small>
+              <small>Perangkat daerah</small>
             </span>
           </Link>
-          {stats?.indicators !== null && stats?.indicators !== undefined ? (
-            <Link
-              href="/statistik"
-              className="home-visual-chip home-visual-chip-bottom"
-            >
-              <FileChartColumn size={17} aria-hidden="true" />
-              <span>
-                <strong>
-                  {loading ? (
-                    <span
-                      className="loading-skeleton home-metric-skeleton"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    displayStat(stats?.indicators)
-                  )}
-                </strong>
-                <small>Indikator publik</small>
-              </span>
-            </Link>
-          ) : null}
+          <Link
+            href="/statistik"
+            className="home-visual-chip home-visual-chip-bottom"
+          >
+            <FileChartColumn size={17} aria-hidden="true" />
+            <span>
+              <strong className="home-metric-value">
+                {loading ? (
+                  <span
+                    className="loading-skeleton home-metric-skeleton"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  displayStat(stats?.indicators)
+                )}
+              </strong>
+              <small>Indikator tersedia</small>
+            </span>
+          </Link>
         </div>
       </div>
       <div className="page-container home-stats-wrap">
@@ -303,7 +299,7 @@ function HomeHeroContent({
               <Database size={22} aria-hidden="true" />
             </span>
             <span className="home-stat-copy">
-              <strong>
+              <strong className="home-metric-value">
                 {loading ? (
                   <span
                     className="loading-skeleton home-metric-skeleton"
@@ -313,7 +309,7 @@ function HomeHeroContent({
                   displayStat(stats?.datasets)
                 )}
               </strong>
-              <small>Dataset terbuka</small>
+              <small>Dataset tersedia</small>
             </span>
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
@@ -322,7 +318,7 @@ function HomeHeroContent({
               <FileText size={22} aria-hidden="true" />
             </span>
             <span className="home-stat-copy">
-              <strong>
+              <strong className="home-metric-value">
                 {loading ? (
                   <span
                     className="loading-skeleton home-metric-skeleton"
@@ -338,33 +334,31 @@ function HomeHeroContent({
             </span>
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
-          {stats?.indicators !== null && stats?.indicators !== undefined ? (
-            <Link href="/statistik" className="home-stat home-stat-green">
-              <span className="home-stat-icon">
-                <FileChartColumn size={22} aria-hidden="true" />
-              </span>
-              <span className="home-stat-copy">
-                <strong>
-                  {loading ? (
-                    <span
-                      className="loading-skeleton home-metric-skeleton"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    displayStat(stats?.indicators)
-                  )}
-                </strong>
-                <small>Indikator statistik</small>
-              </span>
-              <ArrowRight size={17} aria-hidden="true" />
-            </Link>
-          ) : null}
+          <Link href="/statistik" className="home-stat home-stat-green">
+            <span className="home-stat-icon">
+              <FileChartColumn size={22} aria-hidden="true" />
+            </span>
+            <span className="home-stat-copy">
+              <strong className="home-metric-value">
+                {loading ? (
+                  <span
+                    className="loading-skeleton home-metric-skeleton"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  displayStat(stats?.indicators)
+                )}
+              </strong>
+              <small>Indikator statistik</small>
+            </span>
+            <ArrowRight size={17} aria-hidden="true" />
+          </Link>
           <Link href="/organisasi" className="home-stat home-stat-green">
             <span className="home-stat-icon">
               <Building2 size={22} aria-hidden="true" />
             </span>
             <span className="home-stat-copy">
-              <strong>
+              <strong className="home-metric-value">
                 {loading ? (
                   <span
                     className="loading-skeleton home-metric-skeleton"
@@ -380,11 +374,8 @@ function HomeHeroContent({
           </Link>
         </section>
         <p className="home-stats-note">
-          {loading
-            ? "Ringkasan dihitung dari data yang tersedia untuk publik. Jumlah indikator mengikuti data statistik yang diterbitkan."
-            : statsUnavailable || facetsUnavailable
-              ? "Sebagian ringkasan belum dapat dimuat dari layanan data. Angka yang belum tersedia ditandai dengan tanda pisah."
-              : "Ringkasan dihitung dari data yang tersedia untuk publik. Jumlah indikator mengikuti data statistik yang diterbitkan."}
+          Angka pada ringkasan ini berasal dari data yang telah dipublikasikan.
+          Tanda pisah menunjukkan informasi yang sementara belum tersedia.
         </p>
       </div>
     </section>
@@ -406,7 +397,6 @@ async function HomeHero() {
     <HomeHeroContent
       stats={statsResult.data}
       availableCategories={availableCategories}
-      statsUnavailable={statsResult.unavailable}
       facetsUnavailable={facetsResult.unavailable}
     />
   );
@@ -423,9 +413,9 @@ async function HomeLatestDatasetsSection() {
     <section className="home-section home-latest-section">
       <div className="home-section-heading">
         <div>
-          <p className="eyebrow">PEMBARUAN KATALOG</p>
+          <p className="eyebrow">DATA TERBARU</p>
           <h2>Dataset terbaru</h2>
-          <p>Data yang telah diterbitkan dan dapat Anda telusuri.</p>
+          <p>Dataset yang baru ditambahkan atau diperbarui.</p>
         </div>
         <Link href="/dataset" className="home-section-link">
           Lihat semua dataset <ArrowRight size={16} aria-hidden="true" />
@@ -437,12 +427,12 @@ async function HomeLatestDatasetsSection() {
             <Database size={25} aria-hidden="true" />
           </span>
           <div className="min-w-0">
-            <p className="eyebrow">Layanan katalog sedang bermasalah</p>
+            <p className="eyebrow">Katalog belum tersedia</p>
             <h3>Dataset terbaru belum dapat ditampilkan</h3>
             <p>
-              Kami belum dapat mengambil daftar dataset karena layanan katalog
-              sedang mengalami kendala. Coba lagi beberapa saat lagi. Gangguan
-              ini tidak berarti dataset telah dihapus.
+              Daftar dataset belum dapat dimuat saat ini. Silakan coba kembali
+              beberapa saat lagi. Gangguan sementara ini tidak berarti data
+              telah dihapus.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link href="/" className="home-section-link">
@@ -470,12 +460,12 @@ async function HomeLatestDatasetsSection() {
             <Database size={25} aria-hidden="true" />
           </span>
           <div className="min-w-0">
-            <p className="eyebrow">Katalog sedang menunggu publikasi pertama</p>
+            <p className="eyebrow">Belum ada data yang dipublikasikan</p>
             <h3>Belum ada dataset yang diterbitkan</h3>
             <p>
-              Dataset akan muncul setelah informasi dan berkasnya diperiksa lalu
-              diterbitkan. Sementara itu, Anda dapat melihat daftar perangkat
-              daerah atau membaca panduan portal.
+              Dataset akan tampil setelah diperiksa dan dipublikasikan oleh
+              perangkat daerah. Sementara itu, Anda dapat melihat profil
+              perangkat daerah atau membaca panduan penggunaan portal.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Link
@@ -500,125 +490,134 @@ async function HomeLatestDatasetsSection() {
 }
 
 function HomeIndicatorHighlights({ indicators = [] }) {
-  if (!indicators.length) return null;
   return (
-    <section className="home-section" aria-labelledby="home-indicator-heading">
+    <section
+      className="home-section home-dynamic-section"
+      aria-labelledby="home-indicator-heading"
+    >
       <div className="home-section-heading">
         <div>
-          <p className="eyebrow">ANGKA DARI DATA TERBITAN</p>
+          <p className="eyebrow">RINGKASAN STATISTIK</p>
           <h2 id="home-indicator-heading">Sorotan statistik</h2>
-          <p>
-            Nilai terbaru yang tersedia pada resource DataStore indikator resmi.
-          </p>
+          <p>Nilai terbaru dari indikator yang telah dipublikasikan.</p>
         </div>
         <Link href="/statistik" className="home-section-link">
-          Semua indikator <ArrowRight size={16} aria-hidden="true" />
+          Lihat semua indikator <ArrowRight size={16} aria-hidden="true" />
         </Link>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {indicators.map((indicator) => {
-          const latest = indicator.latest;
-          const value =
-            latest?.numericValue !== null && latest?.numericValue !== undefined
-              ? new Intl.NumberFormat("id-ID", {
-                  maximumFractionDigits: 4,
-                }).format(latest.numericValue)
-              : latest?.value !== null &&
-                  latest?.value !== undefined &&
-                  latest?.value !== ""
-                ? String(latest.value)
-                : "Belum tersedia";
-          return (
-            <article
-              key={indicator.name}
-              className="group relative overflow-hidden rounded-2xl border border-line bg-white p-5 shadow-[0_5px_24px_rgb(23_51_75_/_0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgb(23_51_75_/_0.09)] motion-reduce:transform-none motion-reduce:transition-none"
-            >
-              <span
-                className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-700 via-sky-500 to-cyan-300"
-                aria-hidden="true"
-              />
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
-                {indicator.metadata?.periodicity || "Indikator statistik"}
-              </p>
-              <h3 className="mt-3 line-clamp-2 min-h-12 text-base font-semibold leading-6 text-ink">
-                <Link
-                  href={`/statistik/${encodeURIComponent(indicator.name)}`}
-                  className="hover:text-primary hover:underline"
-                >
-                  {indicator.title}
-                </Link>
-              </h3>
-              <div className="mt-5 flex items-end justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="text-3xl font-semibold tracking-tight text-ink tabular-nums">
-                    {value}
-                  </p>
-                  <p className="mt-1 text-xs text-muted">
-                    {latest?.unit ||
-                      indicator.metadata?.unit ||
-                      "Satuan belum dicantumkan"}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right text-xs text-muted">
-                  <p>{latest?.period || "Periode belum dicantumkan"}</p>
-                  <p className="mt-1 max-w-32 truncate">
-                    {latest?.region || "Wilayah belum dicantumkan"}
-                  </p>
-                </div>
-              </div>
-              {indicator.metadata?.source ? (
-                <p className="mt-4 border-t border-line pt-3 text-xs text-muted">
-                  Sumber: {indicator.metadata.source}
+      {indicators.length ? (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {indicators.map((indicator) => {
+            const latest = indicator.latest;
+            const value =
+              latest?.numericValue !== null &&
+              latest?.numericValue !== undefined
+                ? new Intl.NumberFormat("id-ID", {
+                    maximumFractionDigits: 4,
+                  }).format(latest.numericValue)
+                : latest?.value !== null &&
+                    latest?.value !== undefined &&
+                    latest?.value !== ""
+                  ? String(latest.value)
+                  : "Belum tersedia";
+            return (
+              <article
+                key={indicator.name}
+                className="home-indicator-card group relative overflow-hidden rounded-2xl border border-line bg-white p-5 shadow-[0_5px_24px_rgb(23_51_75_/_0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgb(23_51_75_/_0.09)] motion-reduce:transform-none motion-reduce:transition-none"
+              >
+                <span
+                  className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-700 via-sky-500 to-cyan-300"
+                  aria-hidden="true"
+                />
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+                  {indicator.metadata?.periodicity || "Indikator statistik"}
                 </p>
-              ) : null}
-            </article>
-          );
-        })}
-      </div>
+                <h3 className="mt-3 line-clamp-2 min-h-12 text-base font-semibold leading-6 text-ink">
+                  <Link
+                    href={`/statistik/${encodeURIComponent(indicator.name)}`}
+                    className="hover:text-primary hover:underline"
+                  >
+                    {indicator.title}
+                  </Link>
+                </h3>
+                <div className="mt-5 flex items-end justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-3xl font-semibold tracking-tight text-ink tabular-nums">
+                      {value}
+                    </p>
+                    <p className="mt-1 text-xs text-muted">
+                      {latest?.unit ||
+                        indicator.metadata?.unit ||
+                        "Satuan belum dicantumkan"}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right text-xs text-muted">
+                    <p>{latest?.period || "Periode belum dicantumkan"}</p>
+                    <p className="mt-1 max-w-32 truncate">
+                      {latest?.region || "Wilayah belum dicantumkan"}
+                    </p>
+                  </div>
+                </div>
+                {indicator.metadata?.source ? (
+                  <p className="mt-4 border-t border-line pt-3 text-xs text-muted">
+                    Sumber: {indicator.metadata.source}
+                  </p>
+                ) : null}
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="home-dynamic-empty" role="status">
+          Indikator statistik akan ditampilkan setelah data resmi tersedia untuk
+          publik.
+        </div>
+      )}
     </section>
   );
 }
 
 function HomeEditorialHighlights({ infographics = [], publications = [] }) {
-  if (!infographics.length && !publications.length) return null;
   return (
-    <section className="home-section" aria-labelledby="home-editorial-heading">
+    <section
+      className="home-section home-dynamic-section"
+      aria-labelledby="home-editorial-heading"
+    >
       <div className="home-section-heading">
         <div>
           <p className="eyebrow">VISUAL DAN RUJUKAN RESMI</p>
           <h2 id="home-editorial-heading">Lebih dari sekadar dataset</h2>
           <p>
-            Infografik dan publikasi yang telah diterbitkan pengelola di katalog
-            CKAN.
+            Infografik dan publikasi resmi yang melengkapi data dalam katalog.
           </p>
         </div>
         <Link href="/publikasi" className="home-section-link">
           Semua publikasi <ArrowRight size={16} aria-hidden="true" />
         </Link>
       </div>
-      <div className="grid gap-6 xl:grid-cols-2">
-        {infographics.length ? (
-          <section
-            className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5"
-            aria-labelledby="home-infographic-heading"
-          >
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h3
-                id="home-infographic-heading"
-                className="flex items-center gap-2 text-base font-semibold"
-              >
-                <Images size={18} className="text-primary" aria-hidden="true" />{" "}
-                Infografik terbaru
-              </h3>
-              <Link
-                href="/infografik"
-                className="text-xs font-semibold text-primary hover:underline"
-              >
-                Lihat semua
-              </Link>
-            </div>
+      <div className="grid gap-6 xl:grid-cols-2 home-editorial-grid">
+        <section
+          className="home-editorial-panel min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5"
+          aria-labelledby="home-infographic-heading"
+        >
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h3
+              id="home-infographic-heading"
+              className="flex items-center gap-2 text-base font-semibold"
+            >
+              <Images size={18} className="text-primary" aria-hidden="true" />{" "}
+              Infografik terbaru
+            </h3>
+            <Link
+              href="/infografik"
+              className="text-xs font-semibold text-primary hover:underline"
+            >
+              Lihat semua
+            </Link>
+          </div>
+          {infographics.length ? (
             <div className="grid gap-4 sm:grid-cols-2">
-              {infographics.map((item) => {
+              {infographics.slice(0, 2).map((item) => {
                 const imageUrl = safeHttpUrl(item.cover?.url);
                 return (
                   <article key={item.name} className="group min-w-0">
@@ -668,37 +667,37 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
                 );
               })}
             </div>
-          </section>
-        ) : null}
-        {publications.length ? (
-          <section
-            className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5"
-            aria-labelledby="home-publication-heading"
-          >
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h3
-                id="home-publication-heading"
-                className="flex items-center gap-2 text-base font-semibold"
-              >
-                <BookOpen
-                  size={18}
-                  className="text-primary"
-                  aria-hidden="true"
-                />{" "}
-                Publikasi terbaru
-              </h3>
-              <Link
-                href="/publikasi"
-                className="text-xs font-semibold text-primary hover:underline"
-              >
-                Lihat semua
-              </Link>
+          ) : (
+            <div className="home-editorial-empty" role="status">
+              Infografik terbaru akan tampil di sini setelah diterbitkan.
             </div>
+          )}
+        </section>
+        <section
+          className="home-editorial-panel min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5"
+          aria-labelledby="home-publication-heading"
+        >
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h3
+              id="home-publication-heading"
+              className="flex items-center gap-2 text-base font-semibold"
+            >
+              <BookOpen size={18} className="text-primary" aria-hidden="true" />{" "}
+              Publikasi terbaru
+            </h3>
+            <Link
+              href="/publikasi"
+              className="text-xs font-semibold text-primary hover:underline"
+            >
+              Lihat semua
+            </Link>
+          </div>
+          {publications.length ? (
             <div className="divide-y divide-line">
-              {publications.map((item) => (
+              {publications.slice(0, 3).map((item) => (
                 <article
                   key={item.name}
-                  className="flex gap-3 py-4 first:pt-0 last:pb-0"
+                  className="home-publication-row flex gap-3 py-4 first:pt-0 last:pb-0"
                 >
                   <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary">
                     <FileText size={20} aria-hidden="true" />
@@ -717,8 +716,7 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
                       </Link>
                     </h4>
                     <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">
-                      {item.notes ||
-                        "Deskripsi belum dicantumkan oleh pengelola dataset."}
+                      {item.notes || "Deskripsi belum tersedia."}
                     </p>
                     <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
                       {item.publicationDate ? (
@@ -740,10 +738,105 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
                 </article>
               ))}
             </div>
-          </section>
-        ) : null}
+          ) : (
+            <div className="home-editorial-empty" role="status">
+              Publikasi terbaru akan tampil di sini setelah diterbitkan.
+            </div>
+          )}
+        </section>
       </div>
     </section>
+  );
+}
+
+function HomeCKANHighlightsSkeleton() {
+  return (
+    <div
+      className="space-y-12"
+      aria-busy="true"
+      aria-label="Memuat sorotan data publik"
+    >
+      <section className="home-section home-dynamic-section">
+        <div className="home-section-heading">
+          <div>
+            <p className="eyebrow">RINGKASAN STATISTIK</p>
+            <h2>Sorotan statistik</h2>
+            <p>Nilai terbaru dari indikator yang telah dipublikasikan.</p>
+          </div>
+          <span className="home-section-link" aria-hidden="true">
+            Lihat semua indikator <ArrowRight size={16} />
+          </span>
+        </div>
+        <div className="public-loading-grid-sm grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <article
+              key={index}
+              className="home-indicator-card rounded-2xl border border-line bg-white p-5"
+              aria-hidden="true"
+            >
+              <span className="loading-skeleton h-3 w-28" />
+              <span className="loading-skeleton mt-4 h-6 w-4/5" />
+              <span className="loading-skeleton mt-5 h-9 w-2/3" />
+              <span className="loading-skeleton mt-3 h-3 w-1/3" />
+              <span className="loading-skeleton mt-5 h-3 w-full" />
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="home-section home-dynamic-section">
+        <div className="home-section-heading">
+          <div>
+            <p className="eyebrow">VISUAL DAN RUJUKAN RESMI</p>
+            <h2>Lebih dari sekadar dataset</h2>
+            <p>
+              Infografik dan publikasi resmi yang melengkapi data dalam katalog.
+            </p>
+          </div>
+          <span className="home-section-link" aria-hidden="true">
+            Semua publikasi <ArrowRight size={16} />
+          </span>
+        </div>
+        <div className="grid gap-6 xl:grid-cols-2 home-editorial-grid">
+          <section
+            className="home-editorial-panel rounded-2xl border border-line bg-white p-4 sm:p-5"
+            aria-hidden="true"
+          >
+            <span className="loading-skeleton h-5 w-40" />
+            <div className="public-loading-grid-sm mt-4 grid gap-4 sm:grid-cols-2">
+              {Array.from({ length: 2 }, (_, index) => (
+                <div key={index}>
+                  <span className="loading-skeleton block aspect-[4/3] w-full rounded-xl" />
+                  <span className="loading-skeleton mt-3 block h-3 w-2/3" />
+                  <span className="loading-skeleton mt-2 block h-4 w-4/5" />
+                </div>
+              ))}
+            </div>
+          </section>
+          <section
+            className="home-editorial-panel rounded-2xl border border-line bg-white p-4 sm:p-5"
+            aria-hidden="true"
+          >
+            <span className="loading-skeleton h-5 w-40" />
+            <div className="mt-4 divide-y divide-line">
+              {Array.from({ length: 1 }, (_, index) => (
+                <div
+                  key={index}
+                  className="home-publication-row flex gap-3 py-4 first:pt-0"
+                >
+                  <span className="loading-skeleton size-11 shrink-0 rounded-xl" />
+                  <div className="min-w-0 flex-1">
+                    <span className="loading-skeleton block h-3 w-2/3" />
+                    <span className="loading-skeleton mt-2 block h-4 w-4/5" />
+                    <span className="loading-skeleton mt-2 block h-3 w-full" />
+                    <span className="loading-skeleton mt-2 block h-3 w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -758,8 +851,6 @@ async function HomeCKANHighlightsSection() {
   const indicators = indicatorsResult.data || [];
   const infographics = infographicsResult.data || [];
   const publications = publicationsResult.data || [];
-  if (!indicators.length && !infographics.length && !publications.length)
-    return null;
   return (
     <div className="space-y-12">
       <HomeIndicatorHighlights indicators={indicators} />
@@ -775,16 +866,18 @@ async function HomeCmsNewsHighlights() {
   await connection();
   const result = await getPublicCmsBlogPostsResult();
   const posts = (result.data || []).slice(0, 3);
-  if (!posts.length && !result.unavailable) return null;
   return (
-    <section className="home-section" aria-labelledby="home-cms-news-heading">
+    <section
+      className="home-section home-dynamic-section home-news-section"
+      aria-labelledby="home-cms-news-heading"
+    >
       <div className="home-section-heading">
         <div>
           <p className="eyebrow">INFORMASI RESMI</p>
           <h2 id="home-cms-news-heading">Berita dan informasi daerah</h2>
           <p>
-            Artikel dan pengumuman yang diterbitkan melalui pengelolaan konten
-            CKAN.
+            Berita, pengumuman, dan artikel resmi seputar data serta pembangunan
+            daerah.
           </p>
         </div>
         <Link href="/informasi" className="home-section-link">
@@ -796,7 +889,7 @@ async function HomeCmsNewsHighlights() {
           {posts.map((post) => (
             <article
               key={post.name}
-              className="rounded-2xl border border-line bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              className="home-news-card rounded-2xl border border-line bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
                 {post.category || "Berita"}
@@ -823,12 +916,53 @@ async function HomeCmsNewsHighlights() {
         </div>
       ) : (
         <div
-          className="rounded-2xl border border-dashed border-line bg-white p-5 text-sm text-muted"
-          role="status"
+          className="home-dynamic-empty"
+          role={result.unavailable ? "alert" : "status"}
         >
-          Berita dari CMS CKAN sementara tidak dapat dimuat.
+          {result.unavailable
+            ? "Berita belum dapat ditampilkan saat ini. Silakan coba kembali beberapa saat lagi."
+            : "Berita dan artikel akan ditampilkan setelah diterbitkan oleh pengelola portal."}
         </div>
       )}
+    </section>
+  );
+}
+
+function HomeCmsNewsHighlightsSkeleton() {
+  return (
+    <section
+      className="home-section home-dynamic-section home-news-section"
+      aria-busy="true"
+      aria-label="Memuat berita dan informasi daerah"
+    >
+      <div className="home-section-heading">
+        <div>
+          <p className="eyebrow">INFORMASI RESMI</p>
+          <h2>Berita dan informasi daerah</h2>
+          <p>
+            Berita, pengumuman, dan artikel resmi seputar data serta pembangunan
+            daerah.
+          </p>
+        </div>
+        <span className="home-section-link" aria-hidden="true">
+          Pusat informasi <ArrowRight size={16} />
+        </span>
+      </div>
+      <div className="public-loading-grid-three grid gap-4 md:grid-cols-3">
+        {Array.from({ length: 3 }, (_, index) => (
+          <article
+            key={index}
+            className="home-news-card rounded-2xl border border-line bg-white p-5"
+            aria-hidden="true"
+          >
+            <span className="loading-skeleton h-3 w-24" />
+            <span className="loading-skeleton mt-4 h-5 w-4/5" />
+            <span className="loading-skeleton mt-3 h-3 w-full" />
+            <span className="loading-skeleton mt-2 h-3 w-5/6" />
+            <span className="loading-skeleton mt-5 h-4 w-28" />
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
@@ -842,16 +976,16 @@ function HomeLatestDatasetsSkeleton() {
     >
       <div className="home-section-heading">
         <div>
-          <p className="eyebrow">PEMBARUAN KATALOG</p>
+          <p className="eyebrow">DATA TERBARU</p>
           <h2>Dataset terbaru</h2>
-          <p>Data yang telah diterbitkan dan dapat Anda telusuri.</p>
+          <p>Dataset yang baru ditambahkan atau diperbarui.</p>
         </div>
         <Link href="/dataset" className="home-section-link">
           Lihat semua dataset <ArrowRight size={16} aria-hidden="true" />
         </Link>
       </div>
-      <div className="home-dataset-grid">
-        {Array.from({ length: 5 }, (_, index) => (
+      <div className="home-dataset-grid public-loading-grid-sm">
+        {Array.from({ length: 3 }, (_, index) => (
           <article
             className="home-dataset-card home-dataset-card-skeleton"
             key={index}
@@ -918,10 +1052,10 @@ export default function HomePage() {
         <Suspense fallback={<HomeLatestDatasetsSkeleton />}>
           <HomeLatestDatasetsSection />
         </Suspense>
-        <Suspense fallback={null}>
+        <Suspense fallback={<HomeCKANHighlightsSkeleton />}>
           <HomeCKANHighlightsSection />
         </Suspense>
-        <Suspense fallback={null}>
+        <Suspense fallback={<HomeCmsNewsHighlightsSkeleton />}>
           <HomeCmsNewsHighlights />
         </Suspense>
         <section className="home-feature-row" aria-label="Layanan data">
@@ -972,7 +1106,7 @@ export default function HomePage() {
             <p className="eyebrow">DATA TERBUKA</p>
             <h2>Gunakan data sesuai kebutuhan.</h2>
             <p>
-              Periksa metadata dan berkas yang tersedia pada setiap dataset
+              Periksa informasi, periode, sumber, dan berkas pada setiap dataset
               untuk mengetahui format dan cakupan datanya.
             </p>
             <Link href="/dataset" className="home-format-link">

@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import {
-  Search,
-  LockKeyhole,
-  Menu,
-  X,
-  ArrowUpRight,
-} from "lucide-react";
+import { Search, LockKeyhole, Menu, X, ArrowUpRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavigationLink } from "@/components/ui/navigation-link";
 import { cn } from "@/lib/utils";
@@ -183,13 +177,16 @@ export function SiteHeader() {
           </Link>
 
           <a
-            href={process.env.NEXT_PUBLIC_CKAN_ADMIN_URL || "https://ckan.data.wajokab.go.id"}
+            href={
+              process.env.NEXT_PUBLIC_CKAN_ADMIN_URL ||
+              "https://ckan.data.wajokab.go.id"
+            }
             target="_blank"
             rel="noopener noreferrer"
             className="hidden min-h-10 items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 xl:inline-flex sm:px-4"
           >
             <LockKeyhole size={15} aria-hidden="true" />
-            <span>Kelola data</span>
+            <span>Portal Pengelola</span>
           </a>
 
           <div className="relative xl:hidden" ref={menuRef}>
@@ -250,14 +247,17 @@ export function SiteHeader() {
 
               <div className="my-2.5 border-t border-line/70" />
               <a
-                href={process.env.NEXT_PUBLIC_CKAN_ADMIN_URL || "https://ckan.data.wajokab.go.id"}
+                href={
+                  process.env.NEXT_PUBLIC_CKAN_ADMIN_URL ||
+                  "https://ckan.data.wajokab.go.id"
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={closeMobileMenu}
                 className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
               >
                 <LockKeyhole size={16} aria-hidden="true" />
-                <span>Kelola data di CKAN</span>
+                <span>Masuk ke Portal Pengelola</span>
               </a>
             </div>
           </div>

@@ -7,7 +7,11 @@ import { DatasetCard } from "@/components/dataset-card";
 import { getPublicOrganizationBySlugResult } from "@/lib/data/organizations";
 import { getPublishedDatasetsResult } from "@/lib/data/public";
 import { SectionReveal } from "@/components/section-reveal";
-import { getCanonicalMetadata, getSocialMetadata, siteConfig } from "@/lib/site-config";
+import {
+  getCanonicalMetadata,
+  getSocialMetadata,
+  siteConfig,
+} from "@/lib/site-config";
 
 function formatCount(value) {
   return new Intl.NumberFormat("id-ID").format(Number(value) || 0);
@@ -18,8 +22,8 @@ export async function generateMetadata({ params }) {
   const result = await getPublicOrganizationBySlugResult(slug);
   if (result.unavailable) {
     return {
-      title: "Informasi organisasi belum dapat dimuat",
-      description: "Informasi perangkat daerah sementara tidak dapat diakses.",
+      title: "Profil perangkat daerah belum dapat dimuat",
+      description: "Profil perangkat daerah sementara belum dapat ditampilkan.",
       robots: { index: false, follow: false },
     };
   }
@@ -28,19 +32,21 @@ export async function generateMetadata({ params }) {
     ? {
         title: org.title || org.name,
         description: (
-          org.description || `Dataset publik yang dikelola ${org.title || org.name}.`
+          org.description ||
+          `Dataset publik yang dikelola ${org.title || org.name}.`
         ).slice(0, 160),
         ...getCanonicalMetadata(`/organisasi/${org.name}`),
         ...getSocialMetadata({
           path: `/organisasi/${org.name}`,
           title: `${org.title || org.name} | ${siteConfig.shortName}`,
           description: (
-            org.description || `Dataset publik yang dikelola ${org.title || org.name}.`
+            org.description ||
+            `Dataset publik yang dikelola ${org.title || org.name}.`
           ).slice(0, 160),
         }),
       }
     : {
-        title: "Organisasi tidak ditemukan",
+        title: "Perangkat daerah tidak ditemukan",
         robots: { index: false, follow: false },
       };
 }
@@ -59,7 +65,7 @@ export default async function OrganizationDetailPage({ params }) {
           className="public-empty-panel mx-auto max-w-3xl p-8 text-center sm:p-12"
           role="alert"
         >
-          <p className="eyebrow">Layanan data tidak tersedia</p>
+          <p className="eyebrow">Informasi belum tersedia</p>
           <h1 className="mt-3 text-2xl font-semibold">
             Informasi perangkat daerah belum dapat dimuat
           </h1>
@@ -106,17 +112,19 @@ export default async function OrganizationDetailPage({ params }) {
             <ArrowLeft size={16} aria-hidden="true" /> Daftar perangkat daerah
           </Link>
           <PageHeading
-            className="mb-4 sm:mb-4"
-            eyebrow="Profil pengampu data"
+            className="public-dynamic-heading mb-4 sm:mb-4"
+            reserveTitle
+            reserveDescription
+            eyebrow="Profil perangkat daerah"
             title={org.title || org.name}
             description={
               org.description ||
-              "Informasi profil organisasi belum dilengkapi. Dataset yang tercantum di bawah merupakan data yang telah dipublikasikan dan dapat diakses publik."
+              "Profil perangkat daerah belum dilengkapi. Dataset di bawah ini merupakan data yang telah dipublikasikan dan dapat diakses umum."
             }
           />
           <div className="organization-detail-meta">
             <span>
-              <Building2 size={16} aria-hidden="true" /> ID CKAN:{" "}
+              <Building2 size={16} aria-hidden="true" /> Kode perangkat daerah:{" "}
               <strong>{org.name}</strong>
             </span>
             <span>
@@ -133,30 +141,31 @@ export default async function OrganizationDetailPage({ params }) {
       >
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="eyebrow">DATA YANG DITERBITKAN</p>
+            <p className="eyebrow">DATA YANG DIPUBLIKASIKAN</p>
             <h2 className="mt-2 text-2xl font-semibold">
               Dataset dari {org.title || org.name}
             </h2>
             <p className="mt-2 text-sm text-muted">
               {datasetsResult.unavailable
-                ? "Kami belum dapat memperbarui jumlah dataset karena layanan katalog sedang bermasalah."
+                ? "Jumlah dataset belum dapat diperbarui. Silakan coba kembali beberapa saat lagi."
                 : `Menampilkan ${formatCount(Math.min(9, datasets.length, Number(org.package_count) || 0))} dataset terbaru dari ${formatCount(org.package_count)} dataset publik.`}
             </p>
           </div>
           {Number(org.package_count) > 0 ? (
             <Link href={catalogHref} className="home-section-link">
-              Buka katalog terfilter <ArrowRight size={16} aria-hidden="true" />
+              Lihat semua dataset <ArrowRight size={16} aria-hidden="true" />
             </Link>
           ) : null}
         </div>
         {datasetsResult.unavailable ? (
           <div className="surface-panel p-6" role="alert">
             <p className="font-semibold">
-              Dataset organisasi belum dapat dimuat.
+              Dataset dari perangkat daerah ini belum dapat dimuat.
             </p>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Layanan katalog belum merespons. Tunggu sebentar, lalu coba lagi.
-              Daftar yang kosong saat ini belum tentu berarti belum ada dataset.
+              Daftar dataset belum dapat ditampilkan saat ini. Silakan coba
+              kembali beberapa saat lagi. Kondisi ini belum tentu berarti
+              perangkat daerah ini belum memiliki dataset.
             </p>
             <Link
               href={catalogHref}
@@ -177,8 +186,8 @@ export default async function OrganizationDetailPage({ params }) {
               Belum ada dataset publik yang dapat ditampilkan.
             </p>
             <p className="mt-2 text-sm text-muted">
-              Dataset yang masih berupa draf atau menunggu pemeriksaan tidak
-              ditampilkan pada halaman publik.
+              Dataset hanya ditampilkan setelah dinyatakan siap dan
+              dipublikasikan untuk umum.
             </p>
           </div>
         )}
