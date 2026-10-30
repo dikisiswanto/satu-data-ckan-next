@@ -65,33 +65,36 @@ jobs:
             deploy/ckan/docker-compose.manual.yml \
             deploy/ckan/schemas/dataset.yaml \
             .github/workflows/ci.yml
-          bash -n deploy/ckan/bootstrap-upstream.sh deploy/ckan/compose.sh deploy/ckan/enable-xloader.sh deploy/ckan/initialize-extensions.sh deploy/ckan/apply-datastore-permissions.sh
+          bash -n deploy/ckan/bootstrap-upstream.sh deploy/ckan/compose.sh deploy/ckan/sync-ckan-base-source.sh deploy/ckan/prepare-ckan-base.sh deploy/ckan/enable-xloader.sh deploy/ckan/initialize-extensions.sh deploy/ckan/apply-datastore-permissions.sh
           python3 scripts/check-ckan-build-overlay.py
           python3 - <<'PY'
           import ast
           from pathlib import Path
-          for name in ('deploy/ckan/configure-upstream-extensions.py', 'deploy/ckan/render-upstream-env.py', 'deploy/ckan/sync-env.py', 'scripts/check-ckan-build-overlay.py', 'scripts/check-ckan-plugin-entrypoints.py', 'scripts/check-env-single-source.py'):
+          for name in ('deploy/ckan/configure-upstream-extensions.py', 'deploy/ckan/render-upstream-env.py', 'deploy/ckan/sync-env.py', 'scripts/check-ckan-build-overlay.py', 'scripts/check-ckan-admin-theme.py', 'scripts/check-ckan-base-source.py', 'scripts/check-ckan-plugin-entrypoints.py', 'scripts/check-env-single-source.py'):
               ast.parse(Path(name).read_text())
               print(f'valid Python: {name}')
           PY
       - name: Ensure no legacy application remains
         run: npm run check
   ckan-extension-image-smoke:
-    name: Smoke-test CKAN extensions on the pinned base image
+    name: Smoke-test CKAN extensions on the official CKAN 2.12.1 base build
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - name: Pull the pinned official CKAN base image
-        run: docker pull ckan/ckan-base:2.12.1
+      - name: Build the official CKAN 2.12.1 base image from ckan-docker-base
+        run: |
+          ./deploy/ckan/sync-ckan-base-source.sh
+          ./deploy/ckan/prepare-ckan-base.sh
       - name: Build an extension compatibility image and verify plugin entry points
         run: |
           cat > Dockerfile.ckan-extension-smoke <<'DOCKER'
           FROM ckan/ckan-base:2.12.1
           USER root
           COPY deploy/ckan/extensions/requirements.txt /tmp/portal-ckan-extensions.txt
+          COPY deploy/ckan/theme/ /tmp/portal-ckan-theme/
           COPY scripts/check-ckan-plugin-entrypoints.py /tmp/check-ckan-plugin-entrypoints.py
-          RUN pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt \
+          RUN pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme \
               && python /tmp/check-ckan-plugin-entrypoints.py
           DOCKER
-          docker build --pull -f Dockerfile.ckan-extension-smoke -t portal-ckan-extension-smoke .
+          docker build -f Dockerfile.ckan-extension-smoke -t portal-ckan-extension-smoke .

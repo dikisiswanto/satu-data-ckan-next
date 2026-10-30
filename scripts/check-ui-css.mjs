@@ -5,23 +5,40 @@ const root = process.cwd();
 const styleDir = path.join(root, "src/app/styles");
 const globalEntry = path.join(root, "src/app/globals.css");
 const errors = [];
-const styleFiles = (await readdir(styleDir)).filter((name) => name.endsWith(".css")).sort();
+const styleFiles = (await readdir(styleDir))
+  .filter((name) => name.endsWith(".css"))
+  .sort();
 const ignoredSelectors = [
-  { pattern: /\.portal-(?:app|main|form-[\w-]+|table-[\w-]+|tour[\w-]*)\b/, label: "legacy CKAN admin selectors" },
+  {
+    pattern: /\.portal-(?:app|main|form-[\w-]+|table-[\w-]+|tour[\w-]*)\b/,
+    label: "legacy CKAN admin selectors",
+  },
   { pattern: /\.date-picker-[\w-]+\b/, label: "unused date-picker selectors" },
-  { pattern: /\.dataset-resource-list\b/, label: "unused dataset resource-list selector" },
+  {
+    pattern: /\.dataset-resource-list\b/,
+    label: "unused dataset resource-list selector",
+  },
 ];
 let totalBytes = 0;
 let totalLines = 0;
 const missingImports = [];
 const globalCss = await readFile(globalEntry, "utf8");
-for (const match of globalCss.matchAll(/@import\s+["'](\.\/styles\/[^"']+\.css)["']/g)) {
+for (const match of globalCss.matchAll(
+  /@import\s+["'](\.\/styles\/[^"']+\.css)["']/g,
+)) {
   const resolved = path.resolve(path.dirname(globalEntry), match[1]);
-  try { await stat(resolved); } catch { missingImports.push(match[1]); }
+  try {
+    await stat(resolved);
+  } catch {
+    missingImports.push(match[1]);
+  }
 }
-if (missingImports.length) errors.push(`Stylesheet yang di-import hilang: ${missingImports.join(", ")}`);
-if (!globalCss.includes('@import "tailwindcss";')) errors.push("Entrypoint harus memuat Tailwind CSS.");
-if (!globalCss.includes('@plugin "@tailwindcss/forms";')) errors.push("Plugin Tailwind forms harus tetap aktif.");
+if (missingImports.length)
+  errors.push(`Stylesheet yang di-import hilang: ${missingImports.join(", ")}`);
+if (!globalCss.includes('@import "tailwindcss";'))
+  errors.push("Entrypoint harus memuat Tailwind CSS.");
+if (!globalCss.includes('@plugin "@tailwindcss/forms";'))
+  errors.push("Plugin Tailwind forms harus tetap aktif.");
 
 const stylesByFile = new Map();
 for (const file of styleFiles) {
@@ -31,7 +48,8 @@ for (const file of styleFiles) {
   const lines = source.split(/\r?\n/);
   totalLines += lines.at(-1) === "" ? lines.length - 1 : lines.length;
   for (const { pattern, label } of ignoredSelectors) {
-    if (pattern.test(source)) errors.push(`${file}: ${label} ditemukan kembali (${pattern}).`);
+    if (pattern.test(source))
+      errors.push(`${file}: ${label} ditemukan kembali (${pattern}).`);
   }
 }
 
@@ -47,7 +65,9 @@ async function collectSourceFiles(directory) {
   }
 }
 await collectSourceFiles(path.join(root, "src"));
-const applicationSource = (await Promise.all(sourceFiles.map((file) => readFile(file, "utf8")))).join("\n");
+const applicationSource = (
+  await Promise.all(sourceFiles.map((file) => readFile(file, "utf8")))
+).join("\n");
 const knownDynamicClasses = [
   /^home-dataset-art-(?:amber|blue|cyan|emerald|green|rose|violet)$/,
   /^statistics-card-tone-[0-3]$/,
@@ -55,22 +75,39 @@ const knownDynamicClasses = [
 for (const [file, source] of stylesByFile) {
   for (const match of source.matchAll(/^\s*\.([A-Za-z_][\w-]*)/gm)) {
     const className = match[1];
-    if (ignoredSelectors.some(({ pattern }) => pattern.test(`.${className}`))) continue;
+    if (ignoredSelectors.some(({ pattern }) => pattern.test(`.${className}`)))
+      continue;
     const escapedClass = className.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const classReference = new RegExp(`(?<![\\w-])${escapedClass}(?![\\w-])`);
-    if (!classReference.test(applicationSource) && !knownDynamicClasses.some((pattern) => pattern.test(className))) {
-      errors.push(`${file}: selector .${className} tidak lagi dirujuk dari source JS/JSX.`);
+    if (
+      !classReference.test(applicationSource) &&
+      !knownDynamicClasses.some((pattern) => pattern.test(className))
+    ) {
+      errors.push(
+        `${file}: selector .${className} tidak lagi dirujuk dari source JS/JSX.`,
+      );
     }
   }
 }
 
-const button = await readFile(path.join(root, "src/components/ui/button.jsx"), "utf8");
+const button = await readFile(
+  path.join(root, "src/components/ui/button.jsx"),
+  "utf8",
+);
 const utils = await readFile(path.join(root, "src/lib/utils.js"), "utf8");
-if (!button.includes('from "class-variance-authority"') || !button.includes("cva(") || !button.includes("cn(buttonStyles")) {
-  errors.push("Button UI harus mempertahankan pola shadcn/cva dan merge class lewat cn().");
+if (
+  !button.includes('from "class-variance-authority"') ||
+  !button.includes("cva(") ||
+  !button.includes("cn(buttonStyles")
+) {
+  errors.push(
+    "Button UI harus mempertahankan pola shadcn/cva dan merge class lewat cn().",
+  );
 }
 if (!utils.includes("twMerge") || !utils.includes("clsx")) {
-  errors.push("cn() harus menggabungkan class conditional dan menyelesaikan konflik Tailwind.");
+  errors.push(
+    "cn() harus menggabungkan class conditional dan menyelesaikan konflik Tailwind.",
+  );
 }
 
 // Explicit CSS import order is intentional while legacy styles are being removed:
@@ -85,9 +122,13 @@ const orderedImports = [
   "quality-pass.css",
   "public-responsive.css",
 ];
-const actualImports = [...globalCss.matchAll(/@import\s+["']\.\/styles\/([^"']+\.css)["']/g)].map((match) => match[1]);
+const actualImports = [
+  ...globalCss.matchAll(/@import\s+["']\.\/styles\/([^"']+\.css)["']/g),
+].map((match) => match[1]);
 if (JSON.stringify(actualImports) !== JSON.stringify(orderedImports)) {
-  errors.push("Urutan import CSS berubah; audit visual/regresi diperlukan sebelum mengubah urutan cascade.");
+  errors.push(
+    "Urutan import CSS berubah; audit visual/regresi diperlukan sebelum mengubah urutan cascade.",
+  );
 }
 
 if (errors.length) {
@@ -95,4 +136,6 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log(`UI/CSS guard passed: ${styleFiles.length} stylesheets, ${totalLines.toLocaleString("en-US")} lines, ${(totalBytes / 1024).toFixed(1)} KiB; stylesheet imports and source selector references verified; Tailwind/shadcn class merge preserved.`);
+process.stdout.write(
+  `UI/CSS guard passed: ${styleFiles.length} stylesheets, ${totalLines.toLocaleString("en-US")} lines, ${(totalBytes / 1024).toFixed(1)} KiB; stylesheet imports and source selector references verified; Tailwind/shadcn class merge preserved.\n`,
+);

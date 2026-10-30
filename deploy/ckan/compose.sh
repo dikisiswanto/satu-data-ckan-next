@@ -85,6 +85,12 @@ fi
 python3 "$ROOT/deploy/ckan/sync-env.py" "$ENV_FILE"
 python3 "$ROOT/deploy/ckan/render-upstream-env.py" "$ENV_FILE" "$UPSTREAM/.env.generated"
 
+# The official upstream ckan/ckan-docker-base source is built locally before any Compose start.
+# This avoids relying on a Docker Hub 2.12.1 tag before its publication is confirmed.
+if [[ "${1:-}" == "up" ]]; then
+  "$ROOT/deploy/ckan/prepare-ckan-base.sh"
+fi
+
 FILES=(
   -f "$UPSTREAM/docker-compose.yml"
   -f "$UPSTREAM/docker-compose.override.yml"

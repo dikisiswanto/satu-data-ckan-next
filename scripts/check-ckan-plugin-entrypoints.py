@@ -9,6 +9,7 @@ required = {
     "pages",
     "datastore",
     "envvars",
+    "wajo_theme",
     "dcat",
     "dcat_rdf_harvester",
     "structured_data",

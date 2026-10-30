@@ -1,5 +1,5 @@
 {
-  "name": "portal-satu-data-wajo-ckan",
+  "name": "satu-data-ckan-next",
   "version": "1.0.0",
   "private": true,
   "engines": {
@@ -15,7 +15,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "check": "python3 scripts/check-env-single-source.py && node scripts/check-ui-css.mjs && node scripts/check-public-navigation.mjs && node scripts/check-api-doc-consistency.mjs && node scripts/check-project.mjs && node scripts/check-local-imports.mjs",
+    "check": "python3 scripts/check-env-single-source.py && python3 scripts/check-ckan-base-source.py && python3 scripts/check-ckan-admin-theme.py && python3 scripts/check-ckan-build-overlay.py && node scripts/check-ui-css.mjs && node scripts/check-public-navigation.mjs && node scripts/check-api-doc-consistency.mjs && node scripts/check-project.mjs && node scripts/check-local-imports.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

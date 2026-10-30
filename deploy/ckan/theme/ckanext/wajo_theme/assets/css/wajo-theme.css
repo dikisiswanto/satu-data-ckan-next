@@ -1,0 +1,215 @@
+/* Portal Satu Data Kabupaten Wajo — CKAN 2.12 admin theme overlay.
+   Keep this as a small, additive layer over CKAN's Midnight Blue theme. */
+:root {
+  --wajo-green-950: #102f27;
+  --wajo-green-900: #153e32;
+  --wajo-green-800: #175641;
+  --wajo-green-700: #1d6b50;
+  --wajo-green-600: #238260;
+  --wajo-gold: #c8a65a;
+  --wajo-ink: #1d2d27;
+  --wajo-muted: #60716a;
+  --wajo-surface: #ffffff;
+  --wajo-page: #f4f7f5;
+  --wajo-border: #dce6e0;
+  --bs-primary: var(--wajo-green-700);
+  --bs-primary-rgb: 29, 107, 80;
+  --bs-link-color: var(--wajo-green-700);
+  --bs-link-hover-color: var(--wajo-green-900);
+  --bs-body-color: var(--wajo-ink);
+  --bs-body-bg: var(--wajo-page);
+  --bs-border-color: var(--wajo-border);
+  --bs-border-radius: 0.7rem;
+  --bs-border-radius-lg: 0.95rem;
+  --bs-focus-ring-color: rgb(35 130 96 / 22%);
+}
+
+html { color-scheme: light; }
+body { color: var(--wajo-ink); background: var(--wajo-page); }
+a { color: var(--wajo-green-700); text-underline-offset: 0.16em; }
+a:hover { color: var(--wajo-green-900); }
+
+.account-masthead {
+  background: var(--wajo-green-950);
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+}
+.account-masthead a,
+.account-masthead button { color: #f3faf6; }
+.account-masthead a:hover,
+.account-masthead button:hover { color: #ffffff; }
+
+.masthead {
+  background: var(--wajo-surface);
+  border-bottom: 1px solid var(--wajo-border);
+  box-shadow: 0 5px 22px rgb(16 47 39 / 4%);
+}
+.masthead .container { max-width: 1480px; }
+.masthead .navbar { gap: 1.25rem; padding-block: 0.65rem; }
+.masthead .main-navbar .nav-link {
+  border-radius: 0.55rem;
+  color: #344940;
+  font-weight: 600;
+  padding: 0.65rem 0.8rem;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+.masthead .main-navbar .nav-link:hover,
+.masthead .main-navbar .nav-link:focus-visible {
+  background: #edf5f0;
+  color: var(--wajo-green-900);
+}
+.masthead .main-navbar .active > .nav-link,
+.masthead .main-navbar .nav-link.active {
+  background: #e8f3ed;
+  color: var(--wajo-green-900);
+}
+
+.wajo-admin-brand {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.78rem;
+  color: var(--wajo-green-950) !important;
+  line-height: 1.2;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+.wajo-admin-brand img,
+.wajo-admin-brand__fallback {
+  display: block;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+.wajo-admin-brand__fallback {
+  align-content: center;
+  border-radius: 0.8rem;
+  background: var(--wajo-green-800);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-align: center;
+}
+.wajo-admin-brand__copy { display: grid; gap: 0.28rem; }
+.wajo-admin-brand__copy strong { font-size: 1rem; font-weight: 800; letter-spacing: -0.025em; }
+.wajo-admin-brand__copy small {
+  color: var(--wajo-muted);
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.main { min-height: calc(100vh - 11rem); padding-block: 1.7rem 3.5rem; }
+#content { max-width: 1440px; }
+.toolbar { margin-bottom: 1rem; }
+.breadcrumb { padding: 0.35rem 0; background: transparent; }
+.page-header { border-bottom-color: var(--wajo-border); }
+.page-heading, h1, h2, h3 { color: var(--wajo-ink); letter-spacing: -0.025em; }
+.page-heading { font-weight: 750; }
+
+.module,
+.dataset-item,
+.card,
+.primary .module,
+.secondary .module {
+  border: 1px solid var(--wajo-border);
+  border-radius: 0.9rem;
+  background: var(--wajo-surface);
+  box-shadow: 0 8px 26px rgb(16 47 39 / 4%);
+}
+.module .module-heading {
+  border-bottom: 1px solid var(--wajo-border);
+  background: #f7faf8;
+  color: var(--wajo-green-950);
+  font-weight: 750;
+}
+.module-content { padding: 1.25rem; }
+.wrapper { row-gap: 1.2rem; }
+
+.btn,
+.form-control,
+.form-select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+select,
+textarea {
+  border-radius: 0.6rem;
+}
+.btn { font-weight: 650; transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
+.btn-primary {
+  border-color: var(--wajo-green-700);
+  background: var(--wajo-green-700);
+  color: #fff;
+}
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  border-color: var(--wajo-green-900);
+  background: var(--wajo-green-900);
+  color: #fff;
+}
+.btn-secondary { border-color: #d4e0d9; background: #edf4f0; color: var(--wajo-green-900); }
+.btn-secondary:hover { border-color: #bfd3c8; background: #e2eee7; color: var(--wajo-green-950); }
+.form-control:focus,
+.form-select:focus,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: #61a58b;
+  box-shadow: 0 0 0 0.22rem rgb(35 130 96 / 15%);
+  outline: 0;
+}
+.form-label,
+.control-label,
+label { color: #30463c; font-weight: 650; }
+.help-block,
+.text-muted,
+small.text-muted { color: var(--wajo-muted) !important; }
+
+.table,
+table.table { --bs-table-bg: #fff; --bs-table-color: var(--wajo-ink); --bs-table-border-color: var(--wajo-border); }
+table thead th { color: #30483d; background: #f5f9f6; font-weight: 750; }
+.table > :not(caption) > * > * { padding: 0.8rem; }
+.dropdown-menu,
+.popover,
+.modal-content { border-color: var(--wajo-border); border-radius: 0.8rem; box-shadow: 0 12px 34px rgb(16 47 39 / 10%); }
+.alert { border-radius: 0.7rem; }
+.pagination .page-link { color: var(--wajo-green-700); }
+.pagination .active > .page-link { border-color: var(--wajo-green-700); background: var(--wajo-green-700); }
+
+/* Give the native CKAN sign-in screen a dedicated, calm panel layout. */
+.main:has(#field-login) {
+  background:
+    radial-gradient(ellipse at 12% 12%, rgb(35 130 96 / 8%), transparent 34rem),
+    var(--wajo-page);
+}
+.main:has(#field-login) #content { max-width: 1120px; }
+.main:has(#field-login) .wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1.2rem;
+}
+.main:has(#field-login) .primary { flex: 1 1 560px; width: auto; max-width: 650px; }
+.main:has(#field-login) .secondary { flex: 0 1 300px; width: auto; }
+.main:has(#field-login) .primary > .module { overflow: hidden; }
+.main:has(#field-login) #field-login,
+.main:has(#field-login) #field-password { min-height: 2.85rem; }
+.main:has(#field-login) .page-heading { font-size: clamp(1.5rem, 2.4vw, 2rem); }
+.main:has(#field-login) .form-actions { margin-top: 1.25rem; }
+.main:has(#field-login) .form-actions .btn-primary { min-width: 8rem; }
+
+:focus-visible { outline: 3px solid rgb(35 130 96 / 38%); outline-offset: 2px; }
+@media (max-width: 991.98px) {
+  .masthead .navbar { align-items: flex-start; flex-wrap: wrap; }
+  .wajo-admin-brand img,
+  .wajo-admin-brand__fallback { flex-basis: 40px; width: 40px; height: 40px; }
+  .wajo-admin-brand__copy strong { font-size: 0.92rem; }
+  .wajo-admin-brand__copy small { font-size: 0.58rem; }
+  .main:has(#field-login) .primary,
+  .main:has(#field-login) .secondary { flex-basis: 100%; max-width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

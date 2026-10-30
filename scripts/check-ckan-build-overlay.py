@@ -2,7 +2,9 @@
 """Regression test for the generated CKAN Dockerfile overlay (no Docker needed)."""
 from pathlib import Path
 import subprocess
+import tarfile
 import tempfile
+import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIGURE = ROOT / "deploy/ckan/configure-upstream-extensions.py"
@@ -43,12 +45,19 @@ def main() -> None:
         assert "ckanext-xloader==2.5.2" in (ckan / "extensions/requirements.txt").read_text()
         assert "ckanext-geoview==0.3.2" in (ckan / "extensions/requirements.txt").read_text()
         assert "ckanext-harvest==1.6.3" in (ckan / "extensions/requirements.txt").read_text()
+        assert "theme/ /tmp/portal-ckan-theme/" in result, "custom theme source must be copied into the build"
+        assert "pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in result
+        assert "wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin" in (ckan / "theme/setup.py").read_text()
+        assert (ckan / "theme/ckanext/wajo_theme/templates/base.html").is_file()
+        assert (ckan / "theme/ckanext/wajo_theme/templates/header.html").is_file()
+        assert (ckan / "theme/ckanext/wajo_theme/assets/css/wajo-theme.css").is_file()
+        assert (ckan / "theme/ckanext/wajo_theme/public/logo-kabupaten-wajo.webp").is_file()
         assert (ckan / "schemas/dataset.yaml").is_file()
         assert "2.12.1" in result, "generated Dockerfile should use the patch-pinned official base image"
         init_script = ckan / "docker-entrypoint.d/50-portal-extensions.sh"
         assert init_script.is_file() and init_script.stat().st_mode & 0o111
 
-    print("CKAN Docker overlay passes idempotency and required-extension smoke checks.")
+    print("CKAN Docker overlay passes idempotency, extension, and packaged-theme smoke checks.")
 
 
 if __name__ == "__main__":

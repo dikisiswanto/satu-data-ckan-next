@@ -71,6 +71,8 @@ else:
 PYAUTH
 
 command -v git >/dev/null 2>&1 || { echo "git is required" >&2; exit 1; }
+# CKAN runtime image source: official ckan/ckan-docker-base, branch main, CKAN 2.12.1.
+"$ROOT/deploy/ckan/sync-ckan-base-source.sh"
 if [[ ! -d "$UPSTREAM/.git" ]]; then
   mkdir -p "$(dirname "$UPSTREAM")"
   git clone --depth 1 https://github.com/ckan/ckan-docker.git "$UPSTREAM"
@@ -118,8 +120,8 @@ env_file.chmod(0o600)
 print(f"Merged {len(additions)} missing upstream environment defaults into the single .env.ckan source.")
 PYMERGE
 
-# Align the official Compose checkout with the official CKAN 2.12 base image.
-# This specifically avoids mixing CKAN 2.11/Python 3.10 paths with CKAN 2.12/Python 3.14.
+# Align the official Compose checkout with the locally built official CKAN 2.12.1 base image.
+# The image is built from ckan/ckan-docker-base by prepare-ckan-base.sh before `compose up`.
 python3 - "$UPSTREAM" <<'PY'
 from pathlib import Path
 import re, sys
@@ -193,7 +195,7 @@ for line in lines:
 if any(re.match(r'^    ports:\s*$', line) for line in result):
     raise SystemExit("Found an unhandled service-level ports block; refusing to leave a CKAN/backend port exposed.")
 compose.write_text("".join(result))
-print("Pinned official CKAN base image to 2.12.1; removed incompatible site_packages mount.")
+print("Pinned Compose overlay to the locally built official ckan/ckan-base:2.12.1 image; removed incompatible site_packages mount.")
 if removed_datapusher_service:
     print("Removed the deprecated DataPusher service; XLoader will use the CKAN jobs worker.")
 elif re.search(r"^  datapusher:\s*$", compose_text, flags=re.M):
@@ -265,16 +267,25 @@ for key in ("CKAN___API_TOKEN__JWT__ENCODE__SECRET", "CKAN___API_TOKEN__JWT__DEC
 # Enable CKAN's supported XLoader extension instead of the deprecated DataPusher service.
 # `envvars` stays last. The API token is created post-startup by enable-xloader.sh.
 plugin_raw = values.get("CKAN__PLUGINS", "").strip().strip('"').strip("'")
-portal_plugins = {"envvars", "scheming_datasets", "pages", "dcat", "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view", "geojson_view", "wmts_view", "esri_shapefile_view", "harvest", "ckan_harvester", "image_view", "text_view", "recline_view", "datastore", "xloader"}
+portal_plugins = {"envvars", "wajo_theme", "scheming_datasets", "pages", "dcat", "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view", "geojson_view", "wmts_view", "esri_shapefile_view", "harvest", "ckan_harvester", "image_view", "text_view", "recline_view", "datastore", "xloader"}
 plugins = [plugin for plugin in (plugin_raw.split() if plugin_raw else []) if plugin not in portal_plugins and plugin != "datapusher"]
 for plugin in ("scheming_datasets", "pages", "dcat", "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view", "geojson_view", "wmts_view", "esri_shapefile_view", "harvest", "ckan_harvester", "image_view", "text_view", "recline_view", "datastore", "xloader"):
     if plugin not in plugins:
         plugins.append(plugin)
+# Add the local theme last among template providers so its overrides have priority.
+plugins.append("wajo_theme")
 plugins.append("envvars")
 values["CKAN__PLUGINS"] = '"' + " ".join(plugins) + '"'
 # CKAN 2.12 ships the modern Midnight Blue UI; use the supported native theme instead of a prototype theme extension.
 values["CKAN__BASE_PUBLIC_FOLDER"] = "public-midnight-blue"
 values["CKAN__BASE_TEMPLATES_FOLDER"] = "templates-midnight-blue"
+values["CKAN__SITE_TITLE"] = values.get("CKAN__SITE_TITLE", "Portal Satu Data Kabupaten Wajo").strip().strip("\"").strip("\'") or "Portal Satu Data Kabupaten Wajo"
+values["CKAN__SITE_DESCRIPTION"] = values.get("CKAN__SITE_DESCRIPTION", "Portal data resmi Pemerintah Kabupaten Wajo").strip().strip("\"").strip("\'") or "Portal data resmi Pemerintah Kabupaten Wajo"
+site_logo = values.get("CKAN__SITE_LOGO", "/logo-kabupaten-wajo.webp").strip().strip("\"").strip("\'")
+# Migrate the previous generated path: extension public assets are exposed at the URL root.
+if site_logo in {"", "/base/logo-kabupaten-wajo.webp"}:
+    site_logo = "/logo-kabupaten-wajo.webp"
+values["CKAN__SITE_LOGO"] = site_logo
 values["CKANEXT__XLOADER__API_TOKEN"] = values.get("CKANEXT__XLOADER__API_TOKEN", "").strip().strip("\"").strip("\'")
 values["CKANEXT__XLOADER__JOBS_DB__URI"] = values["CKAN_SQLALCHEMY_URL"]
 values["CKANEXT__XLOADER__SITE_URL"] = "http://ckan:5000"

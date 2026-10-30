@@ -1,0 +1,3 @@
+recursive-include ckanext/wajo_theme/templates *.html
+recursive-include ckanext/wajo_theme/assets *.yml *.css
+recursive-include ckanext/wajo_theme/public *

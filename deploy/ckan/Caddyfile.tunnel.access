@@ -44,7 +44,7 @@ Allow: /" 200
     respond @adminSitemap "Not Found" 404
 
     @adminRoot path /
-    redir @adminRoot /user/login?came_from=%2Fckan-admin%2Fconfig%2F 302
+    redir @adminRoot /user/login?came_from=%2Fdashboard%2Fdatasets 302
     handle {
       reverse_proxy https://nginx:443 {
         header_up Host {http.request.host}

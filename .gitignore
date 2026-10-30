@@ -8,6 +8,9 @@ test-results/
 .env.*
 !.env.ckan.example
 /deploy/ckan/upstream/
+/deploy/ckan/upstream-base/
+/deploy/ckan/.ckan-base-source.lock
+/deploy/ckan/.ckan-base-image.lock
 .DS_Store
 *.log
 .tmp-vitest/

@@ -1,0 +1,5 @@
+wajo_theme:
+  filters: cssrewrite
+  output: wajo-theme/%(version)s-wajo-theme.css
+  contents:
+    - css/wajo-theme.css

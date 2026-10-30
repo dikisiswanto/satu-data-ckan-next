@@ -204,6 +204,6 @@ if (errors.length) {
   console.error(errors.join("\n"));
   process.exit(1);
 }
-console.log(
-  `Pemeriksaan import, re-ekspor, dan dependensi lulus (${files.length} modul JS/JSX).`,
+process.stdout.write(
+  `Pemeriksaan import, re-ekspor, dan dependensi lulus (${files.length} modul JS/JSX).\n`,
 );
