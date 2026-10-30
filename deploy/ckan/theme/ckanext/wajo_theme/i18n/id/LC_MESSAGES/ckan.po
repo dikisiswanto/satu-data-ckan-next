@@ -1,19 +1,556 @@
+
 msgid ""
 msgstr ""
 "Project-Id-Version: CKAN 2.12.1 - Portal Satu Data Wajo\n"
 "Report-Msgid-Bugs-To: admin@wajokab.go.id\n"
 "POT-Creation-Date: 2026-10-30 00:00+0800\n"
 "PO-Revision-Date: 2026-10-30 00:00+0800\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: id\n"
 "Language-Team: Bahasa Indonesia\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Portal Satu Data Wajo\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#, python-format
+msgid "%(count)s dataset found for \"%(query)s\"."
+msgid_plural "%(count)s datasets found for \"%(query)s\"."
+msgstr[0] "%(count)s dataset ditemukan untuk \"%(query)s\"."
+
+#, python-format
+msgid "%(count)s dataset found."
+msgid_plural "%(count)s datasets found."
+msgstr[0] "%(count)s dataset ditemukan."
+
+#, python-brace-format
+msgid "A little information about my {object_type}..."
+msgstr "Informasi singkat tentang {object_type} saya..."
+
+msgid "A short description of the dataset..."
+msgstr "Deskripsi singkat dataset..."
+
+msgid "API"
+msgstr "API"
+
+msgid "API Endpoint"
+msgstr "Titik akhir API"
+
+msgid "API Token"
+msgstr "Token API"
+
+msgid "API Tokens"
+msgstr "Token API"
+
+msgid "About"
+msgstr "Tentang"
+
+msgid "Access denied"
+msgstr "Akses ditolak."
+
+msgid "Account"
+msgstr "Akun"
+
+msgid "Action"
+msgstr "Tindakan"
+
+msgid "Actions"
+msgstr "Tindakan"
+
+msgid "Active"
+msgstr "Aktif"
+
+msgid "Activity"
+msgstr "Aktivitas"
+
+msgid "Activity Stream"
+msgstr "Riwayat aktivitas"
+
+msgid "Add"
+msgstr "Tambah"
+
+msgid "Add Dataset"
+msgstr "Tambah dataset"
+
+msgid "Add Harvest Source"
+msgstr "Tambah sumber pengambilan data"
+
+msgid "Add Member"
+msgstr "Tambah anggota"
+
+msgid "Add Page"
+msgstr "Tambah halaman"
+
+msgid "Add Resource"
+msgstr "Tambah sumber daya"
+
+msgid "Add a new resource"
+msgstr "Tambah sumber daya baru"
+
+msgid "Add a resource"
+msgstr "Tambahkan sumber daya"
+
+msgid "Add another resource"
+msgstr "Tambahkan sumber daya lainnya"
+
+msgid "Add group"
+msgstr "Tambah grup"
+
+msgid "Add member"
+msgstr "Tambah anggota"
+
+msgid "Add new"
+msgstr "Tambah baru"
+
+msgid "Add organization"
+msgstr "Tambah organisasi"
+
+msgid "Add resource"
+msgstr "Tambah sumber daya"
+
+#, python-brace-format
+msgid "Add to {object_type}"
+msgstr "Tambahkan ke {object_type}"
+
+#, python-brace-format
+msgid "Add {object_type}"
+msgstr "Tambah {object_type}"
+
+msgid "Admin"
+msgstr "Administrator"
+
+msgid "Administration"
+msgstr "Administrasi"
+
+msgid "All"
+msgstr "Semua"
+
+msgid "All dataset revisions"
+msgstr "Seluruh revisi dataset"
+
+msgid "An error occurred"
+msgstr "Terjadi kesalahan."
+
+msgid "An error occurred while loading the data"
+msgstr "Terjadi kesalahan saat memuat data."
+
+msgid "An organization must be provided"
+msgstr "Organisasi harus ditentukan."
+
+msgid "Apply"
+msgstr "Terapkan"
+
+msgid "Are you sure you want to continue?"
+msgstr "Apakah Anda yakin ingin melanjutkan?"
+
+msgid "Are you sure you want to delete this dataset?"
+msgstr "Apakah Anda yakin ingin menghapus dataset ini?"
+
+msgid "Are you sure you want to delete this group?"
+msgstr "Apakah Anda yakin ingin menghapus grup ini?"
+
+msgid "Are you sure you want to delete this item?"
+msgstr "Apakah Anda yakin ingin menghapus item ini?"
+
+msgid "Are you sure you want to delete this organization?"
+msgstr "Apakah Anda yakin ingin menghapus organisasi ini?"
+
+msgid "Are you sure you want to delete this resource?"
+msgstr "Apakah Anda yakin ingin menghapus sumber daya ini?"
+
+#, python-brace-format
+msgid "Are you sure you want to delete this {object_type}?"
+msgstr "Apakah Anda yakin ingin menghapus {object_type} ini?"
+
+msgid "Are you sure you want to purge datasets?"
+msgstr "Apakah Anda yakin ingin menghapus dataset secara permanen?"
+
+msgid "Are you sure you want to purge this item?"
+msgstr "Apakah Anda yakin ingin menghapus item ini secara permanen?"
+
+msgid "Are you sure?"
+msgstr "Apakah Anda yakin?"
+
+msgid "Author"
+msgstr "Penulis"
+
+#, python-format
+msgid "Authorization function not found: %s"
+msgstr "Fungsi otorisasi tidak ditemukan: %s"
+
+msgid "Back"
+msgstr "Kembali"
+
+msgid "Cancel"
+msgstr "Batal"
+
+#, python-format
+msgid "Cannot change value of key from %(old)s to %(new)s. This key is read-only"
+msgstr "Nilai kunci tidak dapat diubah dari %(old)s menjadi %(new)s. Kunci ini hanya dapat dibaca."
+
+msgid "Cannot modify sysadmin privileges for system user"
+msgstr "Hak administrator sistem untuk pengguna sistem tidak dapat diubah."
+
+msgid "Cannot modify your own sysadmin privileges"
+msgstr "Anda tidak dapat mengubah hak administrator sistem milik sendiri."
+
+msgid "Change password"
+msgstr "Ubah kata sandi"
+
+msgid "Changes not saved"
+msgstr "Perubahan belum disimpan."
+
+msgid "Changes saved"
+msgstr "Perubahan berhasil disimpan."
+
+msgid "Choose"
+msgstr "Pilih"
+
+msgid "Choose File"
+msgstr "Pilih berkas"
+
+msgid "Choose a file"
+msgstr "Pilih berkas"
+
+msgid "Clear"
+msgstr "Bersihkan"
+
+msgid "Click here for more information."
+msgstr "Klik di sini untuk informasi lebih lanjut."
+
+msgid "Close"
+msgstr "Tutup"
+
+msgid "Confirm"
+msgstr "Konfirmasi"
+
+msgid "Continue"
+msgstr "Lanjutkan"
+
+msgid "Could not parse as valid JSON"
+msgstr "Tidak dapat membaca JSON yang valid."
+
+msgid "Create"
+msgstr "Buat"
+
+msgid "Create API Token"
+msgstr "Buat token API"
+
+msgid "Create Account"
+msgstr "Buat akun"
+
+msgid "Create Dataset"
+msgstr "Buat dataset"
+
+msgid "Create Organization"
+msgstr "Buat organisasi"
+
+msgid "Create an Organization"
+msgstr "Buat organisasi"
+
+msgid "Create datasets, groups and other exciting things"
+msgstr "Buat dataset, grup, dan berbagai konten lainnya"
+
+msgid "Create group"
+msgstr "Buat grup"
+
+msgid "Create new"
+msgstr "Buat baru"
+
+msgid "Create organization"
+msgstr "Buat organisasi"
+
+#, python-brace-format
+msgid "Create {object_type}"
+msgstr "Buat {object_type}"
+
+msgid "Created"
+msgstr "Dibuat"
+
+msgid "Created by"
+msgstr "Dibuat oleh"
+
+msgid "Created on"
+msgstr "Dibuat pada"
 
 msgid "Dashboard"
 msgstr "Dasbor"
+
+msgid "Data"
+msgstr "Data"
+
+msgid "Data Dictionary"
+msgstr "Kamus data"
+
+msgid "Data Explorer"
+msgstr "Penjelajah data"
+
+msgid "Data preview"
+msgstr "Pratinjau data"
+
+msgid "DataStore"
+msgstr "DataStore"
+
+msgid "Dataset"
+msgstr "Dataset"
+
+msgid "Dataset Form"
+msgstr "Formulir dataset"
+
+msgid "Dataset has been created."
+msgstr "Dataset berhasil dibuat."
+
+msgid "Dataset has been updated."
+msgstr "Dataset berhasil diperbarui."
+
+msgid "Dataset id already exists"
+msgstr "ID dataset sudah digunakan."
+
+msgid "Dataset not found"
+msgstr "Dataset tidak ditemukan."
+
+#, python-format
+msgid "Dataset not found: %s"
+msgstr "Dataset tidak ditemukan: %s"
+
+msgid "Datasets"
+msgstr "Dataset"
+
+msgid "Date"
+msgstr "Tanggal"
+
+msgid "Date format incorrect"
+msgstr "Format tanggal tidak benar."
+
+msgid "Delete"
+msgstr "Hapus"
+
+msgid "Delete Page"
+msgstr "Hapus halaman"
+
+msgid "Delete dataset"
+msgstr "Hapus dataset"
+
+msgid "Delete group"
+msgstr "Hapus grup"
+
+msgid "Delete organization"
+msgstr "Hapus organisasi"
+
+msgid "Description"
+msgstr "Deskripsi"
+
+msgid "Description of the dataset"
+msgstr "Deskripsi dataset"
+
+msgid "Disabled"
+msgstr "Dinonaktifkan"
+
+msgid "Discard changes"
+msgstr "Batalkan perubahan"
+
+msgid "Documentation"
+msgstr "Dokumentasi"
+
+msgid "Download"
+msgstr "Unduh"
+
+msgid "Download resource"
+msgstr "Unduh sumber daya"
+
+msgid "Draft"
+msgstr "Draf"
+
+#, python-format
+msgid "Duplicate key \"%s\""
+msgstr "Kunci \"%s\" terduplikasi."
+
+msgid "Edit"
+msgstr "Ubah"
+
+msgid "Edit Page"
+msgstr "Ubah halaman"
+
+msgid "Edit datasets"
+msgstr "Ubah dataset"
+
+msgid "Edit not allowed as it looks like spam. Please avoid links in your description."
+msgstr "Perubahan ditolak karena terindikasi sebagai spam. Hindari menyertakan tautan pada deskripsi."
+
+#, python-brace-format
+msgid "Edit {object_type}"
+msgstr "Ubah {object_type}"
+
+msgid "Editor"
+msgstr "Editor"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Email address"
+msgstr "Alamat email"
+
+msgid "Email or username"
+msgstr "Email atau nama pengguna"
+
+msgid "Enabled"
+msgstr "Diaktifkan"
+
+msgid "Error"
+msgstr "Kesalahan"
+
+msgid "Explore"
+msgstr "Jelajahi"
+
+msgid "Extras"
+msgstr "Kolom tambahan"
+
+msgid "Featured"
+msgstr "Unggulan"
+
+msgid "File"
+msgstr "Berkas"
+
+msgid "File URL"
+msgstr "URL berkas"
+
+msgid "Files"
+msgstr "Berkas"
+
+# Additional core CKAN and extension interface labels maintained by Wajo.
+msgid "Filter"
+msgstr "Saring"
+
+msgid "Filter by"
+msgstr "Saring berdasarkan"
+
+msgid "Forgot your password?"
+msgstr "Lupa kata sandi?"
+
+msgid "Format"
+msgstr "Format"
+
+msgid "From"
+msgstr "Dari"
+
+msgid "Full Name"
+msgstr "Nama lengkap"
+
+msgid "Full name"
+msgstr "Nama lengkap"
+
+msgid "Go to resource"
+msgstr "Buka sumber daya"
+
+msgid "Group"
+msgstr "Grup"
+
+msgid "Group has been created."
+msgstr "Grup berhasil dibuat."
+
+msgid "Group has been updated."
+msgstr "Grup berhasil diperbarui."
+
+msgid "Group name already exists in database"
+msgstr "Nama grup sudah digunakan."
+
+msgid "Group not found"
+msgstr "Grup tidak ditemukan."
+
+#, python-format
+msgid "Group not found: %s"
+msgstr "Grup tidak ditemukan: %s"
+
+msgid "Groups"
+msgstr "Grup"
+
+msgid "Harvest"
+msgstr "Pengambilan data"
+
+msgid "Harvest Job"
+msgstr "Tugas pengambilan data"
+
+msgid "Harvest Jobs"
+msgstr "Tugas pengambilan data"
+
+msgid "Harvest Source"
+msgstr "Sumber pengambilan data"
+
+msgid "Harvest Sources"
+msgstr "Sumber pengambilan data"
+
+msgid "Help"
+msgstr "Bantuan"
+
+msgid "Here are some reasons you may not be seeing expected views:"
+msgstr "Berikut beberapa alasan tampilan yang diharapkan belum muncul:"
+
+msgid "History"
+msgstr "Riwayat"
+
+msgid "Home"
+msgstr "Beranda"
+
+msgid "Id already exists"
+msgstr "ID sudah digunakan."
+
+msgid "Inactive"
+msgstr "Tidak aktif"
+
+msgid "Information"
+msgstr "Informasi"
+
+msgid "Internal server error"
+msgstr "Terjadi kesalahan pada server."
+
+msgid "Invalid URL"
+msgstr "URL tidak valid."
+
+msgid "Invalid format"
+msgstr "Format tidak valid."
+
+msgid "Invalid id provided"
+msgstr "ID yang diberikan tidak valid."
+
+msgid "Invalid integer"
+msgstr "Bilangan bulat tidak valid."
+
+msgid "Invalid value"
+msgstr "Nilai tidak valid."
+
+msgid "Job status"
+msgstr "Status tugas"
+
+msgid "Just now"
+msgstr "Baru saja"
+
+msgid "Largest Groups"
+msgstr "Grup dengan dataset terbanyak"
+
+msgid "Last Active"
+msgstr "Terakhir aktif"
+
+msgid "Last Modified"
+msgstr "Terakhir diubah"
+
+msgid "Last modified"
+msgstr "Terakhir diubah"
+
+msgid "Last run"
+msgstr "Terakhir dijalankan"
+
+msgid "Last updated"
+msgstr "Terakhir diperbarui"
+
+msgid "License"
+msgstr "Lisensi"
+
+msgid "Loading data..."
+msgstr "Memuat data..."
+
+msgid "Loading..."
+msgstr "Memuat..."
 
 msgid "Log in"
 msgstr "Masuk"
@@ -21,612 +558,524 @@ msgstr "Masuk"
 msgid "Log out"
 msgstr "Keluar"
 
-msgid "Logout"
-msgstr "Keluar"
-
-msgid "Register"
-msgstr "Daftar"
-
-msgid "Account"
-msgstr "Akun"
-
-msgid "Profile settings"
-msgstr "Pengaturan profil"
-
-msgid "Toggle navigation"
-msgstr "Tampilkan atau sembunyikan navigasi"
-
-msgid "Navigate to Home - {site_title}"
-msgstr "Buka beranda - {site_title}"
-
-msgid "Remember me"
-msgstr "Ingat saya"
-
-msgid "You're already logged in"
-msgstr "Anda sudah masuk"
-
-msgid "You need to log out before you can log in with another account."
-msgstr "Anda harus keluar terlebih dahulu sebelum masuk menggunakan akun lain."
-
 msgid "Log out now"
 msgstr "Keluar sekarang"
 
-msgid "Username"
-msgstr "Nama pengguna"
-
-msgid "username"
-msgstr "nama pengguna"
-
-msgid "Username or Email"
-msgstr "Nama pengguna atau email"
-
-msgid "Email or username"
-msgstr "Email atau nama pengguna"
-
-msgid "Password"
-msgstr "Kata sandi"
-
-msgid "Email"
-msgstr "Email"
-
-msgid "Full Name"
-msgstr "Nama lengkap"
-
-msgid "Create Account"
-msgstr "Buat akun"
-
-msgid "Registration"
-msgstr "Pendaftaran"
-
-msgid "Register for an Account"
-msgstr "Daftarkan akun"
-
-msgid "Reset Your Password"
-msgstr "Atur ulang kata sandi"
-
-msgid "Password Reset"
-msgstr "Pengaturan ulang kata sandi"
-
-msgid "Reset your password"
-msgstr "Atur ulang kata sandi"
-
-msgid "Request Reset"
-msgstr "Minta pengaturan ulang"
-
-msgid "Login failed. Bad username or password."
-msgstr "Gagal masuk. Nama pengguna atau kata sandi salah."
+msgid "Login"
+msgstr "Masuk"
 
 msgid "Login failed. Bad username or password or CAPTCHA."
 msgstr "Gagal masuk. Nama pengguna, kata sandi, atau CAPTCHA tidak sesuai."
 
-msgid "Datasets"
-msgstr "Dataset"
-
-msgid "Dataset"
-msgstr "Dataset"
-
-msgid "Add Dataset"
-msgstr "Tambah dataset"
-
-msgid "Create Dataset"
-msgstr "Buat dataset"
-
-msgid "Edit datasets"
-msgstr "Ubah dataset"
-
-msgid "My Datasets"
-msgstr "Dataset saya"
-
-msgid "Organizations"
-msgstr "Organisasi"
-
-msgid "Organization"
-msgstr "Organisasi"
-
-msgid "Create an Organization"
-msgstr "Buat organisasi"
-
-msgid "Create Organization"
-msgstr "Buat organisasi"
-
-msgid "Update Organization"
-msgstr "Perbarui organisasi"
-
-msgid "Save Organization"
-msgstr "Simpan organisasi"
-
-msgid "My Organizations"
-msgstr "Organisasi saya"
-
-msgid "Groups"
-msgstr "Grup"
-
-msgid "Group"
-msgstr "Grup"
-
-msgid "My Groups"
-msgstr "Grup saya"
-
-msgid "Users"
-msgstr "Pengguna"
-
-msgid "User"
-msgstr "Pengguna"
-
-msgid "Members"
-msgstr "Anggota"
-
-msgid "Member"
-msgstr "Anggota"
-
-msgid "Admin"
-msgstr "Administrator"
-
-msgid "Editor"
-msgstr "Editor"
-
-msgid "Role"
-msgstr "Peran"
-
-msgid "Search"
-msgstr "Cari"
-
-msgid "Search Users"
-msgstr "Cari pengguna"
-
-msgid "Search Datasets"
-msgstr "Cari dataset"
-
-msgid "Search Organizations"
-msgstr "Cari organisasi"
-
-msgid "Search Groups"
-msgstr "Cari grup"
-
-msgid "No datasets found"
-msgstr "Dataset tidak ditemukan"
-
-msgid "No organizations found"
-msgstr "Organisasi tidak ditemukan"
-
-msgid "No groups found"
-msgstr "Grup tidak ditemukan"
-
-msgid "No results found"
-msgstr "Tidak ada hasil yang ditemukan"
-
-msgid "Add"
-msgstr "Tambah"
-
-msgid "Add new"
-msgstr "Tambah baru"
-
-msgid "Add Member"
-msgstr "Tambah anggota"
-
-msgid "Add resource"
-msgstr "Tambah sumber daya"
-
-msgid "Add a new resource"
-msgstr "Tambah sumber daya baru"
-
-msgid "Edit"
-msgstr "Ubah"
-
-msgid "Delete"
-msgstr "Hapus"
-
-msgid "Remove"
-msgstr "Hapus"
-
-msgid "View"
-msgstr "Lihat"
-
-msgid "Preview"
-msgstr "Pratinjau"
-
-msgid "Download"
-msgstr "Unduh"
-
-msgid "Create"
-msgstr "Buat"
-
-msgid "Save"
-msgstr "Simpan"
-
-msgid "Save changes"
-msgstr "Simpan perubahan"
-
-msgid "Cancel"
-msgstr "Batal"
-
-msgid "Continue"
-msgstr "Lanjutkan"
-
-msgid "Back"
-msgstr "Kembali"
-
-msgid "Previous"
-msgstr "Sebelumnya"
-
-msgid "Next"
-msgstr "Berikutnya"
-
-msgid "Submit"
-msgstr "Kirim"
-
-msgid "Update"
-msgstr "Perbarui"
-
-msgid "Upload"
-msgstr "Unggah"
-
-msgid "Upload a file"
-msgstr "Unggah berkas"
-
-msgid "Actions"
-msgstr "Tindakan"
-
-msgid "Name"
-msgstr "Nama"
-
-msgid "Title"
-msgstr "Judul"
-
-msgid "Description"
-msgstr "Deskripsi"
-
-msgid "Tags"
-msgstr "Tag"
-
-msgid "Tag"
-msgstr "Tag"
-
-msgid "License"
-msgstr "Lisensi"
-
-msgid "Visibility"
-msgstr "Visibilitas"
-
-msgid "Public"
-msgstr "Publik"
-
-msgid "Private"
-msgstr "Privat"
-
-msgid "Resources"
-msgstr "Sumber daya"
-
-msgid "Resource"
-msgstr "Sumber daya"
-
-msgid "Data"
-msgstr "Data"
-
-msgid "Files"
-msgstr "Berkas"
-
-msgid "File"
-msgstr "Berkas"
-
-msgid "URL"
-msgstr "URL"
-
-msgid "Format"
-msgstr "Format"
-
-msgid "Created"
-msgstr "Dibuat"
-
-msgid "Last Modified"
-msgstr "Terakhir diubah"
-
-msgid "Metadata"
-msgstr "Metadata"
-
-msgid "Information"
-msgstr "Informasi"
-
-msgid "About"
-msgstr "Tentang"
-
-msgid "Activity"
-msgstr "Aktivitas"
-
-msgid "History"
-msgstr "Riwayat"
-
-msgid "Revisions"
-msgstr "Revisi"
-
-msgid "Date"
-msgstr "Tanggal"
-
-msgid "Required field"
-msgstr "Kolom wajib diisi"
-
-msgid "Organization Form"
-msgstr "Formulir organisasi"
-
-msgid "Dataset Form"
-msgstr "Formulir dataset"
-
-msgid "Description of the dataset"
-msgstr "Deskripsi dataset"
-
-msgid "A short description of the dataset..."
-msgstr "Deskripsi singkat dataset..."
-
-msgid "There is no description for this organization."
-msgstr "Belum ada deskripsi untuk organisasi ini."
-
-msgid "What are Organizations?"
-msgstr "Apa itu organisasi?"
-
-msgid "What are Groups?"
-msgstr "Apa itu grup?"
-
-msgid "Create datasets, groups and other exciting things"
-msgstr "Buat dataset, grup, dan berbagai konten lainnya"
-
-msgid "Social"
-msgstr "Media sosial"
-
-msgid "API Tokens"
-msgstr "Token API"
-
-msgid "Create API Token"
-msgstr "Buat token API"
-
-msgid "Last Active"
-msgstr "Terakhir aktif"
-
-msgid "The username is already associated with another account. Please use a different username."
-msgstr "Nama pengguna ini sudah digunakan oleh akun lain. Silakan gunakan nama pengguna yang berbeda."
-
-msgid "Please enter both passwords"
-msgstr "Silakan isi kedua kolom kata sandi"
-
-msgid "Passwords must be strings"
-msgstr "Kata sandi harus berupa teks"
-
-msgid "Your password must be 8 characters or longer"
-msgstr "Kata sandi harus terdiri dari minimal 8 karakter"
-
-msgid "Are you sure you want to purge datasets?"
-msgstr "Apakah Anda yakin ingin menghapus dataset secara permanen?"
-
-msgid "Total number of Datasets"
-msgstr "Jumlah seluruh dataset"
-
-msgid "Total datasets"
-msgstr "Jumlah dataset"
-
-msgid "All dataset revisions"
-msgstr "Seluruh revisi dataset"
-
-msgid "New datasets"
-msgstr "Dataset baru"
-
-msgid "Most Edited Datasets"
-msgstr "Dataset paling sering diubah"
-
-msgid "Number of edits"
-msgstr "Jumlah perubahan"
-
-msgid "No edited datasets"
-msgstr "Belum ada dataset yang diubah"
-
-msgid "Largest Groups"
-msgstr "Grup dengan dataset terbanyak"
-
-msgid "Number of datasets"
-msgstr "Jumlah dataset"
-
-msgid "No groups"
-msgstr "Belum ada grup"
-
-msgid "Top Tags"
-msgstr "Tag terpopuler"
-
-msgid "Tag Name"
-msgstr "Nama tag"
-
-msgid "Number of Datasets"
-msgstr "Jumlah dataset"
-
-msgid "Users Creating Most Datasets"
-msgstr "Pengguna dengan dataset terbanyak"
-
-msgid "Statistics Menu"
-msgstr "Menu statistik"
-
-msgid "Total Number of Datasets"
-msgstr "Jumlah seluruh dataset"
-
-msgid "%(count)s dataset found for \"%(query)s\"."
-msgid_plural "%(count)s datasets found for \"%(query)s\"."
-msgstr[0] "%(count)s dataset ditemukan untuk \"%(query)s\"."
-
-msgid "%(count)s dataset found."
-msgid_plural "%(count)s datasets found."
-msgstr[0] "%(count)s dataset ditemukan."
-
-# Additional core CKAN and extension interface labels maintained by Wajo.
-
-msgid "Filter"
-msgstr "Saring"
-
-msgid "Apply"
-msgstr "Terapkan"
-
-msgid "Clear"
-msgstr "Bersihkan"
-
-msgid "Open"
-msgstr "Buka"
-
-msgid "Close"
-msgstr "Tutup"
-
-msgid "Create new"
-msgstr "Buat baru"
-
-msgid "Discard changes"
-msgstr "Batalkan perubahan"
-
-msgid "Confirm"
-msgstr "Konfirmasi"
-
-msgid "Are you sure?"
-msgstr "Apakah Anda yakin?"
-
-msgid "Action"
-msgstr "Tindakan"
-
-msgid "Status"
-msgstr "Status"
-
-msgid "Active"
-msgstr "Aktif"
-
-msgid "Inactive"
-msgstr "Tidak aktif"
-
-msgid "Enabled"
-msgstr "Diaktifkan"
-
-msgid "Disabled"
-msgstr "Dinonaktifkan"
-
-msgid "Draft"
-msgstr "Draf"
-
-msgid "Published"
-msgstr "Diterbitkan"
-
-msgid "Unpublished"
-msgstr "Belum diterbitkan"
-
-msgid "This field is required"
-msgstr "Kolom ini wajib diisi"
-
-msgid "No data available"
-msgstr "Tidak ada data tersedia"
-
-msgid "Loading..."
-msgstr "Memuat..."
-
-msgid "Please wait..."
-msgstr "Mohon tunggu..."
-
-msgid "Show more"
-msgstr "Tampilkan lebih banyak"
-
-msgid "Show less"
-msgstr "Tampilkan lebih sedikit"
-
-msgid "Sort by"
-msgstr "Urutkan berdasarkan"
-
-msgid "Filter by"
-msgstr "Saring berdasarkan"
-
-msgid "All"
-msgstr "Semua"
-
-msgid "Created on"
-msgstr "Dibuat pada"
-
-msgid "Last modified"
-msgstr "Terakhir diubah"
-
-msgid "Owner"
-msgstr "Pemilik"
-
-msgid "Author"
-msgstr "Penulis"
-
-msgid "Add Resource"
-msgstr "Tambah sumber daya"
-
-msgid "Data Dictionary"
-msgstr "Kamus data"
-
-msgid "Preview resource"
-msgstr "Pratinjau sumber daya"
-
-msgid "View resource"
-msgstr "Lihat sumber daya"
-
-msgid "Download resource"
-msgstr "Unduh sumber daya"
+msgid "Login failed. Bad username or password."
+msgstr "Gagal masuk. Nama pengguna atau kata sandi salah."
+
+msgid "Logout"
+msgstr "Keluar"
 
 msgid "Manage"
 msgstr "Kelola"
 
-msgid "Settings"
-msgstr "Pengaturan"
-
-msgid "Administration"
-msgstr "Administrasi"
-
-msgid "Site Settings"
-msgstr "Pengaturan situs"
-
-msgid "System settings"
-msgstr "Pengaturan sistem"
-
-msgid "Activity Stream"
-msgstr "Riwayat aktivitas"
-
-msgid "Recent activity"
-msgstr "Aktivitas terbaru"
-
-msgid "Add member"
-msgstr "Tambah anggota"
-
 msgid "Manage members"
 msgstr "Kelola anggota"
 
-msgid "Permissions"
-msgstr "Hak akses"
+msgid "Member"
+msgstr "Anggota"
+
+msgid "Members"
+msgstr "Anggota"
+
+msgid "Menu label"
+msgstr "Label menu"
+
+msgid "Metadata"
+msgstr "Metadata"
+
+msgid "Metadata fields"
+msgstr "Kolom metadata"
+
+msgid "Missing value"
+msgstr "Nilai wajib diisi"
+
+msgid "Modified by"
+msgstr "Diubah oleh"
+
+msgid "More information"
+msgstr "Informasi lebih lanjut"
+
+msgid "Most Edited Datasets"
+msgstr "Dataset paling sering diubah"
+
+msgid "Must be a Unicode string value"
+msgstr "Nilai harus berupa teks Unicode."
+
+msgid "Must be a float timestamp"
+msgstr "Nilai harus berupa penanda waktu desimal."
+
+msgid "Must be a natural number"
+msgstr "Nilai harus berupa bilangan asli."
+
+msgid "Must be a positive integer"
+msgstr "Nilai harus berupa bilangan bulat positif."
+
+#, python-format
+msgid "Must be at least %s characters long"
+msgstr "Panjang minimal %s karakter."
+
+msgid "Must be purely lowercase alphanumeric (ascii) characters and these symbols: -_"
+msgstr "Gunakan hanya huruf kecil ASCII, angka, dan simbol berikut: -_."
+
+msgid "My Datasets"
+msgstr "Dataset saya"
+
+msgid "My Groups"
+msgstr "Grup saya"
+
+msgid "My Organizations"
+msgstr "Organisasi saya"
+
+msgid "My account"
+msgstr "Akun saya"
+
+#, python-brace-format
+msgid "My {object_type}"
+msgstr "{object_type} saya"
+
+#, python-brace-format
+msgid "My {object_type}s"
+msgstr "{object_type} saya"
+
+msgid "Name"
+msgstr "Nama"
+
+#, python-format
+msgid "Name \"%s\" length is less than minimum %s"
+msgstr "Panjang nama \"%s\" kurang dari batas minimum %s."
+
+#, python-format
+msgid "Name \"%s\" length is more than maximum %s"
+msgstr "Panjang nama \"%s\" melebihi batas maksimum %s."
+
+msgid "Name Ascending"
+msgstr "Nama (A–Z)"
+
+msgid "Name Descending"
+msgstr "Nama (Z–A)"
+
+#, python-format
+msgid "Name must be a maximum of %i characters long"
+msgstr "Nama maksimal %i karakter."
+
+#, python-format
+msgid "Name must be at least %s characters long"
+msgstr "Nama harus terdiri dari minimal %s karakter."
+
+msgid "Names must be strings"
+msgstr "Nama harus berupa teks."
+
+#, python-brace-format
+msgid "Navigate to Home - {site_title}"
+msgstr "Buka beranda - {site_title}"
+
+msgid "Never"
+msgstr "Tidak pernah"
+
+msgid "New Page"
+msgstr "Halaman baru"
+
+msgid "New datasets"
+msgstr "Dataset baru"
+
+msgid "Next"
+msgstr "Berikutnya"
+
+msgid "Next run"
+msgstr "Jadwal berikutnya"
+
+msgid "No"
+msgstr "Tidak"
+
+msgid "No activity"
+msgstr "Belum ada aktivitas."
+
+msgid "No activity found"
+msgstr "Tidak ada aktivitas yang ditemukan."
+
+msgid "No data available"
+msgstr "Tidak ada data tersedia"
+
+msgid "No datasets found"
+msgstr "Dataset tidak ditemukan"
+
+msgid "No edited datasets"
+msgstr "Belum ada dataset yang diubah"
+
+msgid "No groups"
+msgstr "Belum ada grup"
+
+msgid "No groups found"
+msgstr "Grup tidak ditemukan"
+
+msgid "No organizations found"
+msgstr "Organisasi tidak ditemukan"
+
+msgid "No preview available"
+msgstr "Pratinjau tidak tersedia"
+
+msgid "No recipient email address available!"
+msgstr "Alamat email penerima tidak tersedia!"
+
+msgid "No resources found"
+msgstr "Sumber daya tidak ditemukan."
+
+msgid "No results found"
+msgstr "Tidak ada hasil yang ditemukan"
+
+msgid "No tag name"
+msgstr "Nama tag belum diisi."
+
+msgid "No users found"
+msgstr "Tidak ada pengguna yang ditemukan"
+
+#, python-brace-format
+msgid "No {object_type}"
+msgstr "Tidak ada {object_type}"
+
+msgid "None"
+msgstr "Tidak ada"
+
+msgid "Not authorized"
+msgstr "Tidak memiliki izin."
+
+msgid "Not found"
+msgstr "Tidak ditemukan."
+
+msgid "Not seeing the views you were expecting?"
+msgstr "Tampilan yang Anda harapkan belum terlihat?"
+
+msgid "Notes"
+msgstr "Catatan"
+
+msgid "Number of Datasets"
+msgstr "Jumlah dataset"
+
+msgid "Number of datasets"
+msgstr "Jumlah dataset"
+
+msgid "Number of edits"
+msgstr "Jumlah perubahan"
+
+msgid "Open"
+msgstr "Buka"
+
+msgid "Open in new window"
+msgstr "Buka di jendela baru"
+
+msgid "Optional"
+msgstr "Opsional"
+
+msgid "Organization"
+msgstr "Organisasi"
+
+msgid "Organization Form"
+msgstr "Formulir organisasi"
+
+msgid "Organization does not exist"
+msgstr "Organisasi tidak ditemukan."
+
+msgid "Organization has been created."
+msgstr "Organisasi berhasil dibuat."
+
+msgid "Organization has been updated."
+msgstr "Organisasi berhasil diperbarui."
+
+msgid "Organization members"
+msgstr "Anggota organisasi"
+
+msgid "Organization not found"
+msgstr "Organisasi tidak ditemukan."
+
+msgid "Organizations"
+msgstr "Organisasi"
+
+msgid "Owner"
+msgstr "Pemilik"
+
+msgid "Package resource(s) invalid"
+msgstr "Sumber daya paket tidak valid."
+
+msgid "Page"
+msgstr "Halaman"
+
+msgid "Page content"
+msgstr "Konten halaman"
+
+msgid "Page not found"
+msgstr "Halaman tidak ditemukan."
+
+msgid "Page title"
+msgstr "Judul halaman"
+
+msgid "Pages"
+msgstr "Halaman"
+
+msgid "Password"
+msgstr "Kata sandi"
+
+msgid "Password Reset"
+msgstr "Pengaturan ulang kata sandi"
+
+msgid "Password must be at least 8 characters long"
+msgstr "Kata sandi harus terdiri dari minimal 8 karakter."
+
+msgid "Passwords must be strings"
+msgstr "Kata sandi harus berupa teks"
 
 msgid "Permission"
 msgstr "Hak akses"
 
-msgid "API Token"
-msgstr "Token API"
+msgid "Permissions"
+msgstr "Hak akses"
 
-msgid "Harvest"
-msgstr "Pengambilan data"
+msgid "Please check the form for errors"
+msgstr "Periksa kembali kesalahan pada formulir."
 
-msgid "Harvest Sources"
-msgstr "Sumber pengambilan data"
+msgid "Please enter a floating point value"
+msgstr "Masukkan bilangan desimal."
 
-msgid "Harvest Source"
-msgstr "Sumber pengambilan data"
+msgid "Please enter a valid email address"
+msgstr "Masukkan alamat email yang valid."
 
-msgid "Add Harvest Source"
-msgstr "Tambah sumber pengambilan data"
+msgid "Please enter an integer value"
+msgstr "Masukkan bilangan bulat."
 
-msgid "Harvest Jobs"
-msgstr "Tugas pengambilan data"
+msgid "Please enter both passwords"
+msgstr "Silakan isi kedua kolom kata sandi"
 
-msgid "Harvest Job"
-msgstr "Tugas pengambilan data"
+msgid "Please provide a valid URL"
+msgstr "Masukkan URL yang valid."
+
+msgid "Please select a file"
+msgstr "Silakan pilih berkas."
+
+msgid "Please wait..."
+msgstr "Mohon tunggu..."
+
+msgid "Popular"
+msgstr "Terpopuler"
+
+msgid "Preview"
+msgstr "Pratinjau"
+
+msgid "Preview resource"
+msgstr "Pratinjau sumber daya"
+
+msgid "Previous"
+msgstr "Sebelumnya"
+
+msgid "Private"
+msgstr "Privat"
+
+msgid "Profile"
+msgstr "Profil"
+
+msgid "Profile settings"
+msgstr "Pengaturan profil"
+
+msgid "Public"
+msgstr "Publik"
+
+msgid "Published"
+msgstr "Diterbitkan"
+
+msgid "Purge"
+msgstr "Hapus permanen"
+
+msgid "Purge item"
+msgstr "Hapus item secara permanen"
+
+msgid "Recent activity"
+msgstr "Aktivitas terbaru"
+
+msgid "Register"
+msgstr "Daftar"
+
+msgid "Register for an Account"
+msgstr "Daftarkan akun"
+
+msgid "Registration"
+msgstr "Pendaftaran"
 
 msgid "Reharvest"
 msgstr "Ambil ulang data"
 
+msgid "Relevance"
+msgstr "Relevansi"
+
+msgid "Remember me"
+msgstr "Ingat saya"
+
+msgid "Remove"
+msgstr "Hapus"
+
+msgid "Remove member"
+msgstr "Hapus anggota"
+
+msgid "Request Reset"
+msgstr "Minta pengaturan ulang"
+
+msgid "Request reset"
+msgstr "Minta pengaturan ulang"
+
+msgid "Required"
+msgstr "Wajib diisi"
+
+msgid "Required field"
+msgstr "Kolom wajib diisi"
+
+msgid "Reset Your Password"
+msgstr "Atur ulang kata sandi"
+
+msgid "Reset password"
+msgstr "Atur ulang kata sandi"
+
+msgid "Reset your password"
+msgstr "Atur ulang kata sandi"
+
+msgid "Resource"
+msgstr "Sumber daya"
+
+msgid "Resource Description"
+msgstr "Deskripsi sumber daya"
+
+msgid "Resource Name"
+msgstr "Nama sumber daya"
+
+msgid "Resource Views"
+msgstr "Tampilan sumber daya"
+
+msgid "Resource has been created"
+msgstr "Sumber daya berhasil dibuat."
+
+msgid "Resource has been updated"
+msgstr "Sumber daya berhasil diperbarui."
+
+msgid "Resource id already exists."
+msgstr "ID sumber daya sudah digunakan."
+
+msgid "Resource not found"
+msgstr "Sumber daya tidak ditemukan."
+
+#, python-format
+msgid "Resource not found: %s"
+msgstr "Sumber daya tidak ditemukan: %s"
+
+msgid "ResourceView id already exists"
+msgstr "ID tampilan sumber daya sudah digunakan."
+
+msgid "Resources"
+msgstr "Sumber daya"
+
+msgid "Revisions"
+msgstr "Revisi"
+
+msgid "Role"
+msgstr "Peran"
+
 msgid "Run now"
 msgstr "Jalankan sekarang"
 
-msgid "Last run"
-msgstr "Terakhir dijalankan"
+msgid "Save"
+msgstr "Simpan"
 
-msgid "Next run"
-msgstr "Jadwal berikutnya"
+msgid "Save Organization"
+msgstr "Simpan organisasi"
+
+msgid "Save changes"
+msgstr "Simpan perubahan"
+
+#, python-brace-format
+msgid "Save {object_type}"
+msgstr "Simpan {object_type}"
+
+msgid "Search"
+msgstr "Cari"
+
+msgid "Search Datasets"
+msgstr "Cari dataset"
+
+msgid "Search Groups"
+msgstr "Cari grup"
+
+msgid "Search Organizations"
+msgstr "Cari organisasi"
+
+msgid "Search Users"
+msgstr "Cari pengguna"
+
+msgid "Search datasets"
+msgstr "Cari dataset"
+
+msgid "Search datasets..."
+msgstr "Cari dataset..."
+
+msgid "Search groups"
+msgstr "Cari grup"
+
+msgid "Search groups..."
+msgstr "Cari grup..."
+
+msgid "Search organizations"
+msgstr "Cari organisasi"
+
+msgid "Search organizations..."
+msgstr "Cari organisasi..."
+
+msgid "Search results"
+msgstr "Hasil pencarian"
+
+msgid "Search users"
+msgstr "Cari pengguna"
+
+msgid "Search users..."
+msgstr "Cari pengguna..."
+
+#, python-brace-format
+msgid "Search {object_type}s..."
+msgstr "Cari {object_type}..."
+
+msgid "Search..."
+msgstr "Cari..."
+
+msgid "Select"
+msgstr "Pilih"
+
+msgid "Select all"
+msgstr "Pilih semua"
+
+msgid "Settings"
+msgstr "Pengaturan"
+
+msgid "Show in menu"
+msgstr "Tampilkan di menu"
+
+msgid "Show less"
+msgstr "Tampilkan lebih sedikit"
+
+msgid "Show more"
+msgstr "Tampilkan lebih banyak"
+
+msgid "Site Settings"
+msgstr "Pengaturan situs"
+
+msgid "Slug"
+msgstr "Slug"
+
+msgid "Social"
+msgstr "Media sosial"
+
+msgid "Sort by"
+msgstr "Urutkan berdasarkan"
 
 msgid "Source URL"
 msgstr "URL sumber"
@@ -634,110 +1083,362 @@ msgstr "URL sumber"
 msgid "Source type"
 msgstr "Jenis sumber"
 
-msgid "Job status"
-msgstr "Status tugas"
+msgid "Statistics"
+msgstr "Statistik"
 
-msgid "Pages"
-msgstr "Halaman"
+msgid "Statistics Menu"
+msgstr "Menu statistik"
 
-msgid "Page"
-msgstr "Halaman"
+msgid "Status"
+msgstr "Status"
 
-msgid "Add Page"
-msgstr "Tambah halaman"
-
-msgid "New Page"
-msgstr "Halaman baru"
-
-msgid "Edit Page"
-msgstr "Ubah halaman"
-
-msgid "Delete Page"
-msgstr "Hapus halaman"
-
-msgid "Page title"
-msgstr "Judul halaman"
-
-msgid "Page content"
-msgstr "Konten halaman"
-
-msgid "Slug"
-msgstr "Slug"
-
-msgid "Menu label"
-msgstr "Label menu"
-
-msgid "Featured"
-msgstr "Unggulan"
-
-msgid "Show in menu"
-msgstr "Tampilkan di menu"
-
-msgid "DataStore"
-msgstr "DataStore"
-
-msgid "Data Explorer"
-msgstr "Penjelajah data"
-
-msgid "Metadata fields"
-msgstr "Kolom metadata"
-
-msgid "Validation"
-msgstr "Validasi"
-
-msgid "Error"
-msgstr "Kesalahan"
-
-msgid "Warning"
-msgstr "Peringatan"
+msgid "Submit"
+msgstr "Kirim"
 
 msgid "Success"
 msgstr "Berhasil"
 
-msgid "Search datasets"
-msgstr "Cari dataset"
+msgid "System Administrator"
+msgstr "Administrator sistem"
 
-msgid "Search organizations"
-msgstr "Cari organisasi"
+msgid "System settings"
+msgstr "Pengaturan sistem"
 
-msgid "Search groups"
-msgstr "Cari grup"
+msgid "Tag"
+msgstr "Tag"
 
-msgid "Search users"
-msgstr "Cari pengguna"
+#, python-format
+msgid ""
+"Tag \"%s\" can only contain alphanumeric characters, spaces (\" \"), hyphens (\"-\"), underscores"
+" (\"_\") or dots (\".\")"
+msgstr ""
+"Tag \"%s\" hanya boleh berisi huruf, angka, spasi, tanda hubung (\"-\"), garis bawah (\"_\"), "
+"atau titik (\".\")."
 
-msgid "Add organization"
-msgstr "Tambah organisasi"
+#, python-format
+msgid "Tag \"%s\" length is less than minimum %s"
+msgstr "Panjang tag \"%s\" kurang dari batas minimum %s."
 
-msgid "Add group"
-msgstr "Tambah grup"
+#, python-format
+msgid "Tag \"%s\" length is more than maximum %i"
+msgstr "Panjang tag \"%s\" melebihi batas maksimum %i."
 
-msgid "Create organization"
-msgstr "Buat organisasi"
+#, python-format
+msgid "Tag \"%s\" must not be uppercase"
+msgstr "Tag \"%s\" tidak boleh menggunakan huruf kapital."
 
-msgid "Create group"
-msgstr "Buat grup"
+#, python-format
+msgid "Tag %s already belongs to vocabulary %s"
+msgstr "Tag %s sudah menjadi bagian dari kosakata %s."
+
+#, python-format
+msgid "Tag %s does not belong to vocabulary %s"
+msgstr "Tag %s bukan bagian dari kosakata %s."
+
+msgid "Tag Name"
+msgstr "Nama tag"
+
+#, python-format
+msgid "Tag vocabulary \"%s\" does not exist"
+msgstr "Kosakata tag \"%s\" tidak ditemukan."
+
+msgid "Tag vocabulary was not found."
+msgstr "Kosakata tag tidak ditemukan."
+
+msgid "Tags"
+msgstr "Tag"
+
+msgid "That URL is already in use."
+msgstr "URL tersebut sudah digunakan."
+
+msgid "That group name or ID does not exist."
+msgstr "Nama atau ID grup tersebut tidak ditemukan."
+
+msgid "That login name can not be modified."
+msgstr "Nama pengguna untuk masuk tidak dapat diubah."
+
+msgid "That name cannot be used"
+msgstr "Nama tersebut tidak dapat digunakan."
+
+msgid "That vocabulary name is already in use."
+msgstr "Nama kosakata tersebut sudah digunakan."
+
+msgid "The dataset has no resources"
+msgstr "Dataset ini belum memiliki sumber daya."
+
+msgid "The dataset was successfully created"
+msgstr "Dataset berhasil dibuat."
+
+msgid "The dataset was successfully updated"
+msgstr "Dataset berhasil diperbarui."
+
+msgid "The email address is invalid"
+msgstr "Alamat email tidak valid."
+
+msgid "The email is already registered"
+msgstr "Alamat email sudah terdaftar."
+
+msgid "The group was successfully created"
+msgstr "Grup berhasil dibuat."
+
+msgid "The group was successfully updated"
+msgstr "Grup berhasil diperbarui."
+
+#, python-format
+msgid "The input field %(name)s was not expected."
+msgstr "Kolom masukan %(name)s tidak diharapkan."
+
+msgid "The organization was successfully created"
+msgstr "Organisasi berhasil dibuat."
+
+msgid "The organization was successfully updated"
+msgstr "Organisasi berhasil diperbarui."
+
+msgid "The page you are looking for could not be found"
+msgstr "Halaman yang Anda cari tidak ditemukan."
+
+msgid "The passwords you entered do not match"
+msgstr "Kata sandi yang dimasukkan tidak sama."
+
+msgid "The resource has been deleted"
+msgstr "Sumber daya telah dihapus."
+
+msgid "The resource was successfully created"
+msgstr "Sumber daya berhasil dibuat."
+
+msgid "The resource was successfully updated"
+msgstr "Sumber daya berhasil diperbarui."
+
+msgid "The username is already associated with another account. Please use a different username."
+msgstr "Nama pengguna ini sudah digunakan oleh akun lain. Silakan gunakan nama pengguna yang berbeda."
+
+msgid "The username is invalid"
+msgstr "Nama pengguna tidak valid."
+
+msgid "There are currently no datasets for this site."
+msgstr "Saat ini belum ada dataset di situs ini."
+
+msgid "There are currently no groups for this site."
+msgstr "Saat ini belum ada grup di situs ini."
+
+msgid "There are currently no organizations for this site."
+msgstr "Saat ini belum ada organisasi di situs ini."
+
+#, python-brace-format
+msgid "There are currently no {object_type}s for this site."
+msgstr "Saat ini belum ada {object_type} di situs ini."
+
+msgid "There are errors in the form"
+msgstr "Terdapat kesalahan pada formulir."
+
+msgid "There are no resources associated with this dataset."
+msgstr "Tidak ada sumber daya yang terkait dengan dataset ini."
+
+msgid "There are no views created for this resource yet."
+msgstr "Belum ada tampilan yang dibuat untuk sumber daya ini."
+
+#, python-brace-format
+msgid "There are no {object_type}s associated with this dataset."
+msgstr "Tidak ada {object_type} yang terkait dengan dataset ini."
+
+msgid "There is no description for this dataset."
+msgstr "Belum ada deskripsi untuk dataset ini."
+
+msgid "There is no description for this organization."
+msgstr "Belum ada deskripsi untuk organisasi ini."
+
+#, python-brace-format
+msgid "There is no description for this {object_type}."
+msgstr "Belum ada deskripsi untuk {object_type} ini."
+
+msgid "This field is required"
+msgstr "Kolom ini wajib diisi"
+
+msgid "This field is required."
+msgstr "Kolom ini wajib diisi."
+
+msgid "This is a required field"
+msgstr "Kolom ini wajib diisi."
+
+msgid "Time"
+msgstr "Waktu"
+
+msgid "Title"
+msgstr "Judul"
+
+msgid "To"
+msgstr "Sampai"
+
+msgid "Today"
+msgstr "Hari ini"
+
+msgid "Toggle navigation"
+msgstr "Tampilkan atau sembunyikan navigasi"
+
+msgid "Top Tags"
+msgstr "Tag terpopuler"
+
+msgid "Total Number of Datasets"
+msgstr "Jumlah seluruh dataset"
+
+msgid "Total datasets"
+msgstr "Jumlah dataset"
+
+msgid "Total number of Datasets"
+msgstr "Jumlah seluruh dataset"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Unknown"
+msgstr "Tidak diketahui"
+
+msgid "Unnamed resource"
+msgstr "Sumber daya tanpa nama"
+
+msgid "Unpublished"
+msgstr "Belum diterbitkan"
+
+msgid "Update"
+msgstr "Perbarui"
+
+msgid "Update Organization"
+msgstr "Perbarui organisasi"
 
 msgid "Update dataset"
 msgstr "Perbarui dataset"
 
-msgid "Delete dataset"
-msgstr "Hapus dataset"
+#, python-brace-format
+msgid "Update {object_type}"
+msgstr "Perbarui {object_type}"
 
-msgid "Delete organization"
-msgstr "Hapus organisasi"
+msgid "Updated on"
+msgstr "Diperbarui pada"
 
-msgid "Delete group"
-msgstr "Hapus grup"
+msgid "Upload"
+msgstr "Unggah"
 
-msgid "Are you sure you want to delete this dataset?"
-msgstr "Apakah Anda yakin ingin menghapus dataset ini?"
+msgid "Upload a file"
+msgstr "Unggah berkas"
 
-msgid "Are you sure you want to delete this resource?"
-msgstr "Apakah Anda yakin ingin menghapus sumber daya ini?"
+msgid "Upload a file from your computer"
+msgstr "Unggah berkas dari komputer Anda."
 
-msgid "Are you sure you want to delete this organization?"
-msgstr "Apakah Anda yakin ingin menghapus organisasi ini?"
+msgid "User"
+msgstr "Pengguna"
 
-msgid "No users found"
-msgstr "Tidak ada pengguna yang ditemukan"
+#, python-brace-format
+msgid "User isn't a member of any {object_type}s."
+msgstr "Pengguna bukan anggota {object_type} mana pun."
+
+msgid "User names must be strings"
+msgstr "Nama pengguna harus berupa teks."
+
+msgid "User not found"
+msgstr "Pengguna tidak ditemukan."
+
+#, python-format
+msgid "User not found: %s"
+msgstr "Pengguna tidak ditemukan: %s"
+
+msgid "Username"
+msgstr "Nama pengguna"
+
+msgid "Username or Email"
+msgstr "Nama pengguna atau email"
+
+msgid "Users"
+msgstr "Pengguna"
+
+msgid "Users Creating Most Datasets"
+msgstr "Pengguna dengan dataset terbanyak"
+
+msgid "Validation"
+msgstr "Validasi"
+
+msgid "Version"
+msgstr "Versi"
+
+#, python-format
+msgid "Version must be a maximum of %i characters long"
+msgstr "Versi maksimal %i karakter."
+
+msgid "View"
+msgstr "Lihat"
+
+msgid "View full size"
+msgstr "Lihat ukuran penuh"
+
+msgid "View resource"
+msgstr "Lihat sumber daya"
+
+#, python-brace-format
+msgid "View {object_type}"
+msgstr "Lihat {object_type}"
+
+msgid "Views"
+msgstr "Tampilan"
+
+msgid "Visibility"
+msgstr "Visibilitas"
+
+msgid "Warning"
+msgstr "Peringatan"
+
+msgid "Welcome"
+msgstr "Selamat datang"
+
+msgid "What are Groups?"
+msgstr "Apa itu grup?"
+
+msgid "What are Organizations?"
+msgstr "Apa itu organisasi?"
+
+msgid "Yes"
+msgstr "Ya"
+
+msgid "Yesterday"
+msgstr "Kemarin"
+
+#, python-brace-format
+msgid "You are not a member of any {object_type}s."
+msgstr "Anda bukan anggota {object_type} mana pun."
+
+msgid "You are not authorized to access this page"
+msgstr "Anda tidak memiliki izin untuk mengakses halaman ini."
+
+msgid "You cannot add a dataset to this organization"
+msgstr "Anda tidak dapat menambahkan dataset ke organisasi ini."
+
+msgid "You cannot move this dataset to another organization"
+msgstr "Anda tidak dapat memindahkan dataset ini ke organisasi lain."
+
+msgid "You must provide a password"
+msgstr "Anda harus mengisi kata sandi."
+
+msgid "You need to log out before you can log in with another account."
+msgstr "Anda harus keluar terlebih dahulu sebelum masuk menggunakan akun lain."
+
+msgid "You're already logged in"
+msgstr "Anda sudah masuk"
+
+msgid "Your password must be 8 characters or longer"
+msgstr "Kata sandi harus terdiri dari minimal 8 karakter"
+
+msgid "group"
+msgstr "grup"
+
+msgid "organization"
+msgstr "organisasi"
+
+msgid "username"
+msgstr "nama pengguna"
+
+#, python-brace-format
+msgid "{object_type} Form"
+msgstr "Formulir {object_type}"
+
+#, python-brace-format
+msgid "{object_type}s"
+msgstr "{object_type}"
+

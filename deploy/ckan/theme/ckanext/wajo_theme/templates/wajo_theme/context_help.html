@@ -1,0 +1,87 @@
+{% from "wajo_theme/icon.html" import wajo_icon %}
+{% set path = request.path or '/' %}
+{% set search_query = request.args.get('q', '') %}
+{% set current_dataset_tags = c.pkg_dict.tags|map(attribute='name')|list if c.pkg_dict and c.pkg_dict.get('tags') else [] %}
+{% set guide_action = '' %}
+{% set guide_action_label = '' %}
+
+{% if path.startswith('/admin/data-preview') %}
+  {% set guide_title = 'Menyiapkan pratinjau DataStore' %}
+  {% set guide_body = 'Ikuti urutan pemeriksaan: koneksi DataStore, hak akses database, token dan action XLoader, worker yang berjalan, lalu antrekan resource lama. Resource yang baru diunggah akan dikirim otomatis oleh CKAN. Setelah worker selesai, buka detail dataset untuk memeriksa tabel pratinjau dan endpoint API.' %}
+  {% set guide_action = '/admin/data-preview' %}
+  {% set guide_action_label = 'Buka panduan langkah demi langkah' %}
+{% elif path.startswith('/pages') %}
+  {% set guide_title = 'Mengelola halaman informasi portal' %}
+  {% set guide_body = 'Gunakan Page untuk profil daerah, kebijakan, metodologi, panduan, FAQ, dan informasi yang relatif tetap. Pilih template standard, landing, policy, atau guide. Lengkapi excerpt, category, tanggal publikasi, featured, show_in_menu, menu_label/menu_order, SEO title/description, dan og_image. content_blocks hanya menerima hero, rich_text, image, gallery, stats, dataset_links, publication_list, cta, dan divider. Gunakan Markdown; HTML mentah tidak dirender portal. Pastikan Visibility = Public sebelum konten diharapkan tampil.' %}
+  {% set guide_action = '/pages/new' %}
+  {% set guide_action_label = 'Buat halaman informasi' %}
+{% elif path.startswith('/blog') %}
+  {% set guide_title = 'Mengelola berita dan artikel blog' %}
+  {% set guide_body = 'Gunakan Blog Article untuk berita, pengumuman, kegiatan, dan artikel berkala; jangan gunakan Blog untuk halaman kebijakan permanen. Lengkapi judul/slug, excerpt, category, tanggal publikasi, gambar utama, featured, SEO title/description, dan Visibility = Public. Artikel bertanggal masa depan baru ditampilkan setelah waktunya tiba. Periksa ejaan, tautan, atribusi gambar, dan tampilan ponsel sebelum menerbitkan.' %}
+  {% set guide_action = '/blog/new' %}
+  {% set guide_action_label = 'Tulis artikel baru' %}
+{% elif path.startswith('/dataset') and ('portal-publikasi' in current_dataset_tags or 'portal-publikasi' in search_query) %}
+  {% set guide_title = 'Mengelola publikasi dan laporan' %}
+  {% set guide_body = 'Konten ini merupakan dataset bertag portal-publikasi. Lengkapi tipe konten Publikasi/laporan, tanggal rilis, penerbit, periode, ringkasan, lisensi, dan resource PDF atau data pendukung. Pastikan file dapat diunduh dan metadata tampil benar.' %}
+  {% set guide_action = '/dataset/new' %}
+  {% set guide_action_label = 'Tambah publikasi sebagai dataset' %}
+{% elif path.startswith('/dataset') and ('portal-indikator' in current_dataset_tags or 'portal-indikator' in search_query) %}
+  {% set guide_title = 'Mengelola indikator dan statistik' %}
+  {% set guide_body = 'Dataset indikator perlu memiliki tag portal-indikator. Lengkapi definisi indikator, satuan, rumus/metodologi, sumber, cakupan wilayah, periode acuan, dan frekuensi pemutakhiran. Nilai numerik harus tersedia pada resource tabular agar dapat dipakai untuk statistik dan grafik.' %}
+  {% set guide_action = '/dataset/new' %}
+  {% set guide_action_label = 'Tambah dataset indikator' %}
+{% elif path.startswith('/dataset') and ('portal-infografik' in current_dataset_tags or 'portal-infografik' in search_query) %}
+  {% set guide_title = 'Mengelola infografik' %}
+  {% set guide_body = 'Infografik menggunakan tag portal-infografik. Isi judul, ringkasan, kategori, periode, atribusi/penerbit, dan tambahkan gambar utama sebagai resource dengan peran Infografik utama. Sertakan dataset sumber agar angka dapat ditelusuri.' %}
+  {% set guide_action = '/dataset/new' %}
+  {% set guide_action_label = 'Tambah infografik' %}
+{% elif path.startswith('/dataset/new') or (path.startswith('/dataset') and path.endswith('/new')) %}
+  {% set guide_title = 'Membuat dataset yang mudah digunakan' %}
+  {% set guide_body = 'Isi judul dan deskripsi yang menjelaskan isi data, pilih organisasi pemilik, kategori, lisensi, periode, dan frekuensi pembaruan. Tambahkan berkas pada bagian sumber daya. Pilih Tipe konten portal dan tag yang sesuai agar dataset masuk ke publikasi, indikator, atau infografik.' %}
+  {% set guide_action = '/admin/data-preview' %}
+  {% set guide_action_label = 'Pelajari cara mengaktifkan pratinjau' %}
+{% elif path.startswith('/dataset') and ('/resource' in path or '/resources' in path) %}
+  {% set guide_title = 'Mengelola sumber daya dan pratinjau' %}
+  {% set guide_body = 'Gunakan CSV, TSV, XLS, XLSX, atau ODS untuk pratinjau tabular. Pastikan berkas dapat diunduh dan dataset bersifat publik. CKAN mengirim resource yang didukung ke XLoader; worker memuatnya ke DataStore. Jika pratinjau belum muncul, periksa status di menu DataStore & pratinjau.' %}
+  {% set guide_action = '/admin/data-preview' %}
+  {% set guide_action_label = 'Periksa kesiapan DataStore' %}
+{% elif path.startswith('/dataset') %}
+  {% set guide_title = 'Mengelola metadata dataset' %}
+  {% set guide_body = 'Perbarui metadata seperlunya, pertahankan kode dataset yang stabil, jelaskan perubahan pada catatan rilis, dan periksa resource, lisensi, organisasi, serta status publikasi sebelum menyimpan.' %}
+  {% set guide_action = '/admin/data-preview' %}
+  {% set guide_action_label = 'Panduan DataStore dan API' %}
+{% elif path.startswith('/organization') %}
+  {% set guide_title = 'Mengelola perangkat daerah' %}
+  {% set guide_body = 'Gunakan satu organisasi untuk satu perangkat daerah pemilik data. Lengkapi nama, deskripsi, identitas, serta anggota. Tetapkan peran berdasarkan tugas dan berikan hak minimum yang diperlukan.' %}
+  {% set guide_action = '/dataset/new' %}
+  {% set guide_action_label = 'Daftarkan dataset milik organisasi' %}
+{% elif path.startswith('/group') %}
+  {% set guide_title = 'Mengelola kategori data' %}
+  {% set guide_body = 'Kategori membantu masyarakat menelusuri dataset berdasarkan topik. Gunakan nama singkat dan deskripsi yang membedakan kategori. Hindari membuat kategori duplikat atau terlalu luas.' %}
+{% elif path.startswith('/harvest') %}
+  {% set guide_title = 'Mengelola sumber pengambilan data' %}
+  {% set guide_body = 'Periksa alamat katalog sumber, jenis harvester, organisasi pemilik, jadwal, serta log pengumpulan dan pengambilan. Jalankan pekerjaan manual terlebih dahulu, periksa laporan, lalu aktifkan jadwal berkala. Jangan hapus sumber sebelum memastikan dampaknya terhadap dataset hasil.' %}
+  {% set guide_action = '/admin' %}
+  {% set guide_action_label = 'Kembali ke ringkasan pengelola' %}
+{% elif path.startswith('/user') or path.startswith('/ckan-admin') %}
+  {% set guide_title = 'Mengelola akun dan sistem' %}
+  {% set guide_body = 'Berikan peran sesuai tanggung jawab. Batasi akun administrator sistem, tinjau keanggotaan organisasi, dan jangan membagikan token API atau kredensial melalui konten publik.' %}
+{% else %}
+  {% set guide_title = 'Panduan pengelolaan data' %}
+  {% set guide_body = 'Gunakan navigasi di samping untuk mengelola katalog data, organisasi, kategori, halaman informasi, berita, publikasi, indikator, infografik, dan integrasi. Hak tindakan mengikuti peran serta keanggotaan akun CKAN Anda.' %}
+  {% set guide_action = '/pages' %}
+  {% set guide_action_label = 'Kelola konten portal' %}
+{% endif %}
+
+<details class="wajo-context-help">
+  <summary>
+    <span class="wajo-context-help__icon">{{ wajo_icon('lightbulb') }}</span>
+    <span><strong>Panduan halaman ini</strong><small>{{ guide_title }}</small></span>
+    <span class="wajo-context-help__toggle">Buka panduan</span>
+  </summary>
+  <div class="wajo-context-help__body">
+    <p>{{ guide_body }}</p>
+    {% if guide_action %}<a class="wajo-context-help__action" href="{{ guide_action }}">{{ guide_action_label }} {{ wajo_icon('arrow-right') }}</a>{% endif %}
+    <a href="{{ g.site_url }}/bantuan" target="_blank" rel="noopener noreferrer">Pusat bantuan portal {{ wajo_icon('external-link') }}</a>
+  </div>
+</details>

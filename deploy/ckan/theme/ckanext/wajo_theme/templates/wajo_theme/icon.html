@@ -1,0 +1,39 @@
+{# Reuse CKAN 2.12's bundled Font Awesome icon font. This keeps the Wajo shell
+   on the same icon implementation used by CKAN resource views and native links. #}
+{% macro wajo_icon(name, class_name='') -%}
+  {% set icons = {
+    'dashboard': 'tachometer',
+    'database': 'database',
+    'building': 'building-o',
+    'tags': 'tags',
+    'file-text': 'file-text-o',
+    'refresh': 'refresh',
+    'folder': 'folder-open-o',
+    'users': 'users',
+    'settings': 'cog',
+    'menu': 'bars',
+    'external-link': 'external-link',
+    'sliders': 'sliders',
+    'log-out': 'sign-out',
+    'chart': 'bar-chart',
+    'arrow-up-right': 'external-link',
+    'arrow-right': 'angle-right',
+    'plus': 'plus',
+    'lightbulb': 'lightbulb-o',
+    'lightbulb-o': 'lightbulb-o',
+    'newspaper': 'newspaper-o',
+    'book': 'book',
+    'chart-line': 'line-chart',
+    'image': 'picture-o',
+    'table': 'table',
+    'server': 'server',
+    'cloud-download': 'cloud-download',
+    'shield-check': 'shield',
+    'check': 'check',
+    'check-circle': 'check-circle',
+    'exclamation-circle': 'exclamation-circle',
+    'exclamation-triangle': 'exclamation-triangle',
+    'info-circle': 'info-circle'
+  } %}
+  <i class="fa fa-{{ icons.get(name, 'circle-o') }} {{ class_name }}" aria-hidden="true"></i>
+{%- endmacro %}

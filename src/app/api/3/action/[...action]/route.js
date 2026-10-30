@@ -61,7 +61,7 @@ function responseHeaders(request, { cache = true } = {}) {
     "X-Content-Type-Options": "nosniff",
     "X-Robots-Tag": "noindex, nofollow, noarchive",
     "Cache-Control": cache
-      ? "public, max-age=0, s-maxage=30, stale-while-revalidate=60"
+      ? "public, max-age=0, s-maxage=5, stale-while-revalidate=5"
       : "no-store",
     Vary: "Origin",
   };
@@ -327,19 +327,16 @@ function buildActionParams(action, searchParams) {
       assert(["id"]);
       return { id: get("id") };
     case "package_activity_list": {
-      assert(["id", "include_data"]);
-      if (boolValue(get("include_data"), false)) {
-        throw Object.assign(
-          new Error(
-            "include_data=true tidak tersedia pada API publik; gunakan include_data=false untuk riwayat aktivitas.",
-          ),
-          {
-            status: 400,
-            type: "Validation Error",
-          },
-        );
-      }
-      return { id: get("id"), include_data: false };
+      // include_data=true tidak tersedia pada API publik: Activity data may
+      // contain internal snapshots that are not needed by the public timeline.
+      assert(["id", "offset", "limit"]);
+      return {
+        id: get("id"),
+        offset: positiveInt(get("offset"), 0, 100_000),
+        limit: positiveInt(get("limit"), 8, 31),
+        // Never expose hidden activity records through the public facade.
+        include_hidden_activity: false,
+      };
     }
     case "organization_list":
       assert(["all_fields", "include_dataset_count", "limit"]);

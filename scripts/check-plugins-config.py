@@ -37,6 +37,12 @@ for name in ("datatables_view", "geo_view", "geojson_view", "wmts_view", "shp_vi
     if f'"{name}"' not in plugin_check:
         errors.append(f"Smoke test harus memverifikasi entry point plugin {name}.")
 
+if '"activity"' not in plugin_block or '"activity"' not in plugin_check:
+    errors.append("CKAN activity plugin harus diaktifkan dan diverifikasi agar package_activity_list tersedia.")
+initialize = (root / "deploy/ckan/initialize-extensions.sh").read_text()
+if 'db upgrade -p activity' not in initialize:
+    errors.append("Bootstrap extension harus menjalankan migrasi activity agar package_activity_list siap digunakan.")
+
 if errors:
     print("\n".join(f"ERROR: {error}" for error in errors), file=sys.stderr)
     raise SystemExit(1)

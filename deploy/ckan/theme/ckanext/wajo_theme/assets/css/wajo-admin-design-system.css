@@ -1,0 +1,1215 @@
+/* Portal Satu Data Kabupaten Wajo — shared public/admin design tokens.
+   Additive presentation only: CKAN native routes, forms, validation, CSRF and JS remain intact. */
+:root {
+  color-scheme: light;
+  --wajo-color-primary: #1d5fa7;
+  --wajo-color-primary-hover: #174f8c;
+  --wajo-color-primary-active: #123f70;
+  --wajo-color-primary-soft: #eaf2ff;
+  --wajo-color-primary-tint: #f4f8ff;
+  --wajo-color-ink: #1b3440;
+  --wajo-color-muted: #586d76;
+  --wajo-color-subtle: #7b8b94;
+  --wajo-color-canvas: #f5f7f6;
+  --wajo-color-surface: #fff;
+  --wajo-color-surface-soft: #f8fafc;
+  --wajo-color-border: #d8e2e4;
+  --wajo-color-border-strong: #c5d3d9;
+  --wajo-color-success: #28784f;
+  --wajo-color-success-soft: #edf7f0;
+  --wajo-color-warning: #95651d;
+  --wajo-color-warning-soft: #fff7e9;
+  --wajo-color-danger: #b33d46;
+  --wajo-color-danger-soft: #fff1f2;
+  --wajo-color-info: #286b99;
+  --wajo-color-info-soft: #edf6fc;
+  --wajo-font-sans:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Arial, sans-serif;
+  --wajo-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --wajo-text-xs: 0.75rem;
+  --wajo-text-sm: 0.8125rem;
+  --wajo-text-base: 0.9375rem;
+  --wajo-text-lg: 1rem;
+  --wajo-heading-1: clamp(1.75rem, 2.2vw, 2rem);
+  --wajo-heading-2: 1.25rem;
+  --wajo-heading-3: 1.0625rem;
+  --wajo-leading-body: 1.6;
+  --wajo-leading-heading: 1.2;
+  --wajo-shell-max: 1800px;
+  --wajo-content-max: 1480px;
+  --wajo-dashboard-max: 1320px;
+  --wajo-form-max: 960px;
+  --wajo-login-max: 448px;
+  --wajo-sidebar-width: 264px;
+  --wajo-page-gutter: clamp(1rem, 2.1vw, 2rem);
+  --wajo-space-1: 0.25rem;
+  --wajo-space-2: 0.5rem;
+  --wajo-space-3: 0.75rem;
+  --wajo-space-4: 1rem;
+  --wajo-space-5: 1.25rem;
+  --wajo-space-6: 1.5rem;
+  --wajo-space-8: 2rem;
+  --wajo-radius-control: 0.625rem;
+  --wajo-radius-card: 0.75rem;
+  --wajo-radius-dialog: 1rem;
+  --wajo-radius-pill: 999px;
+  --wajo-shadow-xs: 0 1px 2px rgb(22 48 64 / 4%);
+  --wajo-shadow-sm: 0 1px 3px rgb(22 48 64 / 5%), 0 4px 12px rgb(22 48 64 / 3%);
+  --wajo-shadow-md: 0 8px 24px rgb(22 48 64 / 8%);
+  --wajo-transition-fast: 140ms ease;
+  --wajo-control-height: 42px;
+  --wajo-button-height: 40px;
+  --wajo-touch-target: 44px;
+  --bs-primary: var(--wajo-color-primary);
+  --bs-primary-rgb: 29, 95, 167;
+  --bs-link-color: var(--wajo-color-primary);
+  --bs-link-hover-color: var(--wajo-color-primary-hover);
+  --bs-body-color: var(--wajo-color-ink);
+  --bs-body-bg: var(--wajo-color-canvas);
+  --bs-border-color: var(--wajo-color-border);
+  --bs-border-radius: var(--wajo-radius-control);
+  --bs-border-radius-lg: var(--wajo-radius-card);
+  --bs-focus-ring-color: rgb(29 95 167 / 24%);
+}
+
+body:has(.wajo-admin-shell),
+body:has(.wajo-login-frame) {
+  color: var(--wajo-color-ink);
+  background: var(--wajo-color-canvas);
+  font-family: var(--wajo-font-sans);
+  font-size: var(--wajo-text-base);
+  line-height: var(--wajo-leading-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+.wajo-admin-shell,
+.wajo-login-frame {
+  font-family: var(--wajo-font-sans);
+}
+.wajo-admin-shell :where(button, input, select, textarea) {
+  font: inherit;
+}
+.wajo-admin-shell
+  :where(a, button, input, select, textarea, summary):focus-visible,
+.wajo-login-frame :where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid rgb(29 95 167 / 30%);
+  outline-offset: 2px;
+}
+
+/* Shell geometry */
+.wajo-admin-topbar {
+  background: rgb(255 255 255 / 96%);
+  color: var(--wajo-color-ink);
+  border-bottom: 1px solid var(--wajo-color-border);
+  box-shadow: var(--wajo-shadow-xs);
+  backdrop-filter: blur(12px);
+}
+.wajo-admin-topbar__inner {
+  width: min(100%, var(--wajo-shell-max));
+  min-height: 68px;
+  padding: 0 var(--wajo-page-gutter);
+}
+.wajo-admin-shell {
+  width: min(100%, var(--wajo-shell-max));
+  min-height: calc(100vh - 68px);
+  grid-template-columns: var(--wajo-sidebar-width) minmax(0, 1fr);
+}
+.wajo-admin-sidebar {
+  top: 69px;
+  max-height: calc(100vh - 69px);
+  border-right: 1px solid var(--wajo-color-border);
+  background: var(--wajo-color-surface);
+}
+.wajo-admin-sidebar__inner {
+  min-height: calc(100vh - 69px);
+  padding: 1.25rem 0.875rem 1rem;
+}
+.wajo-admin-workspace {
+  min-width: 0;
+  background: var(--wajo-color-canvas);
+}
+.wajo-admin-workspace .main {
+  min-height: calc(100vh - 68px);
+  padding: clamp(1.25rem, 2.2vw, 2rem) var(--wajo-page-gutter) 3rem;
+  background: transparent;
+}
+.wajo-admin-workspace #content {
+  width: 100%;
+  max-width: var(--wajo-content-max);
+  margin-inline: auto;
+  padding: 0;
+}
+.wajo-context-help {
+  width: auto;
+  max-width: var(--wajo-content-max);
+  margin: 0.9rem auto 0.25rem;
+}
+.wajo-admin-footer {
+  width: min(100%, var(--wajo-shell-max));
+  margin-inline: auto;
+  padding-inline: var(--wajo-page-gutter);
+}
+
+/* Brand and navigation */
+.wajo-admin-brand {
+  gap: 0.75rem;
+  color: var(--wajo-color-ink) !important;
+}
+.wajo-admin-brand__mark {
+  width: 42px;
+  height: 46px;
+  flex-basis: 42px;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: none;
+}
+.wajo-admin-brand__mark img {
+  width: 34px;
+  height: 40px;
+  object-fit: contain;
+}
+.wajo-admin-brand__copy strong {
+  color: var(--wajo-color-ink);
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+.wajo-admin-brand__copy small {
+  color: var(--wajo-color-muted);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.075em;
+  line-height: 1.35;
+}
+.wajo-admin-public-link,
+.wajo-admin-icon-button,
+.wajo-admin-menu-toggle {
+  min-height: 40px;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: var(--wajo-radius-control);
+  background: #fff;
+  color: var(--wajo-color-muted) !important;
+  box-shadow: none;
+  transition:
+    background-color var(--wajo-transition-fast),
+    border-color var(--wajo-transition-fast),
+    color var(--wajo-transition-fast);
+}
+.wajo-admin-public-link {
+  padding: 0.45rem 0.75rem;
+  font-size: var(--wajo-text-sm);
+  font-weight: 600;
+}
+.wajo-admin-icon-button {
+  width: 40px;
+}
+.wajo-admin-public-link:hover,
+.wajo-admin-icon-button:hover,
+.wajo-admin-menu-toggle:hover {
+  border-color: #b9cfe2;
+  background: var(--wajo-color-primary-soft);
+  color: var(--wajo-color-primary) !important;
+}
+.wajo-admin-user__avatar {
+  border: 1px solid var(--wajo-color-border);
+  background: var(--wajo-color-surface-soft);
+}
+.wajo-admin-user__identity strong {
+  color: var(--wajo-color-ink);
+  font-size: var(--wajo-text-sm);
+  font-weight: 650;
+}
+.wajo-admin-user__identity small {
+  color: var(--wajo-color-muted);
+  font-size: var(--wajo-text-xs);
+}
+.wajo-admin-sidebar__context {
+  border-bottom-color: var(--wajo-color-border);
+}
+.wajo-admin-sidebar__context strong {
+  color: var(--wajo-color-ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.wajo-admin-sidebar__context > span:last-child {
+  color: var(--wajo-color-muted);
+  font-size: var(--wajo-text-xs);
+}
+.wajo-admin-nav__label,
+.wajo-admin-sidebar__eyebrow {
+  color: var(--wajo-color-subtle);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.075em;
+}
+.wajo-admin-nav__item {
+  min-height: 40px;
+  border-radius: var(--wajo-radius-control);
+  padding: 0.5rem 0.7rem;
+  color: #4b606d;
+  font-size: 0.875rem;
+  font-weight: 550;
+}
+.wajo-admin-nav__item > i {
+  width: 18px;
+  color: #82929c;
+  font-size: 0.92rem;
+}
+.wajo-admin-nav__item:hover {
+  border-color: transparent;
+  background: #f1f6fb;
+  color: var(--wajo-color-primary);
+}
+.wajo-admin-nav__item.is-active {
+  border-color: #d9e8f7;
+  background: var(--wajo-color-primary-soft);
+  color: var(--wajo-color-primary-hover);
+  font-weight: 650;
+}
+.wajo-admin-nav__item.is-active > i {
+  color: var(--wajo-color-primary);
+}
+.wajo-admin-sidebar__footer {
+  border-top-color: var(--wajo-color-border);
+}
+
+/* Typography and content hierarchy */
+.wajo-admin-workspace :where(h1, h2, h3, h4) {
+  color: var(--wajo-color-ink);
+  letter-spacing: -0.025em;
+}
+.wajo-admin-workspace h1,
+.wajo-admin-workspace .page-heading {
+  font-size: var(--wajo-heading-1);
+  font-weight: 700;
+  line-height: var(--wajo-leading-heading);
+}
+.wajo-admin-workspace h2 {
+  font-size: var(--wajo-heading-2);
+  font-weight: 680;
+  line-height: 1.25;
+}
+.wajo-admin-workspace h3 {
+  font-size: var(--wajo-heading-3);
+  font-weight: 650;
+  line-height: 1.3;
+}
+.wajo-admin-workspace .page-header {
+  margin-bottom: 1.25rem;
+  border-bottom-color: var(--wajo-color-border);
+  padding-bottom: 1rem;
+}
+.wajo-admin-workspace .page-header h1 {
+  margin: 0;
+}
+.wajo-admin-workspace .breadcrumb {
+  margin: 0 0 0.8rem;
+  padding: 0;
+  background: transparent;
+  color: var(--wajo-color-subtle);
+  font-size: var(--wajo-text-xs);
+}
+.wajo-admin-workspace .breadcrumb a {
+  color: var(--wajo-color-muted);
+}
+.wajo-admin-workspace .wrapper {
+  column-gap: 1.25rem;
+  row-gap: 1.25rem;
+}
+
+/* Typography scale by purpose: hierarchy first, compact metadata second. */
+.wajo-admin-workspace {
+  font-size: var(--wajo-text-base);
+}
+.wajo-admin-workspace
+  :where(p, li, .control-group, .form-control, .form-select) {
+  line-height: 1.55;
+}
+.wajo-admin-workspace .page-header .page-heading,
+.wajo-admin-workspace .page-header h1 {
+  max-width: 42ch;
+  text-wrap: balance;
+}
+.wajo-admin-workspace .page-header .page-heading + p,
+.wajo-admin-workspace .page-header h1 + p {
+  max-width: 76ch;
+  margin-top: 0.55rem;
+  color: var(--wajo-color-muted);
+  font-size: var(--wajo-text-sm);
+  line-height: 1.6;
+}
+.wajo-admin-workspace .module-heading,
+.wajo-admin-workspace .module-content > h2 {
+  font-size: var(--wajo-text-lg);
+}
+.wajo-admin-workspace code,
+.wajo-admin-workspace pre,
+.wajo-datastore-command code {
+  font-family: var(--wajo-font-mono);
+  font-variant-ligatures: none;
+}
+.wajo-admin-workspace .text-muted,
+.wajo-admin-workspace .help-block {
+  overflow-wrap: anywhere;
+}
+
+/* CKAN modules, cards and content surfaces */
+.wajo-admin-workspace
+  :where(.module, .dataset-item, .card, .primary .module, .secondary .module) {
+  overflow: visible;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: var(--wajo-radius-card);
+  background: var(--wajo-color-surface);
+  box-shadow: var(--wajo-shadow-xs);
+}
+.wajo-admin-workspace .module .module-heading {
+  border-bottom: 1px solid var(--wajo-color-border);
+  background: var(--wajo-color-surface-soft);
+  color: var(--wajo-color-ink);
+  font-weight: 680;
+}
+.wajo-admin-workspace .module-content {
+  padding: 1.125rem;
+}
+.wajo-admin-workspace .secondary .module {
+  box-shadow: none;
+}
+.wajo-admin-workspace .empty {
+  border: 1px dashed var(--wajo-color-border-strong);
+  border-radius: var(--wajo-radius-control);
+  background: var(--wajo-color-surface-soft);
+  color: var(--wajo-color-muted);
+}
+.wajo-admin-workspace .dataset-item {
+  margin-bottom: 0.75rem;
+  padding: 1rem;
+}
+.wajo-admin-workspace .dataset-heading a {
+  color: var(--wajo-color-primary-hover);
+  font-weight: 650;
+  text-decoration: none;
+}
+.wajo-admin-workspace .notes {
+  color: #4b606d;
+  line-height: 1.7;
+}
+.wajo-admin-workspace .notes img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--wajo-radius-control);
+}
+
+/* Forms preserve native CKAN field names, validators and CSRF */
+.wajo-admin-workspace
+  :where(
+    input.form-control,
+    select.form-control,
+    textarea.form-control,
+    .form-select,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="url"],
+    input[type="number"],
+    select,
+    textarea
+  ) {
+  min-height: var(--wajo-control-height);
+  border: 1px solid var(--wajo-color-border-strong);
+  border-radius: var(--wajo-radius-control);
+  background: #fff;
+  color: var(--wajo-color-ink);
+  font-family: var(--wajo-font-sans);
+  font-size: 0.9rem;
+  box-shadow: none;
+}
+.wajo-admin-workspace textarea.form-control,
+.wajo-admin-workspace textarea {
+  min-height: 7rem;
+  line-height: 1.6;
+}
+.wajo-admin-workspace
+  :where(.form-control, .form-select, input, select, textarea):focus {
+  border-color: var(--wajo-color-primary);
+  box-shadow: 0 0 0 3px rgb(29 95 167 / 12%);
+  outline: 0;
+}
+.wajo-admin-workspace :where(.form-label, .control-label, label) {
+  color: #3d5360;
+  font-size: 0.84rem;
+  font-weight: 620;
+  line-height: 1.4;
+}
+.wajo-admin-workspace
+  :where(.help-block, .text-muted, .info-block, .control-help) {
+  color: var(--wajo-color-muted) !important;
+  font-size: var(--wajo-text-xs);
+  line-height: 1.55;
+}
+.wajo-admin-workspace .control-group {
+  margin-bottom: 1.15rem;
+}
+.wajo-admin-workspace .form-horizontal {
+  max-width: var(--wajo-form-max);
+}
+.wajo-admin-workspace .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-top: 1px solid var(--wajo-color-border);
+  padding-top: 1rem;
+}
+
+/* Buttons, tables and utility components */
+.wajo-admin-workspace .btn {
+  min-height: var(--wajo-button-height);
+  border-radius: var(--wajo-radius-control);
+  padding: 0.5rem 0.9rem;
+  font-family: var(--wajo-font-sans);
+  font-size: 0.875rem;
+  font-weight: 620;
+  line-height: 1.3;
+  box-shadow: none;
+  transition:
+    background-color var(--wajo-transition-fast),
+    border-color var(--wajo-transition-fast),
+    color var(--wajo-transition-fast);
+}
+.wajo-admin-workspace .btn:hover {
+  transform: none;
+}
+.wajo-admin-workspace .btn-primary {
+  border-color: var(--wajo-color-primary);
+  background: var(--wajo-color-primary);
+  color: #fff;
+}
+.wajo-admin-workspace .btn-primary:hover {
+  border-color: var(--wajo-color-primary-hover);
+  background: var(--wajo-color-primary-hover);
+  color: #fff;
+}
+.wajo-admin-workspace .btn-secondary,
+.wajo-admin-workspace .btn-default,
+.wajo-admin-workspace .btn-light {
+  border-color: var(--wajo-color-border-strong);
+  background: #fff;
+  color: var(--wajo-color-ink);
+}
+.wajo-admin-workspace .btn-secondary:hover,
+.wajo-admin-workspace .btn-default:hover,
+.wajo-admin-workspace .btn-light:hover {
+  border-color: #b9cfe2;
+  background: var(--wajo-color-primary-tint);
+  color: var(--wajo-color-primary-hover);
+}
+.wajo-admin-workspace .btn-danger {
+  border-color: var(--wajo-color-danger);
+  background: var(--wajo-color-danger);
+  color: #fff;
+}
+.wajo-admin-workspace .table-responsive {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: var(--wajo-radius-control);
+  background: #fff;
+  overscroll-behavior-x: contain;
+}
+.wajo-admin-workspace .table,
+.wajo-admin-workspace table.table {
+  margin-bottom: 0;
+  --bs-table-bg: #fff;
+  --bs-table-color: var(--wajo-color-ink);
+  --bs-table-border-color: var(--wajo-color-border);
+}
+.wajo-admin-workspace .table thead th {
+  border-bottom: 1px solid var(--wajo-color-border);
+  background: var(--wajo-color-surface-soft);
+  color: var(--wajo-color-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.wajo-admin-workspace .table > :not(caption) > * > * {
+  padding: 0.75rem 0.875rem;
+  vertical-align: middle;
+}
+.wajo-admin-workspace .table tbody td {
+  font-size: 0.875rem;
+}
+.wajo-admin-workspace .table tbody tr:hover {
+  --bs-table-bg: #f7faff;
+}
+.wajo-admin-workspace .nav-tabs {
+  gap: 0.25rem;
+  border-bottom-color: var(--wajo-color-border);
+}
+.wajo-admin-workspace .nav-tabs .nav-link {
+  border-radius: 7px 7px 0 0;
+  color: var(--wajo-color-muted);
+  font-size: var(--wajo-text-sm);
+  font-weight: 550;
+}
+.wajo-admin-workspace .nav-tabs .nav-link.active {
+  border-color: var(--wajo-color-border) var(--wajo-color-border) #fff;
+  color: var(--wajo-color-primary);
+  font-weight: 650;
+}
+.wajo-admin-workspace .dropdown-menu,
+.wajo-admin-workspace .popover,
+.wajo-admin-workspace .modal-content {
+  border: 1px solid var(--wajo-color-border);
+  border-radius: var(--wajo-radius-card);
+  box-shadow: var(--wajo-shadow-md);
+}
+.wajo-admin-workspace .dropdown-item {
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  color: var(--wajo-color-ink);
+  font-size: var(--wajo-text-sm);
+}
+.wajo-admin-workspace .dropdown-item:hover {
+  background: var(--wajo-color-primary-soft);
+  color: var(--wajo-color-primary-hover);
+}
+.wajo-admin-workspace .pagination {
+  gap: 0.2rem;
+}
+.wajo-admin-workspace .pagination .page-link {
+  border-radius: 6px !important;
+  color: var(--wajo-color-primary);
+  font-size: var(--wajo-text-sm);
+}
+.wajo-admin-workspace .pagination .active > .page-link {
+  border-color: var(--wajo-color-primary);
+  background: var(--wajo-color-primary);
+  color: #fff;
+}
+.wajo-admin-workspace .alert {
+  border: 1px solid var(--wajo-color-border);
+  border-radius: var(--wajo-radius-control);
+  box-shadow: none;
+  font-size: var(--wajo-text-sm);
+}
+.wajo-admin-workspace .alert-success {
+  border-color: #cfe6d6;
+  background: var(--wajo-color-success-soft);
+  color: #24623f;
+}
+.wajo-admin-workspace .alert-warning {
+  border-color: #f0dfbd;
+  background: var(--wajo-color-warning-soft);
+  color: #805518;
+}
+.wajo-admin-workspace .alert-danger {
+  border-color: #f0d0d3;
+  background: var(--wajo-color-danger-soft);
+  color: #92333b;
+}
+.wajo-admin-workspace .alert-info {
+  border-color: #cfe2f0;
+  background: var(--wajo-color-info-soft);
+  color: #235c83;
+}
+.wajo-admin-workspace .badge {
+  border-radius: 5px;
+  padding: 0.25rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+/* Shared component geometry. Apply to additive Wajo/CKAN surfaces only. */
+.wajo-admin-workspace
+  :where(
+    .module,
+    .dataset-item,
+    .card,
+    .alert,
+    .table-responsive,
+    .dropdown-menu,
+    .modal-content
+  ) {
+  scroll-margin-top: 5rem;
+}
+.wajo-admin-workspace
+  :where(.btn, .form-control, .form-select, .dropdown-item, .page-link) {
+  transition-duration: var(--wajo-transition-fast);
+}
+.wajo-admin-workspace :where(.form-control, .form-select) {
+  padding-inline: 0.75rem;
+}
+.wajo-admin-workspace
+  :where(.form-control::placeholder, textarea::placeholder) {
+  color: #82919a;
+  opacity: 1;
+}
+.wajo-admin-workspace .form-actions .btn-primary {
+  min-width: 108px;
+}
+.wajo-admin-workspace .form-actions .btn:not(.btn-primary) {
+  background: var(--wajo-color-surface);
+}
+.wajo-admin-workspace .table-responsive:focus-within {
+  outline: 2px solid rgb(29 95 167 / 18%);
+  outline-offset: 2px;
+}
+.wajo-admin-workspace .table tbody tr > * {
+  border-color: var(--wajo-color-border);
+}
+.wajo-admin-workspace .table td :where(a, button) {
+  font-weight: 550;
+}
+.wajo-admin-workspace .pagination .page-link {
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dashboard and DataStore wizard share the same component language. */
+.wajo-dashboard {
+  width: 100%;
+  max-width: var(--wajo-dashboard-max);
+  margin-inline: auto;
+  gap: 1.25rem;
+}
+.wajo-dashboard__welcome {
+  min-height: 132px;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: var(--wajo-radius-card);
+  background: linear-gradient(115deg, #fff 0%, #f5f9fe 100%);
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  box-shadow: var(--wajo-shadow-xs);
+}
+.wajo-dashboard__welcome::after {
+  display: none;
+}
+.wajo-dashboard__welcome h1 {
+  color: var(--wajo-color-ink);
+  font-size: clamp(1.4rem, 2vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+.wajo-dashboard__welcome p {
+  max-width: 680px;
+  color: var(--wajo-color-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.wajo-dashboard__welcome-mark {
+  width: 68px;
+  height: 68px;
+  flex-basis: 68px;
+  border: 1px solid #dce9f5;
+  border-radius: 12px;
+  background: var(--wajo-color-primary-soft);
+  color: var(--wajo-color-primary);
+  box-shadow: none;
+  font-size: 1.75rem;
+}
+.wajo-dashboard__section-heading h2,
+.wajo-dashboard-panel__header h2 {
+  color: var(--wajo-color-ink);
+  font-size: 1.0625rem;
+  font-weight: 680;
+}
+.wajo-dashboard__metrics {
+  gap: 0.75rem;
+}
+.wajo-metric-card {
+  min-height: 142px;
+  gap: 0.2rem;
+  border-radius: var(--wajo-radius-card);
+  padding: 1rem;
+  box-shadow: var(--wajo-shadow-xs);
+  transition:
+    border-color var(--wajo-transition-fast),
+    box-shadow var(--wajo-transition-fast);
+}
+.wajo-metric-card::after {
+  display: none;
+}
+.wajo-metric-card:hover {
+  transform: none;
+  border-color: #bdd2e5;
+  background: #fff;
+  box-shadow: var(--wajo-shadow-sm);
+}
+.wajo-metric-card__icon,
+.wajo-dashboard-quicklinks__icon {
+  background: var(--wajo-color-primary-soft);
+  color: var(--wajo-color-primary);
+}
+.wajo-metric-card > strong {
+  color: var(--wajo-color-ink);
+  font-size: 1.75rem;
+  font-weight: 720;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+.wajo-dashboard__grid {
+  gap: 0.875rem;
+}
+.wajo-dashboard-panel {
+  border-radius: var(--wajo-radius-card);
+  box-shadow: var(--wajo-shadow-xs);
+}
+.wajo-dashboard-panel__header {
+  padding: 1rem 1.125rem;
+}
+.wajo-dashboard-quicklinks strong {
+  color: var(--wajo-color-ink);
+  font-size: var(--wajo-text-sm);
+  font-weight: 600;
+}
+.wajo-dashboard-quicklinks small {
+  color: var(--wajo-color-muted);
+  font-size: 0.7rem;
+}
+.wajo-dashboard-tip {
+  border-color: #dce7ef;
+  border-radius: var(--wajo-radius-control);
+  background: #f5f9fc;
+  color: var(--wajo-color-muted);
+}
+.wajo-datastore {
+  max-width: var(--wajo-content-max);
+}
+.wajo-datastore__intro h1 {
+  color: var(--wajo-color-ink);
+  font-size: var(--wajo-heading-1);
+  font-weight: 700;
+}
+.wajo-datastore__intro p {
+  color: var(--wajo-color-muted);
+  font-size: 0.9rem;
+}
+.wajo-datastore__progress,
+.wajo-datastore-card,
+.wajo-datastore-sidecard {
+  border-color: var(--wajo-color-border);
+  border-radius: var(--wajo-radius-card);
+  box-shadow: var(--wajo-shadow-xs);
+}
+
+/* Contextual help and footer */
+.wajo-context-help {
+  border-color: var(--wajo-color-border);
+  border-radius: var(--wajo-radius-control);
+  box-shadow: var(--wajo-shadow-xs);
+}
+.wajo-context-help summary strong {
+  color: var(--wajo-color-ink);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.wajo-context-help summary small,
+.wajo-context-help__body p {
+  color: var(--wajo-color-muted);
+}
+.wajo-context-help__icon {
+  background: var(--wajo-color-primary-soft);
+  color: var(--wajo-color-primary);
+}
+.wajo-admin-footer {
+  min-height: 64px;
+  border-top-color: var(--wajo-color-border);
+  background: var(--wajo-color-surface);
+  color: var(--wajo-color-muted);
+}
+.wajo-admin-footer strong {
+  color: var(--wajo-color-ink);
+  font-size: var(--wajo-text-xs);
+  font-weight: 650;
+}
+.wajo-admin-footer span,
+.wajo-admin-footer > small {
+  color: var(--wajo-color-muted);
+  font-size: 0.6875rem;
+}
+
+/* Focused login uses the same typography and color tokens, but no admin shell. */
+body:has(.wajo-login-frame) {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgb(29 95 167 / 7%), transparent 48%),
+    var(--wajo-color-canvas);
+}
+.wajo-login-frame {
+  width: min(calc(100% - 2rem), var(--wajo-login-max));
+  margin: clamp(2.25rem, 8vh, 5.5rem) auto 3rem;
+  padding: 0;
+}
+.wajo-login-brand {
+  width: 100%;
+  justify-content: center;
+  gap: 0.875rem;
+  margin: 0 auto 1.5rem;
+}
+.wajo-login-brand img {
+  width: 52px;
+  height: 62px;
+  flex-basis: 52px;
+}
+.wajo-login-brand strong {
+  color: var(--wajo-color-ink);
+  font-size: 1.08rem;
+  font-weight: 720;
+  letter-spacing: -0.025em;
+}
+.wajo-login-brand small {
+  color: var(--wajo-color-muted);
+  font-size: var(--wajo-text-xs);
+}
+.wajo-login-frame .login-main:has(#field-login) {
+  width: 100%;
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+}
+.wajo-login-frame .login-main:has(#field-login) #content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+.wajo-login-frame .login-main:has(#field-login) .login-wrapper {
+  width: 100%;
+  max-width: none;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: var(--wajo-radius-dialog);
+  background: #fff;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  box-shadow: var(--wajo-shadow-md);
+}
+.wajo-login-frame .login-main:has(#field-login) .login-container {
+  padding-top: 0.5rem;
+}
+.wajo-login-frame .login-main:has(#field-login) .login-container .page-heading {
+  margin-bottom: 0.35rem;
+  color: var(--wajo-color-ink);
+  font-size: 1.625rem;
+  font-weight: 720;
+  letter-spacing: -0.035em;
+}
+.wajo-login-frame .login-main:has(#field-login) .login-container p {
+  color: var(--wajo-color-muted);
+  font-size: var(--wajo-text-sm);
+}
+.wajo-login-frame .login-main:has(#field-login) .form-control {
+  min-height: 46px;
+  border-color: var(--wajo-color-border-strong);
+  border-radius: var(--wajo-radius-control);
+  font-size: 1rem;
+}
+.wajo-login-frame .login-main:has(#field-login) .form-control:focus {
+  border-color: var(--wajo-color-primary);
+  box-shadow: 0 0 0 3px rgb(29 95 167 / 13%);
+}
+.wajo-login-frame .login-main:has(#field-login) .btn-primary {
+  width: 100%;
+  min-height: 46px;
+  border-color: var(--wajo-color-primary);
+  border-radius: var(--wajo-radius-control);
+  background: var(--wajo-color-primary);
+  font-size: 0.9375rem;
+  font-weight: 650;
+}
+.wajo-login-frame .login-main:has(#field-login) .btn-primary:hover {
+  border-color: var(--wajo-color-primary-hover);
+  background: var(--wajo-color-primary-hover);
+}
+.wajo-login-footnote {
+  margin: 1rem 0 0;
+  color: var(--wajo-color-muted);
+  font-size: var(--wajo-text-xs);
+  text-align: center;
+}
+
+/* Responsive layouts */
+@media (max-width: 1199.98px) {
+  :root {
+    --wajo-sidebar-width: 248px;
+    --wajo-content-max: 1280px;
+  }
+}
+@media (max-width: 991.98px) {
+  .wajo-admin-topbar__inner {
+    min-height: 64px;
+  }
+  .wajo-admin-menu-toggle {
+    display: inline-flex;
+    width: 40px;
+    min-height: 40px;
+  }
+  .wajo-admin-shell {
+    display: block;
+    min-height: calc(100vh - 64px);
+  }
+  .wajo-admin-sidebar {
+    position: static;
+    width: 100%;
+    max-height: min(64vh, 560px);
+    border-right: 0;
+    border-bottom: 1px solid var(--wajo-color-border);
+    box-shadow: var(--wajo-shadow-sm);
+  }
+  .wajo-admin-sidebar__inner {
+    min-height: auto;
+    padding: 0.875rem var(--wajo-page-gutter) 1rem;
+  }
+  .wajo-admin-sidebar.collapse:not(.show) {
+    display: none;
+  }
+  .wajo-admin-sidebar.collapse.show {
+    display: block;
+  }
+  .wajo-admin-workspace .main {
+    min-height: calc(100vh - 64px);
+    padding: 1.5rem var(--wajo-page-gutter) 2.5rem;
+  }
+  .wajo-admin-workspace .primary,
+  .wajo-admin-workspace .secondary {
+    float: none;
+    width: 100%;
+    max-width: none;
+  }
+  .wajo-dashboard__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wajo-datastore__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wajo-datastore__aside {
+    position: static;
+  }
+}
+@media (max-width: 767.98px) {
+  .wajo-admin-topbar {
+    position: relative;
+  }
+  .wajo-admin-topbar__inner {
+    min-height: 60px;
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+  }
+  .wajo-admin-brand {
+    max-width: calc(100% - 86px);
+    gap: 0.5rem;
+  }
+  .wajo-admin-brand__mark {
+    width: 36px;
+    height: 40px;
+    flex-basis: 36px;
+    border-radius: 8px;
+  }
+  .wajo-admin-brand__mark img {
+    width: 29px;
+    height: 34px;
+  }
+  .wajo-admin-brand__copy strong {
+    font-size: 0.78rem;
+    white-space: normal;
+  }
+  .wajo-admin-brand__copy small {
+    display: none;
+  }
+  .wajo-admin-topbar__actions {
+    gap: 0.25rem;
+  }
+  .wajo-admin-public-link {
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+  }
+  .wajo-admin-public-link span,
+  .wajo-admin-user {
+    display: none;
+  }
+  .wajo-admin-icon-button,
+  .wajo-admin-menu-toggle {
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .wajo-admin-workspace .main {
+    padding: 1.125rem 0.875rem 2rem;
+  }
+  .wajo-admin-nav__item {
+    min-height: 44px;
+  }
+  .wajo-admin-workspace .btn {
+    min-height: 44px;
+  }
+  .wajo-admin-workspace .pagination .page-link {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .wajo-admin-workspace
+    :where(
+      input.form-control,
+      select.form-control,
+      .form-select,
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      input[type="search"],
+      input[type="url"],
+      input[type="number"],
+      select
+    ) {
+    min-height: 44px;
+  }
+  .wajo-admin-workspace .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .wajo-admin-workspace .page-header h1 {
+    overflow-wrap: anywhere;
+  }
+  .wajo-admin-workspace .wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+  .wajo-admin-workspace .module-content {
+    padding: 0.875rem;
+  }
+  .wajo-admin-workspace .form-actions .btn {
+    flex: 1 1 auto;
+  }
+  .wajo-context-help {
+    width: calc(100% - 1.5rem);
+    margin: 0.75rem auto 0.25rem;
+  }
+  .wajo-context-help summary {
+    min-height: 46px;
+    padding: 0.55rem 0.65rem;
+  }
+  .wajo-context-help summary small {
+    max-width: 54vw;
+  }
+  .wajo-context-help__body {
+    padding: 0.75rem;
+  }
+  .wajo-admin-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.875rem;
+  }
+  .wajo-dashboard__welcome {
+    min-height: auto;
+    padding: 1.125rem;
+  }
+  .wajo-dashboard__welcome-mark {
+    display: none;
+  }
+  .wajo-dashboard__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
+  }
+  .wajo-metric-card {
+    min-height: 126px;
+    padding: 0.8rem;
+  }
+  .wajo-metric-card > strong {
+    font-size: 1.5rem;
+  }
+  .wajo-dashboard-panel__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .wajo-datastore__intro {
+    align-items: flex-start;
+  }
+  .wajo-datastore__aside {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wajo-datastore-checks li {
+    grid-template-columns: 22px minmax(0, 1fr);
+  }
+  .wajo-datastore-checks__status {
+    grid-column: 2;
+  }
+  .wajo-datastore-command {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .wajo-datastore-command .btn {
+    width: 100%;
+  }
+  .wajo-login-frame {
+    width: min(calc(100% - 1.25rem), var(--wajo-login-max));
+    margin-top: 2rem;
+  }
+  .wajo-login-brand {
+    justify-content: flex-start;
+    margin-bottom: 1rem;
+  }
+  .wajo-login-brand img {
+    width: 44px;
+    height: 52px;
+    flex-basis: 44px;
+  }
+  .wajo-login-brand strong {
+    font-size: 0.95rem;
+  }
+  .wajo-login-brand small {
+    font-size: 0.7rem;
+  }
+  .wajo-login-frame .login-main:has(#field-login) .login-wrapper {
+    padding: 1.125rem;
+    border-radius: 12px;
+  }
+}
+@media (max-width: 479.98px) {
+  .wajo-admin-topbar__inner {
+    padding-inline: 0.625rem;
+  }
+  .wajo-admin-brand {
+    max-width: calc(100% - 78px);
+  }
+  .wajo-admin-brand__copy strong {
+    font-size: 0.76rem;
+    line-height: 1.2;
+  }
+  .wajo-admin-menu-toggle,
+  .wajo-admin-icon-button,
+  .wajo-admin-public-link {
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .wajo-dashboard__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .wajo-dashboard__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wajo-admin-workspace .dataset-item {
+    padding: 0.75rem;
+  }
+  .wajo-login-frame {
+    margin-top: 1.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wajo-admin-workspace *,
+  .wajo-admin-topbar *,
+  .wajo-admin-sidebar *,
+  .wajo-login-frame * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

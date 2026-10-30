@@ -24,6 +24,7 @@ setup(
             "wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin",
             "wajo_harvest_i18n = ckanext.wajo_theme.plugin:WajoHarvestTranslationPlugin",
             "wajo_pages_i18n = ckanext.wajo_theme.plugin:WajoPagesTranslationPlugin",
+            "wajo_dcat_i18n = ckanext.wajo_theme.plugin:WajoDcatTranslationPlugin",
         ],
     },
 )

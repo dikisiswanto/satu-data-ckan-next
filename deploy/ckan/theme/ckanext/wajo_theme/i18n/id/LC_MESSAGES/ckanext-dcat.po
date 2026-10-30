@@ -1,0 +1,97 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Portal Satu Data Wajo\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-10-30 10:59+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: id\n"
+"Language-Team: Bahasa Indonesia\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Alternate identifier"
+msgstr "Pengidentifikasi alternatif"
+
+msgid "Conforms to"
+msgstr "Sesuai dengan"
+
+msgid "Contact URI"
+msgstr "URI kontak"
+
+msgid "Contact email"
+msgstr "Email kontak"
+
+msgid "Contact name"
+msgstr "Nama kontak"
+
+msgid "Created"
+msgstr "Dibuat"
+
+msgid "Download URL"
+msgstr "URL unduhan"
+
+msgid "End of temporal extent"
+msgstr "Akhir rentang waktu"
+
+msgid "Frequency"
+msgstr "Frekuensi"
+
+msgid "GUID"
+msgstr "GUID"
+
+msgid "Identifier"
+msgstr "Pengidentifikasi"
+
+msgid "Issued"
+msgstr "Diterbitkan"
+
+msgid "Language"
+msgstr "Bahasa"
+
+msgid "Media type"
+msgstr "Jenis media"
+
+msgid "Modified"
+msgstr "Diubah"
+
+msgid "Publisher URI"
+msgstr "URI penerbit"
+
+msgid "Publisher URL"
+msgstr "URL penerbit"
+
+msgid "Publisher email"
+msgstr "Email penerbit"
+
+msgid "Publisher name"
+msgstr "Nama penerbit"
+
+msgid "Publisher type"
+msgstr "Jenis penerbit"
+
+msgid "Rights"
+msgstr "Hak"
+
+msgid "Size"
+msgstr "Ukuran"
+
+msgid "Spatial URI"
+msgstr "URI spasial"
+
+msgid "Start of temporal extent"
+msgstr "Awal rentang waktu"
+
+msgid "Theme"
+msgstr "Tema"
+
+msgid "URI"
+msgstr "URI"
+
+msgid "Version notes"
+msgstr "Catatan versi"
+

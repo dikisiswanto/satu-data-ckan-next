@@ -38,9 +38,40 @@ import {
 import { serializeJsonLd } from "@/lib/seo/json-ld";
 import { DatasetResourcePreview } from "@/components/dataset-resource-preview";
 import { GeoJSONResourcePreview } from "@/components/geojson-resource-preview";
+import { DatasetApiAccess } from "@/components/dataset-api-access";
 
 function getGeoPortalUrl() {
   return safeHttpUrl(process.env.NEXT_PUBLIC_GEOPORTAL_URL) || null;
+}
+
+function isTabularResource(resource = {}) {
+  const candidates = [
+    resource.format,
+    resource.mimetype,
+    resource.mimetype_inner,
+  ]
+    .filter(Boolean)
+    .map((value) => String(value).trim().toLowerCase());
+  const extensions = [resource.name, resource.url]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase().split(/[?#]/, 1)[0]);
+  const supportedFormats = new Set([
+    "csv",
+    "application/csv",
+    "text/csv",
+    "tsv",
+    "text/tab-separated-values",
+    "xls",
+    "application/vnd.ms-excel",
+    "xlsx",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "ods",
+    "application/vnd.oasis.opendocument.spreadsheet",
+  ]);
+  return (
+    candidates.some((value) => supportedFormats.has(value)) ||
+    extensions.some((value) => /\.(csv|tsv|xls|xlsx|ods)$/i.test(value))
+  );
 }
 
 function isGeoJSONResource(resource = {}) {
@@ -229,7 +260,7 @@ export default async function DatasetDetailPage({ params }) {
   try {
     const activityResult = await ckanAction(
       "package_activity_list",
-      { id: dataset.name, include_data: false },
+      { id: dataset.name, offset: 0, limit: 8, include_hidden_activity: false },
       { revalidate: 30 },
     );
     activities = Array.isArray(activityResult)
@@ -338,13 +369,13 @@ export default async function DatasetDetailPage({ params }) {
           ) : (
             <Badge variant="primary">{ckanPackageCategory(dataset)}</Badge>
           )}
-          <h1 className="dataset-detail-title mt-5 text-3xl font-semibold leading-tight sm:text-4xl">
+          <h1 className="dataset-detail-title mt-3 text-3xl font-semibold leading-tight sm:text-4xl">
             {dataset.title || dataset.name}
           </h1>
-          <p className="dataset-detail-description mt-5 text-base leading-8 text-muted sm:text-lg">
+          <p className="dataset-detail-description mt-3 text-base leading-7 text-muted">
             {dataset.notes || "Deskripsi dataset belum tersedia."}
           </p>
-          <p className="mt-5 text-sm text-muted">
+          <p className="mt-3 text-sm text-muted">
             Ditambahkan ke portal {formatDate(dataset.metadata_created)} ·
             Diperbarui {formatDate(dataset.metadata_modified)}
           </p>
@@ -439,6 +470,16 @@ export default async function DatasetDetailPage({ params }) {
                 </div>
               ) : null}
             </div>
+            <DatasetApiAccess
+              datasetName={dataset.name}
+              resources={publicResources.map((resource) => ({
+                id: resource.id,
+                name: ckanResourceName(resource),
+                format: ckanResourceFormat(resource),
+                mimetype: resource.mimetype,
+                datastore_active: resource.datastore_active === true,
+              }))}
+            />
             <section
               className="overflow-hidden rounded-2xl border border-line bg-white"
               aria-labelledby="dataset-activity-heading"
@@ -636,14 +677,14 @@ export default async function DatasetDetailPage({ params }) {
               </div>
               {resources
                 .filter(
-                  (resource) =>
-                    resource.datastore_active === true && resource.id,
+                  (resource) => resource.id && isTabularResource(resource),
                 )
                 .map((resource) => (
                   <DatasetResourcePreview
                     key={resource.id}
                     datasetName={dataset.name}
                     resource={resource}
+                    datastoreActive={resource.datastore_active === true}
                   />
                 ))}
               {resources

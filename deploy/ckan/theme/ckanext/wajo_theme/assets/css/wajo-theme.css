@@ -1980,3 +1980,952 @@ body {
     font-size: 1.45rem;
   }
 }
+
+/* Portal Satu Data Kabupaten Wajo — shared icon sizing. CKAN supplies Font Awesome. */
+.wajo-admin-shell .fa {
+  display: inline-block;
+  min-width: 1.1em;
+  color: currentColor;
+  font-size: 1em;
+  line-height: 1;
+  text-align: center;
+  vertical-align: -0.08em;
+}
+.wajo-admin-brand {
+  max-width: min(58vw, 540px);
+  gap: 0.75rem;
+}
+.wajo-admin-brand__mark {
+  width: 48px;
+  height: 50px;
+  flex-basis: 48px;
+}
+.wajo-admin-brand__mark img {
+  display: block;
+  width: 38px;
+  height: 44px;
+  object-fit: contain;
+}
+.wajo-admin-brand__copy strong {
+  display: block;
+  max-width: 480px;
+  overflow: hidden;
+  color: #1d3025;
+  font-size: clamp(0.88rem, 1.15vw, 1.02rem);
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+}
+.wajo-admin-brand__copy small {
+  display: block;
+  margin-top: 0.18rem;
+  font-size: 0.56rem;
+  letter-spacing: 0.07em;
+  line-height: 1.35;
+}
+.wajo-admin-menu-toggle .fa,
+.wajo-admin-icon-button .fa {
+  width: 17px;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+.wajo-admin-public-link .fa {
+  width: 15px;
+  font-size: 0.92rem;
+}
+.wajo-admin-nav__item > .fa {
+  width: 18px;
+  font-size: 0.98rem;
+  color: #87938b;
+}
+.wajo-admin-nav__item.is-active > .fa {
+  color: #28744c;
+}
+.wajo-dashboard__welcome-mark .fa {
+  font-size: 2.6rem;
+}
+.wajo-metric-card__icon .fa,
+.wajo-dashboard-quicklinks__icon .fa,
+.wajo-admin-empty > span .fa {
+  font-size: 1.15rem;
+}
+.wajo-dashboard__section-heading a .fa,
+.wajo-metric-card small .fa,
+.wajo-dashboard-panel__header > a .fa,
+.wajo-dashboard-quicklinks > a > .fa {
+  font-size: 0.82rem;
+}
+
+.wajo-context-help {
+  max-width: 1440px;
+  margin: 1rem clamp(1rem, 2.3vw, 2rem) 0.25rem;
+  border: 1px solid var(--wajo-border);
+  border-radius: 0.7rem;
+  background: #fff;
+  box-shadow: var(--wajo-shadow-sm);
+}
+.wajo-context-help summary {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 0.9rem;
+  color: var(--wajo-ink);
+  cursor: pointer;
+  list-style: none;
+}
+.wajo-context-help summary::-webkit-details-marker {
+  display: none;
+}
+.wajo-context-help__icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 0.55rem;
+  background: #eff6f1;
+  color: var(--wajo-forest-700);
+}
+.wajo-context-help__icon .fa {
+  font-size: 1rem;
+}
+.wajo-context-help summary > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 0.08rem;
+}
+.wajo-context-help summary strong {
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+.wajo-context-help summary small {
+  overflow: hidden;
+  color: var(--wajo-muted);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wajo-context-help__toggle {
+  margin-left: auto;
+  color: var(--wajo-forest-700);
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.wajo-context-help[open] .wajo-context-help__toggle {
+  font-size: 0;
+}
+.wajo-context-help[open] .wajo-context-help__toggle::after {
+  content: "Tutup panduan";
+  font-size: 0.7rem;
+}
+.wajo-context-help__body {
+  border-top: 1px solid var(--wajo-border);
+  padding: 0.75rem 1rem 0.9rem 3.7rem;
+}
+.wajo-context-help__body p {
+  max-width: 920px;
+  margin: 0;
+  color: #586a60;
+  font-size: 0.76rem;
+  line-height: 1.65;
+}
+.wajo-context-help__body a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.45rem;
+  color: var(--wajo-forest-700);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.wajo-context-help__body a:hover {
+  text-decoration: underline;
+}
+
+.wajo-admin-footer {
+  display: flex;
+  width: 100%;
+  min-height: 66px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--wajo-border);
+  padding: 0.85rem clamp(1rem, 2.3vw, 2rem);
+  background: #fff;
+  color: var(--wajo-muted);
+}
+.wajo-admin-footer__brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.65rem;
+}
+.wajo-admin-footer__brand img {
+  display: block;
+  width: 25px;
+  height: 31px;
+  flex: 0 0 25px;
+  object-fit: contain;
+}
+.wajo-admin-footer__brand > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+.wajo-admin-footer strong {
+  color: #34483b;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.wajo-admin-footer span,
+.wajo-admin-footer > small {
+  font-size: 0.66rem;
+}
+
+.wajo-login-frame {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 620px);
+  margin: 0 auto;
+  padding: 0 0.2rem;
+}
+.wajo-login-brand {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 0 auto 1.4rem;
+  color: var(--wajo-ink) !important;
+  text-decoration: none !important;
+}
+.wajo-login-brand img {
+  display: block;
+  width: 56px;
+  height: 66px;
+  flex: 0 0 56px;
+  object-fit: contain;
+}
+.wajo-login-brand span {
+  display: grid;
+  gap: 0.2rem;
+}
+.wajo-login-brand strong {
+  color: #1b3528;
+  font-size: clamp(0.95rem, 2.5vw, 1.18rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+.wajo-login-brand small {
+  color: #738279;
+  font-size: 0.69rem;
+}
+.wajo-login-footnote {
+  margin: 1rem 0 0;
+  color: #718078;
+  font-size: 0.7rem;
+  text-align: center;
+}
+.login-main:has(#field-login) {
+  min-height: auto;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+}
+.login-main:has(#field-login) #content {
+  max-width: 100%;
+}
+.login-main:has(#field-login) .login-wrapper {
+  max-width: 560px;
+  border-radius: 0.85rem;
+  box-shadow: 0 12px 36px rgb(22 38 29 / 7%);
+}
+.login-main:has(#field-login) .login-container {
+  padding-top: 1.6rem;
+}
+.login-main:has(#field-login) .login-container .page-heading {
+  font-size: clamp(1.45rem, 3vw, 1.8rem);
+  font-weight: 750;
+}
+.login-main:has(#field-login) .form-control {
+  min-height: 2.9rem;
+  border-radius: 0.55rem;
+}
+.login-main:has(#field-login) .btn-primary {
+  min-height: 2.8rem;
+  border-radius: 0.55rem;
+  font-weight: 700;
+}
+
+/* Long CKAN forms/tables must not widen the viewport on phones. */
+.wajo-admin-workspace,
+.wajo-admin-workspace .main,
+.wajo-admin-workspace #content,
+.wajo-admin-workspace .primary,
+.wajo-admin-workspace .secondary {
+  min-width: 0;
+}
+.wajo-admin-workspace img {
+  max-width: 100%;
+  height: auto;
+}
+.wajo-admin-workspace .table-responsive {
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+}
+.wajo-admin-workspace pre,
+.wajo-admin-workspace code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.wajo-admin-workspace .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.wajo-admin-workspace .control-group .controls {
+  min-width: 0;
+}
+.wajo-admin-workspace .control-group input,
+.wajo-admin-workspace .control-group textarea,
+.wajo-admin-workspace .control-group select {
+  max-width: 100%;
+}
+@media (max-width: 767.98px) {
+  .wajo-admin-topbar {
+    position: relative;
+  }
+  .wajo-admin-topbar__inner {
+    min-height: 64px;
+    flex-wrap: nowrap;
+  }
+  .wajo-admin-brand {
+    max-width: calc(100% - 90px);
+    gap: 0.55rem;
+  }
+  .wajo-admin-brand__mark {
+    width: 39px;
+    height: 42px;
+    flex-basis: 39px;
+  }
+  .wajo-admin-brand__mark img {
+    width: 31px;
+    height: 36px;
+  }
+  .wajo-admin-brand__copy strong {
+    max-width: 100%;
+    font-size: 0.8rem;
+    line-height: 1.25;
+    white-space: normal;
+  }
+  .wajo-admin-brand__copy small {
+    max-width: 100%;
+    font-size: 0.48rem;
+    letter-spacing: 0.045em;
+  }
+  .wajo-admin-topbar__actions {
+    gap: 0.3rem;
+  }
+  .wajo-admin-public-link {
+    width: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    justify-content: center;
+  }
+  .wajo-admin-public-link span {
+    display: none;
+  }
+  .wajo-admin-user {
+    display: none;
+  }
+  .wajo-admin-shell {
+    display: block;
+  }
+  .wajo-admin-sidebar {
+    width: 100%;
+    max-width: none;
+  }
+  .wajo-admin-workspace .main {
+    min-height: calc(100svh - 64px);
+    padding: 1rem 0.75rem 1.75rem;
+  }
+  .wajo-admin-workspace .page-header {
+    gap: 0.7rem;
+  }
+  .wajo-admin-workspace .page-header h1 {
+    overflow-wrap: anywhere;
+  }
+  .wajo-admin-workspace .primary,
+  .wajo-admin-workspace .secondary {
+    float: none;
+    width: 100%;
+  }
+  .wajo-admin-workspace .wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+  .wajo-admin-workspace .module-content {
+    padding: 0.85rem;
+  }
+  .wajo-admin-workspace .btn {
+    max-width: 100%;
+    white-space: normal;
+  }
+  .wajo-context-help {
+    margin: 0.75rem 0.75rem 0.2rem;
+  }
+  .wajo-context-help summary {
+    min-height: 48px;
+    padding: 0.55rem 0.65rem;
+  }
+  .wajo-context-help summary small {
+    max-width: 55vw;
+  }
+  .wajo-context-help__toggle {
+    font-size: 0;
+  }
+  .wajo-context-help__toggle::after {
+    content: "Buka";
+    font-size: 0.68rem;
+  }
+  .wajo-context-help__body {
+    padding: 0.7rem 0.75rem;
+  }
+  .wajo-admin-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.8rem 0.9rem;
+  }
+  .wajo-login-frame {
+    padding-inline: 0.15rem;
+  }
+  .wajo-login-brand {
+    margin-bottom: 1rem;
+  }
+  .wajo-login-brand img {
+    width: 48px;
+    height: 56px;
+    flex-basis: 48px;
+  }
+  .login-main:has(#field-login) {
+    padding: 0;
+  }
+  .login-main:has(#field-login) .login-wrapper {
+    border-radius: 0.75rem;
+  }
+}
+@media (max-width: 479.98px) {
+  .wajo-admin-topbar__inner {
+    padding-inline: 0.6rem;
+  }
+  .wajo-admin-brand {
+    max-width: calc(100% - 82px);
+  }
+  .wajo-admin-brand__copy strong {
+    font-size: 0.74rem;
+  }
+  .wajo-admin-brand__copy small {
+    font-size: 0.43rem;
+  }
+  .wajo-admin-menu-toggle,
+  .wajo-admin-icon-button {
+    width: 34px;
+    min-width: 34px;
+    min-height: 34px;
+  }
+  .wajo-admin-workspace .dataset-item {
+    padding: 0.75rem;
+  }
+  .wajo-dashboard__metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .wajo-dashboard__welcome {
+    padding: 1rem;
+  }
+  .wajo-dashboard__welcome h1 {
+    font-size: 1.35rem;
+  }
+  .wajo-dashboard__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wajo-admin-workspace *,
+  .wajo-admin-topbar *,
+  .wajo-admin-sidebar * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Guided DataStore and XLoader setup: actionable steps, not a text-only manual. */
+.wajo-datastore {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  color: var(--wajo-ink);
+}
+.wajo-datastore__intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin: 0.2rem 0 1.1rem;
+}
+.wajo-datastore__intro h1 {
+  margin: 0.2rem 0 0.45rem;
+  color: var(--wajo-ink);
+  font-size: clamp(1.45rem, 2.2vw, 2rem);
+  font-weight: 760;
+  letter-spacing: -0.035em;
+}
+.wajo-datastore__intro p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--wajo-muted);
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+.wajo-datastore__intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.wajo-datastore__intro-actions .fa {
+  margin-right: 0.35rem;
+}
+.wajo-datastore-resource-list li a {
+  color: inherit;
+  text-decoration: none;
+}
+.wajo-datastore-resource-list li a:hover {
+  color: var(--wajo-accent, #167a52);
+  text-decoration: underline;
+}
+.wajo-datastore-resource-list--pending {
+  margin-bottom: 1rem;
+}
+
+.wajo-datastore__intro-icon {
+  display: grid;
+  width: 68px;
+  height: 68px;
+  flex: 0 0 68px;
+  place-items: center;
+  border: 1px solid #d9e7dd;
+  border-radius: 1rem;
+  background: #f0f7f2;
+  color: #28744c;
+}
+.wajo-datastore__intro-icon .fa {
+  font-size: 1.8rem;
+}
+.wajo-datastore__progress {
+  display: grid;
+  gap: 0.55rem;
+  margin: 1rem 0 1.15rem;
+  border: 1px solid var(--wajo-border);
+  border-radius: 0.7rem;
+  padding: 0.85rem 1rem;
+  background: #fff;
+}
+.wajo-datastore__progress > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+}
+.wajo-datastore__progress strong {
+  color: var(--wajo-ink);
+  font-size: 0.82rem;
+}
+.wajo-datastore__progress small {
+  color: var(--wajo-muted);
+  font-size: 0.7rem;
+}
+.wajo-datastore__progress-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #eaf0ec;
+}
+.wajo-datastore__progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #368258;
+  transition: width 0.2s ease;
+}
+.wajo-datastore__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(240px, 0.8fr);
+  align-items: start;
+  gap: 1rem;
+}
+.wajo-datastore__steps {
+  display: grid;
+  min-width: 0;
+  gap: 0.85rem;
+}
+.wajo-datastore-card,
+.wajo-datastore-sidecard {
+  min-width: 0;
+  border: 1px solid var(--wajo-border);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: var(--wajo-shadow-sm);
+}
+.wajo-datastore-card {
+  padding: 1rem;
+}
+.wajo-datastore-card__heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+.wajo-datastore-card__number {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border-radius: 0.55rem;
+  background: #edf5ef;
+  color: #28744c;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.wajo-datastore-card__heading h2,
+.wajo-datastore-sidecard h2 {
+  margin: 0.05rem 0 0.18rem;
+  color: var(--wajo-ink);
+  font-size: 0.94rem;
+  font-weight: 740;
+}
+.wajo-datastore-card__heading p,
+.wajo-datastore-sidecard p {
+  margin: 0;
+  color: var(--wajo-muted);
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+.wajo-datastore-checks {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wajo-datastore-checks li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+  border-top: 1px solid #edf0ed;
+  padding: 0.65rem 0.1rem;
+}
+.wajo-datastore-checks__icon {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf6ef;
+  color: #27804e;
+}
+.wajo-datastore-checks li.is-pending .wajo-datastore-checks__icon {
+  background: #fff4e5;
+  color: #a76a1b;
+}
+.wajo-datastore-checks__icon .fa {
+  font-size: 0.76rem;
+}
+.wajo-datastore-checks li > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+.wajo-datastore-checks strong {
+  font-size: 0.76rem;
+  font-weight: 680;
+}
+.wajo-datastore-checks small {
+  color: var(--wajo-muted);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+.wajo-datastore-checks__status {
+  color: #64736a;
+  font-size: 0.65rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.wajo-datastore-card__note {
+  margin: 0.6rem 0 0;
+  color: var(--wajo-muted);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+.wajo-datastore-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  border: 1px solid #e4eae5;
+  border-radius: 0.6rem;
+  padding: 0.75rem;
+  background: #f8faf8;
+}
+.wajo-datastore-callout > .fa {
+  margin-top: 0.1rem;
+  font-size: 1rem;
+}
+.wajo-datastore-callout > span {
+  display: grid;
+  gap: 0.15rem;
+}
+.wajo-datastore-callout strong {
+  color: var(--wajo-ink);
+  font-size: 0.75rem;
+}
+.wajo-datastore-callout small {
+  color: var(--wajo-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+.wajo-datastore-callout.is-ok {
+  border-color: #d7e9dc;
+  background: #f3faf5;
+  color: #28744c;
+}
+.wajo-datastore-callout.is-error {
+  border-color: #f0d4d1;
+  background: #fff7f6;
+  color: #a73f35;
+}
+.wajo-datastore-callout.is-pending {
+  border-color: #eadfca;
+  background: #fffbf2;
+  color: #93651f;
+}
+.wajo-datastore-command {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.55rem;
+  border: 1px solid #e9eeea;
+  border-radius: 0.55rem;
+  padding: 0.5rem 0.6rem;
+  background: #f8faf8;
+}
+.wajo-datastore-command code {
+  min-width: 0;
+  color: #32463a;
+  font-size: 0.68rem;
+  overflow-wrap: anywhere;
+}
+.wajo-datastore-command .btn {
+  flex: 0 0 auto;
+}
+.wajo-datastore-backfill-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0.5rem 0 0.75rem;
+}
+.wajo-datastore-backfill-summary > div {
+  display: grid;
+  gap: 0.15rem;
+  border: 1px solid #edf0ed;
+  border-radius: 0.6rem;
+  padding: 0.65rem;
+  background: #fbfcfb;
+}
+.wajo-datastore-backfill-summary strong {
+  color: #285b3e;
+  font-size: 1.3rem;
+  font-weight: 780;
+}
+.wajo-datastore-backfill-summary span {
+  color: var(--wajo-muted);
+  font-size: 0.66rem;
+  line-height: 1.4;
+}
+.wajo-datastore-backfill-form {
+  display: grid;
+  justify-items: start;
+  gap: 0.45rem;
+}
+.wajo-datastore-backfill-form .btn .fa {
+  margin-right: 0.35rem;
+}
+.wajo-datastore-backfill-form small {
+  color: var(--wajo-muted);
+  font-size: 0.67rem;
+  line-height: 1.5;
+}
+.wajo-datastore-resource-list {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+.wajo-datastore-resource-list li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid #edf0ed;
+  padding: 0.45rem 0;
+}
+.wajo-datastore-resource-list li > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+.wajo-datastore-resource-list strong {
+  overflow: hidden;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wajo-datastore-resource-list small {
+  color: var(--wajo-muted);
+  font-size: 0.65rem;
+}
+.wajo-datastore-resource-list .fa {
+  color: #61806c;
+}
+.wajo-datastore-card > .btn {
+  margin-top: 0.4rem;
+}
+.wajo-datastore__aside {
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+}
+.wajo-datastore-sidecard {
+  padding: 0.9rem;
+}
+.wajo-datastore-sidecard__icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 0.65rem;
+  place-items: center;
+  border-radius: 0.6rem;
+  background: #eef6f0;
+  color: #28744c;
+}
+.wajo-datastore-sidecard__icon .fa {
+  font-size: 1rem;
+}
+.wajo-datastore-sidecard ol {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.65rem 0 0;
+  padding-left: 1.1rem;
+  color: #52665a;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+.wajo-datastore-sidecard ol li::marker {
+  color: #368258;
+  font-weight: 750;
+}
+.wajo-datastore-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.6rem 0;
+}
+.wajo-datastore-formats span {
+  border: 1px solid #e4ebe5;
+  border-radius: 0.35rem;
+  padding: 0.2rem 0.4rem;
+  background: #f8faf8;
+  color: #466151;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+.wajo-datastore-sidecard > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+  color: #28744c;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.wajo-datastore .alert {
+  border-radius: 0.65rem;
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+@media (max-width: 991.98px) {
+  .wajo-datastore__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wajo-datastore__aside {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .wajo-datastore__aside > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 767.98px) {
+  .wajo-datastore__intro {
+    align-items: flex-start;
+  }
+  .wajo-datastore__intro-icon {
+    width: 46px;
+    height: 46px;
+    flex-basis: 46px;
+    border-radius: 0.7rem;
+  }
+  .wajo-datastore__intro-icon .fa {
+    font-size: 1.25rem;
+  }
+  .wajo-datastore__progress > div:first-child {
+    display: grid;
+  }
+  .wajo-datastore__aside {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wajo-datastore__aside > :first-child {
+    grid-column: auto;
+  }
+  .wajo-datastore-card {
+    padding: 0.8rem;
+  }
+  .wajo-datastore-checks li {
+    grid-template-columns: 22px minmax(0, 1fr);
+  }
+  .wajo-datastore-checks__status {
+    grid-column: 2;
+  }
+  .wajo-datastore-command {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .wajo-datastore-command .btn {
+    width: 100%;
+  }
+  .wajo-datastore-backfill-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

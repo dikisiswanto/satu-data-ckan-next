@@ -11,8 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 I18N_DIR = ROOT / "deploy/ckan/theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES"
 PO = I18N_DIR / "ckan.po"
 EXTENSION_POS = {
-    "ckanext-harvest": I18N_DIR / "ckanext-harvest.po",
-    "ckanext-pages": I18N_DIR / "ckanext-pages.po",
+    path.stem: path
+    for path in sorted(I18N_DIR.glob("ckanext-*.po"))
 }
 COMPILER = ROOT / "deploy/ckan/compile-id-translations.py"
 ERRORS: list[str] = []
@@ -72,6 +72,28 @@ def main() -> None:
         "Groups", "Users", "Resource", "Resources", "Preview", "Create",
         "Update", "Activity Stream", "Administration", "Site Settings",
         "Harvest Sources", "Harvest Jobs", "Pages", "Add Page", "Data Dictionary",
+        "Authorization function not found: %s", "Editor", "Member", "View", "Just now",
+        "Add {object_type}", "Create {object_type}", "Edit {object_type}", "Save {object_type}",
+        "Search {object_type}s...", "Missing value", "The input field %(name)s was not expected.",
+        "Please enter an integer value", "Please enter a floating point value", "Must be a Unicode string value",
+        "Package resource(s) invalid", "Tag vocabulary \"%s\" does not exist", "Not found",
+        "Could not parse as valid JSON", "An organization must be provided", "Organization does not exist",
+        "Invalid integer", "Must be a natural number", "Must be a positive integer", "Date format incorrect",
+        "Dataset not found: %s", "Resource not found: %s", "User not found: %s", "Group not found: %s",
+        "Names must be strings", "That name cannot be used", "Must be at least %s characters long",
+        "Name must be a maximum of %i characters long", "That URL is already in use.",
+        "Duplicate key \"%s\"", "Group name already exists in database",
+        "Cannot modify your own sysadmin privileges", "User names must be strings",
+        "The username is already associated with another account. Please use a different username.",
+        "Please enter both passwords", "Passwords must be strings", "The passwords you entered do not match",
+        "Edit not allowed as it looks like spam. Please avoid links in your description.",
+        "There are no views created for this resource yet.", "Not seeing the views you were expecting?",
+        "Click here for more information.", "Here are some reasons you may not be seeing expected views:",
+        "Explore", "More information", "Go to resource", "API Endpoint", "Views", "No preview available",
+        "An error occurred", "Loading data...", "Organization members", "Manage members", "Add member",
+        "System Administrator", "Dashboard", "Home", "Help", "Documentation", "Statistics",
+        "Access denied", "Internal server error", "Page not found", "Please check the form for errors",
+        "There are errors in the form", "Changes saved", "Changes not saved", "Are you sure you want to continue?",
     }
     message_ids = {message.id if isinstance(message.id, str) else message.id[0] for message in translated}
     absent = sorted(required - message_ids)
@@ -79,8 +101,48 @@ def main() -> None:
         ERRORS.append(f"Required CKAN core admin translation keys are missing: {', '.join(absent)}")
 
     extension_required = {
-        "ckanext-harvest": {"Harvest Sources", "Add Harvest Source", "Harvest Jobs", "Run", "Reharvest", "Frequency", "Source URL"},
-        "ckanext-pages": {"Pages", "Add Page", "Edit Page", "Delete Page", "Page title", "Page content", "Show in menu"},
+        "ckanext-harvest": {
+            "Harvest Sources", "Add Harvest Source", "Harvest Jobs", "Run", "Reharvest", "Frequency", "Source URL",
+            "Group not found", "Unauthorized to read group %s", "Groups", "Tags", "Formats", "Licence",
+            "Not authorized to see this page", "Harvesting source successfully cleared",
+            "Harvesting source successfully inactivated", "Harvest source not found",
+            "Harvest will start shortly. Refresh this page for updates.",
+            "Cannot create new harvest jobs on inactive sources. First, please change the source status to 'active'.",
+            "A harvest job has already been scheduled for this source", "Harvest source cleared", "No content found",
+            "Harvest job not found", "No jobs yet for this source", "User {0} not authorized to create harvest sources",
+            "User not authorized to create a job for source {0}", "Only sysadmins can create harvest jobs for all sources",
+            "Only the sysadmins can create harvest objects", "User {0} not authorized to delete harvest source {1}",
+            "User {0} not authorized to read harvest source {1}", "User {0} not authorized to see jobs from source {1}",
+            "User {0} not authorized to list jobs for source {1}", "User {0} not authorized to update harvest source {1}",
+            "Only sysadmins can reimport all harvest objects", "Only sysadmins can run the pending harvest jobs",
+            "Only sysadmins can reindex all harvest sources", "There are no datasets associated to this harvest source.",
+            "Sorry no harvest sources found for \"{query}\"", "Sorry no harvest sources found",
+            "There is no description for this harvest source", "Last Harvest Job", "View full job report",
+            "Start a new harvesting job for this harvest source now", "Delete all harvest jobs and existing datasets from this source",
+            "Return to the harvest sources list", "Search sources...", "Name Ascending", "Name Descending",
+            "Last Modified", "All harvest sources", "Try another search term, browse the sources below or ",
+            "add a new one", "Harvest Jobs", "Job: ", "Started:", "Not yet", "Finished:", "Job Report",
+            "Back to job list", "Error Summary", "No errors for this job", "Only the 20 most frequent errors are shown",
+            "Job Errors", "Document Errors", "Error Report", "documents with errors", "Remote content", "Local content",
+        },
+        "ckanext-pages": {
+            "Pages", "Blog", "What are Pages?", "Add Blog Article", "Edit Blog Article", "eg. Blog Article Title",
+            "Add page", "Edit page", "eg. Page Title", "Publish Date", "2005-01-01", "Visibility", "Private", "Public",
+            "Menu Order", "Not in Menu", "Enter content here", "My content", "Add", "Are you sure you want to delete this Page?",
+            "This page currently has no content", "More", "Edit Article", "Blog Articles", "Add Article", "Confirm Delete",
+            "Are you sure you want to delete page - {name}?", "There are currently no blog articles here",
+            "There are currently no pages here", "Page name already exists in database", "Not authorized to see this page",
+            "User %s not authorized to read this page", "Organization not found", "Unauthorized to read organization %s",
+            "Page Not Found", "Unauthorized to delete page", "Group not found", "Unauthorized to read group %s",
+            "ERROR: View not found {view_id}", "Your browser does not support iframes.",
+            "Unauthorized to create or edit a page", "Only Posting is availiable", "Unauthorized to upload file %s",
+        },
+        "ckanext-dcat": {
+            "URI", "GUID", "Theme", "Identifier", "Alternate identifier", "Issued", "Modified", "Version notes",
+            "Language", "Frequency", "Conforms to", "Spatial URI", "Start of temporal extent", "End of temporal extent",
+            "Publisher URI", "Publisher name", "Publisher email", "Publisher URL", "Publisher type", "Contact name",
+            "Contact email", "Contact URI", "Download URL", "Media type", "Size", "Rights", "Created",
+        },
     }
     for domain, required_ids in extension_required.items():
         catalog = parsed_catalogs.get(domain)
@@ -89,7 +151,7 @@ def main() -> None:
             available = {message.id if isinstance(message.id, str) else message.id[0] for message in catalog if message.id}
         absent = sorted(required_ids - available)
         if absent:
-            ERRORS.append(f"{domain}: required admin strings are missing: {', '.join(absent)}")
+            ERRORS.append(f"{domain}: required upstream extension strings are missing: {', '.join(absent)}")
 
     # Exercise the merge against a fixture base catalog. A custom string should
     # override core, while an unrelated upstream translation must survive.
@@ -117,10 +179,11 @@ def main() -> None:
         extension_output = locale_root / "wajo-theme-i18n"
         compiled_extensions = module.compile_extension_catalogs(PO, extension_output)
         if len(compiled_extensions) != len(EXTENSION_POS):
-            ERRORS.append("Compiler must produce both Harvest and Pages Indonesian gettext domains.")
+            ERRORS.append("Compiler must produce every maintained Indonesian extension gettext domain.")
         for domain, expected_msgid, expected_msgstr in (
             ("ckanext-harvest", "Harvest Sources", "Sumber pengambilan data"),
             ("ckanext-pages", "Add Page", "Tambah halaman"),
+            ("ckanext-dcat", "Publisher name", "Nama penerbit"),
         ):
             path = extension_output / "id/LC_MESSAGES" / f"{domain}.mo"
             if not path.is_file():

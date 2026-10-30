@@ -19,8 +19,9 @@ CKAN dan extension dapat memakai domain gettext terpisah. Karena itu setiap kata
 | `ckan`            | CKAN core, shell Wajo Admin, label umum, form dan pesan validasi yang menggunakan `_()`/`gettext` core | `i18n/id/LC_MESSAGES/ckan.po`            |
 | `ckanext-harvest` | Halaman sumber pengambilan data, tugas, status, jadwal, dan tindakan Harvest                           | `i18n/id/LC_MESSAGES/ckanext-harvest.po` |
 | `ckanext-pages`   | Pengelolaan Pages/CMS, form halaman, status publikasi, dan tindakan Pages                              | `i18n/id/LC_MESSAGES/ckanext-pages.po`   |
+| `ckanext-dcat`    | Label metadata DCAT/RDF, penerbit, kontak, lisensi, ruang/waktu, dan URL distribusi                    | `i18n/id/LC_MESSAGES/ckanext-dcat.po`    |
 
-`WajoHarvestTranslationPlugin` dan `WajoPagesTranslationPlugin` mendaftarkan dua domain extension melalui `ITranslation`. Lokasi katalog dan locale mengikuti mekanisme resmi CKAN `DefaultTranslation`; domain di-override agar sesuai nama gettext extension. Plugin tersebut hanya menyediakan lokalisasi dan tidak mengganti route, permission, validasi, ataupun flow native extension.
+`WajoHarvestTranslationPlugin`, `WajoPagesTranslationPlugin`, dan `WajoDcatTranslationPlugin` mendaftarkan domain extension melalui `ITranslation`. Lokasi katalog dan locale mengikuti mekanisme resmi CKAN `DefaultTranslation`; domain di-override agar sesuai nama gettext extension. Plugin tersebut hanya menyediakan lokalisasi dan tidak mengganti route, permission, validasi, ataupun flow native extension.
 
 Katalog `ckan.po` digabung dengan katalog bawaan CKAN yang sudah ada: terjemahan Wajo menang untuk `msgid` yang sama, sedangkan pesan upstream yang tidak dimiliki katalog Wajo tetap dipertahankan. Katalog Harvest dan Pages dikompilasi ke direktori i18n extension Wajo agar dapat ditemukan oleh plugin `ITranslation` pada startup.
 
@@ -37,20 +38,22 @@ Katalog `ckan.po` digabung dengan katalog bawaan CKAN yang sudah ada: terjemahan
 
 `python3 scripts/check-id-translations.py` dijalankan sebagai bagian `bash scripts/check-static.sh`. Pemeriksaan ini memastikan:
 
-- semua entri yang dipelihara di tiga katalog mempunyai terjemahan;
-- string wajib core, Harvest, dan Pages tersedia;
+- semua entri yang dipelihara di empat katalog mempunyai terjemahan;
+- string wajib core, Harvest, Pages, dan DCAT tersedia;
 - placeholder sumber dan terjemahan cocok;
 - merge katalog core tidak menghapus terjemahan upstream;
-- compiler menghasilkan file `.mo` untuk domain Harvest dan Pages.
+- compiler menghasilkan file `.mo` untuk domain Harvest, Pages, dan DCAT.
 
 Kompilasi dijalankan di Docker build melalui `deploy/ckan/compile-id-translations.py`. File `.mo` bersifat hasil build dan tidak perlu dikomit.
 
-## Batas cakupan yang perlu diperhatikan
+## Cakupan yang sudah diuji dan batas yang perlu diperhatikan
 
-Cakupan otomatis ini meliputi string gettext yang dimasukkan ke tiga katalog di atas. Teks hard-coded oleh extension pihak ketiga, pesan dari extension yang menggunakan domain lain, nama kolom yang didefinisikan dalam konfigurasi skema, serta string JavaScript yang tidak terdaftar pada katalog POT tidak bisa diterjemahkan hanya dengan katalog ini. Saat memperbarui extension, lakukan audit string pada halaman aktual dan tambahkan domain/katalog khusus bila extension tersebut mengimplementasikan `ITranslation`.
+Pada source saat ini, `scripts/check-id-translations.py` memeriksa 781 entri `msgid` lintas empat domain, memastikan tidak ada `msgstr` kosong pada entri yang dipelihara, menjaga placeholder, menguji merge katalog upstream, dan mengompilasi `.mo` setiap domain. Angka tersebut adalah jumlah entri katalog project, bukan persentase seluruh string yang mungkin muncul dari semua paket CKAN dan extension.
+
+Cakupan otomatis ini meliputi string gettext yang dimasukkan ke empat katalog di atas. Teks hard-coded oleh extension pihak ketiga, pesan dari extension yang menggunakan domain lain, nama kolom yang didefinisikan dalam konfigurasi skema, serta string JavaScript yang tidak terdaftar pada katalog POT tidak bisa diterjemahkan hanya dengan katalog ini. Saat memperbarui extension, lakukan audit string pada halaman aktual dan tambahkan domain/katalog khusus bila extension tersebut mengimplementasikan `ITranslation`.
 
 Istilah teknis, nama format berkas, dan konten yang dimasukkan administrator (misalnya judul dataset) tidak diterjemahkan otomatis karena merupakan data, bukan label antarmuka.
 
 ## Build ulang
 
-Setelah mengganti source di VPS, jalankan bootstrap dan rebuild image CKAN sesuai mode deployment. Langkah build mengompilasi domain `ckan`, `ckanext-harvest`, dan `ckanext-pages` sebelum container dijalankan. Restart CKAN agar locale default dibaca ulang.
+Setelah mengganti source di VPS, jalankan bootstrap dan rebuild image CKAN sesuai mode deployment. Langkah build mengompilasi domain `ckan`, `ckanext-harvest`, `ckanext-pages`, dan `ckanext-dcat` sebelum container dijalankan. Restart CKAN agar locale default dibaca ulang.

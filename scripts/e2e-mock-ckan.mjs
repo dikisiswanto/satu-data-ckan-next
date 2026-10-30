@@ -34,6 +34,19 @@ const packages = [
         datastore_active: true,
       },
       {
+        id: "resource-sekolah-pending",
+        package_id: "package-sekolah",
+        name: "Data Sekolah Menunggu Indeks",
+        description:
+          "Contoh resource tabular yang baru ditambahkan dan belum selesai dimuat ke DataStore",
+        format: "CSV",
+        mimetype: "text/csv",
+        url: "http://127.0.0.1:8010/dataset/data-sekolah-wajo/resource/resource-sekolah-pending/download/data-sekolah-pending.csv",
+        state: "active",
+        private: false,
+        datastore_active: false,
+      },
+      {
         id: "resource-private-on-public-package",
         package_id: "package-sekolah",
         name: "Lampiran internal",
@@ -762,9 +775,7 @@ function actionResult(action, params) {
               timestamp: pkg.metadata_modified,
               user: "admin-data",
               user_id: "internal-user-id",
-              ...(params.get("include_data") === "true"
-                ? { data: { package: { name: pkg.name, title: pkg.title } } }
-                : {}),
+              data: { package: { name: pkg.name, title: pkg.title } },
             },
           ]
         : { __not_found: true };
@@ -879,41 +890,50 @@ const server = createServer((request, response) => {
       .end(image);
     return;
   }
+  const csvDownload = url.pathname.match(
+    /^\/dataset\/[^/]+\/resource\/([^/]+)\/download\/[^/]+\/?$/,
+  );
+  if (csvDownload && csvDownload[1] === "resource-sekolah-pending") {
+    const csv =
+      "nama_sekolah,kecamatan\r\nSD Negeri 2 Sengkang,Tempe\r\nSMP Negeri 4 Belawa,Belawa\r\n";
+    response
+      .writeHead(200, {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Length": Buffer.byteLength(csv),
+        "Cache-Control": "no-store",
+      })
+      .end(csv);
+    return;
+  }
   const match = url.pathname.match(/^\/api\/3\/action\/([a-z][a-z0-9_]*)$/);
   if (!match) {
-    response
-      .writeHead(404)
-      .end(
-        JSON.stringify({
-          success: false,
-          error: { message: "Not found", __type: "Not Found" },
-        }),
-      );
+    response.writeHead(404).end(
+      JSON.stringify({
+        success: false,
+        error: { message: "Not found", __type: "Not Found" },
+      }),
+    );
     return;
   }
   const action = match[1];
   const sendActionResult = () => {
     const result = actionResult(action, url.searchParams);
     if (result?.__not_found) {
-      response
-        .writeHead(200)
-        .end(
-          JSON.stringify({
-            success: false,
-            error: { message: "Not found", __type: "Not Found" },
-          }),
-        );
-      return;
-    }
-    response
-      .writeHead(200)
-      .end(
+      response.writeHead(200).end(
         JSON.stringify({
-          help: `https://docs.ckan.org/en/2.12/api/index.html#${action}`,
-          success: true,
-          result,
+          success: false,
+          error: { message: "Not found", __type: "Not Found" },
         }),
       );
+      return;
+    }
+    response.writeHead(200).end(
+      JSON.stringify({
+        help: `https://docs.ckan.org/en/2.12/api/index.html#${action}`,
+        success: true,
+        result,
+      }),
+    );
   };
   // Deliberately delay public Action API responses in E2E so loading boundaries
   // and layout-shift reservations are exercised instead of only warm responses.

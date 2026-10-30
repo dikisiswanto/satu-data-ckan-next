@@ -17,11 +17,11 @@ source, destination = map(Path, sys.argv[1:])
 if not source.is_file():
     raise SystemExit(f"Canonical environment file is missing: {source}")
 
-excluded_prefixes = ("NEXT_PUBLIC_", "CKAN_ADMIN_BASIC_AUTH_", "CLOUDFLARE_", "CKANEXT__XLOADER__")
+excluded_prefixes = ("NEXT_PUBLIC_", "CKAN_ADMIN_BASIC_AUTH_", "CLOUDFLARE_", "CKANEXT__XLOADER__", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_")
 excluded_keys = {
     "PUBLIC_HOST", "CKAN_HOST", "PUBLIC_SITE_ORIGIN", "CKAN_ADMIN_URL",
     "CKAN_API_INTERNAL_URL", "CKAN_API_TIMEOUT_MS", "CKAN_INDICATOR_TAG",
-    "CKAN_INFOGRAPHIC_TAG", "CKAN_PUBLICATION_TAG",
+    "CKAN_INFOGRAPHIC_TAG", "CKAN_PUBLICATION_TAG", "CKAN_REVALIDATE_SECRET",
 }
 rendered = []
 seen = set()
@@ -40,7 +40,7 @@ for line in source.read_text().splitlines():
 if not any(line.startswith("CKAN__PLUGINS=") for line in rendered):
     raise SystemExit("CKAN__PLUGINS missing; run bootstrap before rendering the CKAN environment.")
 if any(line.startswith(prefix) for line in rendered for prefix in (
-    "CLOUDFLARE_TUNNEL_TOKEN=", "CKAN_ADMIN_BASIC_AUTH_PASSWORD=", "CKAN_ADMIN_BASIC_AUTH_HASH=", "NEXT_PUBLIC_", "CKANEXT__XLOADER__"
+    "CLOUDFLARE_TUNNEL_TOKEN=", "CKAN_ADMIN_BASIC_AUTH_PASSWORD=", "CKAN_ADMIN_BASIC_AUTH_HASH=", "NEXT_PUBLIC_", "CKANEXT__XLOADER__", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_", "CKAN_REVALIDATE_SECRET="
 )):
     raise SystemExit("Edge credentials or Next.js public variables must not enter CKAN service environment.")
 

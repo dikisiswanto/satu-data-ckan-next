@@ -35,7 +35,10 @@ export async function ckanAction(
 
   const response = await fetch(url, {
     headers: { Accept: "application/json" },
-    next: revalidate > 0 ? { revalidate } : undefined,
+    next:
+      revalidate > 0
+        ? { revalidate, tags: ["ckan-public", `ckan-action:${action}`] }
+        : undefined,
     cache: revalidate > 0 ? undefined : "no-store",
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });

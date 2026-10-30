@@ -14,8 +14,30 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
+msgid " <p><strong>There was an error while searching.</strong> Please try again.</p> "
+msgstr " <p><strong>Terjadi kesalahan saat pencarian.</strong> Silakan coba lagi.</p> "
+
+msgid ""
+" Harvest sources allow importing remote metadata into this catalog. Remote sources can be other "
+"catalogs such as other CKAN instances, CSW servers or Web Accessible Folders (WAF) (depending on "
+"the actual harvesters enabled for this instance). "
+msgstr ""
+" Sumber pengambilan data memungkinkan metadata dari katalog eksternal dimasukkan ke katalog ini. "
+"Sumber eksternal dapat berupa instans CKAN lain, server CSW, atau folder yang dapat diakses "
+"melalui web (WAF), bergantung pada jenis pengambil data yang diaktifkan. "
+
+#, python-brace-format
+msgid " found for \"{query}\""
+msgstr " ditemukan untuk \"{query}\""
+
+msgid "A harvest job has already been scheduled for this source"
+msgstr "Tugas pengambilan data untuk sumber ini sudah dijadwalkan."
+
 msgid "Aborted"
 msgstr "Dibatalkan"
+
+msgid "About"
+msgstr "Tentang"
 
 msgid "Actions"
 msgstr "Tindakan"
@@ -26,6 +48,12 @@ msgstr "Aktif"
 msgid "Add Harvest Source"
 msgstr "Tambah sumber pengambilan data"
 
+msgid "Admin"
+msgstr "Administrator"
+
+msgid "All harvest sources"
+msgstr "Semua sumber pengambilan data"
+
 msgid "Apply"
 msgstr "Terapkan"
 
@@ -35,8 +63,18 @@ msgstr "Yakin ingin menghapus sumber pengambilan data ini?"
 msgid "Back"
 msgstr "Kembali"
 
+msgid "Back to job list"
+msgstr "Kembali ke daftar tugas"
+
 msgid "Cancel"
 msgstr "Batal"
+
+msgid ""
+"Cannot create new harvest jobs on inactive sources. First, please change the source status to "
+"'active'."
+msgstr ""
+"Tugas pengambilan data tidak dapat dibuat untuk sumber yang tidak aktif. Aktifkan sumber terlebih"
+" dahulu."
 
 msgid "Clear"
 msgstr "Hapus pilihan"
@@ -50,10 +88,19 @@ msgstr "Bersihkan hasil pengambilan data"
 msgid "Completed"
 msgstr "Selesai"
 
+msgid "Configuration"
+msgstr "Konfigurasi"
+
+msgid "Count"
+msgstr "Jumlah"
+
 msgid "Create"
 msgstr "Buat"
 
 msgid "Create Harvest Source"
+msgstr "Buat sumber pengambilan data"
+
+msgid "Create harvest source"
 msgstr "Buat sumber pengambilan data"
 
 msgid "Created"
@@ -61,6 +108,9 @@ msgstr "Dibuat"
 
 msgid "Created on"
 msgstr "Dibuat pada"
+
+msgid "Dashboard"
+msgstr "Dasbor"
 
 msgid "Datasets"
 msgstr "Dataset"
@@ -71,6 +121,18 @@ msgstr "Hapus"
 msgid "Delete Harvest Source"
 msgstr "Hapus sumber pengambilan data"
 
+msgid "Delete all harvest jobs and existing datasets from this source"
+msgstr "Hapus semua tugas pengambilan data dan dataset yang sudah ada dari sumber ini."
+
+msgid "Delete and clear source"
+msgstr "Hapus sumber beserta seluruh datanya"
+
+msgid "Delete source"
+msgstr "Hapus sumber"
+
+msgid "Deleted"
+msgstr "Dihapus"
+
 msgid "Description"
 msgstr "Deskripsi"
 
@@ -80,14 +142,29 @@ msgstr "Detail"
 msgid "Disabled"
 msgstr "Dinonaktifkan"
 
+msgid "Document Errors"
+msgstr "Kesalahan dokumen"
+
+msgid "Draft"
+msgstr "Draf"
+
 msgid "Edit"
 msgstr "Ubah"
 
 msgid "Edit Harvest Source"
 msgstr "Ubah sumber pengambilan data"
 
+msgid "Edit harvest source"
+msgstr "Ubah sumber pengambilan data"
+
 msgid "Enabled"
 msgstr "Diaktifkan"
+
+msgid "Error Report"
+msgstr "Laporan kesalahan"
+
+msgid "Error Summary"
+msgstr "Ringkasan kesalahan"
 
 msgid "Errors"
 msgstr "Kesalahan"
@@ -104,11 +181,23 @@ msgstr "Saring"
 msgid "Finished"
 msgstr "Selesai"
 
+msgid "Finished:"
+msgstr "Selesai:"
+
+msgid "Formats"
+msgstr "Format"
+
 msgid "Frequency"
 msgstr "Frekuensi"
 
 msgid "Gathering"
 msgstr "Mengumpulkan"
+
+msgid "Group not found"
+msgstr "Grup tidak ditemukan."
+
+msgid "Groups"
+msgstr "Grup"
 
 msgid "Harvest"
 msgstr "Pengambilan data"
@@ -125,14 +214,38 @@ msgstr "Sumber pengambilan data"
 msgid "Harvest Sources"
 msgstr "Sumber pengambilan data"
 
+msgid "Harvest job not found"
+msgstr "Tugas pengambilan data tidak ditemukan."
+
+msgid "Harvest source cleared"
+msgstr "Hasil pengambilan data dari sumber berhasil dibersihkan."
+
 msgid "Harvest source created"
 msgstr "Sumber pengambilan data berhasil dibuat"
 
 msgid "Harvest source deleted"
 msgstr "Sumber pengambilan data berhasil dihapus"
 
+msgid "Harvest source not found"
+msgstr "Sumber pengambilan data tidak ditemukan."
+
 msgid "Harvest source updated"
 msgstr "Sumber pengambilan data berhasil diperbarui"
+
+msgid "Harvest sources"
+msgstr "Sumber pengambilan data"
+
+msgid "Harvest will start shortly. Refresh this page for updates."
+msgstr "Proses pengambilan data akan segera dimulai. Muat ulang halaman ini untuk melihat pembaruan."
+
+msgid "Harvesting source successfully cleared"
+msgstr "Hasil pengambilan dari sumber berhasil dibersihkan."
+
+msgid "Harvesting source successfully inactivated"
+msgstr "Sumber pengambilan data berhasil dinonaktifkan."
+
+msgid "Id"
+msgstr "ID"
 
 msgid "Importing"
 msgstr "Mengimpor"
@@ -140,20 +253,53 @@ msgstr "Mengimpor"
 msgid "Inactive"
 msgstr "Tidak aktif"
 
+msgid "Job Errors"
+msgstr "Kesalahan tugas"
+
 msgid "Job ID"
 msgstr "ID tugas"
+
+msgid "Job Report"
+msgstr "Laporan tugas"
 
 msgid "Job status"
 msgstr "Status tugas"
 
+msgid "Job: "
+msgstr "Tugas: "
+
+msgid "Jobs"
+msgstr "Tugas"
+
 msgid "Last Harvest"
 msgstr "Pengambilan data terakhir"
+
+msgid "Last Harvest Job"
+msgstr "Tugas pengambilan data terakhir"
 
 msgid "Last Job"
 msgstr "Tugas terakhir"
 
+msgid "Last Modified"
+msgstr "Terakhir diubah"
+
+msgid "Licence"
+msgstr "Lisensi"
+
+msgid "Local content"
+msgstr "Konten lokal"
+
+msgid "Message"
+msgstr "Pesan"
+
 msgid "Name"
 msgstr "Nama"
+
+msgid "Name Ascending"
+msgstr "Nama (A–Z)"
+
+msgid "Name Descending"
+msgstr "Nama (Z–A)"
 
 msgid "New Harvest Source"
 msgstr "Sumber pengambilan data baru"
@@ -161,11 +307,29 @@ msgstr "Sumber pengambilan data baru"
 msgid "Next"
 msgstr "Berikutnya"
 
+msgid "No content found"
+msgstr "Konten tidak ditemukan."
+
+msgid "No errors for this job"
+msgstr "Tidak ada kesalahan pada tugas ini."
+
 msgid "No harvest jobs found"
 msgstr "Tidak ada tugas pengambilan data"
 
 msgid "No harvest sources available"
 msgstr "Belum ada sumber pengambilan data"
+
+msgid "No jobs yet for this source"
+msgstr "Belum ada tugas untuk sumber ini."
+
+msgid "No organization"
+msgstr "Tanpa organisasi"
+
+msgid "Not authorized to see this page"
+msgstr "Anda tidak memiliki izin untuk melihat halaman ini."
+
+msgid "Not yet"
+msgstr "Belum"
 
 msgid "Notes"
 msgstr "Catatan"
@@ -173,7 +337,28 @@ msgstr "Catatan"
 msgid "Object ID"
 msgstr "ID objek"
 
+msgid "Only sysadmins can create harvest jobs for all sources"
+msgstr "Hanya administrator sistem yang dapat membuat tugas pengambilan data untuk semua sumber."
+
+msgid "Only sysadmins can reimport all harvest objects"
+msgstr "Hanya administrator sistem yang dapat mengimpor ulang seluruh objek hasil pengambilan."
+
+msgid "Only sysadmins can reindex all harvest sources"
+msgstr "Hanya administrator sistem yang dapat mengindeks ulang seluruh sumber pengambilan data."
+
+msgid "Only sysadmins can run the pending harvest jobs"
+msgstr "Hanya administrator sistem yang dapat menjalankan tugas pengambilan data yang tertunda."
+
+msgid "Only the 20 most frequent errors are shown"
+msgstr "Hanya 20 kesalahan yang paling sering muncul yang ditampilkan."
+
+msgid "Only the sysadmins can create harvest objects"
+msgstr "Hanya administrator sistem yang dapat membuat objek pengambilan data."
+
 msgid "Organization"
+msgstr "Organisasi"
+
+msgid "Organizations"
 msgstr "Organisasi"
 
 msgid "Owner organization"
@@ -181,6 +366,9 @@ msgstr "Organisasi pemilik"
 
 msgid "Packages"
 msgstr "Dataset"
+
+msgid "Popular"
+msgstr "Terpopuler"
 
 msgid "Previous"
 msgstr "Sebelumnya"
@@ -194,6 +382,18 @@ msgstr "Dalam antrean"
 msgid "Reharvest"
 msgstr "Ambil ulang"
 
+msgid "Relevance"
+msgstr "Relevansi"
+
+msgid "Remote content"
+msgstr "Konten sumber"
+
+msgid "Remove"
+msgstr "Hapus"
+
+msgid "Return to the harvest sources list"
+msgstr "Kembali ke daftar sumber pengambilan data"
+
 msgid "Run"
 msgstr "Jalankan"
 
@@ -206,11 +406,27 @@ msgstr "Simpan"
 msgid "Schedule"
 msgstr "Jadwal"
 
+msgid "Search"
+msgstr "Cari"
+
 msgid "Search harvest jobs..."
 msgstr "Cari tugas pengambilan data..."
 
 msgid "Search harvest sources..."
 msgstr "Cari sumber pengambilan data..."
+
+msgid "Search sources..."
+msgstr "Cari sumber..."
+
+msgid "Search..."
+msgstr "Cari..."
+
+msgid "Sorry no harvest sources found"
+msgstr "Maaf, tidak ada sumber pengambilan data yang ditemukan."
+
+#, python-brace-format
+msgid "Sorry no harvest sources found for \"{query}\""
+msgstr "Maaf, tidak ada sumber pengambilan data yang ditemukan untuk \"{query}\"."
 
 msgid "Source URL"
 msgstr "URL sumber"
@@ -221,8 +437,23 @@ msgstr "Jenis sumber"
 msgid "Source url"
 msgstr "URL sumber"
 
+msgid "Start a new harvesting job for this harvest source now"
+msgstr "Mulai tugas pengambilan data baru untuk sumber ini sekarang."
+
+msgid "Started"
+msgstr "Dimulai"
+
+msgid "Started:"
+msgstr "Dimulai:"
+
+msgid "State"
+msgstr "Status"
+
 msgid "Status"
 msgstr "Status"
+
+msgid "Tags"
+msgstr "Tag"
 
 msgid "The harvest source has been queued for gathering."
 msgstr "Sumber pengambilan data telah masuk antrean untuk dikumpulkan."
@@ -230,11 +461,49 @@ msgstr "Sumber pengambilan data telah masuk antrean untuk dikumpulkan."
 msgid "The harvest source has been queued for reharvesting."
 msgstr "Sumber pengambilan data telah masuk antrean untuk diambil ulang."
 
+msgid "There are no datasets associated to this harvest source."
+msgstr "Tidak ada dataset yang terkait dengan sumber pengambilan data ini."
+
+msgid "There is no description for this harvest source"
+msgstr "Belum ada deskripsi untuk sumber pengambilan data ini."
+
+msgid "This should include the http:// part of the URL"
+msgstr "Sertakan bagian http:// pada alamat URL."
+
+msgid ""
+"This will flag the source as deleted but keep all its datasets and previous jobs. Are you sure "
+"you want to delete this harvest source?"
+msgstr ""
+"Sumber ini akan ditandai sebagai dihapus, tetapi dataset dan riwayat tugas sebelumnya tetap "
+"disimpan. Apakah Anda yakin ingin menghapus sumber ini?"
+
+msgid ""
+"This will re-run the harvesting for this source. Any updates at the source will overwrite the "
+"local datasets. Sources with a large number of datasets may take a significant amount of time to "
+"finish harvesting. Please confirm you would like us to start reharvesting."
+msgstr ""
+"Proses ini akan menjalankan ulang pengambilan data dari sumber. Perubahan pada sumber akan "
+"menggantikan dataset lokal. Sumber dengan banyak dataset dapat memerlukan waktu cukup lama. "
+"Pastikan Anda ingin memulai pengambilan ulang."
+
 msgid "Title"
 msgstr "Judul"
 
+msgid "Try another search term, browse the sources below or "
+msgstr "Coba kata kunci lain, telusuri sumber di bawah, atau "
+
+msgid "URL"
+msgstr "URL"
+
+#, python-format
+msgid "Unauthorized to read group %s"
+msgstr "Anda tidak memiliki izin untuk membaca grup %s."
+
 msgid "Unknown"
 msgstr "Tidak diketahui"
+
+msgid "Update frequency"
+msgstr "Frekuensi pembaruan"
 
 msgid "Updated"
 msgstr "Diperbarui"
@@ -242,6 +511,85 @@ msgstr "Diperbarui"
 msgid "Updated on"
 msgstr "Diperbarui pada"
 
+#, python-brace-format
+msgid "User not authorized to create a job for source {0}"
+msgstr "Pengguna tidak memiliki izin untuk membuat tugas bagi sumber {0}."
+
+#, python-brace-format
+msgid "User {0} not authorized to create harvest sources"
+msgstr "Pengguna {0} tidak memiliki izin untuk membuat sumber pengambilan data."
+
+#, python-brace-format
+msgid "User {0} not authorized to delete harvest source {1}"
+msgstr "Pengguna {0} tidak memiliki izin untuk menghapus sumber pengambilan data {1}."
+
+#, python-brace-format
+msgid "User {0} not authorized to list jobs for source {1}"
+msgstr "Pengguna {0} tidak memiliki izin untuk melihat daftar tugas sumber {1}."
+
+#, python-brace-format
+msgid "User {0} not authorized to read harvest source {1}"
+msgstr "Pengguna {0} tidak memiliki izin untuk membaca sumber pengambilan data {1}."
+
+#, python-brace-format
+msgid "User {0} not authorized to see jobs from source {1}"
+msgstr "Pengguna {0} tidak memiliki izin untuk melihat tugas dari sumber {1}."
+
+#, python-brace-format
+msgid "User {0} not authorized to update harvest source {1}"
+msgstr "Pengguna {0} tidak memiliki izin untuk memperbarui sumber pengambilan data {1}."
+
 msgid "View Harvest Source"
 msgstr "Lihat sumber pengambilan data"
+
+msgid "View full job report"
+msgstr "Lihat laporan tugas lengkap"
+
+msgid "View harvest source"
+msgstr "Lihat sumber pengambilan data"
+
+msgid ""
+"Warning: Apart from deleting this source, this command will remove all its datasets, as well as "
+"all previous job reports. Are you sure you want to continue?"
+msgstr ""
+"Peringatan: selain menghapus sumber, tindakan ini juga menghapus seluruh dataset dan laporan "
+"tugas sebelumnya. Apakah Anda yakin ingin melanjutkan?"
+
+msgid ""
+"Warning: This will remove all datasets for this source, as well as all previous job reports. Are "
+"you sure you want to continue?"
+msgstr ""
+"Peringatan: tindakan ini akan menghapus semua dataset dari sumber ini beserta seluruh laporan "
+"tugas sebelumnya. Apakah Anda yakin ingin melanjutkan?"
+
+msgid "add a new one"
+msgstr "tambahkan sumber baru"
+
+msgid "documents with errors"
+msgstr "dokumen yang mengalami kesalahan"
+
+msgid "eg. A descriptive title"
+msgstr "Contoh: Judul yang menjelaskan sumber data"
+
+msgid "eg. my-dataset"
+msgstr "Contoh: dataset-saya"
+
+msgid "errors"
+msgstr "kesalahan"
+
+msgid "read more"
+msgstr "baca selengkapnya"
+
+msgid "title"
+msgstr "Judul"
+
+#, python-brace-format
+msgid "{number} harvest source found"
+msgid_plural "{number} harvest sources found"
+msgstr[0] "{number} sumber pengambilan data ditemukan"
+
+#, python-brace-format
+msgid "{number} harvest source found for \"{query}\""
+msgid_plural "{number} harvest sources found for \"{query}\""
+msgstr[0] "{number} sumber pengambilan data ditemukan untuk \"{query}\""
 

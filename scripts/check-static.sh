@@ -19,6 +19,7 @@ run_check python3 scripts/check-id-translations.py
 run_check python3 scripts/check-auth-middleware.py
 run_check python3 scripts/check-build.py
 run_check python3 scripts/check-plugins-config.py
+run_check python3 scripts/check-public-sync.py
 run_check node scripts/check-css.mjs
 run_check node scripts/check-nav.mjs
 run_check node scripts/check-api.mjs

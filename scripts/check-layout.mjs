@@ -394,6 +394,61 @@ requireText(
   "Wajo admin CSS must be registered as a WebAssets source",
 );
 requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/webassets.yml",
+  "css/wajo-admin-design-system.css",
+  "The canonical Wajo Admin design system must load after the base theme",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "--wajo-color-primary: #1d5fa7",
+  "Admin primary color must match the public portal design token",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "--wajo-content-max: 1480px",
+  "Admin content width must use a bounded shared layout token",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "--wajo-color-canvas: #f5f7f6",
+  "Admin canvas must match the public portal token exactly",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "--wajo-color-border: #d8e2e4",
+  "Admin border must match the public portal token exactly",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "--wajo-radius-control: .625rem",
+  "Admin controls must share the public control radius",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "--wajo-sidebar-width: 264px",
+  "Admin desktop sidebar width must be explicit and consistent",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "--wajo-font-sans: Inter, ui-sans-serif, system-ui",
+  "Admin typography must prefer Inter with a robust local fallback stack",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "--wajo-control-height: 42px",
+  "Admin fields must use a consistent desktop control height",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "--wajo-button-height: 40px",
+  "Admin buttons must use a consistent desktop height",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  ".wajo-admin-workspace .pagination .page-link { min-width: 44px; min-height: 44px; }",
+  "Mobile pagination must use comfortable touch targets",
+);
+requireText(
   "src/app/styles/public-home-hero.css",
   "background-position: center, center, center 47%",
   "Wajo panorama crop must be deliberate and stable",

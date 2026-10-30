@@ -78,6 +78,11 @@ const required = [
   "src/lib/data/public-infographics.js",
   "src/lib/data/public-publications.js",
   "src/lib/ckan/public-resource-url.js",
+  "src/lib/ckan/delimited-preview.js",
+  "src/components/dataset-api-access.jsx",
+  "src/components/public-context-guide.jsx",
+  "src/app/api/public/resource-preview/route.js",
+  "tests/unit/delimited-preview.test.js",
   "deploy/ckan/schemas/dataset.yaml",
   "deploy/ckan/configure-upstream-extensions.py",
   "deploy/ckan/install-pages.py",
@@ -87,6 +92,7 @@ const required = [
   "deploy/ckan/theme/ckanext/wajo_theme/templates/header.html",
   "deploy/ckan/theme/ckanext/wajo_theme/assets/webassets.yml",
   "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css",
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
   "scripts/check-build.py",
   "scripts/check-base.py",
   "deploy/ckan/sync-ckan-base-source.sh",
@@ -194,8 +200,33 @@ const checks = [
   ],
   [
     "src/app/(public)/dataset/[slug]/page.jsx",
-    /const temporalCoverage[\s\S]*datasetJsonLd[\s\S]*temporalCoverage[\s\S]*GeoJSONResourcePreview/,
-    "Detail dataset harus menghitung temporalCoverage terlebih dahulu dan memberi pratinjau geospasial untuk resource GeoJSON.",
+    /(?=[\s\S]*const temporalCoverage)(?=[\s\S]*datasetJsonLd)(?=[\s\S]*GeoJSONResourcePreview)(?=[\s\S]*DatasetApiAccess)[\s\S]*/,
+    "Detail dataset harus menghitung temporalCoverage, menyediakan pratinjau geospasial, serta endpoint API per dataset/resource.",
+  ],
+  [
+    "src/components/dataset-resource-preview.jsx",
+    /fallbackPreviewQuery[\s\S]*csv-fallback[\s\S]*DataStore akan menyediakan pencarian dan pagination penuh/,
+    "Resource CSV/TSV harus tetap menampilkan pratinjau terbatas sebelum DataStore selesai diindeks.",
+  ],
+  [
+    "src/components/dataset-api-access.jsx",
+    /(?=[\s\S]*datastore_search)(?=[\s\S]*resource-preview\?resource_id=)(?=[\s\S]*Pratinjau sementara CSV\/TSV)[\s\S]*/,
+    "Detail dataset harus menyediakan API metadata/resource/DataStore dan endpoint pratinjau terbatas selama indexing CSV/TSV.",
+  ],
+  [
+    "src/app/api/public/resource-preview/route.js",
+    /(?=[\s\S]*safeInternalDownloadUrl)(?=[\s\S]*MAX_BYTES)(?=[\s\S]*resource_show)(?=[\s\S]*package_show)(?=[\s\S]*parseDelimitedPreview)[\s\S]*/,
+    "Fallback preview harus membatasi ukuran unduhan, memverifikasi akses publik, dan hanya mengambil path unduhan CKAN internal.",
+  ],
+  [
+    "src/components/public-context-guide.jsx",
+    /GUIDES[\s\S]*GUIDES\.default[\s\S]*Panduan halaman/,
+    "Setiap halaman publik non-home/non-bantuan harus mendapatkan panduan penggunaan kontekstual.",
+  ],
+  [
+    "src/app/styles/public-layout-stability.css",
+    /dataset-detail-title[\s\S]*min-block-size: 0[\s\S]*dataset-detail-description[\s\S]*min-block-size: 0[\s\S]*dataset-api-panel[\s\S]*public-context-guide/,
+    "Detail dataset harus memiliki jarak judul-deskripsi alami, panel API, dan panduan halaman yang responsif.",
   ],
   [
     "src/components/site-footer.jsx",
@@ -404,8 +435,8 @@ const checks = [
   ],
   [
     "deploy/ckan/theme/ckanext/wajo_theme/templates/header.html",
-    /wajo-admin-brand[\s\S]*g\.site_logo[\s\S]*wajo-admin-user[\s\S]*user\.logout/,
-    "Header Wajo Admin harus memuat identitas, logo, profil pengelola, dan logout dengan CSRF.",
+    /admin-brand[\s\S]*logo-kabupaten-wajo\.webp[\s\S]*wajo-admin-user[\s\S]*user\.logout/,
+    "Header Wajo Admin harus memuat logo extension, profil pengelola, dan logout dengan CSRF.",
   ],
   [
     "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css",

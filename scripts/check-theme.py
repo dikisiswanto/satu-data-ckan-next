@@ -17,12 +17,15 @@ HEADER = PACKAGE / "templates/header.html"
 PAGE = PACKAGE / "templates/page.html"
 CSS = PACKAGE / "assets/css/wajo-theme.css"
 DASHBOARD = PACKAGE / "templates/wajo_theme/dashboard.html"
+DATA_PREVIEW = PACKAGE / "templates/wajo_theme/data_preview.html"
 SIDEBAR = PACKAGE / "templates/wajo_theme/sidebar.html"
 ASSETS = PACKAGE / "assets/webassets.yml"
+DESIGN_SYSTEM = PACKAGE / "assets/css/wajo-admin-design-system.css"
 LOGO = PACKAGE / "public/logo-kabupaten-wajo.webp"
 INDONESIAN_PO = PACKAGE / "i18n/id/LC_MESSAGES/ckan.po"
 HARVEST_PO = PACKAGE / "i18n/id/LC_MESSAGES/ckanext-harvest.po"
 PAGES_PO = PACKAGE / "i18n/id/LC_MESSAGES/ckanext-pages.po"
+DCAT_PO = PACKAGE / "i18n/id/LC_MESSAGES/ckanext-dcat.po"
 TRANSLATION_COMPILER = ROOT / "deploy/ckan/compile-id-translations.py"
 ENV_EXAMPLE = ROOT / ".env.ckan.example"
 BOOTSTRAP = ROOT / "deploy/ckan/bootstrap-upstream.sh"
@@ -67,7 +70,7 @@ for expected in (
     "plugins.implements(plugins.IBlueprint)",
     "def make_middleware(self, app, config):",
     "def get_blueprint(self):",
-    'Blueprint("wajo_admin", __name__, url_prefix="/wajo-admin")',
+    'Blueprint("wajo_admin", __name__, url_prefix="/admin")',
     'base.render("wajo_theme/dashboard.html"',
     "current_user.is_authenticated",
     "ckanext.wajo_theme.admin_host",
@@ -78,7 +81,7 @@ for expected in (
 ):
     require(expected in plugin_source, f"Registrasi theme CKAN tidak lengkap: {expected}")
 
-require('url_prefix="/wajo-admin"' in plugin_source, "Ringkasan Wajo Admin harus memiliki URL khusus agar redirect root tidak berputar.")
+require('url_prefix="/admin"' in plugin_source, "Ringkasan Wajo Admin harus memiliki URL khusus agar redirect root tidak berputar.")
 require("CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index" in env_source, "Login CKAN harus diarahkan ke halaman ringkasan Wajo Admin.")
 require('values["CKAN__AUTH__ROUTE_AFTER_LOGIN"] = "wajo_admin.index"' in bootstrap_source, "Bootstrap harus mengunci redirect login ke route Wajo Admin.")
 
@@ -91,14 +94,48 @@ require(bool(asset_call.search(styles_body)), "Bundle WebAssets wajo_theme harus
 require("{% ckan_extends %}" in header_source, "header.html harus mewarisi header CKAN.")
 require("{% block header_wrapper %}" in header_source, "Header Wajo Admin harus menggunakan block header_wrapper CKAN 2.12.1.")
 require("h.url_for('wajo_admin.index')" in header_source, "Brand harus mengarah ke ringkasan Wajo Admin.")
-require("g.site_logo or '/logo-kabupaten-wajo.webp'" in header_source and "h.url_for_static_or_external" in header_source, "Branding harus memiliki fallback logo extension yang pasti tersedia.")
+require('src="/logo-kabupaten-wajo.webp"' in header_source and "wajo-admin-brand__mark" in header_source, "Header harus memakai logo extension yang diekspos langsung oleh add_public_directory().")
 require("wajo-admin-user" in header_source and "h.csrf_input()" in header_source and "user.logout" in header_source, "Topbar harus mempertahankan identitas pengguna dan logout dengan CSRF.")
+icon_source = read(PACKAGE / "templates/wajo_theme/icon.html")
+require("wajo_theme/icon.html" in read(SIDEBAR) and 'class="fa fa-' in icon_source and "wajo-icons.svg#" not in icon_source and 'src="/logo-kabupaten-wajo.webp"' in header_source, "Ikon admin harus memakai pustaka Font Awesome bawaan CKAN, bukan SVG buatan sendiri, dan logo lokal extension.")
 require("{% ckan_extends %}" in page_source, "page.html harus mewarisi shell CKAN agar block admin upstream tetap utuh.")
 require("wajo-admin-shell" in page_source and 'wajo_theme/sidebar.html' in page_source and "{{ super() }}" in page_source, "Page shell harus menambahkan sidebar secara aditif tanpa mengganti konten core CKAN.")
+require('class="wajo-admin-footer__brand"' in page_source and 'src="/logo-kabupaten-wajo.webp"' in page_source, "Footer admin harus memakai identitas dan logo yang sama dengan header.")
 
 # Verify WebAssets bundle name and its CSS file are consistent.
 require(bool(re.search(r"(?m)^wajo_theme:\s*$", assets_source)), "webassets.yml harus mendeklarasikan bundle wajo_theme.")
 require("css/wajo-theme.css" in assets_source, "Bundle wajo_theme harus memuat CSS yang dipelihara.")
+require("css/wajo-admin-design-system.css" in assets_source, "Bundle harus memuat lapisan design system admin setelah theme dasar.")
+require(DESIGN_SYSTEM.is_file(), "File design system Wajo Admin tidak ditemukan.")
+design_source = read(DESIGN_SYSTEM)
+for token in (
+    "--wajo-color-primary: #1d5fa7", "--wajo-color-ink: #1b3440",
+    "--wajo-color-muted: #586d76", "--wajo-color-canvas: #f5f7f6",
+    "--wajo-color-border: #d8e2e4", "--wajo-font-sans",
+    "--wajo-content-max: 1480px", "--wajo-dashboard-max: 1320px",
+    "--wajo-form-max: 960px", "--wajo-login-max: 448px",
+    "--wajo-sidebar-width: 264px", "--wajo-radius-control: .625rem",
+    "--wajo-control-height: 42px", "--wajo-button-height: 40px",
+    "--wajo-heading-1: clamp(1.75rem, 2.2vw, 2rem)", "--wajo-text-base: .9375rem",
+    "--wajo-shadow-sm",
+    "--wajo-color-success: #28784f", "--wajo-color-danger: #b33d46",
+):
+    require(token in design_source, f"Design token wajib tidak ditemukan: {token}.")
+for selector in (
+    ".wajo-admin-topbar__inner", ".wajo-admin-shell", ".wajo-admin-workspace #content",
+    ".wajo-admin-workspace .module", ".wajo-admin-workspace .table",
+    ".wajo-admin-workspace :where(input.form-control", ".wajo-dashboard__metrics",
+    ".wajo-login-frame", ".wajo-login-frame .login-main:has(#field-login)",
+    ".wajo-admin-workspace .form-actions", ".wajo-admin-workspace .pagination",
+    ".wajo-admin-workspace .page-header .page-heading",
+    "--wajo-font-mono", ".wajo-admin-workspace .table tbody td",
+    ".wajo-login-frame .login-main:has(#field-login) .form-control",
+    "@media (max-width: 991.98px)", "@media (max-width: 767.98px)",
+    "@media (prefers-reduced-motion: reduce)", "--wajo-heading-1",
+    "--wajo-heading-2", "--wajo-text-base",
+):
+    require(selector in design_source, f"Design system tidak mencakup selector/responsive rule: {selector}.")
+require(assets_source.index("css/wajo-theme.css") < assets_source.index("css/wajo-admin-design-system.css"), "Design system harus dimuat setelah CSS theme dasar agar token dan komponen konsisten.")
 require("wajo-theme/%(version)s-wajo-theme.css" in assets_source, "Output bundle harus memakai nama versi agar cache dapat diinvalisasi.")
 require("cssrewrite" not in assets_source, "Bundle Wajo tidak boleh menjalankan cssrewrite pada stylesheet tanpa referensi URL; filter ini memicu kegagalan pemetaan asset di CKAN.")
 
@@ -114,7 +151,8 @@ require('"wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin"' in setup_sour
 require('"wajo_pages = ckanext.wajo_theme.plugin:WajoPagesSchemaPlugin"' in setup_source, "Entry point schema CMS wajo_pages tidak terdaftar pada setup.py.")
 require("class WajoHarvestTranslationPlugin" in plugin_source and "return \"ckanext-harvest\"" in plugin_source, "Harvest extension must register its own Indonesian gettext domain.")
 require("class WajoPagesTranslationPlugin" in plugin_source and "return \"ckanext-pages\"" in plugin_source, "Pages extension must register its own Indonesian gettext domain.")
-require('"wajo_harvest_i18n = ckanext.wajo_theme.plugin:WajoHarvestTranslationPlugin"' in setup_source and '"wajo_pages_i18n = ckanext.wajo_theme.plugin:WajoPagesTranslationPlugin"' in setup_source, "Entry points for Harvest and Pages Indonesian translation domains must be installed.")
+require("class WajoDcatTranslationPlugin" in plugin_source and "return \"ckanext-dcat\"" in plugin_source, "DCAT extension must register its own Indonesian gettext domain.")
+require('"wajo_harvest_i18n = ckanext.wajo_theme.plugin:WajoHarvestTranslationPlugin"' in setup_source and '"wajo_pages_i18n = ckanext.wajo_theme.plugin:WajoPagesTranslationPlugin"' in setup_source and '"wajo_dcat_i18n = ckanext.wajo_theme.plugin:WajoDcatTranslationPlugin"' in setup_source, "Entry points for Harvest, Pages, and DCAT Indonesian translation domains must be installed.")
 require("IPagesSchema" in plugin_source and "def update_pages_schema(self, schema)" in plugin_source, "Plugin Wajo harus memperluas schema ckanext-pages melalui IPagesSchema.")
 require("def validate_content_blocks(key, data, errors, context)" in plugin_source and "json.loads(value)" in plugin_source and "MAX_CONTENT_BLOCK_COUNT = 16" in plugin_source, "Schema CMS harus memvalidasi JSON blocks, jumlah komponen, dan tipe yang didukung sebelum tersimpan.")
 for field in ("excerpt", "category", "seo_title", "seo_description", "og_image", "template_type", "menu_label", "menu_order", "content_blocks", "featured", "show_in_menu"):
@@ -131,7 +169,7 @@ configurator = read(ROOT / "deploy/ckan/configure-upstream-extensions.py")
 require("shutil.copytree(theme_source, theme_destination)" in configurator, "Bootstrap tidak menyalin source extension theme ke build context.")
 require("compile-id-translations.py" in configurator and "portal-compile-id-translations.py" in configurator and "ckan.po" in configurator, "Docker build harus mengompilasi katalog Bahasa Indonesia ke CKAN core i18n directory.")
 require(INDONESIAN_PO.is_file() and INDONESIAN_PO.stat().st_size > 1000, "Katalog terjemahan CKAN Bahasa Indonesia tidak ditemukan atau terlalu kecil.")
-for catalog in (HARVEST_PO, PAGES_PO):
+for catalog in (HARVEST_PO, PAGES_PO, DCAT_PO):
     require(catalog.is_file() and catalog.stat().st_size > 1000, f"Katalog extension Bahasa Indonesia tidak ditemukan atau terlalu kecil: {catalog.name}.")
 require('"i18n/id/LC_MESSAGES/*.po"' in setup_source, "Wheel theme harus menyertakan katalog PO Bahasa Indonesia.")
 require("CKAN__LOCALE_DEFAULT=id" in env_source and 'CKAN__LOCALES_OFFERED="id en"' in env_source, "CKAN harus memakai Bahasa Indonesia sebagai locale default dan menyediakan English sebagai pilihan.")
@@ -145,8 +183,8 @@ require(
     and plugin_order.index("scheming_datasets") < plugin_order.index("wajo_pages") < plugin_order.index("pages"),
     "wajo_pages harus dimuat setelah Scheming dan sebelum plugin pages.",
 )
-require('"wajo_harvest_i18n"' in bootstrap_source and '"wajo_pages_i18n"' in bootstrap_source, "Bootstrap harus mengaktifkan domain terjemahan khusus Harvest dan Pages.")
-require(all(name in plugin_order for name in ("harvest", "wajo_harvest_i18n", "pages", "wajo_pages_i18n")) and plugin_order.index("harvest") < plugin_order.index("wajo_harvest_i18n") and plugin_order.index("pages") < plugin_order.index("wajo_pages_i18n"), "Translation plugin harus diaktifkan bersama extension yang domain terjemahannya ditangani.")
+require('"wajo_harvest_i18n"' in bootstrap_source and '"wajo_pages_i18n"' in bootstrap_source and '"wajo_dcat_i18n"' in bootstrap_source, "Bootstrap harus mengaktifkan domain terjemahan khusus Harvest, Pages, dan DCAT.")
+require(all(name in plugin_order for name in ("harvest", "wajo_harvest_i18n", "pages", "wajo_pages_i18n", "wajo_dcat_i18n")) and plugin_order.index("harvest") < plugin_order.index("wajo_harvest_i18n") and plugin_order.index("pages") < plugin_order.index("wajo_pages_i18n") and "dcat" in plugin_order and plugin_order.index("dcat") < plugin_order.index("wajo_dcat_i18n"), "Translation plugin harus diaktifkan bersama extension yang domain terjemahannya ditangani.")
 require("plugins.append(\"wajo_theme\")" in bootstrap_source, "Plugin theme harus diaktifkan setelah extension yang juga menyediakan template.")
 require('plugins.append("envvars")' in bootstrap_source, "Plugin envvars harus tetap berada terakhir.")
 workflow = read(ROOT / ".github/workflows/ci.yml")
@@ -169,16 +207,27 @@ require("CKANEXT__WAJO_THEME__ADMIN_HOST" in read(ROOT / "deploy/ckan/sync-env.p
 
 # Keep the extension intentionally additive: only common shell templates are overridden.
 actual_templates = sorted(path.relative_to(PACKAGE / "templates").as_posix() for path in (PACKAGE / "templates").rglob("*.html"))
-require(actual_templates == ["base.html", "ckanext_pages/base_form.html", "header.html", "page.html", "wajo_theme/dashboard.html", "wajo_theme/sidebar.html"], "Theme hanya boleh mengganti shell bersama, dashboard Wajo, sidebar, dan form editorial Pages; route/modul CKAN lain harus tetap native.")
+require(actual_templates == ["base.html", "ckanext_pages/base_form.html", "header.html", "page.html", "wajo_theme/context_help.html", "wajo_theme/dashboard.html", "wajo_theme/data_preview.html", "wajo_theme/icon.html", "wajo_theme/sidebar.html"], "Theme hanya boleh mengganti shell bersama, dashboard Wajo, sidebar, dan form editorial Pages; route/modul CKAN lain harus tetap native.")
 CMS_FORM = PACKAGE / "templates/ckanext_pages/base_form.html"
 dashboard_source = read(DASHBOARD)
+data_preview_source = read(DATA_PREVIEW)
 sidebar_source = read(SIDEBAR)
 require("wajo_admin_stats" in dashboard_source and "wajo_admin_recent_datasets" in dashboard_source, "Dashboard harus memakai ringkasan yang disiapkan oleh view CKAN.")
 require("h.check_access('package_create')" in dashboard_source and "h.check_access('organization_create')" in dashboard_source, "Quick action dashboard harus menghormati permission CKAN.")
 require("h.url_for(dataset_type ~ '.read', id=item.name)" in dashboard_source, "Tautan dataset terbaru harus menggunakan route native CKAN.")
 require("request.path" in sidebar_source and "h.url_for('wajo_admin.index')" in sidebar_source, "Sidebar harus mendeteksi route aktif dan memakai route ringkasan Wajo Admin.")
 require("h.url_for('dashboard.datasets')" in sidebar_source and "h.url_for('dashboard.organizations')" in sidebar_source and "h.url_for('dashboard.groups')" in sidebar_source, "Sidebar harus mempertahankan route dashboard native pengguna.")
-require("/pages" in sidebar_source and "/harvest" in sidebar_source, "Sidebar harus menyediakan tautan ke extension Pages dan Harvest.")
+require("/pages" in sidebar_source and "/blog" in sidebar_source and "/harvest" in sidebar_source, "Sidebar harus menyediakan tautan ke Pages, Blog, dan Harvest.")
+for required_nav in ("Semua dataset", "Organisasi", "Kategori data", "Publikasi & laporan", "Indikator & statistik", "Infografik", "Halaman portal", "Berita & blog", "Pengambilan data", "DataStore & pratinjau"):
+    require(required_nav in sidebar_source, f"Sidebar admin belum menyediakan menu {required_nav}.")
+context_help_source = read(PACKAGE / "templates/wajo_theme/context_help.html")
+for tag in ("portal-publikasi", "portal-indikator", "portal-infografik"):
+    require(tag in context_help_source and "current_dataset_tags" in context_help_source, f"Panduan halaman detail harus mengenali dataset dengan tag {tag}.")
+require("Panduan halaman ini" in context_help_source and "guide_action_label" in context_help_source, "Setiap halaman admin harus memiliki panduan kontekstual dan aksi lanjutan.")
+require("tags:portal-publikasi" in sidebar_source and "tags:portal-indikator" in sidebar_source and "tags:portal-infografik" in sidebar_source, "Menu publikasi, indikator, dan infografik harus menggunakan tag CKAN yang sama dengan frontend publik.")
+require("/admin/data-preview" in sidebar_source, "Sidebar harus menyediakan akses ke panduan DataStore dan pratinjau.")
+require("wajo_icon('check'" in data_preview_source and 'data-copy-command' in data_preview_source and 'wajo_admin.data_preview_backfill' in data_preview_source + plugin_source, "Panduan DataStore harus berupa alur UI dengan status, aksi salin perintah, dan tombol backfill.")
+require("xloader_submit" in plugin_source and 'def data_preview_backfill()' in plugin_source and 'maximum_jobs = 25' in plugin_source, "Panduan DataStore harus menyediakan antrean backfill terbatas melalui action XLoader.")
 form_source = read(CMS_FORM)
 require("{% ckan_extends %}" in form_source and "{% block extra_pages_form %}" in form_source, "Form CMS harus mewarisi form upstream dan mengisi block extra_pages_form.")
 require(all(f'name=\"{field}\"' in form_source for field in ("excerpt", "category", "template_type", "featured", "show_in_menu", "seo_title", "seo_description", "og_image", "content_blocks")), "Form CMS belum menampilkan semua field editorial penting.")
@@ -193,10 +242,18 @@ require(css_source.count("{") == css_source.count("}"), "CSS memiliki jumlah kur
 require(".login-main:has(#field-login)" in css_source, "Layout login harus menargetkan wrapper login CKAN 2.12, bukan selector .main yang tidak digunakan.")
 require(".login-wrapper > .login-container" in css_source and ".login-wrapper > .login-form" in css_source, "Login harus memakai layout satu kolom yang sesuai dengan markup CKAN 2.12.")
 require("@media (max-width: 991.98px)" in css_source, "Layout login/header harus punya breakpoint tablet/mobile.")
+require(re.search(r"@media \(max-width: 991\.98px\)\s*\{[\s\S]{0,500}\.wajo-admin-menu-toggle\s*\{\s*display:\s*inline-flex", css_source), "Tombol navigasi admin harus terlihat dan dapat digunakan pada tablet/mobile.")
+require(".wajo-admin-footer__brand img" in css_source, "Logo footer admin harus memiliki ukuran dan object-fit yang eksplisit.")
 require("@media (prefers-reduced-motion: reduce)" in css_source, "Theme harus menghormati prefers-reduced-motion.")
+require(".wajo-admin-workspace .btn { min-height: var(--wajo-button-height)" in design_source, "Tombol admin harus memakai tinggi kanonis design system.")
+require(".wajo-admin-workspace .btn { min-height: 44px; }" in design_source, "Target tombol admin pada mobile harus minimal 44px.")
+require(".wajo-admin-workspace .pagination .page-link { min-width: 44px; min-height: 44px; }" in design_source, "Pagination mobile harus memiliki target sentuh yang memadai.")
+require("font-size: 1rem; }" in design_source[design_source.find(".wajo-login-frame .login-main:has(#field-login) .form-control"):], "Input login harus memakai ukuran teks yang nyaman dibaca.")
 require(":focus-visible" in css_source, "Focus indicator keyboard tidak ditemukan.")
 require("position: fixed" not in css_source, "Theme tidak boleh membuat overlay fixed global yang berpotensi menutup kontrol CKAN.")
 require(".wajo-admin-topbar" in css_source and ".wajo-admin-shell" in css_source and ".wajo-admin-sidebar" in css_source and ".wajo-dashboard__metrics" in css_source and ".table tbody tr:hover" in css_source, "Theme administrasi harus memiliki topbar, shell, sidebar, dashboard, tabel, dan responsivitas yang konsisten.")
+require(".wajo-datastore__layout" in css_source and "@media (max-width: 991.98px)" in css_source and "@media (max-width: 767.98px)" in css_source, "Wizard DataStore harus responsif pada tablet dan ponsel.")
+require(".wajo-admin-shell .fa" in css_source and ".wajo-icon" not in css_source, "Ukuran ikon harus konsisten memakai pustaka Font Awesome CKAN, tanpa aturan SVG custom.")
 
 # Parse Jinja and CSS with the parsers already present in a CKAN dev environment.
 try:
@@ -204,7 +261,7 @@ try:
 
     env = Environment()
     normalized_form = form_source.replace("{% ckan_extends %}", '{% extends "base.html" %}')
-    for path, source in ((BASE, base_source), (HEADER, header_source), (PAGE, page_source), (CMS_FORM, form_source), (DASHBOARD, dashboard_source), (SIDEBAR, sidebar_source)):
+    for path, source in ((BASE, base_source), (HEADER, header_source), (PAGE, page_source), (CMS_FORM, form_source), (DASHBOARD, dashboard_source), (DATA_PREVIEW, data_preview_source), (SIDEBAR, sidebar_source)):
         normalized = source.replace("{% ckan_extends %}", '{% extends "base.html" %}')
         normalized = re.sub(r"{%\s*asset\s+(['\"]).*?\1\s*%}", "{% set wajo_theme_asset_loaded = true %}", normalized)
         try:
@@ -225,16 +282,17 @@ try:
         ),
         "page.html": normalized_page,
         "wajo_theme/sidebar.html": "WAJO_ADMIN_SIDEBAR",
+        "wajo_theme/context_help.html": "WAJO_CONTEXT_HELP",
     }))
     chrome_template = chrome_env.get_template("page.html")
-    anonymous_render = chrome_template.render(c={"userobj": None})
-    admin_render = chrome_template.render(c={"userobj": object()})
-    require("UPSTREAM_HEADER" not in anonymous_render and "UPSTREAM_FOOTER" not in anonymous_render and "WAJO_ADMIN_SIDEBAR" not in anonymous_render,
+    anonymous_render = chrome_template.render(c={"userobj": None}, g={"site_url": "https://data.example.test"})
+    admin_render = chrome_template.render(c={"userobj": object()}, g={"site_url": "https://data.example.test"})
+    require("UPSTREAM_HEADER" not in anonymous_render and "UPSTREAM_FOOTER" not in anonymous_render and "WAJO_ADMIN_SIDEBAR" not in anonymous_render and "WAJO_CONTEXT_HELP" not in anonymous_render,
             "Header/footer/sidebar CKAN harus disembunyikan untuk pengguna anonim.")
     require("ADMIN_CONTENT" in anonymous_render,
             "Menyembunyikan chrome anonim tidak boleh menghilangkan konten halaman/login.")
-    require("UPSTREAM_HEADER" in admin_render and "UPSTREAM_FOOTER" in admin_render and "ADMIN_CONTENT" in admin_render and "WAJO_ADMIN_SIDEBAR" in admin_render,
-            "Topbar/footer, sidebar Wajo, dan konten CKAN harus tampil untuk administrator yang login.")
+    require("UPSTREAM_HEADER" in admin_render and "wajo-admin-footer" in admin_render and "Portal Satu Data Kabupaten Wajo" in admin_render and "ADMIN_CONTENT" in admin_render and "WAJO_ADMIN_SIDEBAR" in admin_render and "WAJO_CONTEXT_HELP" in admin_render,
+            "Topbar, footer bermerek, sidebar Wajo, dan konten CKAN harus tampil untuk administrator yang login.")
 
     # Exercise select rendering so the selected options remain correct on create/edit.
     render_env = Environment(loader=DictLoader({

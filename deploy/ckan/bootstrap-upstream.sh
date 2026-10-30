@@ -96,7 +96,7 @@ import re, sys
 root, upstream, env_file = map(Path, sys.argv[1:])
 current = env_file.read_text().splitlines()
 existing = {m.group(1) for line in current if (m := re.match(r'^([A-Za-z_][A-Za-z0-9_]*)=', line))}
-legacy_datapusher_keys = {"DATAPUSHER_VERSION", "DATAPUSHER_CONTAINER_NAME", "CKAN__DATAPUSHER__URL", "CKAN__DATAPUSHER__CALLBACK_URL_BASE"}
+legacy_datapusher_keys = {"DATAPUSHER_VERSION", "DATAPUSHER_CONTAINER_NAME", "CKAN__DATAPUSHER__URL", "CKAN__DATAPUSHER__CALLBACK_URL_BASE", "CKAN__SCHEMING__DATASET_SCHEMAS", "CKAN__SCHEMING__PRESETS"}
 source_files = []
 old_env = upstream / ".env"
 if old_env.exists() and not old_env.is_symlink():
@@ -222,7 +222,7 @@ if not site_url.startswith("https://"):
     raise SystemExit("PUBLIC_SITE_ORIGIN must be an HTTPS URL for public deployment.")
 # Remove stale DataPusher variables during migration so they cannot reappear
 # from an earlier .env.ckan or an old upstream checkout.
-legacy_datapusher_keys = {"DATAPUSHER_VERSION", "DATAPUSHER_CONTAINER_NAME", "CKAN__DATAPUSHER__URL", "CKAN__DATAPUSHER__CALLBACK_URL_BASE"}
+legacy_datapusher_keys = {"DATAPUSHER_VERSION", "DATAPUSHER_CONTAINER_NAME", "CKAN__DATAPUSHER__URL", "CKAN__DATAPUSHER__CALLBACK_URL_BASE", "CKAN__SCHEMING__DATASET_SCHEMAS", "CKAN__SCHEMING__PRESETS"}
 lines = [line for line in path.read_text().splitlines() if not ((m := re.match(r'^([A-Za-z_][A-Za-z0-9_]*)=', line)) and m.group(1) in legacy_datapusher_keys)]
 values = {}
 for line in lines:
@@ -238,7 +238,7 @@ def strong(key):
 
 for key in ("POSTGRES_PASSWORD", "CKAN_DB_PASSWORD", "DATASTORE_READONLY_PASSWORD", "CKAN_SYSADMIN_PASSWORD", "CKAN___SECRET_KEY", "CKAN___BEAKER__SESSION__SECRET"):
     strong(key)
-for key in ("CKAN___API_TOKEN__JWT__ENCODE__SECRET", "CKAN___API_TOKEN__JWT__DECODE__SECRET"):
+for key in ("CKAN___API_TOKEN__JWT__ENCODE__SECRET", "CKAN___API_TOKEN__JWT__DECODE__SECRET", "CKAN_REVALIDATE_SECRET"):
     strong(key)
 
 # Keep every connection string synchronized with the generated CKAN database credentials.
@@ -274,10 +274,10 @@ legacy_view_plugins = {
     "esri_shapefile_view",
 }
 portal_plugins = {
-    "envvars", "wajo_pages", "wajo_theme", "wajo_harvest_i18n", "wajo_pages_i18n", "scheming_datasets", "pages", "dcat",
+    "envvars", "wajo_pages", "wajo_theme", "wajo_harvest_i18n", "wajo_pages_i18n", "wajo_dcat_i18n", "scheming_datasets", "pages", "dcat",
     "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view",
     "geojson_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
-    "datatables_view", "image_view", "text_view", "datastore", "xloader",
+    "datatables_view", "image_view", "text_view", "datastore", "xloader", "activity",
     *legacy_view_plugins,
 }
 plugins = [plugin for plugin in (plugin_raw.split() if plugin_raw else []) if plugin not in portal_plugins and plugin != "datapusher"]
@@ -285,7 +285,7 @@ for plugin in (
     "scheming_datasets", "wajo_pages", "pages", "dcat", "dcat_rdf_harvester",
     "structured_data", "resource_proxy", "datatables_view", "image_view", "text_view",
     "geojson_view", "geo_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
-    "datastore", "xloader", "wajo_harvest_i18n", "wajo_pages_i18n",
+    "datastore", "xloader", "activity", "wajo_harvest_i18n", "wajo_pages_i18n", "wajo_dcat_i18n",
 ):
     if plugin not in plugins:
         plugins.append(plugin)
@@ -314,8 +314,9 @@ values["CKAN__SITE_LOGO"] = site_logo
 values["CKANEXT__XLOADER__API_TOKEN"] = values.get("CKANEXT__XLOADER__API_TOKEN", "").strip().strip("\"").strip("\'")
 values["CKANEXT__XLOADER__JOBS_DB__URI"] = values["CKAN_SQLALCHEMY_URL"]
 values["CKANEXT__XLOADER__SITE_URL"] = "http://ckan:5000"
-values["CKAN__SCHEMING__DATASET_SCHEMAS"] = "/srv/app/ckanext-schemas/dataset.yaml"
-values["CKAN__SCHEMING__PRESETS"] = "ckanext.scheming:presets.json"
+values["CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL"] = "http://nextjs:3000/api/internal/ckan/revalidate"
+values["CKAN___SCHEMING__DATASET_SCHEMAS"] = "/srv/app/ckanext-schemas/dataset.yaml"
+values["CKAN___SCHEMING__PRESETS"] = "ckanext.scheming:presets.json"
 values["CKANEXT__PAGES__REVISIONS_LIMIT"] = "5"
 values["CKANEXT__PAGES__REVISIONS_FORCE_LIMIT"] = "true"
 values["CKANEXT__PAGES__ALLOW_HTML"] = "false"

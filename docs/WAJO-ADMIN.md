@@ -10,14 +10,16 @@ Tema ini tidak membuat backend CRUD paralel dan tidak mengganti endpoint CKAN. S
 
 ### Application shell
 
-- **Topbar:** logo, nama Wajo Admin, identitas portal, tautan portal publik, profil pengguna, akses pengaturan sistem untuk sysadmin, dan logout dengan CSRF.
-- **Sidebar:** menu dikelompokkan menjadi Utama, Publikasi & Konten, Akun Saya, dan Sistem.
+- **Topbar:** logo Kabupaten Wajo, judul resmi “Portal Satu Data Kabupaten Wajo”, tautan portal publik, profil pengguna, akses pengaturan sistem untuk sysadmin, serta logout dengan CSRF.
+- **Footer:** memakai logo, nama portal, keterangan layanan, dan versi CKAN yang konsisten dengan topbar.
+- **Sidebar:** menu dikelompokkan menjadi Ringkasan, Katalog Data, Publikasi Data, Halaman & Informasi, Integrasi Data, Akun Saya, dan Pengaturan Sistem. Item menu mengikuti permission CKAN.
+- **Ikon:** seluruh ikon shell memakai font Font Awesome yang sudah dibundel oleh CKAN 2.12.1 (`fa fa-*`), bukan SVG buatan tangan atau file ikon eksternal. Nama ikon dipetakan pada satu macro agar bentuk, ukuran, baseline, dan warna konsisten.
 - **Workspace:** area CKAN asli yang dibungkus dengan shell Wajo; breadcrumb, flash message, form, toolbar, tabel, tab, dan isi halaman tetap dirender oleh template upstream.
 - **Responsive:** sidebar menjadi collapse di bawah breakpoint desktop; workspace dan tabel menggunakan aturan responsif.
 
 ### Ringkasan Wajo Admin
 
-Route: `/wajo-admin/`.
+Route: `/admin/`.
 
 Ringkasan menampilkan:
 
@@ -27,26 +29,61 @@ Ringkasan menampilkan:
 - Jumlah dataset yang dibuat pengguna (`package_search` dengan filter `creator_user_id`).
 - Enam dataset yang terakhir diperbarui.
 - Akses cepat tambah dataset/organisasi hanya ketika `package_create`/`organization_create` diizinkan.
-- Tautan menuju CMS Pages dan Harvest.
+- Akses cepat menuju CMS Pages/Blog, publikasi/laporan, indikator/statistik, infografik, dan Harvest.
+
+## Peta menu dan alur pekerjaan admin
+
+| Menu sidebar          | Fungsi                                                          | Alur utama                                                                                                                  |
+| --------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Semua dataset         | Mengelola katalog data                                          | Cari/filter → buka detail → tambah/perbarui metadata → kelola resource → cek pratinjau/API                                  |
+| Organisasi            | Mengelola perangkat daerah pemilik data                         | Buat/perbarui organisasi → kelola anggota dan peran → hubungkan dataset                                                     |
+| Kategori data         | Mengelola kelompok topik                                        | Buat kategori → isi deskripsi → hubungkan dataset yang relevan                                                              |
+| Publikasi & laporan   | Dataset bertag `portal-publikasi`                               | Tambah dataset → pilih tipe Publikasi/Laporan → isi penerbit, periode, lisensi → unggah PDF/data → terbitkan                |
+| Indikator & statistik | Dataset bertag `portal-indikator`                               | Tambah dataset → pilih tipe Indikator → isi definisi, satuan, metodologi, wilayah, periode, frekuensi → unggah data tabular |
+| Infografik            | Dataset bertag `portal-infografik`                              | Tambah dataset → pilih tipe Infografik → unggah gambar utama → cantumkan dataset sumber dan periode                         |
+| Halaman portal        | CMS Pages untuk profil, kebijakan, panduan, dan informasi tetap | Buat halaman → susun konten → periksa slug/SEO/gambar → atur visibilitas dan tanggal terbit → periksa portal publik         |
+| Berita & blog         | CMS Blog untuk berita, pengumuman, dan artikel berkala          | Tulis artikel → lengkapi ringkasan/gambar/kategori/tanggal → periksa tampilan mobile → terbitkan                            |
+| Pengambilan data      | CKAN Harvest                                                    | Buat sumber → pilih harvester → atur jadwal/organisasi → jalankan pekerjaan → periksa laporan dan dataset hasil             |
+| DataStore & pratinjau | Wizard operasional untuk sysadmin                               | Periksa konfigurasi → izin PostgreSQL → worker XLoader → antrekan data lama → verifikasi detail dataset dan API             |
+
+Halaman admin CKAN menampilkan panel **Panduan halaman ini**. Panel menjelaskan tujuan halaman, metadata yang harus dilengkapi, risiko umum, dan tautan aksi berikutnya. Publikasi/indikator/infografik adalah klasifikasi dataset menggunakan tag portal; bukan modul CRUD paralel yang memecah sumber data CKAN.
+
+### Pengelolaan halaman dan berita
+
+Pages dan Blog memakai route serta form native `ckanext-pages`. Menu mengarahkan ke `/pages` dan `/blog`; tombol tindakan di panel panduan menuju form tambah yang disediakan extension. Gunakan Pages untuk konten relatif tetap dan Blog untuk artikel berkala. Pastikan visibilitas serta tanggal publikasi sudah sesuai sebelum konten dianggap tampil di portal.
+
+### Alur DataStore dari UI
+
+Buka **Integrasi Data → DataStore & pratinjau** (`/admin/data-preview`). Halaman memeriksa plugin, URL baca/tulis, token/action XLoader, dan konfigurasi antrean. Dari halaman tersebut admin dapat:
+
+1. Menekan **Periksa ulang** untuk menjalankan pemeriksaan konfigurasi terbaru.
+2. Menyalin perintah penerapan izin DataStore dari kartu langkah kedua, menjalankannya pada terminal server, lalu kembali ke halaman dan periksa ulang.
+3. Menyalin perintah pemeriksaan container/log worker pada kartu langkah ketiga; pastikan `xloader-worker` berjalan/healthy.
+4. Menekan **Antrekan hingga 25 resource** untuk mengirim resource tabular lama ke XLoader. Aksi ini hanya tersedia untuk sysadmin dan hanya memilih resource publik yang formatnya didukung.
+5. Membuka tautan dataset dari daftar resource siap/menunggu untuk memeriksa hasilnya. Setelah proses selesai, detail dataset menampilkan pratinjau DataStore dan endpoint API.
+
+Worker adalah proses server, sehingga status containernya tidak dijalankan dari browser. UI menyediakan tombol salin perintah yang aman; tidak mengeksekusi shell server secara langsung. Backfill menyeluruh tetap dijalankan dari prosedur deployment bila katalog lebih besar dari batas pemindaian UI.
 
 Setiap Action API dijalankan menggunakan context identitas pengguna yang sedang login. Kegagalan action dicatat ke log dan hanya membuat metrik terkait menjadi `—`; dashboard masih dapat dirender. Nilai metrik tidak di-hardcode.
 
 ## Peta file
 
-| File                                                                       | Kegunaan                                             |
-| -------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `deploy/ckan/theme/ckanext/wajo_theme/templates/header.html`               | Header/topbar aplikasi                               |
-| `deploy/ckan/theme/ckanext/wajo_theme/templates/page.html`                 | Wrapper shell untuk seluruh halaman admin yang login |
-| `deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/sidebar.html`   | Navigasi dan active state                            |
-| `deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html` | Tampilan Ringkasan                                   |
-| `deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css`           | Design system dan styling lintas modul               |
-| `deploy/ckan/theme/ckanext/wajo_theme/plugin.py`                           | Middleware, blueprint ringkasan, schema Pages        |
-| `deploy/ckan/theme/setup.py`                                               | Metadata package dan daftar package-data             |
+| File                                                                           | Kegunaan                                                                       |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `deploy/ckan/theme/ckanext/wajo_theme/templates/header.html`                   | Header/topbar aplikasi                                                         |
+| `deploy/ckan/theme/ckanext/wajo_theme/templates/page.html`                     | Wrapper shell untuk seluruh halaman admin yang login                           |
+| `deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/sidebar.html`       | Navigasi dan active state                                                      |
+| `deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html`     | Tampilan Ringkasan                                                             |
+| `deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css`               | Compatibility styling dan aturan komponen CKAN                                 |
+| `deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css` | Token dan komponen visual kanonis Wajo Admin                                   |
+| `docs/WAJO-ADMIN-DESIGN-SYSTEM.md`                                             | Spesifikasi warna, tipografi, lebar konten, spacing, radius, dan pola komponen |
+| `deploy/ckan/theme/ckanext/wajo_theme/plugin.py`                               | Middleware, blueprint ringkasan, schema Pages                                  |
+| `deploy/ckan/theme/setup.py`                                                   | Metadata package dan daftar package-data                                       |
 
 ## Routing dan autentikasi
 
 - `CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index` mengarahkan login sukses ke Ringkasan.
-- Blueprint `wajo_admin` memakai `url_prefix="/wajo-admin"`; route `/` di dalam blueprint menjadi `/wajo-admin/`. Jangan menghapus prefix ini: tanpa prefix, middleware yang mengarahkan `/` ke ringkasan akan membuat redirect loop.
+- Blueprint `wajo_admin` memakai `url_prefix="/admin"`; route `/` di dalam blueprint menjadi `/admin/`. Jangan menghapus prefix ini: tanpa prefix, middleware yang mengarahkan `/` ke ringkasan akan membuat redirect loop.
 - Root `CKAN_HOST` mengarahkan pengguna anonim ke login dan pengguna yang sudah login ke Ringkasan.
 - Halaman lain dan seluruh route extension tetap diteruskan ke CKAN. Middleware meminta login untuk seluruh route pada hostname admin; Action API tanpa sesi mendapat JSON `401`.
 - Aset static untuk halaman login dikecualikan dari login guard. File logo Wajo berada di `/logo-kabupaten-wajo.webp`.
@@ -84,7 +121,7 @@ Jangan membuat ulang form CRUD hanya untuk mengejar visual. Styling generik lebi
 
 ## Bahasa
 
-CKAN memakai locale `id` sebagai default, `en` tetap tersedia sebagai pilihan. Lokalisasi dipelihara dalam tiga domain: `ckan` (core dan shell), `ckanext-harvest`, serta `ckanext-pages`. Katalog core digabung dengan katalog upstream agar terjemahan bawaan yang sudah ada tidak hilang; dua domain extension didaftarkan melalui `ITranslation` dan dikompilasi saat Docker build. Cakupan string, placeholder, file `.mo`, serta merge upstream diuji oleh `scripts/check-id-translations.py`.
+CKAN memakai locale `id` sebagai default, `en` tetap tersedia sebagai pilihan. Lokalisasi yang dipelihara di project mencakup empat domain: `ckan` (core dan shell), `ckanext-harvest`, `ckanext-pages`, dan `ckanext-dcat`. Katalog core digabung dengan katalog upstream agar terjemahan bawaan yang sudah ada tidak hilang; domain extension didaftarkan melalui `ITranslation` dan dikompilasi saat Docker build. Cakupan string, placeholder, file `.mo`, serta merge upstream diuji oleh `scripts/check-id-translations.py`.
 
 Katalog project menjamin semua entri yang dipelihara terisi, tetapi bukan klaim bahwa setiap string dari semua extension pihak ketiga sudah diterjemahkan. Teks hard-coded, domain extension lain, nama kolom schema, dan konten yang dimasukkan administrator perlu diaudit pada halaman runtime dan ditambahkan ke domain yang sesuai.
 
@@ -113,12 +150,15 @@ Static suite memeriksa sintaks/template, CSS contract, route/authentication, das
 Lakukan uji pada instance CKAN yang benar-benar berjalan menggunakan sedikitnya akun sysadmin dan akun editor/organisasi:
 
 1. Akses root CKAN tanpa login: harus menuju login.
-2. Akses `/dataset`, `/organization`, `/pages`, `/harvest`, dan `/wajo-admin/` tanpa login: harus menuju login.
-3. Login berhasil: harus tetap pada hostname CKAN dan masuk `/wajo-admin/`, bukan katalog publik.
-4. Cek metrik Ringkasan terhadap CKAN Action API, lalu buka satu dataset dari tabel dataset terbaru.
-5. Uji pencarian, detail, tambah/edit dataset, resource upload, preview DataStore dan GeoView.
-6. Uji organisasi, grup, anggota, pengguna, pengaturan, Pages, dan Harvest sesuai permission role.
-7. Uji logout, session expiry, login gagal, dan `came_from`.
-8. Uji lebar layar desktop, tablet, dan mobile serta keyboard navigation.
+2. Akses `/dataset`, `/organization`, `/pages`, `/harvest`, dan `/admin/` tanpa login: harus menuju login.
+3. Login berhasil: harus tetap pada hostname CKAN dan masuk `/admin/`, bukan katalog publik.
+4. Pastikan logo Kabupaten Wajo tampil pada topbar, login, dan footer; uji tombol navigasi collapse pada lebar tablet dan mobile.
+5. Cek metrik Ringkasan terhadap CKAN Action API, lalu buka satu dataset dari tabel dataset terbaru.
+6. Uji pencarian, detail, tambah/edit dataset, resource upload, preview DataStore dan GeoView.
+7. Pada halaman detail dataset publik, pastikan panel Akses API menampilkan endpoint `package_show`, `resource_show`, serta `datastore_search` untuk resource tabular.
+8. Untuk CSV/TSV yang belum selesai diindeks, pastikan preview fallback menampilkan status/isi terbatas tanpa mengakali permission dataset/resource. Untuk XLS/XLSX/ODS, pastikan worker XLoader mengisi DataStore sebelum preview penuh tersedia.
+9. Uji organisasi, grup, anggota, pengguna, pengaturan, Pages, dan Harvest sesuai permission role.
+10. Uji logout, session expiry, login gagal, dan `came_from`.
+11. Uji lebar layar desktop, tablet, dan mobile serta keyboard navigation.
 
 Belum ada klaim hasil visual browser pada server produksi sampai rangkaian acceptance test tersebut benar-benar dilakukan.

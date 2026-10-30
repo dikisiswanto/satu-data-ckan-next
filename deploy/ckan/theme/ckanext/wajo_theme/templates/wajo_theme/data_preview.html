@@ -1,0 +1,176 @@
+{% extends "page.html" %}
+{% from "wajo_theme/icon.html" import wajo_icon %}
+
+{% block subtitle %}DataStore dan Pratinjau{% endblock %}
+{% block breadcrumb_content %}
+  <li><a href="{{ h.url_for('wajo_admin.index') }}">Dasbor</a></li>
+  <li class="active">DataStore dan pratinjau</li>
+{% endblock %}
+{% block secondary %}{% endblock %}
+{% block primary_content %}
+<section class="wajo-datastore" aria-labelledby="wajo-datastore-title">
+  <header class="wajo-datastore__intro">
+    <div>
+      <span class="wajo-dashboard__eyebrow">PANDUAN OPERASIONAL</span>
+      <h1 id="wajo-datastore-title">Aktifkan pratinjau data</h1>
+      <p>Ikuti langkah berikut agar berkas CSV dan Excel dapat dibaca sebagai tabel di portal publik. DataStore menyimpan tabel, sedangkan XLoader memproses berkas secara otomatis di latar belakang.</p>
+      <div class="wajo-datastore__intro-actions">
+        <a class="btn btn-default" href="{{ h.url_for('wajo_admin.data_preview', refresh='1') }}">{{ wajo_icon('refresh') }} Periksa ulang</a>
+        {% if h.check_access('package_create') %}
+          <a class="btn btn-primary" href="{{ h.url_for(h.default_package_type() ~ '.new') }}">{{ wajo_icon('plus') }} Tambah dataset</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="wajo-datastore__intro-icon">{{ wajo_icon('table') }}</div>
+  </header>
+
+  {% if wajo_datastore_queued != '' %}
+    <div class="alert alert-success" role="status">
+      <strong>{{ wajo_datastore_queued }} resource masuk antrean.</strong>
+      {% if wajo_datastore_failed|int > 0 %} {{ wajo_datastore_failed }} resource gagal dikirim; periksa log CKAN/XLoader.{% endif %}
+      Periksa kembali status pemrosesan beberapa saat kemudian.
+    </div>
+  {% elif wajo_datastore_error == 'token' %}
+    <div class="alert alert-warning" role="alert">Token XLoader belum dikonfigurasi. Jalankan aktivasi XLoader dari lingkungan server sebelum mengantrekan resource.</div>
+  {% elif wajo_datastore_error %}
+    <div class="alert alert-danger" role="alert">CKAN tidak dapat menyiapkan antrean. Periksa konfigurasi plugin dan log CKAN/XLoader.</div>
+  {% endif %}
+
+  <section class="wajo-datastore__progress" aria-label="Ringkasan kesiapan">
+    <div><strong>{{ wajo_datastore_ready }} dari {{ wajo_datastore_total }} pemeriksaan konfigurasi siap</strong><small>Pemeriksaan ini membaca konfigurasi CKAN; status worker tetap perlu dicek pada server.</small></div>
+    <div class="wajo-datastore__progress-track"><span style="width: {{ (wajo_datastore_ready / wajo_datastore_total * 100) if wajo_datastore_total else 0 }}%"></span></div>
+  </section>
+
+  <div class="wajo-datastore__layout">
+    <div class="wajo-datastore__steps">
+      <section class="wajo-datastore-card">
+        <div class="wajo-datastore-card__heading">
+          <span class="wajo-datastore-card__number">1</span>
+          <div><h2>Periksa konfigurasi</h2><p>Pastikan CKAN memiliki koneksi baca/tulis dan plugin yang dibutuhkan.</p></div>
+        </div>
+        <ul class="wajo-datastore-checks">
+          {% for check in wajo_datastore_checks %}
+            <li class="{% if check.ok %}is-ok{% else %}is-pending{% endif %}">
+              <span class="wajo-datastore-checks__icon">{{ wajo_icon('check' if check.ok else 'exclamation-circle') }}</span>
+              <span><strong>{{ check.label }}</strong><small>{{ check.detail }}</small></span>
+              <span class="wajo-datastore-checks__status">{{ 'Siap' if check.ok else 'Perlu tindakan' }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="wajo-datastore-card__note">Alamat koneksi dan token tidak ditampilkan. Jika salah satu pemeriksaan gagal, perbaiki environment CKAN lalu bangun ulang container.</p>
+      </section>
+
+      <section class="wajo-datastore-card">
+        <div class="wajo-datastore-card__heading">
+          <span class="wajo-datastore-card__number">2</span>
+          <div><h2>Pastikan hak akses DataStore</h2><p>CKAN harus dapat membuat tabel dan membaca kembali data yang sudah dimuat.</p></div>
+        </div>
+        {% if wajo_datastore_probe is sameas true %}
+          <div class="wajo-datastore-callout is-ok">{{ wajo_icon('check-circle') }}<span><strong>Uji baca berhasil.</strong><small>Setidaknya satu resource yang sudah aktif di DataStore berhasil dibaca.</small></span></div>
+        {% elif wajo_datastore_probe is sameas false %}
+          <div class="wajo-datastore-callout is-error">{{ wajo_icon('exclamation-triangle') }}<span><strong>Uji baca gagal.</strong><small>Periksa database DataStore, kredensial baca, dan hak akses tabel.</small></span></div>
+        {% else %}
+          <div class="wajo-datastore-callout is-pending">{{ wajo_icon('info-circle') }}<span><strong>Belum ada resource yang bisa diuji.</strong><small>Setelah satu berkas berhasil diproses, halaman ini akan menjalankan uji baca otomatis.</small></span></div>
+        {% endif %}
+        <div class="wajo-datastore-command"><code>bash ./deploy/ckan/apply-datastore-permissions.sh</code><button type="button" class="btn btn-default btn-sm" data-copy-command="bash ./deploy/ckan/apply-datastore-permissions.sh">Salin perintah</button></div>
+      </section>
+
+      <section class="wajo-datastore-card">
+        <div class="wajo-datastore-card__heading">
+          <span class="wajo-datastore-card__number">3</span>
+          <div><h2>Pastikan worker XLoader berjalan</h2><p>Worker mengambil pekerjaan dari antrean. Plugin aktif saja belum cukup jika worker berhenti.</p></div>
+        </div>
+        <div class="wajo-datastore-callout is-pending">{{ wajo_icon('server') }}<span><strong>Status proses worker tidak dapat dipastikan dari halaman CKAN.</strong><small>Periksa container xloader-worker di server dan pastikan statusnya berjalan/healthy.</small></span></div>
+        <div class="wajo-datastore-command"><code>docker compose ps xloader-worker</code><button type="button" class="btn btn-default btn-sm" data-copy-command="docker compose ps xloader-worker">Salin perintah</button></div>
+        <div class="wajo-datastore-command"><code>bash ./deploy/ckan/compose.sh cloudflare logs --tail=100 xloader-worker</code><button type="button" class="btn btn-default btn-sm" data-copy-command="bash ./deploy/ckan/compose.sh cloudflare logs --tail=100 xloader-worker">Salin perintah</button></div>
+      </section>
+
+      <section class="wajo-datastore-card">
+        <div class="wajo-datastore-card__heading">
+          <span class="wajo-datastore-card__number">4</span>
+          <div><h2>Antrekan resource lama</h2><p>Resource yang dibuat sebelum otomatisasi XLoader perlu dikirim ke antrean satu kali.</p></div>
+        </div>
+        <div class="wajo-datastore-backfill-summary">
+          <div><strong>{{ wajo_datastore_pending|length }}</strong><span>Resource menunggu pratinjau (maksimal 100 dataset terbaru)</span></div>
+          <div><strong>{{ wajo_datastore_ready_resources|length }}</strong><span>Resource sudah memiliki tabel DataStore (hasil pemindaian)</span></div>
+        </div>
+        {% if wajo_datastore_pending %}
+          <ul class="wajo-datastore-resource-list wajo-datastore-resource-list--pending">
+            {% for resource in wajo_datastore_pending[:5] %}
+              <li><span>{{ wajo_icon('file-text') }}</span><span><a href="{{ h.url_for(h.default_package_type() ~ '.read', id=resource.dataset_name) }}"><strong>{{ resource.name }}</strong></a><small>{{ resource.dataset }} · {{ resource.format }}</small></span><span class="label label-warning">Menunggu</span></li>
+            {% endfor %}
+          </ul>
+          <form method="post" action="{{ h.url_for('wajo_admin.data_preview_backfill') }}" class="wajo-datastore-backfill-form">
+            {{ h.csrf_input() }}
+            <button class="btn btn-primary" type="submit" {% if wajo_datastore_ready != wajo_datastore_total %}disabled{% endif %}>
+              {{ wajo_icon('refresh') }} Antrekan hingga 25 resource
+            </button>
+            <small>Hanya resource publik dengan format tabular yang didukung. Tombol aktif setelah seluruh pemeriksaan konfigurasi lulus; XLoader tetap menentukan kelayakan akhir setiap berkas.</small>
+          </form>
+        {% else %}
+          <div class="wajo-datastore-callout is-ok">{{ wajo_icon('check-circle') }}<span><strong>Tidak ditemukan resource tabular yang menunggu.</strong><small>Pemindaian dibatasi pada 100 dataset publik terbaru.</small></span></div>
+        {% endif %}
+        {% if wajo_datastore_scan_limited %}<p class="wajo-datastore-card__note">Pemindaian ini dibatasi untuk menjaga beban server. Gunakan perintah backfill seluruh resource pada panduan deployment untuk katalog besar.</p>{% endif %}
+      </section>
+
+      <section class="wajo-datastore-card">
+        <div class="wajo-datastore-card__heading">
+          <span class="wajo-datastore-card__number">5</span>
+          <div><h2>Verifikasi dari halaman dataset</h2><p>Setelah worker menyelesaikan pekerjaan, periksa apakah pratinjau tampil pada detail dataset publik.</p></div>
+        </div>
+        {% if wajo_datastore_ready_resources %}
+          <ul class="wajo-datastore-resource-list">
+            {% for resource in wajo_datastore_ready_resources[:5] %}
+              <li><span>{{ wajo_icon('file-text') }}</span><span><a href="{{ h.url_for(h.default_package_type() ~ '.read', id=resource.dataset_name) }}"><strong>{{ resource.name }}</strong></a><small>{{ resource.dataset }} · {{ resource.format }}</small></span><span class="label label-success">Siap</span></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="wajo-datastore-card__note">Belum ada contoh resource yang terindeks pada pemindaian ini. Gunakan tombol antre di langkah sebelumnya, lalu muat ulang halaman ini setelah worker selesai.</p>
+        {% endif %}
+        <a class="btn btn-default" href="{{ h.url_for(h.default_package_type() ~ '.search') }}">Buka katalog dataset {{ wajo_icon('arrow-right') }}</a>
+      </section>
+    </div>
+
+    <aside class="wajo-datastore__aside">
+      <section class="wajo-datastore-sidecard">
+        <span class="wajo-datastore-sidecard__icon">{{ wajo_icon('lightbulb-o') }}</span>
+        <h2>Alur setelah ini aktif</h2>
+        <ol>
+          <li>Admin mengunggah CSV/Excel ke sumber daya.</li>
+          <li>CKAN otomatis mengirim resource ke antrean XLoader.</li>
+          <li>Worker memuat tabel ke DataStore.</li>
+          <li>Detail dataset menampilkan pratinjau dan API.</li>
+          <li>Portal publik menerima invalidasi cache setelah pemuatan selesai.</li>
+        </ol>
+      </section>
+      <section class="wajo-datastore-sidecard">
+        <h2>Format pratinjau tabular</h2>
+        <div class="wajo-datastore-formats"><span>CSV</span><span>TSV</span><span>XLS</span><span>XLSX</span><span>ODS</span></div>
+        <p>Format lain tetap dapat diunduh sebagai berkas, tetapi tidak otomatis menjadi tabel DataStore.</p>
+      </section>
+      <section class="wajo-datastore-sidecard">
+        <h2>Perlu bantuan?</h2>
+        <p>Jika resource tetap menunggu, periksa status antrean, log worker, format berkas, token internal, dan izin database.</p>
+        <a href="{{ g.site_url }}/bantuan" target="_blank" rel="noopener noreferrer">Buka pusat bantuan portal {{ wajo_icon('external-link') }}</a>
+      </section>
+    </aside>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    document.addEventListener('click', function (event) {
+      const button = event.target.closest('[data-copy-command]');
+      if (!button) return;
+      const command = button.getAttribute('data-copy-command') || '';
+      if (!navigator.clipboard || !command) return;
+      navigator.clipboard.writeText(command).then(function () {
+        const original = button.textContent;
+        button.textContent = 'Tersalin';
+        window.setTimeout(function () { button.textContent = original; }, 1400);
+      }).catch(function () {});
+    });
+  </script>
+{% endblock %}

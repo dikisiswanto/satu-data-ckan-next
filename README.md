@@ -116,19 +116,21 @@ Route publik CMS:
 
 Panduan field, template, komponen, media, keamanan, dan alur publikasi tersedia di [`docs/CMS.md`](docs/CMS.md).
 
+Halaman detail dataset publik menyediakan endpoint API per dataset (`package_show`), per resource (`resource_show`), dan isi tabel DataStore (`datastore_search`). Untuk CSV/TSV lokal yang belum selesai diindeks XLoader, tersedia pratinjau sementara dengan batas ukuran/baris; pratinjau penuh tetap memakai DataStore. Halaman katalog, organisasi, statistik, publikasi, infografik, informasi, berita, API, dan route publik lain menyediakan panduan kontekstual yang relevan.
+
 ## Wajo Admin — antarmuka administrasi CKAN
 
 CKAN 2.12.1 tetap menjadi backend katalog, autentikasi, otorisasi, CRUD, DataStore, dan extension. Antarmuka administrasinya menggunakan **Wajo Admin**, custom application shell pada extension lokal `ckanext-wajo-theme`:
 
 - Topbar dengan identitas Kabupaten Wajo, tautan portal publik, profil pengguna, pengaturan sistem, dan logout ber-CSRF.
 - Sidebar responsif dengan navigasi Ringkasan, Dataset, Organisasi, Kategori data, Pages, Harvesting, dashboard pribadi, Pengguna, dan Pengaturan CKAN. Menu sensitif ditampilkan sesuai role/permission.
-- Ringkasan khusus di `/wajo-admin/` dengan metrik yang diambil dari CKAN Action API menggunakan identitas pengguna yang sedang login, daftar dataset terbaru, dan akses cepat berdasarkan permission.
+- Ringkasan khusus di `/admin/` dengan metrik yang diambil dari CKAN Action API menggunakan identitas pengguna yang sedang login, daftar dataset terbaru, dan akses cepat berdasarkan permission.
 - Bahasa Indonesia menjadi default CKAN Admin. Katalog terjemahan dikompilasi saat image dibangun.
 - Design system CSS merapikan formulir, tabel, tombol, alert, breadcrumb, pagination, tabs, dropdown, fokus keyboard, serta breakpoint desktop/tablet/mobile.
 
 Wajo Admin **tidak mengganti route atau workflow native** dataset, resource, organisasi, user, DataStore, Pages, Harvest, Scheming, dan GeoView. Shell ditambahkan secara aditif di `page.html`; form dan action tiap modul tetap berasal dari CKAN/extension upstream. Ini menjaga validasi, CSRF, upload, permission, dan URL existing. Dashboard ringkasan merupakan satu halaman custom yang memanggil Action API CKAN; ia bukan pengganti halaman CRUD.
 
-Blueprint ringkasan memakai prefix `/wajo-admin`, sedangkan root hostname admin mengarahkan pengguna terautentikasi ke ringkasan tersebut. `CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index` dipastikan oleh bootstrap. Pengunjung anonim pada `CKAN_HOST` hanya dapat membuka login dan aset login; halaman lain meminta autentikasi dan Action API admin tanpa sesi mendapat `401`. Setelah login, seluruh path CKAN dan extension diteruskan ke CKAN, tanpa allowlist route yang dapat mematikan menu baru.
+Blueprint ringkasan memakai prefix `/admin`, sedangkan root hostname admin mengarahkan pengguna terautentikasi ke ringkasan tersebut. `CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index` dipastikan oleh bootstrap. Pengunjung anonim pada `CKAN_HOST` hanya dapat membuka login dan aset login; halaman lain meminta autentikasi dan Action API admin tanpa sesi mendapat `401`. Setelah login, seluruh path CKAN dan extension diteruskan ke CKAN, tanpa allowlist route yang dapat mematikan menu baru.
 
 Untuk mengubah tampilan, edit:
 
@@ -167,3 +169,11 @@ Pratinjau tabel memakai `datatables_view`; pratinjau geospasial memakai `geo_vie
 `geojson_view`, `wmts_view`, dan `shp_view`. Plugin berbasis Recline telah dihapus
 dari CKAN 2.12 dan tidak boleh diaktifkan. Bootstrap membersihkan ID lama dari
 `.env.ckan` dan menormalisasi daftar plugin saat dijalankan ulang.
+
+## Panduan administrator
+
+- Peta menu dan alur kerja admin: [`docs/PANDUAN-MENU-ADMIN.md`](docs/PANDUAN-MENU-ADMIN.md)
+- Tema dan shell Wajo Admin: [`docs/WAJO-ADMIN.md`](docs/WAJO-ADMIN.md)
+- Alur DataStore/XLoader dan preview: [`docs/DATASTORE-PREVIEW-SYNC.md`](docs/DATASTORE-PREVIEW-SYNC.md)
+- Cakupan lokalisasi CKAN: [`docs/CKAN-ADMIN-LOKALISASI.md`](docs/CKAN-ADMIN-LOKALISASI.md)
+- Design tokens, ukuran konten, tipografi, komponen, dan aturan responsif: [`docs/WAJO-ADMIN-DESIGN-SYSTEM.md`](docs/WAJO-ADMIN-DESIGN-SYSTEM.md)

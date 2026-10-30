@@ -20,6 +20,12 @@ export const publicQueryKeys = {
   root: ["public"],
   datasets: () => ["public", "datasets"],
   dataset: (slug) => ["public", "datasets", String(slug)],
+  resourceStatus: (resourceId) => [
+    "public",
+    "resources",
+    String(resourceId),
+    "datastore-status",
+  ],
   resourceRows: (slug, resourceId, page, limit = 10) => [
     "public",
     "datasets",

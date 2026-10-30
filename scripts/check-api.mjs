@@ -101,11 +101,23 @@ if (
   );
 }
 if (
-  !apiPage.toLowerCase().includes("nilai yang meminta snapshot data") ||
-  !apiMarkdown.toLowerCase().includes("permintaan yang meminta snapshot")
+  !apiPage.includes("package_activity_list?id=nama-dataset&limit=8&offset=0") ||
+  !apiMarkdown.includes(
+    "package_activity_list?id=nama-dataset&limit=8&offset=0",
+  ) ||
+  !apiRoute.includes("include_hidden_activity: false")
 ) {
   errors.push(
-    "Dokumentasi package_activity_list harus menjelaskan bahwa permintaan include_data=true ditolak.",
+    "package_activity_list harus memakai limit/offset dan memaksa include_hidden_activity=false pada server.",
+  );
+}
+if (
+  apiRoute.includes('assert(["id", "include_data"])') ||
+  apiPage.includes("include_data=false") ||
+  apiMarkdown.includes("include_data=false")
+) {
+  errors.push(
+    "Kontrak package_activity_list masih memakai parameter include_data yang tidak valid untuk CKAN 2.12.",
   );
 }
 

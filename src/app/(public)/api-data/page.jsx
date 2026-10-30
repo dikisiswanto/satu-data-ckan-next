@@ -26,7 +26,7 @@ const examples = {
   search: `curl -sS '${apiOrigin}${basePath}/package_search?q=pendidikan&rows=20&start=0'`,
   detail: `curl -sS '${apiOrigin}${basePath}/package_show?id=nama-dataset'`,
   organizations: `curl -sS '${apiOrigin}${basePath}/organization_list?all_fields=true&limit=1000'`,
-  activities: `curl -sS '${apiOrigin}${basePath}/package_activity_list?id=nama-dataset&include_data=false'`,
+  activities: `curl -sS '${apiOrigin}${basePath}/package_activity_list?id=nama-dataset&limit=8&offset=0'`,
   datastore: `curl -sS '${apiOrigin}${basePath}/datastore_search?resource_id=RESOURCE_ID&limit=10&offset=0'`,
   facets: `curl -sS '${apiOrigin}${basePath}/package_search?q=%2A%3A%2A&rows=0&facets=true'`,
   harvest: `curl -sS '${apiOrigin}${basePath}/package_search?rows=100&start=0&sort=id%20asc'`,
@@ -73,10 +73,10 @@ const endpoints = [
   {
     name: "package_activity_list",
     label: "Lihat riwayat perubahan dataset",
-    params: "id (wajib), include_data",
+    params: "id (wajib), limit, offset",
     description:
-      "Mengambil riwayat aktivitas dataset. include_data dihilangkan atau harus bernilai false, 0, atau no. Nilai yang meminta snapshot data (true, 1, atau yes) ditolak agar payload dan metadata internal tidak ikut terbuka.",
-    example: `${basePath}/package_activity_list?id=nama-dataset&include_data=false`,
+      "Mengambil riwayat aktivitas dataset yang sudah dipastikan publik. limit default 8 (maksimum 31), offset default 0. Facade selalu memaksa include_hidden_activity=false dan menghapus identitas pengguna serta snapshot data internal.",
+    example: `${basePath}/package_activity_list?id=nama-dataset&limit=8&offset=0`,
   },
   {
     name: "organization_list",
@@ -753,7 +753,7 @@ export default function ApiDocsPage() {
                   />
                   <Field
                     name="Cache"
-                    value="status_show, package_search, daftar/detail organisasi/topik, dan tag dapat memakai shared cache (s-maxage 30 detik; stale-while-revalidate 60 detik). package_show, package_activity_list, resource_show, file_show, datastore_search, dan semua respons error memakai Cache-Control: no-store."
+                    value="status_show, package_search, daftar/detail organisasi/topik, dan tag dapat memakai shared cache singkat sebagai fallback (s-maxage 5 detik; stale-while-revalidate 5 detik). package_show, package_activity_list, resource_show, file_show, datastore_search, dan semua respons error memakai Cache-Control: no-store."
                   />
                   <Field
                     name="CORS"

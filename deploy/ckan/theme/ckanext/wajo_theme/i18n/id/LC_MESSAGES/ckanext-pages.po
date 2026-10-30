@@ -14,10 +14,35 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
+msgid " <p>Add blog articles to CKAN here.</p> "
+msgstr " <p>Tambahkan artikel blog ke CKAN melalui halaman ini.</p> "
+
+msgid ""
+" <p>Pages are are simple way to add extra pages to your ckan instance. You can assign an order to"
+" them.</p> "
+msgstr ""
+" <p>Halaman merupakan cara sederhana untuk menambahkan halaman ke portal CKAN. Anda dapat "
+"mengatur urutannya.</p> "
+
+msgid "2005-01-01"
+msgstr "2005-01-01"
+
 msgid "Actions"
 msgstr "Tindakan"
 
+msgid "Add"
+msgstr "Tambah"
+
+msgid "Add Article"
+msgstr "Tambah artikel"
+
+msgid "Add Blog Article"
+msgstr "Tambah artikel blog"
+
 msgid "Add Page"
+msgstr "Tambah halaman"
+
+msgid "Add page"
 msgstr "Tambah halaman"
 
 msgid "Add to menu"
@@ -25,6 +50,13 @@ msgstr "Tambahkan ke menu"
 
 msgid "Apply"
 msgstr "Terapkan"
+
+#, python-brace-format
+msgid "Are you sure you want to delete page - {name}?"
+msgstr "Apakah Anda yakin ingin menghapus halaman {name}?"
+
+msgid "Are you sure you want to delete this Page?"
+msgstr "Apakah Anda yakin ingin menghapus halaman ini?"
 
 msgid "Are you sure you want to delete this page?"
 msgstr "Yakin ingin menghapus halaman ini?"
@@ -37,6 +69,9 @@ msgstr "Kembali"
 
 msgid "Blog"
 msgstr "Blog"
+
+msgid "Blog Articles"
+msgstr "Artikel blog"
 
 msgid "Blog post"
 msgstr "Artikel blog"
@@ -52,6 +87,9 @@ msgstr "Kategori"
 
 msgid "Clear"
 msgstr "Hapus pilihan"
+
+msgid "Confirm Delete"
+msgstr "Konfirmasi penghapusan"
 
 msgid "Content"
 msgstr "Konten"
@@ -89,11 +127,27 @@ msgstr "Tampilkan pada navigasi"
 msgid "Draft"
 msgstr "Draf"
 
+#, python-brace-format
+msgid "ERROR: View not found {view_id}"
+msgstr "KESALAHAN: Tampilan {view_id} tidak ditemukan."
+
 msgid "Edit"
 msgstr "Ubah"
 
+msgid "Edit Article"
+msgstr "Ubah artikel"
+
+msgid "Edit Blog Article"
+msgstr "Ubah artikel blog"
+
 msgid "Edit Page"
 msgstr "Ubah halaman"
+
+msgid "Edit page"
+msgstr "Ubah halaman"
+
+msgid "Enter content here"
+msgstr "Masukkan konten di sini"
 
 msgid "Excerpt"
 msgstr "Ringkasan"
@@ -104,17 +158,29 @@ msgstr "Unggulan"
 msgid "Filter"
 msgstr "Saring"
 
+msgid "Group not found"
+msgstr "Grup tidak ditemukan."
+
 msgid "Manage content"
 msgstr "Kelola konten"
 
 msgid "Manage pages"
 msgstr "Kelola halaman"
 
+msgid "Menu Order"
+msgstr "Urutan menu"
+
 msgid "Menu label"
 msgstr "Label menu"
 
 msgid "Menu order"
 msgstr "Urutan menu"
+
+msgid "More"
+msgstr "Selengkapnya"
+
+msgid "My content"
+msgstr "Konten saya"
 
 msgid "Name"
 msgstr "Nama"
@@ -131,8 +197,20 @@ msgstr "Belum ada halaman"
 msgid "No pages found"
 msgstr "Tidak ada halaman"
 
+msgid "Not authorized to see this page"
+msgstr "Anda tidak memiliki izin untuk melihat halaman ini."
+
+msgid "Not in Menu"
+msgstr "Tidak ditampilkan di menu"
+
+msgid "Only Posting is availiable"
+msgstr "Hanya metode POST yang tersedia."
+
 msgid "Open Graph image"
 msgstr "Gambar Open Graph"
+
+msgid "Organization not found"
+msgstr "Organisasi tidak ditemukan."
 
 msgid "Page"
 msgstr "Halaman"
@@ -142,6 +220,9 @@ msgstr "Konten halaman"
 
 msgid "Page Name"
 msgstr "Nama halaman"
+
+msgid "Page Not Found"
+msgstr "Halaman tidak ditemukan."
 
 msgid "Page Title"
 msgstr "Judul halaman"
@@ -157,6 +238,9 @@ msgstr "Halaman berhasil dihapus"
 
 msgid "Page name"
 msgstr "Nama halaman"
+
+msgid "Page name already exists in database"
+msgstr "Nama halaman sudah digunakan."
 
 msgid "Page title"
 msgstr "Judul halaman"
@@ -181,6 +265,9 @@ msgstr "Tanggal publikasi"
 
 msgid "Publish"
 msgstr "Terbitkan"
+
+msgid "Publish Date"
+msgstr "Tanggal terbit"
 
 msgid "Publish date"
 msgstr "Tanggal terbit"
@@ -221,6 +308,15 @@ msgstr "Templat"
 msgid "Template type"
 msgstr "Jenis templat"
 
+msgid "There are currently no blog articles here"
+msgstr "Belum ada artikel blog."
+
+msgid "There are currently no pages here"
+msgstr "Belum ada halaman."
+
+msgid "This page currently has no content"
+msgstr "Halaman ini belum memiliki konten."
+
 msgid "Title"
 msgstr "Judul"
 
@@ -230,12 +326,49 @@ msgstr "URL"
 msgid "URL slug"
 msgstr "Slug URL"
 
+msgid "Unauthorized to create or edit a page"
+msgstr "Anda tidak memiliki izin untuk membuat atau mengubah halaman."
+
+msgid "Unauthorized to delete page"
+msgstr "Anda tidak memiliki izin untuk menghapus halaman."
+
+#, python-format
+msgid "Unauthorized to read group %s"
+msgstr "Anda tidak memiliki izin untuk membaca grup %s."
+
+#, python-format
+msgid "Unauthorized to read organization %s"
+msgstr "Anda tidak memiliki izin untuk membaca organisasi %s."
+
+#, python-format
+msgid "Unauthorized to upload file %s"
+msgstr "Anda tidak memiliki izin untuk mengunggah berkas %s."
+
 msgid "Updated"
 msgstr "Diperbarui"
 
 msgid "Updated on"
 msgstr "Diperbarui pada"
 
+#, python-format
+msgid "User %s not authorized to read this page"
+msgstr "Pengguna %s tidak memiliki izin untuk membaca halaman ini."
+
 msgid "View Page"
 msgstr "Lihat halaman"
+
+msgid "Visibility"
+msgstr "Visibilitas"
+
+msgid "What are Pages?"
+msgstr "Apa itu Halaman?"
+
+msgid "Your browser does not support iframes."
+msgstr "Peramban Anda tidak mendukung iframe."
+
+msgid "eg. Blog Article Title"
+msgstr "Contoh: Judul artikel blog"
+
+msgid "eg. Page Title"
+msgstr "Contoh: Judul halaman"
 

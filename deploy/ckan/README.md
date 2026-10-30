@@ -179,7 +179,7 @@ CKAN 2.12.1 tetap menjadi sumber kebenaran untuk data, route, Action API, autent
 
 - **Topbar:** logo Kabupaten Wajo, nama Wajo Admin, tautan ke portal publik Next.js, identitas pengguna, akses pengaturan untuk sysadmin, dan tombol logout dengan token CSRF.
 - **Sidebar:** Ringkasan, Dataset, Organisasi, Kategori data, Halaman informasi (Pages), Harvesting, Dataset saya, Organisasi saya, Kategori saya, serta Pengguna/Pengaturan CKAN untuk sysadmin. Menu aktif mengikuti path. Tautan fitur tetap menuju endpoint CKAN/extension asli.
-- **Ringkasan `/wajo-admin/`:** kartu jumlah dataset yang dapat diakses pengguna, organisasi, kategori/grup, dan dataset yang dibuat pengguna; tabel dataset terbaru; pintasan tambah dataset/organisasi (hanya jika diizinkan); tautan Pages dan Harvest. Angka diambil saat halaman dibuka melalui Action API CKAN, bukan angka statis. Kegagalan satu action dicatat ke log dan tidak membuat dashboard gagal dirender; metrik yang gagal ditampilkan sebagai `—`.
+- **Ringkasan `/admin/`:** kartu jumlah dataset yang dapat diakses pengguna, organisasi, kategori/grup, dan dataset yang dibuat pengguna; tabel dataset terbaru; pintasan tambah dataset/organisasi (hanya jika diizinkan); tautan Pages dan Harvest. Angka diambil saat halaman dibuka melalui Action API CKAN, bukan angka statis. Kegagalan satu action dicatat ke log dan tidak membuat dashboard gagal dirender; metrik yang gagal ditampilkan sebagai `—`.
 - **Halaman pengelolaan:** dataset, resource, preview, organisasi, grup, pengguna, DataStore, Pages, Harvest, Scheming, dan GeoView tetap memakai route serta template/fungsi native modul CKAN. Design system Wajo menata shell, tabel, formulir, navigasi, alert, tombol, tabs, dropdown, breadcrumb, pagination, dan responsivitasnya.
 - **Bahasa:** `id` menjadi locale default dengan `en` sebagai pilihan. Katalog gettext dikompilasi ke CKAN saat Docker image dibuat; terjemahan extension pihak ketiga bergantung pada katalog mereka sendiri.
 
@@ -196,7 +196,7 @@ CKAN 2.12.1 tetap menjadi sumber kebenaran untuk data, route, Action API, autent
 
 `page.html` menggunakan `ckan_extends` dan hanya menambahkan shell di sekitar `super()` untuk pengguna yang telah login. Form CRUD tiap modul tidak ditulis ulang. Template tambahan harus tetap aditif dan mengikuti block CKAN 2.12.1; jangan menyalin seluruh template upstream hanya demi styling karena akan membuat maintenance dan upgrade lebih sulit.
 
-Blueprint Wajo Admin terdaftar dengan `url_prefix="/wajo-admin"`. Prefix ini penting: route ringkasan harus tetap `/wajo-admin/`, bukan `/`, untuk menghindari loop ketika middleware mengarahkan root hostname ke halaman ringkasan. Bootstrap menegakkan `CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index`, sehingga login berhasil diarahkan ke dashboard Wajo Admin.
+Blueprint Wajo Admin terdaftar dengan `url_prefix="/admin"`. Prefix ini penting: route ringkasan harus tetap `/admin/`, bukan `/`, untuk menghindari loop ketika middleware mengarahkan root hostname ke halaman ringkasan. Bootstrap menegakkan `CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index`, sehingga login berhasil diarahkan ke dashboard Wajo Admin.
 
 ### Pemisahan host publik dan host administrasi
 
@@ -229,21 +229,21 @@ Jangan menghapus volume database, Solr, Redis, atau filestore untuk menerapkan p
 
 ## 7. Audit theme dan penerimaan UI admin
 
-Static guard `scripts/check-theme.py` mem-parsing template Jinja, memeriksa route `/wajo-admin`, locale, kontrak shell, role-aware quick actions, dan scope template. `scripts/check-auth-middleware.py` menguji login guard, redirect, API `401`, dan view dashboard dengan stub Action API. `scripts/check-build.py` membuat wheel `ckanext-wajo-theme` pada direktori sementara lalu memverifikasi bahwa plugin, header/page/sidebar/dashboard, logo, WebAssets/CSS, dan katalog `.po` benar-benar ikut terkemas. `bash scripts/check-static.sh` menjalankan seluruh pemeriksaan tersebut.
+Static guard `scripts/check-theme.py` mem-parsing template Jinja, memeriksa route `/admin`, locale, kontrak shell, role-aware quick actions, dan scope template. `scripts/check-auth-middleware.py` menguji login guard, redirect, API `401`, dan view dashboard dengan stub Action API. `scripts/check-build.py` membuat wheel `ckanext-wajo-theme` pada direktori sementara lalu memverifikasi bahwa plugin, header/page/sidebar/dashboard, logo, WebAssets/CSS, dan katalog `.po` benar-benar ikut terkemas. `bash scripts/check-static.sh` menjalankan seluruh pemeriksaan tersebut.
 
 Browser acceptance test tetap diperlukan pada container CKAN yang berjalan. Gunakan akun sysadmin dan akun editor/organisasi:
 
-| Area                 | Alur yang harus dicoba                             | Kriteria lulus                                                                                             |
-| -------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Login dan shell      | `/`, `/user/login`, login gagal/berhasil, logout   | Anonim hanya melihat login; logo/CSS tampil; login berhasil menuju `/wajo-admin/`; logout kembali ke login |
-| Ringkasan            | `/wajo-admin/`                                     | Angka sesuai Action API; kegagalan API tidak merusak dashboard; quick actions mengikuti permission         |
-| Dataset              | pencarian, detail, create/edit, resource, preview  | Filter, pagination, Scheming, validasi, upload, visibility, save/cancel dan unduhan berfungsi              |
-| Resource & DataStore | add/edit/upload resource, table preview, DataStore | Form, progress/error upload, tabel, toolbar, DataStore query dan pesan error berfungsi                     |
-| Organisasi & grup    | index, detail, create/edit, anggota                | Navigasi, facet, tabel anggota, action dan hak akses tetap mengikuti CKAN                                  |
-| Pengguna & sistem    | daftar/detail pengguna, konfigurasi, revisi        | Khusus sysadmin sesuai permission; tidak ada akses tambahan yang diberikan oleh theme                      |
-| Pages & Harvest      | daftar, form, halaman, harvest source/job/log      | Route extension tetap terbuka setelah login dan worker tidak dipengaruhi oleh CSS/template                 |
-| GeoView              | GeoJSON, WMTS, shapefile, peta                     | Viewer tidak tertutup/terpotong oleh shell/sidebar; legenda dan toolbar tetap dapat digunakan              |
-| Responsif/a11y       | lebar 1440, 1024, 768, 390, 320 px; keyboard-only  | Tidak ada overflow horizontal; sidebar dapat dibuka/tutup; focus terlihat; reduced motion dihormati        |
+| Area                 | Alur yang harus dicoba                             | Kriteria lulus                                                                                        |
+| -------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Login dan shell      | `/`, `/user/login`, login gagal/berhasil, logout   | Anonim hanya melihat login; logo/CSS tampil; login berhasil menuju `/admin/`; logout kembali ke login |
+| Ringkasan            | `/admin/`                                          | Angka sesuai Action API; kegagalan API tidak merusak dashboard; quick actions mengikuti permission    |
+| Dataset              | pencarian, detail, create/edit, resource, preview  | Filter, pagination, Scheming, validasi, upload, visibility, save/cancel dan unduhan berfungsi         |
+| Resource & DataStore | add/edit/upload resource, table preview, DataStore | Form, progress/error upload, tabel, toolbar, DataStore query dan pesan error berfungsi                |
+| Organisasi & grup    | index, detail, create/edit, anggota                | Navigasi, facet, tabel anggota, action dan hak akses tetap mengikuti CKAN                             |
+| Pengguna & sistem    | daftar/detail pengguna, konfigurasi, revisi        | Khusus sysadmin sesuai permission; tidak ada akses tambahan yang diberikan oleh theme                 |
+| Pages & Harvest      | daftar, form, halaman, harvest source/job/log      | Route extension tetap terbuka setelah login dan worker tidak dipengaruhi oleh CSS/template            |
+| GeoView              | GeoJSON, WMTS, shapefile, peta                     | Viewer tidak tertutup/terpotong oleh shell/sidebar; legenda dan toolbar tetap dapat digunakan         |
+| Responsif/a11y       | lebar 1440, 1024, 768, 390, 320 px; keyboard-only  | Tidak ada overflow horizontal; sidebar dapat dibuka/tutup; focus terlihat; reduced motion dihormati   |
 
 Periksa `https://CKAN_HOST/logo-kabupaten-wajo.webp` mengembalikan `200` dengan `Content-Type: image/webp`, dan stylesheet WebAssets merespons `200`. `bash ./deploy/ckan/diagnose-admin.sh` memeriksa pola status yang diharapkan: login `200/302`, dashboard anonim `302`, API admin anonim `401`.
 

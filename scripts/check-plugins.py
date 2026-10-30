@@ -8,6 +8,7 @@ registered = {entry.name for entry in entry_points(group="ckan.plugins")}
 required = {
     # CKAN 2.12 core plugins.
     "datastore",
+    "activity",
     "datatables_view",
     "image_view",
     "text_view",

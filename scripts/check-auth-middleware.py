@@ -36,15 +36,32 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     class ITranslation:
         pass
 
+    class IPackageController:
+        pass
+
+    class IResourceController:
+        pass
+
+    class IOrganizationController:
+        pass
+
+    class IGroupController:
+        pass
+
     plugins.SingletonPlugin = SingletonPlugin
     plugins.IConfigurer = IConfigurer
+    plugins.IPackageController = IPackageController
     plugins.IMiddleware = IMiddleware
     plugins.IBlueprint = IBlueprint
     plugins.ITranslation = ITranslation
+    plugins.IResourceController = IResourceController
+    plugins.IOrganizationController = IOrganizationController
+    plugins.IGroupController = IGroupController
     plugins.implements = lambda *args, **kwargs: None
 
     toolkit = types.ModuleType("ckan.plugins.toolkit")
     toolkit.get_validator = lambda name: None
+    toolkit.config = {"ckanext.xloader.api_token": "test-xloader-token"}
     toolkit.add_template_directory = lambda *args: None
     toolkit.add_public_directory = lambda *args: None
     toolkit.add_resource = lambda *args: None
@@ -77,10 +94,20 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
         pass
 
     interfaces.IPagesSchema = IPagesSchema
+    xloader = types.ModuleType("ckanext.xloader")
+    xloader.__path__ = []
+    xloader_interfaces = types.ModuleType("ckanext.xloader.interfaces")
+
+    class IXloader:
+        pass
+
+    xloader_interfaces.IXloader = IXloader
     sys.modules.update({
         "ckanext": ckanext,
         "ckanext.pages": pages,
         "ckanext.pages.interfaces": interfaces,
+        "ckanext.xloader": xloader,
+        "ckanext.xloader.interfaces": xloader_interfaces,
     })
 
     class Request:
@@ -110,6 +137,10 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
                 return function
             return decorate
 
+        def post(self, route):
+            # The smoke test records route handlers independent of HTTP method.
+            return self.get(route)
+
     flask = types.ModuleType("flask")
     flask.Blueprint = FakeBlueprint
     flask.request = request
@@ -123,7 +154,7 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
         if endpoint == "dashboard.datasets":
             return "/dashboard/datasets"
         if endpoint == "wajo_admin.index":
-            return "/wajo-admin/"
+            return "/admin/"
         raise AssertionError(f"Unexpected url_for endpoint in test: {endpoint}")
 
     flask.url_for = url_for
@@ -193,7 +224,7 @@ def main() -> None:
     run_case("anonymous visitor may load Wajo logo", None, path="/logo-kabupaten-wajo.webp")
     run_case(
         "anonymous admin root opens login with Wajo overview return target",
-        ("REDIRECT", "/user/login?came_from=/wajo-admin/"),
+        ("REDIRECT", "/user/login?came_from=/admin/"),
         path="/",
     )
     run_case(
@@ -224,30 +255,36 @@ def main() -> None:
     run_case("authenticated extension route is available", None, path="/harvest", authenticated=True)
     run_case(
         "authenticated root opens Wajo Admin overview",
-        ("REDIRECT", "/wajo-admin/"),
+        ("REDIRECT", "/admin/"),
         path="/",
         authenticated=True,
     )
     run_case(
         "authenticated login route opens Wajo Admin overview",
-        ("REDIRECT", "/wajo-admin/"),
+        ("REDIRECT", "/admin/"),
         path="/user/login",
         authenticated=True,
     )
 
     # Exercise the custom dashboard blueprint with CKAN Action API stubs.
     import ckan.plugins.toolkit as toolkit
-    toolkit.get_action = lambda action_name: (
-        lambda context, data: (
-            {"count": 42, "results": [{"name": "dataset-terbaru", "title": "Dataset Terbaru"}]}
-            if action_name == "package_search" and data.get("rows") == 6
-            else {"count": 7, "results": []}
-            if action_name == "package_search"
-            else [{"name": "org-wajo"}]
-            if action_name == "organization_list"
-            else [{"name": "kategori-wajo"}]
-        )
-    )
+    xloader_calls = []
+
+    def fake_action(action_name):
+        def invoke(context, data):
+            if action_name == "xloader_submit":
+                xloader_calls.append((context, data))
+                return True
+            if action_name == "package_search" and data.get("rows") == 6:
+                return {"count": 42, "results": [{"name": "dataset-terbaru", "title": "Dataset Terbaru"}]}
+            if action_name == "package_search":
+                return {"count": 7, "results": []}
+            if action_name == "organization_list":
+                return [{"name": "org-wajo"}]
+            return [{"name": "kategori-wajo"}]
+        return invoke
+
+    toolkit.get_action = fake_action
     base_module = types.ModuleType("ckan.lib.base")
     dashboard_render = {}
     base_module.render = lambda template, extra_vars: dashboard_render.update({"template": template, "vars": extra_vars}) or "RENDERED"
@@ -257,8 +294,8 @@ def main() -> None:
     sys.modules.update({"ckan.lib": ckan_lib, "ckan.lib.base": base_module})
     user.is_authenticated = True
     blueprint = module.WajoThemePlugin().get_blueprint()
-    if blueprint.name != "wajo_admin" or blueprint.url_prefix != "/wajo-admin" or "/" not in blueprint.routes:
-        raise AssertionError("Blueprint Wajo Admin harus mendaftarkan route /wajo-admin/.")
+    if blueprint.name != "wajo_admin" or blueprint.url_prefix != "/admin" or "/" not in blueprint.routes:
+        raise AssertionError("Blueprint Wajo Admin harus mendaftarkan route /admin/.")
     dashboard_response = blueprint.routes["/"]()
     if dashboard_response != "RENDERED" or dashboard_render.get("template") != "wajo_theme/dashboard.html":
         raise AssertionError("Route Wajo Admin tidak merender dashboard custom.")
@@ -269,6 +306,16 @@ def main() -> None:
     if not dashboard_vars.get("wajo_admin_recent_datasets") or dashboard_vars["wajo_admin_recent_datasets"][0]["name"] != "dataset-terbaru":
         raise AssertionError("Dashboard harus menampilkan dataset terbaru dari Action API CKAN.")
     print("PASS Wajo Admin overview loads metrics and recent datasets from CKAN actions")
+
+    if plugin.can_upload("resource-tabular") is not True:
+        raise AssertionError("Wajo theme harus mengizinkan XLoader melanjutkan validasi format bawaannya.")
+    plugin._enqueue_resource_preview({"user": "editor"}, {"id": "resource-tabular", "format": "CSV"})
+    plugin._enqueue_resource_preview({"user": "editor"}, {"id": "resource-document", "format": "PDF"})
+    if len(xloader_calls) != 1 or xloader_calls[0][1] != {"resource_id": "resource-tabular"}:
+        raise AssertionError("Resource tabular harus mengantrekan XLoader dan format non-tabular tidak boleh dikirim.")
+    if xloader_calls[0][0].get("ignore_auth") is not True:
+        raise AssertionError("XLoader submit internal harus menggunakan konteks CKAN internal tanpa mengekspos token.")
+    print("PASS tabular resource creation queues XLoader with internal CKAN context")
 
     class Response:
         def __init__(self, location: str) -> None:

@@ -8,6 +8,8 @@ services:
       CKANEXT__XLOADER__API_TOKEN: ${CKANEXT__XLOADER__API_TOKEN}
       CKANEXT__XLOADER__JOBS_DB__URI: ${CKANEXT__XLOADER__JOBS_DB__URI}
       CKANEXT__XLOADER__SITE_URL: ${CKANEXT__XLOADER__SITE_URL}
+      CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL: ${CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL}
+      CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_SECRET: ${CKAN_REVALIDATE_SECRET}
     # Use Python stdlib rather than wget: CKAN's base image guarantees Python,
     # while minimal image variants may not include wget. Validate the CKAN API
     # payload as well as the HTTP status before allowing dependent services up.
@@ -88,6 +90,7 @@ services:
       PUBLIC_SITE_ORIGIN: ${PUBLIC_SITE_ORIGIN}
       PUBLIC_API_CORS_ORIGINS: ${PUBLIC_API_CORS_ORIGINS}
       CKAN_ADMIN_URL: ${CKAN_ADMIN_URL}
+      CKAN_REVALIDATE_SECRET: ${CKAN_REVALIDATE_SECRET}
     networks:
       - ckannet
     depends_on:

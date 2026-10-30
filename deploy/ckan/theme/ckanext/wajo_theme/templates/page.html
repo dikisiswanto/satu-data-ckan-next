@@ -1,11 +1,6 @@
 {% ckan_extends %}
 
-{#
-  Anonymous visitors on the CKAN host only receive the login flow. For signed-in
-  administrators, wrap native CKAN page content in the Wajo Admin application
-  shell. CKAN's own content blocks, forms, actions and extension routes remain
-  responsible for all CRUD and workflow behaviour.
-#}
+{# Anonymous visitors on the CKAN host only receive the focused login screen. #}
 {% block header %}
   {% if c.userobj %}
     {{ super() }}
@@ -17,16 +12,33 @@
     <div class="wajo-admin-shell">
       {% include "wajo_theme/sidebar.html" %}
       <div class="wajo-admin-workspace">
+        {% include "wajo_theme/context_help.html" %}
         {{ super() }}
       </div>
     </div>
   {% else %}
-    {{ super() }}
+    <div class="wajo-login-frame">
+      <a class="wajo-login-brand" href="{{ g.site_url }}" aria-label="Portal Satu Data Kabupaten Wajo">
+        <img src="/logo-kabupaten-wajo.webp" alt="Lambang Kabupaten Wajo" width="60" height="70" />
+        <span><strong>Portal Satu Data Kabupaten Wajo</strong><small>Sistem Pengelolaan Data Pemerintah Daerah</small></span>
+      </a>
+      {{ super() }}
+      <p class="wajo-login-footnote">Akses khusus pengelola data yang memiliki akun CKAN.</p>
+    </div>
   {% endif %}
 {% endblock %}
 
 {% block footer %}
   {% if c.userobj %}
-    {{ super() }}
+    <footer class="wajo-admin-footer">
+      <div class="wajo-admin-footer__brand">
+        <img src="/logo-kabupaten-wajo.webp" alt="" width="28" height="34" loading="lazy" />
+        <span>
+          <strong>Portal Satu Data Kabupaten Wajo</strong>
+          <small>Pengelolaan data resmi Pemerintah Kabupaten Wajo</small>
+        </span>
+      </div>
+      <small>CKAN 2.12.1 · Portal Administrasi</small>
+    </footer>
   {% endif %}
 {% endblock %}

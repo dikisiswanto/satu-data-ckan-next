@@ -47,7 +47,7 @@ else:
         "CKAN_DB_USER", "CKAN_DB", "DATASTORE_READONLY_USER", "DATASTORE_DB", "NGINX_SSLPORT_HOST",
         "POSTGRES_PASSWORD", "CKAN_DB_PASSWORD", "DATASTORE_READONLY_PASSWORD", "CKAN_SYSADMIN_PASSWORD",
         "CKAN___SECRET_KEY", "CKAN___BEAKER__SESSION__SECRET", "CKAN___API_TOKEN__JWT__ENCODE__SECRET",
-        "CKAN___API_TOKEN__JWT__DECODE__SECRET", "CKAN__PLUGINS", "CKAN__SCHEMING__DATASET_SCHEMAS", "CKAN__SCHEMING__PRESETS",
+        "CKAN___API_TOKEN__JWT__DECODE__SECRET", "CKAN__PLUGINS", "CKAN___SCHEMING__DATASET_SCHEMAS", "CKAN___SCHEMING__PRESETS", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL",
         "CKANEXT__PAGES__REVISIONS_LIMIT", "CKANEXT__PAGES__REVISIONS_FORCE_LIMIT", "CKANEXT__PAGES__ALLOW_HTML",
         "CKAN__DATASTORE__SQLSEARCH__ENABLED", "CKAN__HARVEST__MQ__TYPE", "CKAN__HARVEST__MQ__HOSTNAME",
         "CKAN__HARVEST__MQ__PORT", "CKAN__HARVEST__MQ__REDIS_DB", "CKAN__HARVEST__LOG_SCOPE",
@@ -136,7 +136,7 @@ if not renderer.is_file():
     errors.append("Renderer environment terfilter tidak ditemukan")
 else:
     render_text = renderer.read_text()
-    for token in ("CLOUDFLARE_", "CKAN_ADMIN_BASIC_AUTH_", "NEXT_PUBLIC_", "CKANEXT__XLOADER__"):
+    for token in ("CLOUDFLARE_", "CKAN_ADMIN_BASIC_AUTH_", "NEXT_PUBLIC_", "CKANEXT__XLOADER__", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_"):
         if token not in render_text:
             errors.append(f"Renderer tidak mengecualikan variabel edge sensitif {token}")
     else:
@@ -155,13 +155,15 @@ else:
                 "CKANEXT__XLOADER__API_TOKEN=sensitive-xloader-token\n"
                 "CKANEXT__XLOADER__JOBS_DB__URI=postgresql://ckan:secret@db/ckan\n"
                 "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test\n"
+                "CKAN_REVALIDATE_SECRET=sensitive-revalidate-secret\n"
+                "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL=http://nextjs:3000/api/internal/ckan/revalidate\n"
             )
             result = subprocess.run([sys.executable, str(renderer), str(source), str(output)], capture_output=True, text=True)
             if result.returncode != 0:
                 errors.append("Renderer env CKAN gagal pada smoke test: " + result.stderr.strip())
             else:
                 generated = output.read_text()
-                for secret in ("CLOUDFLARE_TUNNEL_TOKEN", "CKAN_ADMIN_BASIC_AUTH_PASSWORD", "CKAN_ADMIN_BASIC_AUTH_HASH", "NEXT_PUBLIC_SITE_URL", "PUBLIC_SITE_ORIGIN", "CKANEXT__XLOADER__API_TOKEN", "CKANEXT__XLOADER__JOBS_DB__URI"):
+                for secret in ("CLOUDFLARE_TUNNEL_TOKEN", "CKAN_ADMIN_BASIC_AUTH_PASSWORD", "CKAN_ADMIN_BASIC_AUTH_HASH", "NEXT_PUBLIC_SITE_URL", "PUBLIC_SITE_ORIGIN", "CKANEXT__XLOADER__API_TOKEN", "CKANEXT__XLOADER__JOBS_DB__URI", "CKAN_REVALIDATE_SECRET", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL"):
                     if re.search(rf"^{secret}=", generated, re.M):
                         errors.append(f"Renderer env membocorkan variabel edge {secret} ke service CKAN")
                 if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test" not in generated or output.stat().st_mode & 0o777 != 0o600:

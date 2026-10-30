@@ -236,6 +236,32 @@ test("CKAN-native dataset is rendered on the public catalog and detail page", as
     page.getByRole("heading", { name: "Riwayat perubahan CKAN" }),
   ).toBeVisible();
   await expect(page.getByText("Metadata diperbarui").first()).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Data Sekolah CSV" }),
+  ).toBeVisible();
+  await expect(page.getByText("SMP Negeri 1 Sengkang")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Akses API dataset" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/package_show\?id=data-sekolah-wajo/),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/datastore_search\?resource_id=resource-sekolah/),
+  ).toBeVisible();
+});
+
+test("CSV preview remains visible before DataStore indexing and uses a bounded file preview", async ({
+  page,
+}) => {
+  await page.goto("/dataset/data-sekolah-wajo");
+  await expect(
+    page.getByRole("heading", { name: "Data Sekolah Menunggu Indeks" }),
+  ).toBeVisible();
+  await expect(page.getByText("SD Negeri 2 Sengkang")).toBeVisible();
+  await expect(
+    page.getByText(/Pratinjau sementara dibaca langsung dari berkas CSV/),
+  ).toBeVisible();
 });
 
 test("CKAN DataStore powers the public indicator listing and chart page", async ({
@@ -521,16 +547,20 @@ test("same-origin Action API is read-only and marked noindex", async ({
   expect(packageDetail.headers()["cache-control"]).toContain("no-store");
 
   const activity = await request.get(
-    "/api/3/action/package_activity_list?id=data-sekolah-wajo&include_data=false",
+    "/api/3/action/package_activity_list?id=data-sekolah-wajo&limit=8&offset=0",
   );
   expect(activity.ok()).toBeTruthy();
   expect(activity.headers()["cache-control"]).toContain("no-store");
   expect((await activity.json()).success).toBe(true);
-  const activityData = await request.get(
+  const activitySnapshot = await request.get(
+    "/api/3/action/package_activity_list?id=data-sekolah-wajo&include_hidden_activity=true",
+  );
+  expect(activitySnapshot.status()).toBe(400);
+  expect((await activitySnapshot.json()).error.__type).toBe("Validation Error");
+  const legacyActivityParam = await request.get(
     "/api/3/action/package_activity_list?id=data-sekolah-wajo&include_data=true",
   );
-  expect(activityData.status()).toBe(400);
-  expect((await activityData.json()).error.__type).toBe("Validation Error");
+  expect(legacyActivityParam.status()).toBe(400);
 
   const resource = await request.get(
     "/api/3/action/resource_show?id=resource-ipm",
@@ -549,6 +579,17 @@ test("same-origin Action API is read-only and marked noindex", async ({
   expect(mutation.headers()["x-robots-tag"]).toContain("noindex");
   const post = await request.post("/api/3/action/package_search");
   expect(post.status()).toBe(404);
+});
+
+test("internal CKAN cache revalidation webhook rejects unsigned public requests", async ({
+  request,
+}) => {
+  const response = await request.post("/api/internal/ckan/revalidate", {
+    data: { event: "manual.revalidate", event_id: "public-forgery" },
+  });
+  expect([401, 503]).toContain(response.status());
+  expect(response.headers()["cache-control"]).toContain("no-store");
+  expect(response.headers()["x-robots-tag"]).toContain("noindex");
 });
 
 test("public API omits private resource metadata embedded in a public package", async ({

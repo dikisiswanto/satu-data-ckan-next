@@ -372,14 +372,95 @@ function ResourceChart({ rows, columns, resourceId }) {
   );
 }
 
-export function DatasetResourcePreview({ datasetName, resource }) {
+export function DatasetResourcePreview({
+  datasetName,
+  resource,
+  datastoreActive = true,
+}) {
   const [page, setPage] = useState(1);
   const [view, setView] = useState("table");
   const previewSectionRef = useRef(null);
   const endpoint = `/api/3/action/datastore_search?resource_id=${encodeURIComponent(resource.id)}`;
+  const fallbackEndpoint = `/api/public/resource-preview?resource_id=${encodeURIComponent(resource.id)}&limit=${PAGE_SIZE}`;
   const offset = Math.min((page - 1) * PAGE_SIZE, MAX_DATASTORE_OFFSET);
   const requestUrl = `${endpoint}&limit=${PAGE_SIZE}&offset=${offset}`;
+  const resourceFormat = [
+    resource.format,
+    resource.mimetype,
+    resource.name,
+    resource.url,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const supportsCsvFallback =
+    /(?:^|[./;\s_-])(csv|tsv)(?:$|[;\s?#._-])/i.test(resourceFormat) ||
+    /\.(csv|tsv)(?:[?#]|$)/i.test(resourceFormat);
+  const resourceStatusQuery = useQuery({
+    enabled: !datastoreActive,
+    queryKey: publicQueryKeys.resourceStatus(resource.id),
+    queryFn: async ({ signal }) => {
+      const response = await fetch(
+        `/api/3/action/resource_show?id=${encodeURIComponent(resource.id)}`,
+        {
+          cache: "no-store",
+          signal,
+          headers: { Accept: "application/json" },
+        },
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.success !== true || !payload?.result) {
+        throw new Error(
+          payload?.error?.message || `resource_status_http_${response.status}`,
+        );
+      }
+      return payload.result;
+    },
+    staleTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchInterval: (query) => {
+      if (
+        query.state.status === "error" ||
+        query.state.data?.datastore_active === true
+      )
+        return false;
+      return query.state.dataUpdateCount < 7 ? 12_000 : false;
+    },
+  });
+  const isDatastoreActive =
+    datastoreActive || resourceStatusQuery.data?.datastore_active === true;
+  const fallbackPreviewQuery = useQuery({
+    enabled: !isDatastoreActive && supportsCsvFallback,
+    queryKey: publicQueryKeys.resourceRows(
+      datasetName,
+      `${resource.id}:csv-fallback`,
+      1,
+      PAGE_SIZE,
+    ),
+    queryFn: async ({ signal }) => {
+      const response = await fetch(fallbackEndpoint, {
+        cache: "no-store",
+        signal,
+        headers: { Accept: "application/json" },
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.success !== true || !payload?.result) {
+        const error = new Error(
+          payload?.error?.message || `csv_preview_http_${response.status}`,
+        );
+        error.status = response.status;
+        throw error;
+      }
+      return payload.result;
+    },
+    staleTime: 10_000,
+    gcTime: 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
   const previewQuery = useQuery({
+    enabled: isDatastoreActive,
     queryKey: publicQueryKeys.resourceRows(
       datasetName,
       resource.id,
@@ -413,12 +494,25 @@ export function DatasetResourcePreview({ datasetName, resource }) {
     },
     retryDelay: (_failureCount, error) => error.retryAfterMs ?? 1_000,
   });
-  const result = previewQuery.data?.result || null;
-  const state = previewQuery.isPending
-    ? "loading"
-    : previewQuery.isError
-      ? "error"
-      : "ready";
+  const fallbackResult =
+    fallbackPreviewQuery.data?.state === "ready"
+      ? fallbackPreviewQuery.data
+      : null;
+  const isFallback = Boolean(fallbackResult && !isDatastoreActive);
+  const result = isDatastoreActive
+    ? previewQuery.data?.result || null
+    : fallbackResult;
+  const state = isDatastoreActive
+    ? previewQuery.isPending
+      ? "loading"
+      : previewQuery.isError
+        ? "error"
+        : "ready"
+    : isFallback
+      ? "ready"
+      : fallbackPreviewQuery.isPending
+        ? "loading"
+        : "not-indexed";
   const rows = Array.isArray(result?.records) ? result.records : [];
   const columns = (Array.isArray(result?.fields) ? result.fields : [])
     .filter((field) => field?.id && field.id !== "_id")
@@ -428,14 +522,16 @@ export function DatasetResourcePreview({ datasetName, resource }) {
       description: field.info?.notes || field.info?.description || "",
       type: field.type,
     }));
-  const total = Number(result?.total || 0);
-  const totalPages = Math.max(
-    1,
-    Math.min(
-      Math.ceil(total / PAGE_SIZE),
-      Math.floor(MAX_DATASTORE_OFFSET / PAGE_SIZE) + 1,
-    ),
-  );
+  const total = Number(result?.total || rows.length || 0);
+  const totalPages = isFallback
+    ? 1
+    : Math.max(
+        1,
+        Math.min(
+          Math.ceil(total / PAGE_SIZE),
+          Math.floor(MAX_DATASTORE_OFFSET / PAGE_SIZE) + 1,
+        ),
+      );
   const visibleRows = rows;
   const changePage = (nextPage) => {
     setPage(nextPage);
@@ -480,6 +576,13 @@ export function DatasetResourcePreview({ datasetName, resource }) {
             <ExternalLink size={14} aria-hidden="true" />
           </a>
         </div>
+        {isFallback ? (
+          <p className="mt-3 rounded-lg bg-blue-50 px-3 py-2 text-xs leading-5 text-blue-900">
+            Pratinjau sementara dibaca langsung dari berkas CSV/TSV (maksimal 1
+            MB dan 25 baris awal). DataStore akan menyediakan pencarian dan
+            pagination penuh setelah proses indeks selesai.
+          </p>
+        ) : null}
         <div
           className="mt-4 inline-flex rounded-lg border border-line bg-slate-50 p-1"
           role="group"
@@ -505,7 +608,39 @@ export function DatasetResourcePreview({ datasetName, resource }) {
       </div>
 
       <div className="p-4 sm:p-5">
-        {state === "loading" ? (
+        {state === "not-indexed" ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+            <p className="font-semibold">
+              Pratinjau lengkap sedang menunggu DataStore.
+            </p>
+            <p className="mt-1">
+              Berkas sumber tersedia untuk diunduh. Untuk format spreadsheet,
+              pengelola perlu memastikan antrean XLoader dan indeks DataStore
+              selesai diproses. Untuk CSV/TSV yang tidak dapat dibaca langsung,
+              pratinjau akan tersedia setelah indeks siap.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <span className="text-xs text-amber-800" role="status">
+                {resourceStatusQuery.isFetching ||
+                fallbackPreviewQuery.isFetching
+                  ? "Memeriksa status…"
+                  : resourceStatusQuery.dataUpdateCount > 6
+                    ? "Belum terindeks. Pengelola perlu memeriksa antrean XLoader."
+                    : "Pemeriksaan otomatis aktif."}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  resourceStatusQuery.refetch();
+                  fallbackPreviewQuery.refetch();
+                }}
+                className="font-semibold underline underline-offset-4"
+              >
+                Periksa lagi
+              </button>
+            </div>
+          </div>
+        ) : state === "loading" ? (
           <p
             className="flex items-center gap-2 py-4 text-sm text-muted"
             role="status"
@@ -522,9 +657,8 @@ export function DatasetResourcePreview({ datasetName, resource }) {
             className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"
             role="alert"
           >
-            Pratinjau tabel belum tersedia. Berkas ini mungkin belum disiapkan
-            untuk ditampilkan sebagai tabel atau belum tersedia untuk akses
-            publik.{" "}
+            DataStore belum menyediakan pratinjau untuk berkas ini. Pengelola
+            perlu memeriksa status XLoader dan izin DataStore.{" "}
             <button
               type="button"
               className="ml-1 font-semibold underline underline-offset-4"
@@ -625,26 +759,30 @@ export function DatasetResourcePreview({ datasetName, resource }) {
               <p className="text-muted" aria-live="polite" aria-atomic="true">
                 {total === 0
                   ? "Belum ada baris"
-                  : `Menampilkan ${offset + 1}–${offset + rows.length} dari ${total.toLocaleString("id-ID")} baris data`}
+                  : isFallback
+                    ? `Menampilkan ${rows.length} baris awal dari berkas sumber`
+                    : `Menampilkan ${offset + 1}–${offset + rows.length} dari ${total.toLocaleString("id-ID")} baris data`}
               </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => changePage(Math.max(1, page - 1))}
-                  disabled={page <= 1}
-                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-white px-3 font-medium disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <ChevronLeft size={15} aria-hidden="true" /> Sebelumnya
-                </button>
-                <button
-                  type="button"
-                  onClick={() => changePage(Math.min(totalPages, page + 1))}
-                  disabled={page >= totalPages}
-                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-white px-3 font-medium disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Berikutnya <ChevronRight size={15} aria-hidden="true" />
-                </button>
-              </div>
+              {!isFallback ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => changePage(Math.max(1, page - 1))}
+                    disabled={page <= 1}
+                    className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-white px-3 font-medium disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ChevronLeft size={15} aria-hidden="true" /> Sebelumnya
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => changePage(Math.min(totalPages, page + 1))}
+                    disabled={page >= totalPages}
+                    className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-white px-3 font-medium disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Berikutnya <ChevronRight size={15} aria-hidden="true" />
+                  </button>
+                </div>
+              ) : null}
             </div>
           </>
         )}

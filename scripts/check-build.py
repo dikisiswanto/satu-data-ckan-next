@@ -86,11 +86,12 @@ def main() -> None:
             assert compiled.is_file() and compiled.stat().st_size > 0
             extension_output = locale_root / "wajo-theme-i18n"
             compiled_domains = compiler.compile_extension_catalogs(catalog_path, extension_output)
-            assert {path.name for path in compiled_domains} == {"ckanext-harvest.mo", "ckanext-pages.mo"}
+            assert {path.name for path in compiled_domains} == {"ckanext-dcat.mo", "ckanext-harvest.mo", "ckanext-pages.mo"}
             import gettext
             for domain, msgid, msgstr in (
                 ("ckanext-harvest", "Harvest Sources", "Sumber pengambilan data"),
                 ("ckanext-pages", "Add Page", "Tambah halaman"),
+                ("ckanext-dcat", "Publisher name", "Nama penerbit"),
             ):
                 with (extension_output / "id/LC_MESSAGES" / f"{domain}.mo").open("rb") as mo_file:
                     domain_translations = gettext.GNUTranslations(mo_file)
@@ -147,9 +148,11 @@ def main() -> None:
         assert "wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin" in (ckan / "theme/setup.py").read_text()
         assert "wajo_harvest_i18n = ckanext.wajo_theme.plugin:WajoHarvestTranslationPlugin" in (ckan / "theme/setup.py").read_text()
         assert "wajo_pages_i18n = ckanext.wajo_theme.plugin:WajoPagesTranslationPlugin" in (ckan / "theme/setup.py").read_text()
+        assert "wajo_dcat_i18n = ckanext.wajo_theme.plugin:WajoDcatTranslationPlugin" in (ckan / "theme/setup.py").read_text()
         assert (ckan / "theme/ckanext/wajo_theme/templates/base.html").is_file()
         assert (ckan / "theme/ckanext/wajo_theme/templates/header.html").is_file()
         assert (ckan / "theme/ckanext/wajo_theme/assets/css/wajo-theme.css").is_file()
+        assert (ckan / "theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css").is_file()
         assert (ckan / "theme/ckanext/wajo_theme/public/logo-kabupaten-wajo.webp").is_file()
         assert (ckan / "schemas/dataset.yaml").is_file()
         assert "2.12.1" in result, "generated Dockerfile should use the patch-pinned official base image"
@@ -198,13 +201,17 @@ def main() -> None:
                 "ckanext/wajo_theme/templates/header.html",
                 "ckanext/wajo_theme/templates/page.html",
                 "ckanext/wajo_theme/templates/wajo_theme/dashboard.html",
+                "ckanext/wajo_theme/templates/wajo_theme/data_preview.html",
+                "ckanext/wajo_theme/templates/wajo_theme/icon.html",
                 "ckanext/wajo_theme/templates/wajo_theme/sidebar.html",
                 "ckanext/wajo_theme/assets/css/wajo-theme.css",
+                "ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
                 "ckanext/wajo_theme/assets/webassets.yml",
                 "ckanext/wajo_theme/public/logo-kabupaten-wajo.webp",
                 "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po",
                 "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-harvest.po",
                 "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-pages.po",
+                "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-dcat.po",
             }
             missing_theme_files = required_theme_files - wheel_files
             assert not missing_theme_files, f"Wajo theme wheel is missing files: {sorted(missing_theme_files)}"

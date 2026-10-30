@@ -7,5 +7,6 @@ if [[ "${CKAN_SKIP_EXTENSION_MIGRATIONS:-false}" == "true" ]]; then
   exit 0
 fi
 
+ckan -c /srv/app/ckan.ini db upgrade -p activity
 ckan -c /srv/app/ckan.ini db upgrade -p pages
 ckan -c /srv/app/ckan.ini db upgrade -p harvest
