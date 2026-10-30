@@ -63,17 +63,17 @@ jobs:
             deploy/ckan/docker-compose.manual.yml \
             deploy/ckan/schemas/dataset.yaml \
             .github/workflows/ci.yml
-          bash -n deploy/ckan/bootstrap-upstream.sh deploy/ckan/compose.sh deploy/ckan/sync-ckan-base-source.sh deploy/ckan/prepare-ckan-base.sh deploy/ckan/enable-xloader.sh deploy/ckan/initialize-extensions.sh deploy/ckan/apply-datastore-permissions.sh
+          bash -n scripts/check-static.sh deploy/ckan/bootstrap-upstream.sh deploy/ckan/compose.sh deploy/ckan/sync-ckan-base-source.sh deploy/ckan/prepare-ckan-base.sh deploy/ckan/enable-xloader.sh deploy/ckan/initialize-extensions.sh deploy/ckan/apply-datastore-permissions.sh
           python3 scripts/check-build.py
           python3 - <<'PY'
           import ast
           from pathlib import Path
-          for name in ('deploy/ckan/configure-upstream-extensions.py', 'deploy/ckan/install-pages.py', 'deploy/ckan/render-upstream-env.py', 'deploy/ckan/sync-env.py', 'scripts/check-build.py', 'scripts/check-plugins-config.py', 'scripts/check-theme.py', 'scripts/check-base.py', 'scripts/check-plugins.py', 'scripts/check-env.py'):
+          for name in ('deploy/ckan/configure-upstream-extensions.py', 'deploy/ckan/install-pages.py', 'deploy/ckan/render-upstream-env.py', 'deploy/ckan/sync-env.py', 'scripts/check-ci.py', 'scripts/check-build.py', 'scripts/check-plugins-config.py', 'scripts/check-theme.py', 'scripts/check-base.py', 'scripts/check-plugins.py', 'scripts/check-env.py'):
               ast.parse(Path(name).read_text())
               print(f'valid Python: {name}')
           PY
-      - name: Ensure no legacy application remains
-        run: npm run check:static
+      - name: Run shared static repository checks
+        run: bash scripts/check-static.sh
   ckan-extension-image-smoke:
     name: Smoke-test CKAN extensions on the official CKAN 2.12.1 base build
     runs-on: ubuntu-latest

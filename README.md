@@ -129,7 +129,7 @@ npm run build
 npm run security:check
 ```
 
-`npm run check:static` menjalankan pemeriksaan struktur dan integrasi tanpa ESLint. `npm run check` menjalankan pemeriksaan tersebut sekaligus ESLint.
+`bash scripts/check-static.sh` menjalankan pemeriksaan struktur dan integrasi tanpa bergantung pada permission executable. `npm run check:static` memanggil pemeriksaan yang sama, sedangkan `npm run check` menambahkan ESLint.
 
 E2E publik menggunakan CKAN Action API mock. Smoke test image extension dijalankan melalui GitHub Actions. Pengujian visual CKAN Admin tetap perlu dilakukan pada instance yang berjalan menggunakan akun sysadmin dan akun editor.
 

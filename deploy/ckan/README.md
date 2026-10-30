@@ -171,7 +171,7 @@ Sebelum menyatakan UI admin siap produksi, verifikasi melalui browser desktop da
 
 Periksa juga `https://ckan.data.wajokab.go.id/logo-kabupaten-wajo.webp` harus merespons `200` dengan `Content-Type: image/webp`, dan asset CSS hasil WebAssets harus merespons `200`. Bila logo 404, pastikan `CKAN__SITE_LOGO=/logo-kabupaten-wajo.webp`; `add_public_directory()` memang mengekspos isi folder `public` pada URL root, bukan di bawah `/base/`.
 
-Validasi source yang tersedia: `npm run check:static` menjalankan guard theme, packaging overlay, route publik, API contract, dan pemeriksaan CSS. `npm run check` menjalankan pemeriksaan statis tersebut sekaligus ESLint. `npm run test`, `npm run test:e2e`, dan `npm run build` menguji aplikasi publik Next.js. CI smoke image memasang package theme lokal sebelum memeriksa entry point. Pengujian visual semua halaman CKAN tetap wajib dilakukan pada container CKAN yang benar-benar berjalan; pemeriksaan source/CI tidak menggantikan browser acceptance test.
+Validasi source yang tersedia: `bash scripts/check-static.sh` menjalankan guard theme, packaging overlay, route publik, API contract, dan pemeriksaan CSS. `npm run check:static` memakai entry point yang sama; `npm run check` menambahkan ESLint. `npm run test`, `npm run test:e2e`, dan `npm run build` menguji aplikasi publik Next.js. CI smoke image memasang package theme lokal sebelum memeriksa entry point. Pengujian visual semua halaman CKAN tetap wajib dilakukan pada container CKAN yang benar-benar berjalan; pemeriksaan source/CI tidak menggantikan browser acceptance test.
 
 ## 8. Persiapan data dan extension
 
