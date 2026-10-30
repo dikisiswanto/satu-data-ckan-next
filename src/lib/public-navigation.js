@@ -7,6 +7,7 @@ import {
   Images,
   BookOpen,
   LifeBuoy,
+  Newspaper,
 } from "lucide-react";
 
 /** Single source of truth for the public portal's primary routes. */
@@ -32,6 +33,12 @@ export const publicNavigation = [
     match: ["/publikasi"],
   },
   {
+    href: "/informasi",
+    label: "Informasi",
+    icon: Newspaper,
+    match: ["/informasi", "/berita"],
+  },
+  {
     href: "/organisasi",
     label: "Perangkat Daerah",
     desktopLabel: "OPD",
@@ -42,4 +49,6 @@ export const publicNavigation = [
   { href: "/api-data", label: "API data", icon: Code2, match: ["/api-data"] },
 ];
 
-export const footerNavigation = publicNavigation.filter(({ href }) => href !== "/");
+export const footerNavigation = publicNavigation.filter(
+  ({ href }) => href !== "/",
+);

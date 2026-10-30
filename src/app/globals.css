@@ -9,3 +9,20 @@
 @import "./styles/quality-pass.css";
 @import "./styles/public-responsive.css";
 @plugin "@tailwindcss/forms";
+
+/* Editorial pages are rendered by Next.js from the CKAN Pages headless CMS. */
+.cms-page-body-policy {
+  border-left: 3px solid var(--color-primary);
+  padding-left: clamp(1rem, 3vw, 1.75rem);
+}
+
+.cms-page-body-guide .cms-markdown ol > li::marker {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.cms-page-body-article .cms-markdown > p:first-child {
+  font-size: 1.0625rem;
+  line-height: 1.9;
+  color: var(--color-ink);
+}

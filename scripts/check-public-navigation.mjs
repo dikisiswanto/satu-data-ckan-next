@@ -25,6 +25,7 @@ const apiPage = readFileSync(
   path.join(root, "src/app/(public)/api-data/page.jsx"),
   "utf8",
 );
+const robots = readFileSync(path.join(root, "src/app/robots.js"), "utf8");
 
 const routes = [...navSource.matchAll(/href:\s*"([^\"]+)"/g)].map(
   (match) => match[1],
@@ -62,6 +63,8 @@ for (const route of [
   "statistik",
   "infografik",
   "publikasi",
+  "informasi",
+  "berita",
   "api-data",
   "bantuan",
 ]) {
@@ -80,6 +83,10 @@ if (
   errors.push(
     "Halaman API harus menggunakan komponen UI bersama, contoh kode, dan navigasi ke halaman terkait.",
   );
+}
+for (const route of ["/informasi", "/berita"]) {
+  if (!robots.includes(`"${route}"`))
+    errors.push(`robots.js harus mengizinkan indexing konten publik ${route}.`);
 }
 
 // Scan route literals across the public UI so links stay aligned with App Router pages.

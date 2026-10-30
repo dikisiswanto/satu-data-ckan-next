@@ -11,6 +11,8 @@ const routeLabels = {
   statistik: { label: "Statistik", detail: "Detail indikator" },
   infografik: { label: "Infografik", detail: "Detail infografik" },
   publikasi: { label: "Publikasi", detail: "Detail publikasi" },
+  informasi: { label: "Informasi", detail: "Detail informasi" },
+  berita: { label: "Berita dan artikel", detail: "Detail artikel" },
   "api-data": { label: "Dokumentasi API" },
   bantuan: { label: "Bantuan" },
 };
@@ -40,10 +42,22 @@ export function PublicBreadcrumbs() {
     >
       <ol className="page-container flex min-w-0 items-center gap-1.5 overflow-x-auto py-2.5 text-xs text-muted sm:gap-2 sm:py-3 sm:text-sm">
         {items.map((item, index) => (
-          <li key={`${item.label}-${index}`} className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            {index > 0 ? <ChevronRight size={14} className="text-muted/70" aria-hidden="true" /> : null}
+          <li
+            key={`${item.label}-${index}`}
+            className="flex shrink-0 items-center gap-1.5 sm:gap-2"
+          >
+            {index > 0 ? (
+              <ChevronRight
+                size={14}
+                className="text-muted/70"
+                aria-hidden="true"
+              />
+            ) : null}
             {item.current ? (
-              <span aria-current="page" className="max-w-[48vw] truncate font-semibold text-ink sm:max-w-none">
+              <span
+                aria-current="page"
+                className="max-w-[48vw] truncate font-semibold text-ink sm:max-w-none"
+              >
                 {item.label}
               </span>
             ) : (

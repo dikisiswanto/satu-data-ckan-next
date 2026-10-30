@@ -9,6 +9,7 @@ setup(
     package_data={
         "ckanext.wajo_theme": [
             "templates/*.html",
+            "templates/ckanext_pages/*.html",
             "assets/webassets.yml",
             "assets/css/*.css",
             "public/*",
@@ -16,6 +17,9 @@ setup(
     },
     zip_safe=False,
     entry_points={
-        "ckan.plugins": ["wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin"],
+        "ckan.plugins": [
+            "wajo_pages = ckanext.wajo_theme.plugin:WajoPagesSchemaPlugin",
+            "wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin",
+        ],
     },
 )

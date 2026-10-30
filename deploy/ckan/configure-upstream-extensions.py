@@ -42,7 +42,11 @@ COPY --chown=ckan:ckan extensions/requirements.txt /tmp/portal-ckan-extensions.t
 COPY --chown=ckan:ckan schemas/dataset.yaml /srv/app/ckanext-schemas/dataset.yaml
 COPY --chown=ckan:ckan docker-entrypoint.d/50-portal-extensions.sh /docker-entrypoint.d/50-portal-extensions.sh
 COPY --chown=ckan:ckan theme/ /tmp/portal-ckan-theme/
-RUN pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme \
+# The upstream base image may default to an unprivileged CKAN user. Install
+# extensions globally as root, then let the original USER ckan boundary below
+# restore the runtime identity.
+USER root
+RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme \
     && rm -f /tmp/portal-ckan-extensions.txt \
     && rm -rf /tmp/portal-ckan-theme
 
@@ -56,7 +60,7 @@ if marker in text:
         raise SystemExit("Could not find the USER ckan boundary after the generated extension block.")
     text = text[:start] + block + after_marker[next_user.start():]
 else:
-    # The upstream image installs packages as root before switching to ckan.
+    # Install extensions before the original runtime USER ckan boundary.
     matches = list(re.finditer(r'^USER\s+ckan(?:\s|$)', text, flags=re.M))
     if not matches:
         raise SystemExit("Could not find 'USER ckan' in upstream Dockerfile; refusing unsafe injection.")

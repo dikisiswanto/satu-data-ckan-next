@@ -9,7 +9,7 @@ IMAGE="ckan/ckan-base:2.12.1"
 EXPECTED_CKAN_REF="ckan-2.12.1"
 
 command -v docker >/dev/null 2>&1 || { echo "Docker diperlukan untuk membangun image dasar CKAN 2.12.1." >&2; exit 1; }
-"$ROOT/deploy/ckan/sync-ckan-base-source.sh"
+bash "$ROOT/deploy/ckan/sync-ckan-base-source.sh"
 
 source_value() {
   local key="$1"

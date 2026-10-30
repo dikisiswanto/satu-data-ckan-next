@@ -37,16 +37,19 @@ def main() -> None:
         result = dockerfile.read_text()
         assert result.count(MARKER) == 1, "generated Dockerfile block must be idempotent"
         assert result.count("COPY --chown=ckan:ckan extensions/requirements.txt") == 1
-        assert result.count("RUN pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt") == 1
-        assert result.count("USER ckan") == 1, "the original CKAN runtime user boundary must be preserved"
-        assert "ckanext-scheming==3.1.0" in (ckan / "extensions/requirements.txt").read_text()
-        assert "ckanext-pages==0.5.2" in (ckan / "extensions/requirements.txt").read_text()
+        assert result.count("RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt") == 1
+        assert sum(line.strip() == "USER root" for line in result.splitlines()) == 2, "root must be explicit for extension install, after the fixture's initial root user"
+        assert sum(line.strip() == "USER ckan" for line in result.splitlines()) == 1, "the original CKAN runtime user boundary must be preserved"
+        requirements = (ckan / "extensions/requirements.txt").read_text()
+        assert "ckanext-scheming==3.1.0" in requirements
+        assert "ckanext-pages @ https://codeload.github.com/ckan/ckanext-pages/tar.gz/28eba99ad85d3b9037f5aaddad1f083300c69041" in requirements
+        assert "ckanext-pages==0.5.2" not in requirements, "Pages must not be resolved from the unavailable PyPI pin"
         assert "ckanext-dcat==2.4.4" in (ckan / "extensions/requirements.txt").read_text()
         assert "ckanext-xloader==2.5.2" in (ckan / "extensions/requirements.txt").read_text()
         assert "ckanext-geoview==0.3.2" in (ckan / "extensions/requirements.txt").read_text()
         assert "ckanext-harvest==1.6.3" in (ckan / "extensions/requirements.txt").read_text()
         assert "theme/ /tmp/portal-ckan-theme/" in result, "custom theme source must be copied into the build"
-        assert "pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in result
+        assert "USER root\nRUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in result
         assert "wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin" in (ckan / "theme/setup.py").read_text()
         assert (ckan / "theme/ckanext/wajo_theme/templates/base.html").is_file()
         assert (ckan / "theme/ckanext/wajo_theme/templates/header.html").is_file()

@@ -278,6 +278,91 @@ const indicatorRecords = [
     source: "BPS Kabupaten Wajo",
   },
 ];
+const cmsPages = [
+  {
+    name: "tentang-satu-data",
+    title: "Tentang Satu Data Wajo",
+    page_type: "page",
+    private: false,
+    publish_date: "2026-10-01",
+    content:
+      "# Satu Data Wajo\n\nPortal ini menyediakan data resmi yang dapat ditemukan dan digunakan kembali.",
+    excerpt: "Mengenal Portal Satu Data Kabupaten Wajo.",
+    category: "Profil portal",
+    template_type: "landing",
+    featured: true,
+    show_in_menu: true,
+    menu_label: "Tentang",
+    menu_order: "1",
+    seo_title: "Tentang Portal Satu Data Wajo",
+    seo_description: "Profil dan tujuan Portal Satu Data Kabupaten Wajo.",
+    content_blocks: JSON.stringify([
+      {
+        type: "stats",
+        title: "Prinsip layanan",
+        items: [
+          { label: "Sumber", value: "Resmi", source: "Pengelola portal" },
+        ],
+      },
+      {
+        type: "dataset_links",
+        title: "Dataset contoh",
+        items: [{ slug: "data-sekolah-wajo", label: "Lihat dataset sekolah" }],
+      },
+      {
+        type: "cta",
+        title: "Jelajahi katalog",
+        description: "Temukan data publik Kabupaten Wajo.",
+        label: "Buka katalog",
+        href: "/dataset",
+      },
+    ]),
+  },
+  {
+    name: "warta-data-wajo",
+    title: "Warta Data Wajo",
+    page_type: "blog",
+    private: false,
+    publish_date: "2026-10-28",
+    content:
+      "# Warta Data Wajo\n\nPengelola memperkenalkan pembaruan portal data daerah.",
+    excerpt: "Pembaruan dan publikasi terbaru Portal Satu Data Wajo.",
+    category: "Kabar portal",
+    template_type: "article",
+    featured: true,
+    show_in_menu: false,
+    menu_order: "99",
+    og_image: "/uploads/page_images/cms-cover.png",
+    seo_title: "Warta Data Wajo",
+    seo_description: "Berita dan pembaruan data Kabupaten Wajo.",
+    content_blocks: JSON.stringify([
+      {
+        type: "rich_text",
+        title: "Catatan",
+        markdown: "Konten ini bersumber dari CKAN Pages.",
+      },
+    ]),
+  },
+  {
+    name: "artikel-terjadwal",
+    title: "Artikel Terjadwal",
+    page_type: "blog",
+    private: false,
+    publish_date: "2099-01-01",
+    content: "Belum terbit.",
+    excerpt: "Tidak boleh tampil sebelum tanggal publikasi.",
+  },
+  {
+    name: "halaman-internal",
+    title: "Halaman Internal",
+    page_type: "page",
+    private: true,
+    publish_date: "2026-10-01",
+    content: "Rahasia.",
+    excerpt: "Konten internal.",
+    og_image: "/uploads/page_images/private-doc.png",
+  },
+];
 
 function readExtra(pkg, key) {
   const directKey = key.startsWith("extras_")
@@ -437,6 +522,25 @@ function actionResult(action, params) {
   switch (action) {
     case "status_show":
       return { ckan_version: "2.12.1" };
+    case "ckanext_pages_list": {
+      const pageType = params.get("page_type") || "page";
+      const items = cmsPages.filter(
+        (item) => item.private !== true && item.page_type === pageType,
+      );
+      if (params.get("order_publish_date") === "true")
+        items.sort((left, right) =>
+          String(right.publish_date || "").localeCompare(
+            String(left.publish_date || ""),
+          ),
+        );
+      return items;
+    }
+    case "ckanext_pages_show": {
+      const page = cmsPages.find(
+        (item) => item.name === params.get("page") && item.private !== true,
+      );
+      return page || { __not_found: true };
+    }
     case "package_search": {
       let selected = packages.filter(
         (item) => item.state !== "deleted" && item.private !== true,
@@ -613,6 +717,20 @@ const server = createServer((request, response) => {
     response
       .writeHead(200)
       .end(JSON.stringify({ status: "ok", ckan_version: "2.12.1" }));
+    return;
+  }
+  if (url.pathname === "/uploads/page_images/cms-cover.png") {
+    const image = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p2sAAAAASUVORK5CYII=",
+      "base64",
+    );
+    response
+      .writeHead(200, {
+        "Content-Type": "image/png",
+        "Content-Length": image.length,
+        "Cache-Control": "no-store",
+      })
+      .end(image);
     return;
   }
   const match = url.pathname.match(/^\/api\/3\/action\/([a-z][a-z0-9_]*)$/);

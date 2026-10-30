@@ -16,6 +16,8 @@ export default function robots() {
           "/organisasi",
           "/bantuan",
           "/api-data",
+          "/informasi",
+          "/berita",
         ],
       },
     ],

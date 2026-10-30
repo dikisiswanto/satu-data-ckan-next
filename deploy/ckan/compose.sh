@@ -11,17 +11,17 @@ Gunakan satu file konfigurasi: .env.ckan
 
 Persiapan (sekali):
   cp .env.ckan.example .env.ckan
-  ./deploy/ckan/bootstrap-upstream.sh
+  bash ./deploy/ckan/bootstrap-upstream.sh
 
 Perintah:
-  ./deploy/ckan/compose.sh manual up -d --build                    # root CKAN host -> login form
-  ./deploy/ckan/compose.sh cloudflare up -d --build                # Tunnel + root CKAN host -> login form
-  ./deploy/ckan/compose.sh cloudflare-access up -d --build        # Tunnel + Cloudflare Access (optional)
-  ./deploy/ckan/compose.sh manual config
-  ./deploy/ckan/compose.sh manual ps
-  ./deploy/ckan/compose.sh manual logs -f ckan nextjs
-  ./deploy/ckan/compose.sh manual down
-  ./deploy/ckan/enable-xloader.sh manual  # setelah stack sehat
+  bash ./deploy/ckan/compose.sh manual up -d --build                    # root CKAN host -> login form
+  bash ./deploy/ckan/compose.sh cloudflare up -d --build                # Tunnel + root CKAN host -> login form
+  bash ./deploy/ckan/compose.sh cloudflare-access up -d --build        # Tunnel + Cloudflare Access (optional)
+  bash ./deploy/ckan/compose.sh manual config
+  bash ./deploy/ckan/compose.sh manual ps
+  bash ./deploy/ckan/compose.sh manual logs -f ckan nextjs
+  bash ./deploy/ckan/compose.sh manual down
+  bash ./deploy/ckan/enable-xloader.sh manual  # setelah stack sehat
 
 Gunakan tepat satu profil ingress: manual, cloudflare, ATAU cloudflare-access.
 CKAN_ADMIN_GATE_MODE=none (default) langsung menampilkan form login CKAN pada root host admin.
@@ -88,7 +88,7 @@ python3 "$ROOT/deploy/ckan/render-upstream-env.py" "$ENV_FILE" "$UPSTREAM/.env.g
 # The official upstream ckan/ckan-docker-base source is built locally before any Compose start.
 # This avoids relying on a Docker Hub 2.12.1 tag before its publication is confirmed.
 if [[ "${1:-}" == "up" ]]; then
-  "$ROOT/deploy/ckan/prepare-ckan-base.sh"
+  bash "$ROOT/deploy/ckan/prepare-ckan-base.sh"
 fi
 
 FILES=(

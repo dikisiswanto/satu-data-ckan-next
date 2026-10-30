@@ -4,7 +4,7 @@ Dokumen ini mendeskripsikan **facade API yang benar-benar diekspos oleh aplikasi
 
 ## Mulai di sini (tanpa harus menjadi developer)
 
-API adalah alamat yang bisa dibuka aplikasi lain untuk meminta data secara otomatis. Anda juga bisa mencoba contoh berikut langsung di browser:
+API adalah alamat yang bisa dibuka aplikasi lain untuk meminta data secara otomatis. Contoh request berikut dapat diuji langsung melalui browser:
 
 - **Cari dataset:** <https://data.wajokab.go.id/api/3/action/package_search?q=pendidikan&rows=5>
 - **Periksa layanan:** <https://data.wajokab.go.id/api/3/action/status_show>

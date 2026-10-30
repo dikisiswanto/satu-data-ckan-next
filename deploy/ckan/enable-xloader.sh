@@ -46,7 +46,7 @@ if [[ -z "$TOKEN" || "$TOKEN" == "NOT_SET" ]]; then
   echo "Membuat token XLoader melalui CKAN CLI (token tidak akan ditampilkan)..."
   # compose.sh also emits synchronization logs. Capture output and use only the
   # last non-empty CLI line; do not print the captured value to the terminal.
-  TOKEN_OUTPUT="$("$ROOT/deploy/ckan/compose.sh" "$PROFILE" exec -T ckan \
+  TOKEN_OUTPUT="$(bash "$ROOT/deploy/ckan/compose.sh" "$PROFILE" exec -T ckan \
     ckan -c /srv/app/ckan.ini user token add "$SYSADMIN" xloader -q)"
   TOKEN="$(printf '%s\n' "$TOKEN_OUTPUT" | awk 'NF { value=$NF } END { print value }' | tr -d '\r\t')"
   unset TOKEN_OUTPUT
@@ -82,6 +82,6 @@ else
 fi
 
 # Force the CKAN process and worker to load the same secret from .env.ckan.
-"$ROOT/deploy/ckan/compose.sh" "$PROFILE" up -d --force-recreate ckan xloader-worker
+bash "$ROOT/deploy/ckan/compose.sh" "$PROFILE" up -d --force-recreate ckan xloader-worker
 chmod 600 "$ENV_FILE"
 echo "XLoader disiapkan. Token tersimpan privat di .env.ckan dan tidak dicetak ke terminal."

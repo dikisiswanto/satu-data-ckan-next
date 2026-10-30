@@ -61,6 +61,15 @@ for (const field of [
 
 const required = [
   "src/lib/ckan/client.js",
+  "src/lib/cms/pages.js",
+  "src/components/cms/markdown-content.jsx",
+  "src/components/cms/content-blocks.jsx",
+  "src/components/cms/content-card.jsx",
+  "src/app/(public)/informasi/page.jsx",
+  "src/app/(public)/informasi/[slug]/page.jsx",
+  "src/app/(public)/berita/page.jsx",
+  "src/app/(public)/berita/[slug]/page.jsx",
+  "src/app/api/cms/media/[filename]/route.js",
   "src/lib/data/public.js",
   "src/lib/data/organizations.js",
   "src/lib/data/public-indicators.js",
@@ -75,8 +84,8 @@ const required = [
   "deploy/ckan/theme/ckanext/wajo_theme/templates/header.html",
   "deploy/ckan/theme/ckanext/wajo_theme/assets/webassets.yml",
   "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css",
-  "scripts/check-ckan-build-overlay.py",
-  "scripts/check-ckan-base-source.py",
+  "scripts/check-build.py",
+  "scripts/check-base.py",
   "deploy/ckan/sync-ckan-base-source.sh",
   "deploy/ckan/prepare-ckan-base.sh",
   "src/app/api/3/action/[...action]/route.js",
@@ -90,7 +99,10 @@ const required = [
   "src/app/(public)/publikasi/[slug]/page.jsx",
   "src/components/indicator-trend-chart.jsx",
   "tests/unit/ckan-public-content.test.js",
+  "tests/unit/ckan-cms.test.js",
   "tests/unit/geojson-preview.test.js",
+  "tests/e2e/public-portal.spec.js",
+  "docs/CMS.md",
   "src/lib/geo/geojson-preview.js",
   "src/components/geojson-resource-preview.jsx",
   "public/logo-satu-data-indonesia.svg",
@@ -100,8 +112,8 @@ const required = [
   "deploy/ckan/compose.sh",
   "deploy/ckan/render-upstream-env.py",
   "deploy/ckan/sync-env.py",
-  "scripts/check-env-single-source.py",
-  "scripts/check-ui-css.mjs",
+  "scripts/check-env.py",
+  "scripts/check-css.mjs",
   "deploy/ckan/enable-xloader.sh",
   "deploy/ckan/apply-datastore-permissions.sh",
   "deploy/ckan/docker-compose.override.yml",
@@ -218,8 +230,8 @@ const checks = [
   ],
   [
     "deploy/ckan/extensions/requirements.txt",
-    /ckanext-scheming==3\.1\.0[\s\S]*ckanext-pages==0\.5\.2[\s\S]*ckanext-dcat==2\.4\.4[\s\S]*ckanext-xloader==2\.5\.2[\s\S]*ckanext-geoview==0\.3\.2[\s\S]*ckanext-harvest==1\.6\.3/,
-    "Extension CKAN metadata, interoperabilitas DCAT, GeoView, dan Harvest harus dipatok.",
+    /ckanext-scheming==3\.1\.0[\s\S]*ckanext-pages @ https:\/\/codeload\.github\.com\/ckan\/ckanext-pages\/tar\.gz\/28eba99ad85d3b9037f5aaddad1f083300c69041[\s\S]*ckanext-dcat==2\.4\.4[\s\S]*ckanext-xloader==2\.5\.2[\s\S]*ckanext-geoview==0\.3\.2[\s\S]*ckanext-harvest==1\.6\.3/,
+    "Extension CKAN harus dipatok; Pages memakai commit upstream yang memuat dukungan CKAN 2.12.",
   ],
   [
     "src/proxy.js",
@@ -392,6 +404,149 @@ const checks = [
     "CI harus memvalidasi instalasi, unit test, E2E, dan production build.",
   ],
 ];
+const cmsChecks = [
+  [
+    "src/lib/cms/pages.js",
+    /import \"server-only\"[\s\S]*ckanext_pages_list[\s\S]*ckanext_pages_show[\s\S]*revalidate: 0/,
+    "CMS harus dipanggil server-side lewat action CKAN Pages dan membaca tanpa cache agar perubahan visibility segera berlaku.",
+  ],
+  [
+    "src/lib/cms/pages.js",
+    /parseCmsBoolean[\s\S]*isCmsRecordPublished[\s\S]*publish_date[\s\S]*template_type[\s\S]*show_in_menu[\s\S]*content_blocks/,
+    "Adapter CMS harus menormalisasi status privasi, jadwal publikasi, field editorial, dan block JSON.",
+  ],
+  [
+    "deploy/ckan/bootstrap-upstream.sh",
+    /CKANEXT__PAGES__ALLOW_HTML.*false[\s\S]*CKANEXT__PAGES__EDITOR.*markdown/,
+    "CKAN Pages harus konsisten memakai Markdown dan tidak mengaktifkan HTML mentah untuk renderer publik.",
+  ],
+  [
+    "src/lib/cms/pages.js",
+    /normalizeCmsSlug[\s\S]*publicCmsImageUrl[\s\S]*https:/,
+    "Slug dan URL gambar CMS harus dibatasi sebelum masuk ke renderer publik.",
+  ],
+  [
+    "src/app/api/3/action/[...action]/route.js",
+    /const ACTIONS = new Set\([\s\S]*package_search[\s\S]*datastore_search/,
+    "Facade API umum harus tetap memakai allowlist action CKAN yang eksplisit.",
+  ],
+  [
+    "src/app/api/cms/media/[filename]/route.js",
+    /recordReferencesImage[\s\S]*MAX_IMAGE_BYTES[\s\S]*matchesImageSignature[\s\S]*no-store/,
+    "Proxy media CMS harus memeriksa referensi konten publik, ukuran, signature gambar, dan no-store.",
+  ],
+  [
+    "src/components/cms/markdown-content.jsx",
+    /publicCmsImageUrl[\s\S]*safeHref[\s\S]*export function MarkdownContent/,
+    "Renderer Markdown harus memakai sanitasi URL dan tidak mengeksekusi HTML mentah.",
+  ],
+  [
+    "src/components/cms/content-blocks.jsx",
+    /getPublishedDatasetBySlugResult[\s\S]*type === \"dataset_links\"/,
+    "Renderer CMS harus menyediakan tautan dataset yang diverifikasi sebagai data publik.",
+  ],
+  [
+    "src/app/(public)/informasi/page.jsx",
+    /getPublicCmsNavigationResult[\s\S]*Navigasi informasi[\s\S]*featuredPages/,
+    "Hub informasi harus memakai label dan urutan navigasi yang dikelola melalui CKAN Pages.",
+  ],
+  [
+    "src/app/(public)/berita/[slug]/page.jsx",
+    /NewsArticle[\s\S]*datePublished/,
+    "Detail berita harus menyediakan JSON-LD NewsArticle dan tanggal terbit.",
+  ],
+  [
+    "src/app/sitemap.js",
+    /getPublicCmsPagesResult[\s\S]*getPublicCmsBlogPostsResult[\s\S]*cmsPageEntries[\s\S]*cmsBlogEntries/,
+    "Sitemap harus memuat hanya halaman/berita CMS publik.",
+  ],
+  [
+    "src/app/robots.js",
+    /\"\/informasi\"[\s\S]*\"\/berita\"/,
+    "Robots harus mengizinkan crawler mengindeks halaman CMS publik.",
+  ],
+  [
+    "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
+    /IPagesSchema[\s\S]*class WajoPagesSchemaPlugin[\s\S]*content_blocks[\s\S]*show_in_menu/,
+    "CKAN Admin harus menyediakan schema field editorial melalui IPagesSchema.",
+  ],
+  [
+    "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/base_form.html",
+    /extra_pages_form[\s\S]*seo_title[\s\S]*content_blocks/,
+    "Form Pages admin harus memuat field SEO dan JSON content blocks.",
+  ],
+  [
+    "deploy/ckan/bootstrap-upstream.sh",
+    /scheming_datasets\", \"wajo_pages\", \"pages\"[\s\S]*plugins.append\(\"wajo_theme\"\)/,
+    "Bootstrap harus memuat schema Wajo sebelum Pages dan template Wajo setelah Pages.",
+  ],
+  [
+    "scripts/e2e-mock-ckan.mjs",
+    /ckanext_pages_list[\s\S]*ckanext_pages_show/,
+    "E2E mock harus memodelkan kedua Action API CKAN Pages.",
+  ],
+  [
+    "scripts/e2e-mock-ckan.mjs",
+    /artikel-terjadwal[\s\S]*halaman-internal/,
+    "E2E mock harus memuat fixture artikel terjadwal dan halaman privat.",
+  ],
+  [
+    "tests/e2e/public-portal.spec.js",
+    /CKAN Pages feeds the public information hub[\s\S]*CKAN Pages blog posts[\s\S]*private and not-yet-published/,
+    "E2E harus menguji CMS pages, blog, structured blocks, media, dan penolakan konten privat/terjadwal.",
+  ],
+];
+for (const [file, pattern, message] of cmsChecks) {
+  try {
+    const source = await readFile(path.join(root, file), "utf8");
+    if (!pattern.test(source)) errors.push(message);
+  } catch {
+    errors.push(`Tidak dapat membaca file pemeriksaan CMS: ${file}`);
+  }
+}
+const publicActionProxy = await readFile(
+  path.join(root, "src/app/api/3/action/[...action]/route.js"),
+  "utf8",
+);
+if (/ckanext_pages_(?:list|show)/.test(publicActionProxy)) {
+  errors.push(
+    "Action CKAN Pages hanya boleh dipanggil server-side, tidak boleh masuk allowlist facade browser publik.",
+  );
+}
+
+const nestedShellInvocations = [
+  [
+    "deploy/ckan/bootstrap-upstream.sh",
+    /bash "\$ROOT\/deploy\/ckan\/sync-ckan-base-source\.sh"/,
+    "Bootstrap harus memanggil sync-ckan-base-source.sh melalui Bash agar tidak bergantung pada executable bit.",
+  ],
+  [
+    "deploy/ckan/prepare-ckan-base.sh",
+    /bash "\$ROOT\/deploy\/ckan\/sync-ckan-base-source\.sh"/,
+    "Prepare CKAN base harus memanggil sync-ckan-base-source.sh melalui Bash.",
+  ],
+  [
+    "deploy/ckan/compose.sh",
+    /bash "\$ROOT\/deploy\/ckan\/prepare-ckan-base\.sh"/,
+    "Compose harus memanggil prepare-ckan-base.sh melalui Bash.",
+  ],
+  [
+    "deploy/ckan/enable-xloader.sh",
+    /bash "\$ROOT\/deploy\/ckan\/compose\.sh"/,
+    "XLoader harus memanggil compose.sh melalui Bash.",
+  ],
+];
+for (const [file, pattern, message] of nestedShellInvocations) {
+  try {
+    const source = await readFile(path.join(root, file), "utf8");
+    if (!pattern.test(source)) errors.push(message);
+  } catch {
+    errors.push(
+      `Tidak dapat membaca shell script untuk pemeriksaan permission: ${file}`,
+    );
+  }
+}
+
 for (const [file, pattern, message] of checks) {
   try {
     const source = await readFile(path.join(root, file), "utf8");
@@ -511,5 +666,5 @@ if (errors.length) {
   process.exit(1);
 }
 process.stdout.write(
-  "Pemeriksaan arsitektur CKAN/Next.js lulus: aset legacy dibersihkan dan indikator/infografik bersumber dari CKAN.\n",
+  "Pemeriksaan arsitektur CKAN/Next.js lulus: integrasi headless CMS CKAN Pages, keamanan konten/media, sitemap/robots, extension schema/form, API publik, indikator, dan deployment terverifikasi secara statis.\n",
 );

@@ -72,7 +72,7 @@ PYAUTH
 
 command -v git >/dev/null 2>&1 || { echo "git is required" >&2; exit 1; }
 # CKAN runtime image source: official ckan/ckan-docker-base, branch main, CKAN 2.12.1.
-"$ROOT/deploy/ckan/sync-ckan-base-source.sh"
+bash "$ROOT/deploy/ckan/sync-ckan-base-source.sh"
 if [[ ! -d "$UPSTREAM/.git" ]]; then
   mkdir -p "$(dirname "$UPSTREAM")"
   git clone --depth 1 https://github.com/ckan/ckan-docker.git "$UPSTREAM"
@@ -228,7 +228,7 @@ values = {}
 for line in lines:
     m = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)$', line)
     if m: values[m.group(1)] = m.group(2)
-weak = {"", "pass", "password", "changeme", "change_me", "change-me", "replace_me", "secret", "secret_key", "token", "admin", "postgres", "ckan", "datastore", "ckan_default", "ckandbpassword", "test1234", "admin1234"}
+weak = {"", "pass", "password", "changeme", "change_me", "change-me", "replace_me", "secret", "secret_key", "token", "admin", "postgres", "ckan", "datastore", "ckan_default", "ckandbpassword", "test1234", "admin1234", "generate_on_bootstrap"}
 
 def strong(key):
     value = values.get(key, "").strip().strip('"').strip("'")
@@ -267,12 +267,13 @@ for key in ("CKAN___API_TOKEN__JWT__ENCODE__SECRET", "CKAN___API_TOKEN__JWT__DEC
 # Enable CKAN's supported XLoader extension instead of the deprecated DataPusher service.
 # `envvars` stays last. The API token is created post-startup by enable-xloader.sh.
 plugin_raw = values.get("CKAN__PLUGINS", "").strip().strip('"').strip("'")
-portal_plugins = {"envvars", "wajo_theme", "scheming_datasets", "pages", "dcat", "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view", "geojson_view", "wmts_view", "esri_shapefile_view", "harvest", "ckan_harvester", "image_view", "text_view", "recline_view", "datastore", "xloader"}
+portal_plugins = {"envvars", "wajo_pages", "wajo_theme", "scheming_datasets", "pages", "dcat", "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view", "geojson_view", "wmts_view", "esri_shapefile_view", "harvest", "ckan_harvester", "image_view", "text_view", "recline_view", "datastore", "xloader"}
 plugins = [plugin for plugin in (plugin_raw.split() if plugin_raw else []) if plugin not in portal_plugins and plugin != "datapusher"]
-for plugin in ("scheming_datasets", "pages", "dcat", "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view", "geojson_view", "wmts_view", "esri_shapefile_view", "harvest", "ckan_harvester", "image_view", "text_view", "recline_view", "datastore", "xloader"):
+for plugin in ("scheming_datasets", "wajo_pages", "pages", "dcat", "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view", "geojson_view", "wmts_view", "esri_shapefile_view", "harvest", "ckan_harvester", "image_view", "text_view", "recline_view", "datastore", "xloader"):
     if plugin not in plugins:
         plugins.append(plugin)
-# Add the local theme last among template providers so its overrides have priority.
+# Schema extension must load before Pages; the visual theme loads last so its
+# template overrides retain priority without changing the CMS permission model.
 plugins.append("wajo_theme")
 plugins.append("envvars")
 values["CKAN__PLUGINS"] = '"' + " ".join(plugins) + '"'
@@ -294,6 +295,7 @@ values["CKAN__SCHEMING__PRESETS"] = "ckanext.scheming:presets.json"
 values["CKANEXT__PAGES__REVISIONS_LIMIT"] = "5"
 values["CKANEXT__PAGES__REVISIONS_FORCE_LIMIT"] = "true"
 values["CKANEXT__PAGES__ALLOW_HTML"] = "false"
+values["CKANEXT__PAGES__EDITOR"] = "markdown"
 # Keep the legacy SQL search endpoint disabled unless explicitly reviewed and protected.
 values["CKAN__DATASTORE__SQLSEARCH__ENABLED"] = "false"
 values["CKAN__HARVEST__MQ__TYPE"] = "redis"
@@ -339,8 +341,8 @@ Next steps:
 2) Edit only .env.ckan. deploy/ckan/upstream/.env.generated is filtered and automatically regenerated.
 3) Start one ingress profile only: manual, cloudflare, OR cloudflare-access (after Cloudflare Access policy is configured).
 4) After CKAN is healthy, apply DataStore permissions and create the XLoader token:
-   ./deploy/ckan/apply-datastore-permissions.sh
-   ./deploy/ckan/enable-xloader.sh manual   # or cloudflare / cloudflare-access
+   bash ./deploy/ckan/apply-datastore-permissions.sh
+   bash ./deploy/ckan/enable-xloader.sh manual   # or cloudflare / cloudflare-access
 
 No containers have been started. The upstream checkout is pinned to the official CKAN 2.12.1 base image,
 Solr 2.12 / Solr 9, without DataPusher and without direct nginx host ports.

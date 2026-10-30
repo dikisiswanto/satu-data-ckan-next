@@ -30,10 +30,15 @@ import {
 import { formatDate, safeHttpUrl } from "@/lib/utils";
 import { ckanPackageCategory } from "@/lib/ckan/client";
 import { SectionReveal } from "@/components/section-reveal";
-import { getCanonicalMetadata, getSocialMetadata, siteConfig } from "@/lib/site-config";
+import {
+  getCanonicalMetadata,
+  getSocialMetadata,
+  siteConfig,
+} from "@/lib/site-config";
 import { getPublishedIndicatorsResult } from "@/lib/data/public-indicators";
 import { getPublishedInfographicsResult } from "@/lib/data/public-infographics";
 import { getPublishedPublicationsResult } from "@/lib/data/public-publications";
+import { getPublicCmsBlogPostsResult } from "@/lib/cms/pages";
 
 export const metadata = {
   title: siteConfig.name,
@@ -131,11 +136,11 @@ function DatasetPreviewCard({ dataset, index }) {
         <span className="home-dataset-index">0{index + 1}</span>
       </div>
       <div className="home-dataset-body">
-        <p className="home-dataset-category">
-          {ckanPackageCategory(dataset)}
-        </p>
+        <p className="home-dataset-category">{ckanPackageCategory(dataset)}</p>
         <h3>
-          <Link href={`/dataset/${dataset.name}`}>{dataset.title || dataset.name}</Link>
+          <Link href={`/dataset/${dataset.name}`}>
+            {dataset.title || dataset.name}
+          </Link>
         </h3>
         <p className="home-dataset-description">
           {dataset.notes || "Metadata ringkas belum tersedia."}
@@ -143,7 +148,9 @@ function DatasetPreviewCard({ dataset, index }) {
         <div className="home-dataset-meta">
           <span>
             <Building2 size={13} aria-hidden="true" />
-            {dataset.organization?.title || dataset.organization?.name || "Organisasi belum dicantumkan"}
+            {dataset.organization?.title ||
+              dataset.organization?.name ||
+              "Organisasi belum dicantumkan"}
           </span>
           <span>
             <CalendarDays size={13} aria-hidden="true" />
@@ -203,7 +210,8 @@ function HomeHeroContent({
       <div className="page-container home-hero-inner">
         <div className="home-hero-copy">
           <p className="home-hero-kicker">
-            <span /> {`PORTAL DATA TERPADU ${siteConfig.regionName.toUpperCase()}`}
+            <span />{" "}
+            {`PORTAL DATA TERPADU ${siteConfig.regionName.toUpperCase()}`}
           </p>
           <h1>
             Temukan Data,
@@ -211,8 +219,8 @@ function HomeHeroContent({
             <span>Pahami {siteConfig.regionShortName}.</span>
           </h1>
           <p className="home-hero-description">
-            Jelajahi data resmi {siteConfig.regionName} untuk memahami kondisi daerah,
-            menyusun perencanaan, dan mendukung keputusan berbasis data.
+            Jelajahi data resmi {siteConfig.regionName} untuk memahami kondisi
+            daerah, menyusun perencanaan, dan mendukung keputusan berbasis data.
           </p>
           <div className="home-hero-search">
             <SearchForm placeholder="Cari topik, mis. sekolah, kesehatan, anggaran…" />
@@ -266,25 +274,25 @@ function HomeHeroContent({
             </span>
           </Link>
           {stats?.indicators !== null && stats?.indicators !== undefined ? (
-          <Link
-            href="/statistik"
-            className="home-visual-chip home-visual-chip-bottom"
-          >
-            <FileChartColumn size={17} aria-hidden="true" />
-            <span>
-              <strong>
-                {loading ? (
-                  <span
-                    className="loading-skeleton home-metric-skeleton"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  displayStat(stats?.indicators)
-                )}
-              </strong>
-              <small>Indikator publik</small>
-            </span>
-          </Link>
+            <Link
+              href="/statistik"
+              className="home-visual-chip home-visual-chip-bottom"
+            >
+              <FileChartColumn size={17} aria-hidden="true" />
+              <span>
+                <strong>
+                  {loading ? (
+                    <span
+                      className="loading-skeleton home-metric-skeleton"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    displayStat(stats?.indicators)
+                  )}
+                </strong>
+                <small>Indikator publik</small>
+              </span>
+            </Link>
           ) : null}
         </div>
       </div>
@@ -331,25 +339,25 @@ function HomeHeroContent({
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
           {stats?.indicators !== null && stats?.indicators !== undefined ? (
-          <Link href="/statistik" className="home-stat home-stat-green">
-            <span className="home-stat-icon">
-              <FileChartColumn size={22} aria-hidden="true" />
-            </span>
-            <span className="home-stat-copy">
-              <strong>
-                {loading ? (
-                  <span
-                    className="loading-skeleton home-metric-skeleton"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  displayStat(stats?.indicators)
-                )}
-              </strong>
-              <small>Indikator statistik</small>
-            </span>
-            <ArrowRight size={17} aria-hidden="true" />
-          </Link>
+            <Link href="/statistik" className="home-stat home-stat-green">
+              <span className="home-stat-icon">
+                <FileChartColumn size={22} aria-hidden="true" />
+              </span>
+              <span className="home-stat-copy">
+                <strong>
+                  {loading ? (
+                    <span
+                      className="loading-skeleton home-metric-skeleton"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    displayStat(stats?.indicators)
+                  )}
+                </strong>
+                <small>Indikator statistik</small>
+              </span>
+              <ArrowRight size={17} aria-hidden="true" />
+            </Link>
           ) : null}
           <Link href="/organisasi" className="home-stat home-stat-green">
             <span className="home-stat-icon">
@@ -499,7 +507,9 @@ function HomeIndicatorHighlights({ indicators = [] }) {
         <div>
           <p className="eyebrow">ANGKA DARI DATA TERBITAN</p>
           <h2 id="home-indicator-heading">Sorotan statistik</h2>
-          <p>Nilai terbaru yang tersedia pada resource DataStore indikator resmi.</p>
+          <p>
+            Nilai terbaru yang tersedia pada resource DataStore indikator resmi.
+          </p>
         </div>
         <Link href="/statistik" className="home-section-link">
           Semua indikator <ArrowRight size={16} aria-hidden="true" />
@@ -508,29 +518,59 @@ function HomeIndicatorHighlights({ indicators = [] }) {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {indicators.map((indicator) => {
           const latest = indicator.latest;
-          const value = latest?.numericValue !== null && latest?.numericValue !== undefined
-            ? new Intl.NumberFormat("id-ID", { maximumFractionDigits: 4 }).format(latest.numericValue)
-            : latest?.value !== null && latest?.value !== undefined && latest?.value !== ""
-              ? String(latest.value)
-              : "Belum tersedia";
+          const value =
+            latest?.numericValue !== null && latest?.numericValue !== undefined
+              ? new Intl.NumberFormat("id-ID", {
+                  maximumFractionDigits: 4,
+                }).format(latest.numericValue)
+              : latest?.value !== null &&
+                  latest?.value !== undefined &&
+                  latest?.value !== ""
+                ? String(latest.value)
+                : "Belum tersedia";
           return (
-            <article key={indicator.name} className="group relative overflow-hidden rounded-2xl border border-line bg-white p-5 shadow-[0_5px_24px_rgb(23_51_75_/_0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgb(23_51_75_/_0.09)] motion-reduce:transform-none motion-reduce:transition-none">
-              <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-700 via-sky-500 to-cyan-300" aria-hidden="true" />
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">{indicator.metadata?.periodicity || "Indikator statistik"}</p>
+            <article
+              key={indicator.name}
+              className="group relative overflow-hidden rounded-2xl border border-line bg-white p-5 shadow-[0_5px_24px_rgb(23_51_75_/_0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgb(23_51_75_/_0.09)] motion-reduce:transform-none motion-reduce:transition-none"
+            >
+              <span
+                className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-700 via-sky-500 to-cyan-300"
+                aria-hidden="true"
+              />
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+                {indicator.metadata?.periodicity || "Indikator statistik"}
+              </p>
               <h3 className="mt-3 line-clamp-2 min-h-12 text-base font-semibold leading-6 text-ink">
-                <Link href={`/statistik/${encodeURIComponent(indicator.name)}`} className="hover:text-primary hover:underline">{indicator.title}</Link>
+                <Link
+                  href={`/statistik/${encodeURIComponent(indicator.name)}`}
+                  className="hover:text-primary hover:underline"
+                >
+                  {indicator.title}
+                </Link>
               </h3>
               <div className="mt-5 flex items-end justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-3xl font-semibold tracking-tight text-ink tabular-nums">{value}</p>
-                  <p className="mt-1 text-xs text-muted">{latest?.unit || indicator.metadata?.unit || "Satuan belum dicantumkan"}</p>
+                  <p className="text-3xl font-semibold tracking-tight text-ink tabular-nums">
+                    {value}
+                  </p>
+                  <p className="mt-1 text-xs text-muted">
+                    {latest?.unit ||
+                      indicator.metadata?.unit ||
+                      "Satuan belum dicantumkan"}
+                  </p>
                 </div>
                 <div className="shrink-0 text-right text-xs text-muted">
                   <p>{latest?.period || "Periode belum dicantumkan"}</p>
-                  <p className="mt-1 max-w-32 truncate">{latest?.region || "Wilayah belum dicantumkan"}</p>
+                  <p className="mt-1 max-w-32 truncate">
+                    {latest?.region || "Wilayah belum dicantumkan"}
+                  </p>
                 </div>
               </div>
-              {indicator.metadata?.source ? <p className="mt-4 border-t border-line pt-3 text-xs text-muted">Sumber: {indicator.metadata.source}</p> : null}
+              {indicator.metadata?.source ? (
+                <p className="mt-4 border-t border-line pt-3 text-xs text-muted">
+                  Sumber: {indicator.metadata.source}
+                </p>
+              ) : null}
             </article>
           );
         })}
@@ -547,7 +587,10 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
         <div>
           <p className="eyebrow">VISUAL DAN RUJUKAN RESMI</p>
           <h2 id="home-editorial-heading">Lebih dari sekadar dataset</h2>
-          <p>Infografik dan publikasi yang telah diterbitkan pengelola di katalog CKAN.</p>
+          <p>
+            Infografik dan publikasi yang telah diterbitkan pengelola di katalog
+            CKAN.
+          </p>
         </div>
         <Link href="/publikasi" className="home-section-link">
           Semua publikasi <ArrowRight size={16} aria-hidden="true" />
@@ -555,24 +598,72 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
       </div>
       <div className="grid gap-6 xl:grid-cols-2">
         {infographics.length ? (
-          <section className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5" aria-labelledby="home-infographic-heading">
+          <section
+            className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5"
+            aria-labelledby="home-infographic-heading"
+          >
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 id="home-infographic-heading" className="flex items-center gap-2 text-base font-semibold"><Images size={18} className="text-primary" aria-hidden="true" /> Infografik terbaru</h3>
-              <Link href="/infografik" className="text-xs font-semibold text-primary hover:underline">Lihat semua</Link>
+              <h3
+                id="home-infographic-heading"
+                className="flex items-center gap-2 text-base font-semibold"
+              >
+                <Images size={18} className="text-primary" aria-hidden="true" />{" "}
+                Infografik terbaru
+              </h3>
+              <Link
+                href="/infografik"
+                className="text-xs font-semibold text-primary hover:underline"
+              >
+                Lihat semua
+              </Link>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {infographics.map((item) => {
                 const imageUrl = safeHttpUrl(item.cover?.url);
                 return (
                   <article key={item.name} className="group min-w-0">
-                    <Link href={`/infografik/${encodeURIComponent(item.name)}`} className="block overflow-hidden rounded-xl border border-line bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+                    <Link
+                      href={`/infografik/${encodeURIComponent(item.name)}`}
+                      className="block overflow-hidden rounded-xl border border-line bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                    >
                       <div className="relative aspect-[4/3]">
-                        {imageUrl ? <Image src={imageUrl} alt={item.cover?.description || item.cover?.name || item.title} fill unoptimized sizes="(min-width: 640px) 320px, 100vw" className="object-contain transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none" /> : <div className="flex h-full items-center justify-center text-muted"><Images size={28} aria-hidden="true" /></div>}
+                        {imageUrl ? (
+                          <Image
+                            src={imageUrl}
+                            alt={
+                              item.cover?.description ||
+                              item.cover?.name ||
+                              item.title
+                            }
+                            fill
+                            unoptimized
+                            sizes="(min-width: 640px) 320px, 100vw"
+                            className="object-contain transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-muted">
+                            <Images size={28} aria-hidden="true" />
+                          </div>
+                        )}
                       </div>
                     </Link>
-                    <p className="mt-3 text-[11px] font-semibold uppercase tracking-wide text-muted">{item.category || "Infografik"}{item.period ? ` · ${item.period}` : ""}</p>
-                    <h4 className="mt-1 line-clamp-2 text-sm font-semibold leading-5"><Link href={`/infografik/${encodeURIComponent(item.name)}`} className="hover:text-primary hover:underline">{item.title}</Link></h4>
-                    {item.attribution ? <p className="mt-1 truncate text-xs text-muted">{item.attribution}</p> : null}
+                    <p className="mt-3 text-[11px] font-semibold uppercase tracking-wide text-muted">
+                      {item.category || "Infografik"}
+                      {item.period ? ` · ${item.period}` : ""}
+                    </p>
+                    <h4 className="mt-1 line-clamp-2 text-sm font-semibold leading-5">
+                      <Link
+                        href={`/infografik/${encodeURIComponent(item.name)}`}
+                        className="hover:text-primary hover:underline"
+                      >
+                        {item.title}
+                      </Link>
+                    </h4>
+                    {item.attribution ? (
+                      <p className="mt-1 truncate text-xs text-muted">
+                        {item.attribution}
+                      </p>
+                    ) : null}
                   </article>
                 );
               })}
@@ -580,26 +671,72 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
           </section>
         ) : null}
         {publications.length ? (
-          <section className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5" aria-labelledby="home-publication-heading">
+          <section
+            className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5"
+            aria-labelledby="home-publication-heading"
+          >
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 id="home-publication-heading" className="flex items-center gap-2 text-base font-semibold"><BookOpen size={18} className="text-primary" aria-hidden="true" /> Publikasi terbaru</h3>
-              <Link href="/publikasi" className="text-xs font-semibold text-primary hover:underline">Lihat semua</Link>
+              <h3
+                id="home-publication-heading"
+                className="flex items-center gap-2 text-base font-semibold"
+              >
+                <BookOpen
+                  size={18}
+                  className="text-primary"
+                  aria-hidden="true"
+                />{" "}
+                Publikasi terbaru
+              </h3>
+              <Link
+                href="/publikasi"
+                className="text-xs font-semibold text-primary hover:underline"
+              >
+                Lihat semua
+              </Link>
             </div>
             <div className="divide-y divide-line">
               {publications.map((item) => (
-                <article key={item.name} className="flex gap-3 py-4 first:pt-0 last:pb-0">
-                  <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary"><FileText size={20} aria-hidden="true" /></div>
+                <article
+                  key={item.name}
+                  className="flex gap-3 py-4 first:pt-0 last:pb-0"
+                >
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary">
+                    <FileText size={20} aria-hidden="true" />
+                  </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">{item.category || "Publikasi"}{item.period ? ` · ${item.period}` : ""}</p>
-                    <h4 className="mt-1 line-clamp-2 text-sm font-semibold leading-5"><Link href={`/publikasi/${encodeURIComponent(item.name)}`} className="hover:text-primary hover:underline">{item.title}</Link></h4>
-                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">{item.notes || "Deskripsi belum dicantumkan oleh pengelola dataset."}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                      {item.category || "Publikasi"}
+                      {item.period ? ` · ${item.period}` : ""}
+                    </p>
+                    <h4 className="mt-1 line-clamp-2 text-sm font-semibold leading-5">
+                      <Link
+                        href={`/publikasi/${encodeURIComponent(item.name)}`}
+                        className="hover:text-primary hover:underline"
+                      >
+                        {item.title}
+                      </Link>
+                    </h4>
+                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">
+                      {item.notes ||
+                        "Deskripsi belum dicantumkan oleh pengelola dataset."}
+                    </p>
                     <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
-                      {item.publicationDate ? <span>Rilis {formatDate(item.publicationDate)}</span> : null}
+                      {item.publicationDate ? (
+                        <span>Rilis {formatDate(item.publicationDate)}</span>
+                      ) : null}
                       {item.version ? <span>Versi {item.version}</span> : null}
-                      {item.attribution ? <span>{item.attribution}</span> : null}
+                      {item.attribution ? (
+                        <span>{item.attribution}</span>
+                      ) : null}
                     </div>
                   </div>
-                  <Link href={`/publikasi/${encodeURIComponent(item.name)}`} className="self-center rounded-lg p-2 text-muted transition hover:bg-accent hover:text-primary" aria-label={`Baca publikasi ${item.title}`}><ArrowUpRight size={17} aria-hidden="true" /></Link>
+                  <Link
+                    href={`/publikasi/${encodeURIComponent(item.name)}`}
+                    className="self-center rounded-lg p-2 text-muted transition hover:bg-accent hover:text-primary"
+                    aria-label={`Baca publikasi ${item.title}`}
+                  >
+                    <ArrowUpRight size={17} aria-hidden="true" />
+                  </Link>
                 </article>
               ))}
             </div>
@@ -612,20 +749,87 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
 
 async function HomeCKANHighlightsSection() {
   await connection();
-  const [indicatorsResult, infographicsResult, publicationsResult] = await Promise.all([
-    getPublishedIndicatorsResult({ limit: 3, includeLatest: true }),
-    getPublishedInfographicsResult({ limit: 2, page: 1 }),
-    getPublishedPublicationsResult({ limit: 3, page: 1 }),
-  ]);
+  const [indicatorsResult, infographicsResult, publicationsResult] =
+    await Promise.all([
+      getPublishedIndicatorsResult({ limit: 3, includeLatest: true }),
+      getPublishedInfographicsResult({ limit: 2, page: 1 }),
+      getPublishedPublicationsResult({ limit: 3, page: 1 }),
+    ]);
   const indicators = indicatorsResult.data || [];
   const infographics = infographicsResult.data || [];
   const publications = publicationsResult.data || [];
-  if (!indicators.length && !infographics.length && !publications.length) return null;
+  if (!indicators.length && !infographics.length && !publications.length)
+    return null;
   return (
     <div className="space-y-12">
       <HomeIndicatorHighlights indicators={indicators} />
-      <HomeEditorialHighlights infographics={infographics} publications={publications} />
+      <HomeEditorialHighlights
+        infographics={infographics}
+        publications={publications}
+      />
     </div>
+  );
+}
+
+async function HomeCmsNewsHighlights() {
+  await connection();
+  const result = await getPublicCmsBlogPostsResult();
+  const posts = (result.data || []).slice(0, 3);
+  if (!posts.length && !result.unavailable) return null;
+  return (
+    <section className="home-section" aria-labelledby="home-cms-news-heading">
+      <div className="home-section-heading">
+        <div>
+          <p className="eyebrow">INFORMASI RESMI</p>
+          <h2 id="home-cms-news-heading">Berita dan informasi daerah</h2>
+          <p>
+            Artikel dan pengumuman yang diterbitkan melalui pengelolaan konten
+            CKAN.
+          </p>
+        </div>
+        <Link href="/informasi" className="home-section-link">
+          Pusat informasi <ArrowRight size={16} aria-hidden="true" />
+        </Link>
+      </div>
+      {posts.length ? (
+        <div className="grid gap-4 md:grid-cols-3">
+          {posts.map((post) => (
+            <article
+              key={post.name}
+              className="rounded-2xl border border-line bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                {post.category || "Berita"}
+              </p>
+              <h3 className="mt-3 line-clamp-2 text-base font-semibold leading-6">
+                <Link
+                  href={`/berita/${encodeURIComponent(post.name)}`}
+                  className="hover:text-primary hover:underline"
+                >
+                  {post.title}
+                </Link>
+              </h3>
+              <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">
+                {post.excerpt}
+              </p>
+              <Link
+                href={`/berita/${encodeURIComponent(post.name)}`}
+                className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary"
+              >
+                Baca artikel <ArrowUpRight size={15} aria-hidden="true" />
+              </Link>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div
+          className="rounded-2xl border border-dashed border-line bg-white p-5 text-sm text-muted"
+          role="status"
+        >
+          Berita dari CMS CKAN sementara tidak dapat dimuat.
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -717,6 +921,9 @@ export default function HomePage() {
         <Suspense fallback={null}>
           <HomeCKANHighlightsSection />
         </Suspense>
+        <Suspense fallback={null}>
+          <HomeCmsNewsHighlights />
+        </Suspense>
         <section className="home-feature-row" aria-label="Layanan data">
           <article className="home-feature home-feature-visualization">
             <div className="home-feature-copy">
@@ -746,7 +953,11 @@ export default function HomePage() {
               </div>
               <div className="home-data-art-tile home-data-art-tile-statistic">
                 <FileChartColumn size={22} strokeWidth={1.8} />
-                <span className="home-data-art-dots"><i /><i /><i /></span>
+                <span className="home-data-art-dots">
+                  <i />
+                  <i />
+                  <i />
+                </span>
               </div>
               <div className="home-data-art-tile home-data-art-tile-map">
                 <MapPinned size={22} strokeWidth={1.8} />

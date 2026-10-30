@@ -83,6 +83,11 @@ require('if site_logo in {"", "/base/logo-kabupaten-wajo.webp"}' in bootstrap_so
 
 # Ensure the extension is packaged and actually installed into the pinned image.
 require('"wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin"' in setup_source, "Entry point plugin wajo_theme tidak terdaftar pada setup.py.")
+require('"wajo_pages = ckanext.wajo_theme.plugin:WajoPagesSchemaPlugin"' in setup_source, "Entry point schema CMS wajo_pages tidak terdaftar pada setup.py.")
+require("IPagesSchema" in plugin_source and "def update_pages_schema(self, schema)" in plugin_source, "Plugin Wajo harus memperluas schema ckanext-pages melalui IPagesSchema.")
+require("def validate_content_blocks(key, data, errors, context)" in plugin_source and "json.loads(value)" in plugin_source and "MAX_CONTENT_BLOCK_COUNT = 16" in plugin_source, "Schema CMS harus memvalidasi JSON blocks, jumlah komponen, dan tipe yang didukung sebelum tersimpan.")
+for field in ("excerpt", "category", "seo_title", "seo_description", "og_image", "template_type", "menu_label", "menu_order", "content_blocks", "featured", "show_in_menu"):
+    require(f'"{field}"' in plugin_source, f"Field editorial {field} belum didaftarkan pada schema CKAN Pages.")
 manifest = read(THEME / "MANIFEST.in")
 for expected in (
     "templates *.html",
@@ -92,12 +97,13 @@ for expected in (
     require(expected in manifest, f"MANIFEST.in tidak memasukkan {expected}.")
 configurator = read(ROOT / "deploy/ckan/configure-upstream-extensions.py")
 require("shutil.copytree(theme_source, theme_destination)" in configurator, "Bootstrap tidak menyalin source extension theme ke build context.")
-require("pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in configurator, "Docker build tidak memasang package theme.")
+require("USER root\nRUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in configurator, "Docker build harus memasang extension/theme secara global sebagai root sebelum kembali ke user runtime CKAN.")
+require('for plugin in ("scheming_datasets", "wajo_pages", "pages"' in bootstrap_source, "wajo_pages harus dimuat setelah Scheming dan sebelum plugin pages.")
 require("plugins.append(\"wajo_theme\")" in bootstrap_source, "Plugin theme harus diaktifkan setelah extension yang juga menyediakan template.")
 require('plugins.append("envvars")' in bootstrap_source, "Plugin envvars harus tetap berada terakhir.")
 workflow = read(ROOT / ".github/workflows/ci.yml")
 require("COPY deploy/ckan/theme/ /tmp/portal-ckan-theme/" in workflow, "CI Docker smoke image harus memasukkan source package wajo_theme.")
-require("/tmp/portal-ckan-theme" in workflow and "check-ckan-plugin-entrypoints.py" in workflow, "CI harus menginstal theme sebelum memeriksa entry point plugin.")
+require("USER root" in workflow and "RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in workflow and "check-ckan-plugin-entrypoints.py" in workflow, "CI harus memasang extension/theme secara global sebagai root sebelum memeriksa entry point plugin.")
 for caddy_name in ("Caddyfile", "Caddyfile.basic-auth", "Caddyfile.tunnel", "Caddyfile.tunnel.access", "Caddyfile.tunnel.basic-auth"):
     caddy = read(ROOT / "deploy/ckan" / caddy_name)
     require("came_from=%2Fdashboard%2Fdatasets" in caddy, f"{caddy_name}: redirect login harus kembali ke dashboard dataset, bukan halaman konfigurasi khusus sysadmin.")
@@ -105,7 +111,12 @@ for caddy_name in ("Caddyfile", "Caddyfile.basic-auth", "Caddyfile.tunnel", "Cad
 
 # Keep the extension intentionally additive: only common shell templates are overridden.
 actual_templates = sorted(path.relative_to(PACKAGE / "templates").as_posix() for path in (PACKAGE / "templates").rglob("*.html"))
-require(actual_templates == ["base.html", "header.html"], "Theme hanya boleh mengganti shell bersama (base/header), bukan template fitur CKAN.")
+require(actual_templates == ["base.html", "ckanext_pages/base_form.html", "header.html"], "Theme hanya boleh mengganti shell bersama dan form editorial Pages, bukan template fitur CKAN lainnya.")
+CMS_FORM = PACKAGE / "templates/ckanext_pages/base_form.html"
+form_source = read(CMS_FORM)
+require("{% ckan_extends %}" in form_source and "{% block extra_pages_form %}" in form_source, "Form CMS harus mewarisi form upstream dan mengisi block extra_pages_form.")
+require(all(f'name=\"{field}\"' in form_source for field in ("excerpt", "category", "template_type", "featured", "show_in_menu", "seo_title", "seo_description", "og_image", "content_blocks")), "Form CMS belum menampilkan semua field editorial penting.")
+require("errors.content_blocks" in form_source, "Form CMS harus menampilkan kesalahan validasi JSON content blocks.")
 
 # The CSS must remain parseable and preserve the responsive login fallback.
 require(css_source.count("{") == css_source.count("}"), "CSS memiliki jumlah kurung blok yang tidak seimbang.")
@@ -120,7 +131,7 @@ try:
     from jinja2 import Environment
 
     env = Environment()
-    for path, source in ((BASE, base_source), (HEADER, header_source)):
+    for path, source in ((BASE, base_source), (HEADER, header_source), (CMS_FORM, form_source)):
         normalized = source.replace("{% ckan_extends %}", '{% extends "base.html" %}')
         normalized = re.sub(r"{%\s*asset\s+(['\"]).*?\1\s*%}", "{% set wajo_theme_asset_loaded = true %}", normalized)
         try:
@@ -157,4 +168,4 @@ if ERRORS:
         print(f"- {error}", file=sys.stderr)
     raise SystemExit(1)
 
-print("CKAN admin theme regression check passed: CKAN 2.12 template blocks, Jinja/CSS syntax, WebAssets, public logo path, packaging, plugin order, responsive login, and additive-only template scope verified.")
+print("CKAN admin theme/CMS regression check passed: CKAN 2.12 template blocks, Jinja/CSS syntax, WebAssets, logo, Pages schema/form, packaging, plugin order, responsive login, and additive template scope verified.")
