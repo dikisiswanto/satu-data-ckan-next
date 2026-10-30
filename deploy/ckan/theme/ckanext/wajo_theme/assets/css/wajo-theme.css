@@ -1982,7 +1982,8 @@ body {
 }
 
 /* Portal Satu Data Kabupaten Wajo — shared icon sizing. CKAN supplies Font Awesome. */
-.wajo-admin-shell .fa {
+.wajo-admin-shell .fa,
+.wajo-admin-shell .fa-solid {
   display: inline-block;
   min-width: 1.1em;
   color: currentColor;

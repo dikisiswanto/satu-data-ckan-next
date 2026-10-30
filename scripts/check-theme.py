@@ -101,6 +101,28 @@ require('src="/logo-kabupaten-wajo.webp"' in header_source and "wajo-admin-brand
 require("wajo-admin-user" in header_source and "h.csrf_input()" in header_source and "user.logout" in header_source, "Topbar harus mempertahankan identitas pengguna dan logout dengan CSRF.")
 icon_source = read(PACKAGE / "templates/wajo_theme/icon.html")
 require("wajo_theme/icon.html" in read(SIDEBAR) and 'class="fa fa-' in icon_source and "wajo-icons.svg#" not in icon_source and 'src="/logo-kabupaten-wajo.webp"' in header_source, "Ikon admin harus memakai pustaka Font Awesome bawaan CKAN, bukan SVG buatan sendiri, dan logo lokal extension.")
+require("fa-solid" in icon_source, "Ikon Wajo harus memakai family solid Font Awesome Free yang dibundel CKAN 2.12.1.")
+
+icon_template_sources = "\n".join(path.read_text(encoding="utf-8") for path in (PACKAGE / "templates").rglob("*.html"))
+icon_calls = set(re.findall(r"wajo_icon\('([^']+)'", icon_template_sources))
+icon_pairs = re.findall(r"'([^']+)':\s*'([a-z0-9-]+)'", icon_source)
+icon_map = dict(icon_pairs)
+valid_free_solid_glyphs = {
+    "gauge-high", "database", "building", "tags", "file-lines", "arrows-rotate",
+    "folder", "users", "gear", "bars", "arrow-up-right-from-square", "sliders",
+    "right-from-bracket", "chart-bar", "angle-right", "plus", "lightbulb",
+    "newspaper", "book", "chart-line", "image", "table", "server",
+    "cloud-arrow-down", "shield", "check", "circle-check", "circle-exclamation",
+    "triangle-exclamation", "circle-info",
+}
+require(icon_calls.issubset(icon_map), f"Semua pemanggilan wajo_icon harus memiliki pemetaan: {sorted(icon_calls - icon_map.keys())}.")
+require(set(icon_map.values()).issubset(valid_free_solid_glyphs), f"Glyph harus tersedia pada Font Awesome Free Solid CKAN: {sorted(set(icon_map.values()) - valid_free_solid_glyphs)}.")
+require("circle-question" in icon_source, "Fallback ikon harus memakai glyph Font Awesome Free circle-question.")
+for glyph in ("gauge-high", "building", "image", "file-lines", "newspaper", "folder", "chart-line", "right-from-bracket", "arrow-up-right-from-square", "circle-check", "triangle-exclamation", "shield"):
+    require(f"'{glyph}'" in icon_source, f"Glyph Font Awesome yang dibutuhkan tidak dipetakan: {glyph}.")
+for retired_glyph in ("building-o", "file-text-o", "newspaper-o", "picture-o", "folder-open-o", "line-chart", "sign-out", "tachometer"):
+    require(f"'{retired_glyph}'" not in icon_source, f"Nama glyph Font Awesome lama harus diganti: {retired_glyph}.")
+require("fonts.googleapis.com/css2?family=Inter" in base_source and "fonts.gstatic.com" in base_source and "display=swap" in base_source, "CKAN admin harus memuat Google Font Inter dengan preconnect dan display swap.")
 require("{% ckan_extends %}" in page_source, "page.html harus mewarisi shell CKAN agar block admin upstream tetap utuh.")
 require("wajo-admin-shell" in page_source and 'wajo_theme/sidebar.html' in page_source and "{{ super() }}" in page_source, "Page shell harus menambahkan sidebar secara aditif tanpa mengganti konten core CKAN.")
 require('class="wajo-admin-footer__brand"' in page_source and 'src="/logo-kabupaten-wajo.webp"' in page_source, "Footer admin harus memakai identitas dan logo yang sama dengan header.")
@@ -112,11 +134,12 @@ require("css/wajo-admin-design-system.css" in assets_source, "Bundle harus memua
 require(DESIGN_SYSTEM.is_file(), "File design system Wajo Admin tidak ditemukan.")
 design_source = read(DESIGN_SYSTEM)
 design_normalized = re.sub(r"\s+", " ", design_source)
+require(".wajo-dashboard { width: 100%; max-width: var(--wajo-dashboard-max)" in design_normalized, "Dashboard harus menggunakan lebar 100% pada area konten yang sama dengan halaman admin lain.")
 for token in (
     "--wajo-color-primary: #1d5fa7", "--wajo-color-ink: #1b3440",
     "--wajo-color-muted: #586d76", "--wajo-color-canvas: #f5f7f6",
     "--wajo-color-border: #d8e2e4", "--wajo-font-sans",
-    "--wajo-content-max: 1480px", "--wajo-dashboard-max: 1320px",
+    "--wajo-content-max: 1480px", "--wajo-dashboard-max: var(--wajo-content-max)",
     "--wajo-form-max: 960px", "--wajo-login-max: 448px",
     "--wajo-sidebar-width: 264px", "--wajo-radius-control: .625rem",
     "--wajo-control-height: 42px", "--wajo-button-height: 40px",

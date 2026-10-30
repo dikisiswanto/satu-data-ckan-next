@@ -10,6 +10,7 @@ ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-dcat.po
 ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-harvest.po
 ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-pages.po
 ckanext/wajo_theme/public/logo-kabupaten-wajo.webp
+ckanext/wajo_theme/schemas/dataset.yaml
 ckanext/wajo_theme/templates/base.html
 ckanext/wajo_theme/templates/header.html
 ckanext/wajo_theme/templates/page.html

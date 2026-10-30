@@ -38,7 +38,7 @@
   --wajo-leading-heading: 1.2;
   --wajo-shell-max: 1800px;
   --wajo-content-max: 1480px;
-  --wajo-dashboard-max: 1320px;
+  --wajo-dashboard-max: var(--wajo-content-max);
   --wajo-form-max: 960px;
   --wajo-login-max: 448px;
   --wajo-sidebar-width: 264px;

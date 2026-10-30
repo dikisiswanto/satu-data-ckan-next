@@ -1,39 +1,39 @@
-{# Reuse CKAN 2.12's bundled Font Awesome icon font. This keeps the Wajo shell
-   on the same icon implementation used by CKAN resource views and native links. #}
+{# CKAN 2.12.1 bundles Font Awesome Free (modern solid icon names).
+   Keep semantic names here so navigation templates never depend on glyph spelling. #}
 {% macro wajo_icon(name, class_name='') -%}
   {% set icons = {
-    'dashboard': 'tachometer',
+    'dashboard': 'gauge-high',
     'database': 'database',
-    'building': 'building-o',
+    'building': 'building',
     'tags': 'tags',
-    'file-text': 'file-text-o',
-    'refresh': 'refresh',
-    'folder': 'folder-open-o',
+    'file-text': 'file-lines',
+    'refresh': 'arrows-rotate',
+    'folder': 'folder',
     'users': 'users',
-    'settings': 'cog',
+    'settings': 'gear',
     'menu': 'bars',
-    'external-link': 'external-link',
+    'external-link': 'arrow-up-right-from-square',
     'sliders': 'sliders',
-    'log-out': 'sign-out',
-    'chart': 'bar-chart',
-    'arrow-up-right': 'external-link',
+    'log-out': 'right-from-bracket',
+    'chart': 'chart-bar',
+    'arrow-up-right': 'arrow-up-right-from-square',
     'arrow-right': 'angle-right',
     'plus': 'plus',
-    'lightbulb': 'lightbulb-o',
-    'lightbulb-o': 'lightbulb-o',
-    'newspaper': 'newspaper-o',
+    'lightbulb': 'lightbulb',
+    'lightbulb-o': 'lightbulb',
+    'newspaper': 'newspaper',
     'book': 'book',
-    'chart-line': 'line-chart',
-    'image': 'picture-o',
+    'chart-line': 'chart-line',
+    'image': 'image',
     'table': 'table',
     'server': 'server',
-    'cloud-download': 'cloud-download',
+    'cloud-download': 'cloud-arrow-down',
     'shield-check': 'shield',
     'check': 'check',
-    'check-circle': 'check-circle',
-    'exclamation-circle': 'exclamation-circle',
-    'exclamation-triangle': 'exclamation-triangle',
-    'info-circle': 'info-circle'
+    'check-circle': 'circle-check',
+    'exclamation-circle': 'circle-exclamation',
+    'exclamation-triangle': 'triangle-exclamation',
+    'info-circle': 'circle-info'
   } %}
-  <i class="fa fa-{{ icons.get(name, 'circle-o') }} {{ class_name }}" aria-hidden="true"></i>
+  <i class="fa fa-{{ icons.get(name, 'circle-question') }} fa-solid {{ class_name }}" aria-hidden="true"></i>
 {%- endmacro %}

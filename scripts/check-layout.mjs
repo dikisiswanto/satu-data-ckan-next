@@ -637,6 +637,22 @@ for (const route of ["infografik", "publikasi"]) {
   }
 }
 
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "--wajo-dashboard-max: var(--wajo-content-max)",
+  "Wajo Admin dashboard must use the same full workspace width as other admin pages",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/icon.html",
+  "fa-solid",
+  "admin navigation icons must use the CKAN 2.12 Font Awesome solid family",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
+  "fonts.googleapis.com/css2?family=Inter",
+  "CKAN admin must load Google Font Inter",
+);
+
 if (failures.length) {
   process.stderr.write(
     `Layout stability checks failed:\n${failures.map((item) => `- ${item}`).join("\n")}\n`,
