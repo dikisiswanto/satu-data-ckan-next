@@ -232,3 +232,7 @@ Sebelum deployment, jalankan `npm run check`, `npm run test`, `npm run build`, `
 ## 12. CMS konten publik
 
 CKAN Pages digunakan sebagai headless CMS untuk Next.js. Pengelolaan konten, field editorial, content blocks, SEO, media, privasi, dan alur publikasi dijelaskan pada [`docs/CMS.md`](../../docs/CMS.md).
+
+## Healthcheck CKAN
+
+Healthcheck CKAN memakai Python standard library untuk meminta `http://127.0.0.1:5000/api/action/status_show` dan memastikan payload memiliki `success: true`. Pemeriksaan tidak bergantung pada `wget`. `start_period: 90s`, interval 30 detik, timeout 10 detik, dan lima retry memberi waktu untuk proses upgrade/migrasi sebelum service lain bergantung pada status `healthy`.

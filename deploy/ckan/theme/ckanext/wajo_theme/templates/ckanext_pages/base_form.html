@@ -1,326 +1,110 @@
-{% ckan_extends %} {% block extra_pages_form %} {{ super() }}
-<fieldset class="wajo-pages-editor">
-  <legend>{{ _('Pengaturan konten Portal Satu Data Wajo') }}</legend>
-  <p class="wajo-pages-editor__help">
-    {{ _('Field ini dipakai oleh portal Next.js. Konten tetap disimpan dan
-    dikelola melalui CKAN Pages.') }}
-  </p>
+{% ckan_extends %}
 
-  <div class="control-group form-group">
-    <label class="control-label" for="field-excerpt"
-      >{{ _('Ringkasan') }}</label
-    >
-    <div class="controls">
-      <textarea
-        id="field-excerpt"
-        name="excerpt"
-        class="form-control"
-        rows="3"
-        maxlength="360"
-        placeholder="Ringkasan singkat untuk kartu berita dan halaman informasi"
-      >
-{{ data.excerpt or '' }}</textarea>
-      <p class="wajo-pages-editor__help">
-        {{ _('Disarankan 160–240 karakter. Jika kosong, portal menggunakan
-        cuplikan konten.') }}
-      </p>
-    </div>
-  </div>
+{% block extra_pages_form %}
+  {{ super() }}
+  <fieldset class="wajo-pages-editor">
+    <legend>{{ _('Pengaturan konten Portal Satu Data Wajo') }}</legend>
+    <p class="wajo-pages-editor__help">{{ _('Field ini dipakai oleh portal Next.js. Konten tetap disimpan dan dikelola melalui CKAN Pages.') }}</p>
 
-  <div class="control-group form-group">
-    <label class="control-label" for="field-category"
-      >{{ _('Kategori konten') }}</label
-    >
-    <div class="controls">
-      <input
-        id="field-category"
-        name="category"
-        class="form-control"
-        type="text"
-        value="{{ data.category or '' }}"
-        maxlength="80"
-        placeholder="Contoh: Kebijakan, Panduan, Kegiatan"
-      />
+    <div class="control-group form-group">
+      <label class="control-label" for="field-excerpt">{{ _('Ringkasan') }}</label>
+      <div class="controls">
+        <textarea id="field-excerpt" name="excerpt" class="form-control" rows="3" maxlength="360" placeholder="Ringkasan singkat untuk kartu berita dan halaman informasi">{{ data.excerpt or '' }}</textarea>
+        <p class="wajo-pages-editor__help">{{ _('Disarankan 160–240 karakter. Jika kosong, portal menggunakan cuplikan konten.') }}</p>
+      </div>
     </div>
-  </div>
 
-  <div class="control-group form-group">
-    <label class="control-label" for="field-template-type"
-      >{{ _('Tata letak halaman') }}</label
-    >
-    <div class="controls">
-      <select
-        id="field-template-type"
-        name="template_type"
-        class="form-control"
-      >
-        <option
-          value="standard"
-          {%
-          if
-          not
-          data.template_type
-          or
-          data.template_type=""
-          ="standard"
-          %}selected="selected"
-          {%
-          endif
-          %}
-        >
-          {{ _('Standar') }}
-        </option>
-        <option
-          value="landing"
-          {%
-          if
-          data.template_type=""
-          ="landing"
-          %}selected="selected"
-          {%
-          endif
-          %}
-        >
-          {{ _('Landing page') }}
-        </option>
-        <option
-          value="policy"
-          {%
-          if
-          data.template_type=""
-          ="policy"
-          %}selected="selected"
-          {%
-          endif
-          %}
-        >
-          {{ _('Kebijakan / regulasi') }}
-        </option>
-        <option
-          value="guide"
-          {%
-          if
-          data.template_type=""
-          ="guide"
-          %}selected="selected"
-          {%
-          endif
-          %}
-        >
-          {{ _('Panduan') }}
-        </option>
-        <option
-          value="article"
-          {%
-          if
-          data.template_type=""
-          ="article"
-          %}selected="selected"
-          {%
-          endif
-          %}
-        >
-          {{ _('Artikel') }}
-        </option>
-      </select>
+    <div class="control-group form-group">
+      <label class="control-label" for="field-category">{{ _('Kategori konten') }}</label>
+      <div class="controls">
+        <input id="field-category" name="category" class="form-control" type="text" value="{{ data.category or '' }}" maxlength="80" placeholder="Contoh: Kebijakan, Panduan, Kegiatan" />
+      </div>
     </div>
-  </div>
 
-  <div class="control-group form-group">
-    <label class="control-label" for="field-featured"
-      >{{ _('Konten unggulan') }}</label
-    >
-    <div class="controls">
-      <select id="field-featured" name="featured" class="form-control">
-        <option
-          value="false"
-          {%
-          if
-          not
-          data.featured
-          %}selected="selected"
-          {%
-          endif
-          %}
-        >
-          {{ _('Tidak') }}
-        </option>
-        <option
-          value="true"
-          {%
-          if
-          data.featured
-          %}selected="selected"
-          {%
-          endif
-          %}
-        >
-          {{ _('Ya') }}
-        </option>
-      </select>
+    <div class="control-group form-group">
+      <label class="control-label" for="field-template-type">{{ _('Tata letak halaman') }}</label>
+      <div class="controls">
+        <select id="field-template-type" name="template_type" class="form-control">
+          <option value="standard" {{ 'selected="selected"' if not data.template_type or data.template_type == 'standard' else '' }}>{{ _('Standar') }}</option>
+          <option value="landing" {{ 'selected="selected"' if data.template_type == 'landing' else '' }}>{{ _('Landing page') }}</option>
+          <option value="policy" {{ 'selected="selected"' if data.template_type == 'policy' else '' }}>{{ _('Kebijakan / regulasi') }}</option>
+          <option value="guide" {{ 'selected="selected"' if data.template_type == 'guide' else '' }}>{{ _('Panduan') }}</option>
+          <option value="article" {{ 'selected="selected"' if data.template_type == 'article' else '' }}>{{ _('Artikel') }}</option>
+        </select>
+      </div>
     </div>
-  </div>
 
-  <div class="control-group form-group">
-    <label class="control-label" for="field-show-in-menu"
-      >{{ _('Tampilkan pada navigasi Informasi') }}</label
-    >
-    <div class="controls">
-      <select id="field-show-in-menu" name="show_in_menu" class="form-control">
-        <option
-          value="false"
-          {%
-          if
-          not
-          data.show_in_menu
-          %}selected="selected"
-          {%
-          endif
-          %}
-        >
-          {{ _('Tidak') }}
-        </option>
-        <option
-          value="true"
-          {%
-          if
-          data.show_in_menu
-          %}selected="selected"
-          {%
-          endif
-          %}
-        >
-          {{ _('Ya') }}
-        </option>
-      </select>
+    <div class="control-group form-group">
+      <label class="control-label" for="field-featured">{{ _('Konten unggulan') }}</label>
+      <div class="controls">
+        <select id="field-featured" name="featured" class="form-control">
+          <option value="false" {{ 'selected="selected"' if not data.featured else '' }}>{{ _('Tidak') }}</option>
+          <option value="true" {{ 'selected="selected"' if data.featured else '' }}>{{ _('Ya') }}</option>
+        </select>
+      </div>
     </div>
-  </div>
 
-  <div class="control-group form-group">
-    <label class="control-label" for="field-menu-label"
-      >{{ _('Label navigasi') }}</label
-    >
-    <div class="controls">
-      <input
-        id="field-menu-label"
-        name="menu_label"
-        class="form-control"
-        type="text"
-        value="{{ data.menu_label or '' }}"
-        maxlength="48"
-        placeholder="Opsional; default menggunakan judul halaman"
-      />
+    <div class="control-group form-group">
+      <label class="control-label" for="field-show-in-menu">{{ _('Tampilkan pada navigasi Informasi') }}</label>
+      <div class="controls">
+        <select id="field-show-in-menu" name="show_in_menu" class="form-control">
+          <option value="false" {{ 'selected="selected"' if not data.show_in_menu else '' }}>{{ _('Tidak') }}</option>
+          <option value="true" {{ 'selected="selected"' if data.show_in_menu else '' }}>{{ _('Ya') }}</option>
+        </select>
+      </div>
     </div>
-  </div>
 
-  <div class="control-group form-group">
-    <label class="control-label" for="field-menu-order"
-      >{{ _('Urutan navigasi') }}</label
-    >
-    <div class="controls">
-      <input
-        id="field-menu-order"
-        name="menu_order"
-        class="form-control"
-        type="number"
-        min="1"
-        max="99"
-        step="1"
-        value="{{ data.menu_order or '' }}"
-        placeholder="1"
-      />
+    <div class="control-group form-group">
+      <label class="control-label" for="field-menu-label">{{ _('Label navigasi') }}</label>
+      <div class="controls">
+        <input id="field-menu-label" name="menu_label" class="form-control" type="text" value="{{ data.menu_label or '' }}" maxlength="48" placeholder="Opsional; default menggunakan judul halaman" />
+      </div>
     </div>
-  </div>
-</fieldset>
 
-<fieldset class="wajo-pages-editor">
-  <legend>{{ _('SEO dan gambar sosial') }}</legend>
-  <div class="control-group form-group">
-    <label class="control-label" for="field-seo-title"
-      >{{ _('Judul SEO') }}</label
-    >
-    <div class="controls">
-      <input
-        id="field-seo-title"
-        name="seo_title"
-        class="form-control"
-        type="text"
-        value="{{ data.seo_title or '' }}"
-        maxlength="70"
-        placeholder="Opsional; default menggunakan judul konten"
-      />
+    <div class="control-group form-group">
+      <label class="control-label" for="field-menu-order">{{ _('Urutan navigasi') }}</label>
+      <div class="controls">
+        <input id="field-menu-order" name="menu_order" class="form-control" type="number" min="1" max="99" step="1" value="{{ data.menu_order or '' }}" placeholder="1" />
+      </div>
     </div>
-  </div>
-  <div class="control-group form-group">
-    <label class="control-label" for="field-seo-description"
-      >{{ _('Deskripsi SEO') }}</label
-    >
-    <div class="controls">
-      <textarea
-        id="field-seo-description"
-        name="seo_description"
-        class="form-control"
-        rows="3"
-        maxlength="180"
-        placeholder="Deskripsi singkat untuk hasil pencarian"
-      >
-{{ data.seo_description or '' }}</textarea>
-    </div>
-  </div>
-  <div class="control-group form-group">
-    <label class="control-label" for="field-og-image"
-      >{{ _('URL gambar Open Graph') }}</label
-    >
-    <div class="controls">
-      <input
-        id="field-og-image"
-        name="og_image"
-        class="form-control"
-        type="text"
-        value="{{ data.og_image or '' }}"
-        placeholder="https://... atau /uploads/..."
-      />
-      <p class="wajo-pages-editor__help">
-        {{ _('Gunakan URL HTTPS atau path publik portal. Gambar akan dipakai
-        untuk pratinjau berbagi tautan.') }}
-      </p>
-    </div>
-  </div>
-</fieldset>
+  </fieldset>
 
-<fieldset class="wajo-pages-editor">
-  <legend>{{ _('Komponen halaman terstruktur (opsional)') }}</legend>
-  <div class="control-group form-group">
-    <label class="control-label" for="field-content-blocks"
-      >{{ _('Content blocks JSON') }}</label
-    >
-    <div class="controls">
-      <textarea
-        id="field-content-blocks"
-        name="content_blocks"
-        class="form-control wajo-pages-editor__json"
-        rows="14"
-        spellcheck="false"
-        placeholder='[{"type":"hero","title":"Judul bagian","description":"Ringkasan"}]'
-      >
-{{ data.content_blocks or '' }}</textarea>
-      <p class="wajo-pages-editor__help">
-        {{ _('Opsional. Gunakan JSON array. Tipe yang didukung: hero, rich_text,
-        image, gallery, stats, dataset_links, publication_list, cta, divider.
-        HTML bebas tidak dijalankan.') }}
-      </p>
-      {% if errors.content_blocks %}
-      <p class="error-block" role="alert">
-        {% for error in errors.content_blocks %}{{ error }}{% if not loop.last
-        %}; {% endif %}{% endfor %}
-      </p>
-      {% endif %}
-      <details class="wajo-pages-editor__example">
-        <summary>{{ _('Lihat contoh komponen') }}</summary>
-        <pre>
-[\n  {"type":"hero","eyebrow":"Satu Data Wajo","title":"Data untuk keputusan","description":"Akses data resmi daerah.","primaryLabel":"Jelajahi dataset","primaryHref":"/dataset"},\n  {"type":"stats","items":[{"label":"Dataset terbuka","value":"120","source":"Katalog CKAN"}]},\n  {"type":"dataset_links","title":"Dataset pilihan","items":[{"slug":"contoh-dataset","label":"Buka dataset"}]},\n  {"type":"cta","title":"Butuh data lain?","label":"Jelajahi katalog","href":"/dataset"}\n]</pre>
-      </details>
+  <fieldset class="wajo-pages-editor">
+    <legend>{{ _('SEO dan gambar sosial') }}</legend>
+    <div class="control-group form-group">
+      <label class="control-label" for="field-seo-title">{{ _('Judul SEO') }}</label>
+      <div class="controls">
+        <input id="field-seo-title" name="seo_title" class="form-control" type="text" value="{{ data.seo_title or '' }}" maxlength="70" placeholder="Opsional; default menggunakan judul konten" />
+      </div>
     </div>
-  </div>
-</fieldset>
+    <div class="control-group form-group">
+      <label class="control-label" for="field-seo-description">{{ _('Deskripsi SEO') }}</label>
+      <div class="controls">
+        <textarea id="field-seo-description" name="seo_description" class="form-control" rows="3" maxlength="180" placeholder="Deskripsi singkat untuk hasil pencarian">{{ data.seo_description or '' }}</textarea>
+      </div>
+    </div>
+    <div class="control-group form-group">
+      <label class="control-label" for="field-og-image">{{ _('URL gambar Open Graph') }}</label>
+      <div class="controls">
+        <input id="field-og-image" name="og_image" class="form-control" type="text" value="{{ data.og_image or '' }}" placeholder="https://... atau /uploads/..." />
+        <p class="wajo-pages-editor__help">{{ _('Gunakan URL HTTPS atau path publik portal. Gambar akan dipakai untuk pratinjau berbagi tautan.') }}</p>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="wajo-pages-editor">
+    <legend>{{ _('Komponen halaman terstruktur (opsional)') }}</legend>
+    <div class="control-group form-group">
+      <label class="control-label" for="field-content-blocks">{{ _('Content blocks JSON') }}</label>
+      <div class="controls">
+        <textarea id="field-content-blocks" name="content_blocks" class="form-control wajo-pages-editor__json" rows="14" spellcheck="false" placeholder='[{"type":"hero","title":"Judul bagian","description":"Ringkasan"}]'>{{ data.content_blocks or '' }}</textarea>
+        <p class="wajo-pages-editor__help">{{ _('Opsional. Gunakan JSON array. Tipe yang didukung: hero, rich_text, image, gallery, stats, dataset_links, publication_list, cta, divider. HTML bebas tidak dijalankan.') }}</p>
+        {% if errors.content_blocks %}<p class="error-block" role="alert">{% for error in errors.content_blocks %}{{ error }}{% if not loop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+        <details class="wajo-pages-editor__example">
+          <summary>{{ _('Lihat contoh komponen') }}</summary>
+          <pre>[\n  {"type":"hero","eyebrow":"Satu Data Wajo","title":"Data untuk keputusan","description":"Akses data resmi daerah.","primaryLabel":"Jelajahi dataset","primaryHref":"/dataset"},\n  {"type":"stats","items":[{"label":"Dataset terbuka","value":"120","source":"Katalog CKAN"}]},\n  {"type":"dataset_links","title":"Dataset pilihan","items":[{"slug":"contoh-dataset","label":"Buka dataset"}]},\n  {"type":"cta","title":"Butuh data lain?","label":"Jelajahi katalog","href":"/dataset"}\n]</pre>
+        </details>
+      </div>
+    </div>
+  </fieldset>
 {% endblock %}

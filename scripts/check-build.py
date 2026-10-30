@@ -111,6 +111,15 @@ def main() -> None:
         assert (ckan / "theme/ckanext/wajo_theme/public/logo-kabupaten-wajo.webp").is_file()
         assert (ckan / "schemas/dataset.yaml").is_file()
         assert "2.12.1" in result, "generated Dockerfile should use the patch-pinned official base image"
+        compose_override = (ROOT / "deploy/ckan/docker-compose.override.yml").read_text()
+        ckan_service = compose_override.split("  ckan:\n", 1)[1].split("  # XLoader", 1)[0]
+        assert "healthcheck:" in ckan_service, "CKAN must define an explicit healthcheck override"
+        assert "- python" in ckan_service and "urllib.request.urlopen" in ckan_service, "CKAN healthcheck must use Python stdlib instead of relying on wget"
+        assert "/api/action/status_show" in ckan_service and "payload.get('success') is True" in ckan_service, "CKAN healthcheck must validate status_show success"
+        assert "start_period: 90s" in ckan_service and "retries: 5" in ckan_service, "CKAN healthcheck must allow startup/migration time"
+        ckan_healthcheck = ckan_service.split("    healthcheck:\n", 1)[1].split("  # XLoader", 1)[0]
+        assert "wget" not in ckan_healthcheck, "CKAN healthcheck must not rely on wget being installed in the base image"
+
         workflow = (ROOT / ".github/workflows/ci.yml").read_text()
         assert "COPY deploy/ckan/install-pages.py /tmp/install-pages.py" in workflow
         assert "&& python /tmp/install-pages.py" in workflow

@@ -8,6 +8,22 @@ services:
       CKANEXT__XLOADER__API_TOKEN: ${CKANEXT__XLOADER__API_TOKEN}
       CKANEXT__XLOADER__JOBS_DB__URI: ${CKANEXT__XLOADER__JOBS_DB__URI}
       CKANEXT__XLOADER__SITE_URL: ${CKANEXT__XLOADER__SITE_URL}
+    # Use Python stdlib rather than wget: CKAN's base image guarantees Python,
+    # while minimal image variants may not include wget. Validate the CKAN API
+    # payload as well as the HTTP status before allowing dependent services up.
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import json, urllib.request;
+          payload = json.load(urllib.request.urlopen('http://127.0.0.1:5000/api/action/status_show', timeout=8));
+          raise SystemExit(0 if payload.get('success') is True else 1)
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
 
   # XLoader jobs run in the same pinned CKAN image and private networks.
   xloader-worker:
