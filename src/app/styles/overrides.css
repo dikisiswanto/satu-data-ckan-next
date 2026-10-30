@@ -217,4 +217,3 @@ body:has(.public-home) .site-header-at-top .site-brand-copy > span {
 body:has(.public-home) .site-header-at-top .site-brand-copy > span:first-child {
   @apply text-white/80;
 }
-

@@ -1,22 +1,42 @@
 import "server-only";
 import { cache } from "react";
-import { ckanAction, ckanExtraValue, ckanExtraValues, searchPackages } from "@/lib/ckan/client";
+import {
+  ckanAction,
+  ckanExtraValue,
+  ckanExtraValues,
+  searchPackages,
+} from "@/lib/ckan/client";
 import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
 import { publicResourceUrl } from "@/lib/ckan/public-resource-url";
 
-export const PUBLICATION_TAG = process.env.CKAN_PUBLICATION_TAG || "portal-publikasi";
+export const PUBLICATION_TAG =
+  process.env.CKAN_PUBLICATION_TAG || "portal-publikasi";
 
 export function isPublicPublicationPackage(pkg) {
-  return Boolean(pkg && (!pkg.state || pkg.state === "active") && pkg.private !== true &&
-    (pkg.tags || []).some((tag) => (tag.name || tag.display_name) === PUBLICATION_TAG));
+  return Boolean(
+    pkg &&
+    (!pkg.state || pkg.state === "active") &&
+    pkg.private !== true &&
+    (pkg.tags || []).some(
+      (tag) => (tag.name || tag.display_name) === PUBLICATION_TAG,
+    ),
+  );
 }
 
 export function getPublicationResources(pkg = {}) {
-  return (pkg.resources || []).filter((resource) => resource && (!resource.state || resource.state === "active") && resource.private !== true && resource.url);
+  return (pkg.resources || []).filter(
+    (resource) =>
+      resource &&
+      (!resource.state || resource.state === "active") &&
+      resource.private !== true &&
+      resource.url,
+  );
 }
 
 export function getPublicationReleaseDate(pkg = {}) {
-  return ckanExtraValue(pkg, ["portal_publication_date", "publication_date"]) || "";
+  return (
+    ckanExtraValue(pkg, ["portal_publication_date", "publication_date"]) || ""
+  );
 }
 
 function toPublication(pkg) {
@@ -28,20 +48,47 @@ function toPublication(pkg) {
     notes: pkg.notes || "",
     organization: pkg.organization || null,
     resources: getPublicationResources(pkg)
-      .map((resource) => ({ ...resource, url: publicResourceUrl(resource.url) }))
+      .map((resource) => ({
+        ...resource,
+        url: publicResourceUrl(resource.url),
+      }))
       .filter((resource) => resource.url),
-    period: ckanExtraValue(pkg, ["portal_reference_period", "portal_period", "period", "periode_data"]) || "",
+    period:
+      ckanExtraValue(pkg, [
+        "portal_reference_period",
+        "portal_period",
+        "period",
+        "periode_data",
+      ]) || "",
     publicationDate: getPublicationReleaseDate(pkg),
-    version: ckanExtraValue(pkg, ["portal_version", "version_release"]) || pkg.version || "",
-    revisionNote: ckanExtraValue(pkg, ["portal_revision_note", "revision_note"]) || "",
-    methodology: ckanExtraValue(pkg, ["portal_methodology", "methodology", "methodology_description"]) || "",
-    category: ckanExtraValue(pkg, ["portal_category", "category"]) || pkg.groups?.[0]?.title || "Publikasi statistik",
-    attribution: ckanExtraValue(pkg, ["portal_attribution", "publisher"]) || pkg.organization?.title || "",
+    version:
+      ckanExtraValue(pkg, ["portal_version", "version_release"]) ||
+      pkg.version ||
+      "",
+    revisionNote:
+      ckanExtraValue(pkg, ["portal_revision_note", "revision_note"]) || "",
+    methodology:
+      ckanExtraValue(pkg, [
+        "portal_methodology",
+        "methodology",
+        "methodology_description",
+      ]) || "",
+    category:
+      ckanExtraValue(pkg, ["portal_category", "category"]) ||
+      pkg.groups?.[0]?.title ||
+      "Publikasi statistik",
+    attribution:
+      ckanExtraValue(pkg, ["portal_attribution", "publisher"]) ||
+      pkg.organization?.title ||
+      "",
     extras,
   };
 }
 
-export async function getPublishedPublicationsResult({ limit = 18, page = 1 } = {}) {
+export async function getPublishedPublicationsResult({
+  limit = 18,
+  page = 1,
+} = {}) {
   const safeLimit = Math.min(Math.max(Number(limit) || 18, 1), 100);
   const safePage = Math.min(Math.max(Number(page) || 1, 1), 10000);
   try {
@@ -52,27 +99,56 @@ export async function getPublishedPublicationsResult({ limit = 18, page = 1 } = 
       sort: "metadata_modified desc",
       fq: [`tags:${PUBLICATION_TAG}`],
     });
-    const packages = (Array.isArray(result.results) ? result.results : []).filter(isPublicPublicationPackage);
+    const packages = (
+      Array.isArray(result.results) ? result.results : []
+    ).filter(isPublicPublicationPackage);
     return {
       data: packages.map(toPublication),
-      meta: { current_page: safePage, per_page: safeLimit, total: Number(result.count || 0), last_page: Math.max(1, Math.ceil(Number(result.count || 0) / safeLimit)) },
+      meta: {
+        current_page: safePage,
+        per_page: safeLimit,
+        total: Number(result.count || 0),
+        last_page: Math.max(
+          1,
+          Math.ceil(Number(result.count || 0) / safeLimit),
+        ),
+      },
       unavailable: false,
     };
   } catch (error) {
-    console.error("ckan_public_publications_failed", { status: error?.status || null });
-    return { data: [], meta: { current_page: safePage, per_page: safeLimit, total: 0, last_page: 1 }, unavailable: true };
+    console.error("ckan_public_publications_failed", {
+      status: error?.status || null,
+    });
+    return {
+      data: [],
+      meta: {
+        current_page: safePage,
+        per_page: safeLimit,
+        total: 0,
+        last_page: 1,
+      },
+      unavailable: true,
+    };
   }
 }
 
-export const getPublicPublicationBySlugResult = cache(async function getPublicPublicationBySlugResult(name) {
-  if (typeof name !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(name)) return { data: null, unavailable: false };
-  try {
-    const pkg = sanitizePublicPackage(await ckanAction("package_show", { id: name }));
-    if (!isPublicPublicationPackage(pkg)) return { data: null, unavailable: false };
-    return { data: toPublication(pkg), unavailable: false };
-  } catch (error) {
-    if (error?.status === 404) return { data: null, unavailable: false };
-    console.error("ckan_public_publication_detail_failed", { status: error?.status || null });
-    return { data: null, unavailable: true };
-  }
-});
+export const getPublicPublicationBySlugResult = cache(
+  async function getPublicPublicationBySlugResult(name) {
+    if (typeof name !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(name))
+      return { data: null, unavailable: false };
+    try {
+      const pkg = sanitizePublicPackage(
+        await ckanAction("package_show", { id: name }),
+      );
+      if (!isPublicPublicationPackage(pkg))
+        return { data: null, unavailable: false };
+      return { data: toPublication(pkg), unavailable: false };
+    } catch (error) {
+      if (error?.status === 404) return { data: null, unavailable: false };
+      console.error("ckan_public_publication_detail_failed", {
+        status: error?.status || null,
+      });
+      return { data: null, unavailable: true };
+    }
+  },
+);

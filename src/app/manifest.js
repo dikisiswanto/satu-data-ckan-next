@@ -20,13 +20,17 @@ export default function manifest() {
       {
         src: siteConfig.pwaIcon192,
         sizes: siteConfig.pwaIcon192.endsWith(".svg") ? "any" : "192x192",
-        type: siteConfig.pwaIcon192.endsWith(".svg") ? "image/svg+xml" : "image/png",
+        type: siteConfig.pwaIcon192.endsWith(".svg")
+          ? "image/svg+xml"
+          : "image/png",
         purpose: "any",
       },
       {
         src: siteConfig.pwaIcon512,
         sizes: siteConfig.pwaIcon512.endsWith(".svg") ? "any" : "512x512",
-        type: siteConfig.pwaIcon512.endsWith(".svg") ? "image/svg+xml" : "image/png",
+        type: siteConfig.pwaIcon512.endsWith(".svg")
+          ? "image/svg+xml"
+          : "image/png",
         purpose: "any",
       },
     ],

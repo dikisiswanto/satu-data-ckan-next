@@ -21,5 +21,7 @@ const badgeVariants = cva(
 );
 
 export function Badge({ variant = "neutral", className, ...props }) {
-  return <span className={cn(badgeVariants({ variant }), className)} {...props} />;
+  return (
+    <span className={cn(badgeVariants({ variant }), className)} {...props} />
+  );
 }

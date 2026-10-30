@@ -17,7 +17,7 @@ html {
 }
 
 .public-app-shell
-  :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea){
+  :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
   color: #263f52;
   border-color: var(--brand-border);
   border-radius: 0.625rem;
@@ -30,21 +30,24 @@ html {
     input:not([type="checkbox"]):not([type="radio"]),
     select,
     textarea
-  ):focus-visible{
+  ):focus-visible {
   border-color: var(--brand-blue);
   outline: none;
   box-shadow: 0 0 0 3px var(--brand-focus-ring);
 }
 
-.public-app-shell :is(input:not([type="checkbox"]):not([type="radio"]), select){
+.public-app-shell
+  :is(input:not([type="checkbox"]):not([type="radio"]), select) {
   min-height: 2.75rem;
 }
 
-.public-app-shell :is(button, a){
+.public-app-shell :is(button, a) {
   -webkit-tap-highlight-color: transparent;
 }
 
-.public-app-shell a:focus-visible, .public-app-shell button:focus-visible, .public-app-shell summary:focus-visible{
+.public-app-shell a:focus-visible,
+.public-app-shell button:focus-visible,
+.public-app-shell summary:focus-visible {
   outline: 2px solid var(--brand-blue);
   outline-offset: 3px;
 }
@@ -61,11 +64,7 @@ html {
   text-wrap: pretty;
 }
 
-
-
-
-
-.site-header .public-link:focus-visible{
+.site-header .public-link:focus-visible {
   outline: 2px solid var(--brand-blue);
   outline-offset: 2px;
 }
@@ -74,8 +73,6 @@ html {
   .public-interior-page .public-page-heading {
     gap: 0.875rem;
   }
-
-  
 }
 
 /* Brand alignment uses the shared tokens from foundation.css. */
@@ -240,9 +237,6 @@ body:has(.public-home) .home-visual-caption small {
 
 /* Keep dashboard sections and form panels aligned to the full main-column width. */
 
-
-
-
 /* Shared typography scale across public pages and navigation. */
 .public-interior-page .public-page-heading h1 {
   font-size: var(--type-h1);
@@ -270,7 +264,3 @@ body:has(.public-home) .home-visual-caption small {
       56% center !important;
   }
 }
-
-
-
-

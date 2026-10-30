@@ -153,7 +153,6 @@
   }
 }
 
-
 /* Motion is intentionally confined to the right-side hero illustration.
    Each animated element has one animation owner to avoid stacked/replayed motion. */
 .home-hero-copy,
@@ -175,7 +174,8 @@
 }
 
 .home-hero-visual {
-  animation: home-hero-visual-enter 1100ms cubic-bezier(0.16, 1, 0.3, 1) 250ms both;
+  animation: home-hero-visual-enter 1100ms cubic-bezier(0.16, 1, 0.3, 1) 250ms
+    both;
 }
 
 .home-orbit-one {
@@ -195,7 +195,8 @@
 }
 
 .home-visual-caption {
-  animation: home-hero-element-enter 740ms cubic-bezier(0.16, 1, 0.3, 1) 600ms both;
+  animation: home-hero-element-enter 740ms cubic-bezier(0.16, 1, 0.3, 1) 600ms
+    both;
 }
 
 .home-visual-chip-top {

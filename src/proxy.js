@@ -18,7 +18,8 @@ export function proxy(request) {
   // read-only and must never be indexed. The route handler enforces the action
   // allowlist; this proxy rejects mutating methods before they reach it.
   if (pathname.startsWith("/api/3/action/")) {
-    if (!/^\/api\/3\/action\/[a-z][a-z0-9_]*\/?$/.test(pathname)) return notFound();
+    if (!/^\/api\/3\/action\/[a-z][a-z0-9_]*\/?$/.test(pathname))
+      return notFound();
     if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) return notFound();
     const response = NextResponse.next();
     response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");

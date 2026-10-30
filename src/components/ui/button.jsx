@@ -6,10 +6,14 @@ const buttonStyles = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-        primary: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-        outline: "border border-line bg-surface text-ink shadow-sm hover:bg-accent hover:text-primary",
-        secondary: "border border-line bg-surface text-ink shadow-sm hover:bg-canvas",
+        default:
+          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+        primary:
+          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+        outline:
+          "border border-line bg-surface text-ink shadow-sm hover:bg-accent hover:text-primary",
+        secondary:
+          "border border-line bg-surface text-ink shadow-sm hover:bg-canvas",
         ghost: "text-ink hover:bg-accent hover:text-primary",
         destructive: "bg-red-700 text-white shadow-sm hover:bg-red-800",
         danger: "bg-red-700 text-white shadow-sm hover:bg-red-800",
@@ -25,14 +29,27 @@ const buttonStyles = cva(
     defaultVariants: { variant: "default", size: "md" },
   },
 );
-export function Button({ className, variant, size, href, children, prefetch, ...props }) {
+export function Button({
+  className,
+  variant,
+  size,
+  href,
+  children,
+  prefetch,
+  ...props
+}) {
   const classes = cn(buttonStyles({ variant, size }), className);
   if (href)
     return (
       <Link
         className={classes}
         href={href}
-        prefetch={prefetch ?? (typeof href === "string" && /^https?:\/\//i.test(href) ? false : undefined)}
+        prefetch={
+          prefetch ??
+          (typeof href === "string" && /^https?:\/\//i.test(href)
+            ? false
+            : undefined)
+        }
         {...props}
       >
         {children}

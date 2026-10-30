@@ -8,9 +8,11 @@ export function ServiceWorkerRegistration() {
     if (!("serviceWorker" in navigator)) return;
 
     const registerWorker = () => {
-      navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).catch(() => {
-        // Offline support is progressive enhancement; it must not block the portal.
-      });
+      navigator.serviceWorker
+        .register("/sw.js", { scope: "/", updateViaCache: "none" })
+        .catch(() => {
+          // Offline support is progressive enhancement; it must not block the portal.
+        });
     };
 
     if (document.readyState === "complete") registerWorker();

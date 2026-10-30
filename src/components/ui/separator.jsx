@@ -1,6 +1,11 @@
 import { cn } from "@/lib/utils";
 
-export function Separator({ className, orientation = "horizontal", decorative = true, ...props }) {
+export function Separator({
+  className,
+  orientation = "horizontal",
+  decorative = true,
+  ...props
+}) {
   const vertical = orientation === "vertical";
   return (
     <div

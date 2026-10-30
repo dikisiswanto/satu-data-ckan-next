@@ -28,7 +28,13 @@ export const metadata = {
   icons: {
     icon: [
       { url: siteConfig.iconPath, type: "image/svg+xml" },
-      { url: siteConfig.pwaIcon192, sizes: siteConfig.pwaIcon192.endsWith(".svg") ? "any" : "192x192", type: siteConfig.pwaIcon192.endsWith(".svg") ? "image/svg+xml" : "image/png" },
+      {
+        url: siteConfig.pwaIcon192,
+        sizes: siteConfig.pwaIcon192.endsWith(".svg") ? "any" : "192x192",
+        type: siteConfig.pwaIcon192.endsWith(".svg")
+          ? "image/svg+xml"
+          : "image/png",
+      },
     ],
     apple: siteConfig.pwaIcon192,
   },

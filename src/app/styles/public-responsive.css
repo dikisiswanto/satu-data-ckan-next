@@ -174,7 +174,6 @@
     max-width: calc(100vw - 2rem);
     scrollbar-width: thin;
   }
-
 }
 
 @media (max-width: 359px) {

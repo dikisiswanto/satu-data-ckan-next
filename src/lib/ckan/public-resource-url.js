@@ -18,7 +18,8 @@ export function publicResourceUrl(value) {
   }
 
   const publicOrigin = getPublicSiteOrigin();
-  const configuredAdmin = process.env.CKAN_ADMIN_URL || process.env.NEXT_PUBLIC_CKAN_ADMIN_URL;
+  const configuredAdmin =
+    process.env.CKAN_ADMIN_URL || process.env.NEXT_PUBLIC_CKAN_ADMIN_URL;
   let adminOrigin = null;
   try {
     adminOrigin = configuredAdmin ? new URL(configuredAdmin).origin : null;
@@ -26,11 +27,19 @@ export function publicResourceUrl(value) {
     adminOrigin = null;
   }
 
-  const isInternalCkanHost = ["ckan", "nginx", "localhost", "127.0.0.1"].includes(resourceUrl.hostname);
+  const isInternalCkanHost = [
+    "ckan",
+    "nginx",
+    "localhost",
+    "127.0.0.1",
+  ].includes(resourceUrl.hostname);
   const isProtectedOrigin = Boolean(
     (adminOrigin && resourceUrl.origin === adminOrigin) || isInternalCkanHost,
   );
-  const isCkanDownload = /^\/dataset\/[^/]+\/resource\/[^/]+\/download\/[^/]+\/?$/.test(resourceUrl.pathname);
+  const isCkanDownload =
+    /^\/dataset\/[^/]+\/resource\/[^/]+\/download\/[^/]+\/?$/.test(
+      resourceUrl.pathname,
+    );
 
   // Never publish a service-network/admin URL. Only the CKAN download route is
   // known to be routed safely through the public portal. A different internal
@@ -47,12 +56,18 @@ export function publicResourceUrl(value) {
 export function ckanResourceExtra(resource = {}, key) {
   if (!key) return null;
   const direct = resource[key];
-  if (direct !== undefined && direct !== null && String(direct).trim() !== "") return String(direct);
+  if (direct !== undefined && direct !== null && String(direct).trim() !== "")
+    return String(direct);
   const extras = Array.isArray(resource.extras) ? resource.extras : [];
-  const match = extras.find((item) => item?.key === key && item.value !== undefined && item.value !== null && String(item.value).trim() !== "");
+  const match = extras.find(
+    (item) =>
+      item?.key === key &&
+      item.value !== undefined &&
+      item.value !== null &&
+      String(item.value).trim() !== "",
+  );
   return match ? String(match.value) : null;
 }
-
 
 /**
  * Preserve CKAN's native Action API object shape while rewriting only CKAN
@@ -61,13 +76,15 @@ export function ckanResourceExtra(resource = {}, key) {
  */
 export function rewriteCkanDownloadUrls(value, depth = 0) {
   if (depth > 14 || value === null || value === undefined) return value;
-  if (Array.isArray(value)) return value.map((item) => rewriteCkanDownloadUrls(item, depth + 1));
+  if (Array.isArray(value))
+    return value.map((item) => rewriteCkanDownloadUrls(item, depth + 1));
   if (typeof value !== "object") return value;
   const output = {};
   for (const [key, item] of Object.entries(value)) {
-    output[key] = key === "url" && typeof item === "string"
-      ? publicResourceUrl(item)
-      : rewriteCkanDownloadUrls(item, depth + 1);
+    output[key] =
+      key === "url" && typeof item === "string"
+        ? publicResourceUrl(item)
+        : rewriteCkanDownloadUrls(item, depth + 1);
   }
   return output;
 }

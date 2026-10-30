@@ -7,14 +7,18 @@ export function sanitizePublicPackage(pkg) {
   if (!Array.isArray(pkg.resources)) return pkg;
   return {
     ...pkg,
-    resources: pkg.resources.filter((resource) =>
-      resource && resource.private !== true && (!resource.state || resource.state === "active"),
+    resources: pkg.resources.filter(
+      (resource) =>
+        resource &&
+        resource.private !== true &&
+        (!resource.state || resource.state === "active"),
     ),
   };
 }
 
 export function sanitizePublicSearchResult(result) {
-  if (!result || typeof result !== "object" || !Array.isArray(result.results)) return result;
+  if (!result || typeof result !== "object" || !Array.isArray(result.results))
+    return result;
   return { ...result, results: result.results.map(sanitizePublicPackage) };
 }
 

@@ -1,22 +1,33 @@
-const configuredRegionName = (process.env.NEXT_PUBLIC_REGION_NAME || "Kabupaten Wajo").trim() || "Kabupaten Wajo";
+const configuredRegionName =
+  (process.env.NEXT_PUBLIC_REGION_NAME || "Kabupaten Wajo").trim() ||
+  "Kabupaten Wajo";
 const hasConfiguredRegion = configuredRegionName.length > 0;
 const configuredRegionShortName = (
   process.env.NEXT_PUBLIC_REGION_SHORT_NAME ||
   (hasConfiguredRegion
-    ? configuredRegionName.replace(/^(?:Kabupaten|Kota|Provinsi|Kecamatan)\s+/i, "")
+    ? configuredRegionName.replace(
+        /^(?:Kabupaten|Kota|Provinsi|Kecamatan)\s+/i,
+        "",
+      )
     : "Instansi")
 ).trim();
 const configuredShortName = (
   process.env.NEXT_PUBLIC_SHORT_NAME ||
-  (hasConfiguredRegion ? `Satu Data ${configuredRegionShortName}` : "Portal Satu Data")
+  (hasConfiguredRegion
+    ? `Satu Data ${configuredRegionShortName}`
+    : "Portal Satu Data")
 ).trim();
 const configuredOrganizationName = (
   process.env.NEXT_PUBLIC_ORGANIZATION_NAME ||
-  (hasConfiguredRegion ? `Pemerintah ${configuredRegionName}` : "Instansi pengampu")
+  (hasConfiguredRegion
+    ? `Pemerintah ${configuredRegionName}`
+    : "Instansi pengampu")
 ).trim();
 const configuredAppName = (
   process.env.NEXT_PUBLIC_APP_NAME ||
-  (hasConfiguredRegion ? `Portal Satu Data ${configuredRegionName}` : "Portal Satu Data")
+  (hasConfiguredRegion
+    ? `Portal Satu Data ${configuredRegionName}`
+    : "Portal Satu Data")
 ).trim();
 const configuredDescription = (
   process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
@@ -24,14 +35,33 @@ const configuredDescription = (
     ? `Portal resmi untuk menemukan, memahami, dan menggunakan data publik ${configuredRegionName}.`
     : "Katalog data resmi untuk menemukan, memahami, dan menggunakan data publik dari instansi pengampu.")
 ).trim();
-const configuredBrandProfile = (process.env.NEXT_PUBLIC_BRAND_PROFILE || (/^kabupaten wajo$/i.test(configuredRegionName) ? "wajo" : "generic")).trim().toLowerCase();
+const configuredBrandProfile = (
+  process.env.NEXT_PUBLIC_BRAND_PROFILE ||
+  (/^kabupaten wajo$/i.test(configuredRegionName) ? "wajo" : "generic")
+)
+  .trim()
+  .toLowerCase();
 // Regional assets/contact details must be opt-in. A configured region name is
 // not enough to infer a logo, PPID endpoint, address, or personal contact data.
-const isWajoBrandProfile = configuredBrandProfile === "wajo" && /^kabupaten wajo$/i.test(configuredRegionName);
-const configuredLogoPath = (process.env.NEXT_PUBLIC_LOGO_PATH || (isWajoBrandProfile ? "/logo-kabupaten-wajo.webp" : "/icons/portal.svg")).trim();
-const configuredHeroImage = (process.env.NEXT_PUBLIC_HERO_IMAGE || (isWajoBrandProfile ? "/wajo-hero-panorama.webp" : "/portal-social.svg")).trim();
-const configuredPpidName = (process.env.NEXT_PUBLIC_PPID_NAME || (isWajoBrandProfile ? "PPID Kabupaten Wajo" : "PPID instansi")).trim();
-const configuredPpidUrl = (process.env.NEXT_PUBLIC_PPID_URL || (isWajoBrandProfile ? "https://e-ppid-utama.wajokab.go.id/" : "")).trim();
+const isWajoBrandProfile =
+  configuredBrandProfile === "wajo" &&
+  /^kabupaten wajo$/i.test(configuredRegionName);
+const configuredLogoPath = (
+  process.env.NEXT_PUBLIC_LOGO_PATH ||
+  (isWajoBrandProfile ? "/logo-kabupaten-wajo.webp" : "/icons/portal.svg")
+).trim();
+const configuredHeroImage = (
+  process.env.NEXT_PUBLIC_HERO_IMAGE ||
+  (isWajoBrandProfile ? "/wajo-hero-panorama.webp" : "/portal-social.svg")
+).trim();
+const configuredPpidName = (
+  process.env.NEXT_PUBLIC_PPID_NAME ||
+  (isWajoBrandProfile ? "PPID Kabupaten Wajo" : "PPID instansi")
+).trim();
+const configuredPpidUrl = (
+  process.env.NEXT_PUBLIC_PPID_URL ||
+  (isWajoBrandProfile ? "https://e-ppid-utama.wajokab.go.id/" : "")
+).trim();
 
 export const siteConfig = Object.freeze({
   name: configuredAppName,
@@ -42,19 +72,52 @@ export const siteConfig = Object.freeze({
   regionName: configuredRegionName,
   regionShortName: configuredRegionShortName,
   organizationName: configuredOrganizationName,
-  publicSubtitle: (process.env.NEXT_PUBLIC_PUBLIC_SUBTITLE || (hasConfiguredRegion ? `Portal Data ${configuredRegionName}` : "Katalog Data Terbuka")).trim(),
+  publicSubtitle: (
+    process.env.NEXT_PUBLIC_PUBLIC_SUBTITLE ||
+    (hasConfiguredRegion
+      ? `Portal Data ${configuredRegionName}`
+      : "Katalog Data Terbuka")
+  ).trim(),
   logoPath: configuredLogoPath,
-  logoAlt: (process.env.NEXT_PUBLIC_LOGO_ALT || (isWajoBrandProfile ? `Lambang ${configuredRegionName}` : "Logo Portal Satu Data")).trim(),
+  logoAlt: (
+    process.env.NEXT_PUBLIC_LOGO_ALT ||
+    (isWajoBrandProfile
+      ? `Lambang ${configuredRegionName}`
+      : "Logo Portal Satu Data")
+  ).trim(),
   heroImage: configuredHeroImage,
-  iconPath: (process.env.NEXT_PUBLIC_ICON_PATH || (isWajoBrandProfile ? "/icons/icon.svg" : "/icons/portal.svg")).trim(),
-  pwaIcon192: (process.env.NEXT_PUBLIC_PWA_ICON_192 || (isWajoBrandProfile ? "/icons/icon-192.png" : "/icons/portal.svg")).trim(),
-  pwaIcon512: (process.env.NEXT_PUBLIC_PWA_ICON_512 || (isWajoBrandProfile ? "/icons/icon-512.png" : "/icons/portal.svg")).trim(),
+  iconPath: (
+    process.env.NEXT_PUBLIC_ICON_PATH ||
+    (isWajoBrandProfile ? "/icons/icon.svg" : "/icons/portal.svg")
+  ).trim(),
+  pwaIcon192: (
+    process.env.NEXT_PUBLIC_PWA_ICON_192 ||
+    (isWajoBrandProfile ? "/icons/icon-192.png" : "/icons/portal.svg")
+  ).trim(),
+  pwaIcon512: (
+    process.env.NEXT_PUBLIC_PWA_ICON_512 ||
+    (isWajoBrandProfile ? "/icons/icon-512.png" : "/icons/portal.svg")
+  ).trim(),
   ppidName: configuredPpidName,
   ppidUrl: configuredPpidUrl,
-  ppidContactUrl: (process.env.NEXT_PUBLIC_PPID_CONTACT_URL || (isWajoBrandProfile ? "https://e-ppid-utama.wajokab.go.id/kontak/" : "")).trim(),
-  ppidAddress: (process.env.NEXT_PUBLIC_PPID_ADDRESS || (isWajoBrandProfile ? "Jl. Rusa No. 17, Bulu Pabbulu, Kecamatan Tempe, Kabupaten Wajo, Sulawesi Selatan 90911" : "")).trim(),
-  ppidEmail: (process.env.NEXT_PUBLIC_PPID_EMAIL || (isWajoBrandProfile ? "ppid@wajokab.go.id" : "")).trim(),
-  ppidPhone: (process.env.NEXT_PUBLIC_PPID_PHONE || (isWajoBrandProfile ? "+62 811-4780-6767" : "")).trim(),
+  ppidContactUrl: (
+    process.env.NEXT_PUBLIC_PPID_CONTACT_URL ||
+    (isWajoBrandProfile ? "https://e-ppid-utama.wajokab.go.id/kontak/" : "")
+  ).trim(),
+  ppidAddress: (
+    process.env.NEXT_PUBLIC_PPID_ADDRESS ||
+    (isWajoBrandProfile
+      ? "Jl. Rusa No. 17, Bulu Pabbulu, Kecamatan Tempe, Kabupaten Wajo, Sulawesi Selatan 90911"
+      : "")
+  ).trim(),
+  ppidEmail: (
+    process.env.NEXT_PUBLIC_PPID_EMAIL ||
+    (isWajoBrandProfile ? "ppid@wajokab.go.id" : "")
+  ).trim(),
+  ppidPhone: (
+    process.env.NEXT_PUBLIC_PPID_PHONE ||
+    (isWajoBrandProfile ? "+62 811-4780-6767" : "")
+  ).trim(),
   locale: process.env.NEXT_PUBLIC_LOCALE || "id-ID",
   timeZone: process.env.NEXT_PUBLIC_TIME_ZONE || "Asia/Makassar",
 });

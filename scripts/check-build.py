@@ -82,7 +82,12 @@ def main() -> None:
             assert "include ckanext/pages/config_declaration.yaml" in manifest
             assert "recursive-include ckanext/pages/migration *" in manifest
         assert "ckanext-dcat==2.4.4" in (ckan / "extensions/requirements.txt").read_text()
-        assert "ckanext-xloader==2.5.2" in (ckan / "extensions/requirements.txt").read_text()
+        requirements_text = (ckan / "extensions/requirements.txt").read_text()
+        assert "ckanext-xloader==2.6.0" in requirements_text
+        assert "chardet==7.6.0" in requirements_text
+        plugin_checker = (ROOT / "scripts/check-plugins.py").read_text()
+        assert "ckanext.xloader.plugin" in plugin_checker
+        assert "chardet.universaldetector" in plugin_checker
         assert "ckanext-geoview==0.3.2" in (ckan / "extensions/requirements.txt").read_text()
         assert "ckanext-harvest==1.6.3" in (ckan / "extensions/requirements.txt").read_text()
         assert "theme/ /tmp/portal-ckan-theme/" in result, "custom theme source must be copied into the build"

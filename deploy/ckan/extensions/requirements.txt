@@ -3,6 +3,8 @@
 # upstream wheel omits the config declaration and Alembic migration assets.
 ckanext-scheming==3.1.0
 ckanext-dcat==2.4.4
-ckanext-xloader==2.5.2
+# XLoader 2.6.0 requires chardet 7.6.0; pin both for reproducible Python 3.14 builds.
+ckanext-xloader==2.6.0
+chardet==7.6.0
 ckanext-geoview==0.3.2
 ckanext-harvest==1.6.3

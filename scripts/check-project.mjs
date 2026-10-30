@@ -231,7 +231,7 @@ const checks = [
   ],
   [
     "deploy/ckan/extensions/requirements.txt",
-    /ckanext-scheming==3\.1\.0[\s\S]*ckanext-dcat==2\.4\.4[\s\S]*ckanext-xloader==2\.5\.2[\s\S]*ckanext-geoview==0\.3\.2[\s\S]*ckanext-harvest==1\.6\.3/,
+    /ckanext-scheming==3\.1\.0[\s\S]*ckanext-dcat==2\.4\.4[\s\S]*ckanext-xloader==2\.6\.0[\s\S]*chardet==7\.6\.0[\s\S]*ckanext-geoview==0\.3\.2[\s\S]*ckanext-harvest==1\.6\.3/,
     "Extension CKAN harus dipatok; Pages dibangun melalui installer package-data upstream.",
   ],
   [
