@@ -25,11 +25,31 @@
       <label class="control-label" for="field-template-type">{{ _('Tata letak halaman') }}</label>
       <div class="controls">
         <select id="field-template-type" name="template_type" class="form-control">
-          <option value="standard" {{ 'selected="selected"' if not data.template_type or data.template_type == 'standard' else '' }}>{{ _('Standar') }}</option>
-          <option value="landing" {{ 'selected="selected"' if data.template_type == 'landing' else '' }}>{{ _('Landing page') }}</option>
-          <option value="policy" {{ 'selected="selected"' if data.template_type == 'policy' else '' }}>{{ _('Kebijakan / regulasi') }}</option>
-          <option value="guide" {{ 'selected="selected"' if data.template_type == 'guide' else '' }}>{{ _('Panduan') }}</option>
-          <option value="article" {{ 'selected="selected"' if data.template_type == 'article' else '' }}>{{ _('Artikel') }}</option>
+          {% if not data.template_type or data.template_type == 'standard' %}
+          <option value="standard" selected="selected">{{ _('Standar') }}</option>
+          {% else %}
+          <option value="standard">{{ _('Standar') }}</option>
+          {% endif %}
+          {% if data.template_type == 'landing' %}
+          <option value="landing" selected="selected">{{ _('Landing page') }}</option>
+          {% else %}
+          <option value="landing">{{ _('Landing page') }}</option>
+          {% endif %}
+          {% if data.template_type == 'policy' %}
+          <option value="policy" selected="selected">{{ _('Kebijakan / regulasi') }}</option>
+          {% else %}
+          <option value="policy">{{ _('Kebijakan / regulasi') }}</option>
+          {% endif %}
+          {% if data.template_type == 'guide' %}
+          <option value="guide" selected="selected">{{ _('Panduan') }}</option>
+          {% else %}
+          <option value="guide">{{ _('Panduan') }}</option>
+          {% endif %}
+          {% if data.template_type == 'article' %}
+          <option value="article" selected="selected">{{ _('Artikel') }}</option>
+          {% else %}
+          <option value="article">{{ _('Artikel') }}</option>
+          {% endif %}
         </select>
       </div>
     </div>
@@ -38,8 +58,16 @@
       <label class="control-label" for="field-featured">{{ _('Konten unggulan') }}</label>
       <div class="controls">
         <select id="field-featured" name="featured" class="form-control">
-          <option value="false" {{ 'selected="selected"' if not data.featured else '' }}>{{ _('Tidak') }}</option>
-          <option value="true" {{ 'selected="selected"' if data.featured else '' }}>{{ _('Ya') }}</option>
+          {% if data.featured not in [true, 'true', '1', 1] %}
+          <option value="false" selected="selected">{{ _('Tidak') }}</option>
+          {% else %}
+          <option value="false">{{ _('Tidak') }}</option>
+          {% endif %}
+          {% if data.featured in [true, 'true', '1', 1] %}
+          <option value="true" selected="selected">{{ _('Ya') }}</option>
+          {% else %}
+          <option value="true">{{ _('Ya') }}</option>
+          {% endif %}
         </select>
       </div>
     </div>
@@ -48,8 +76,16 @@
       <label class="control-label" for="field-show-in-menu">{{ _('Tampilkan pada navigasi Informasi') }}</label>
       <div class="controls">
         <select id="field-show-in-menu" name="show_in_menu" class="form-control">
-          <option value="false" {{ 'selected="selected"' if not data.show_in_menu else '' }}>{{ _('Tidak') }}</option>
-          <option value="true" {{ 'selected="selected"' if data.show_in_menu else '' }}>{{ _('Ya') }}</option>
+          {% if data.show_in_menu not in [true, 'true', '1', 1] %}
+          <option value="false" selected="selected">{{ _('Tidak') }}</option>
+          {% else %}
+          <option value="false">{{ _('Tidak') }}</option>
+          {% endif %}
+          {% if data.show_in_menu in [true, 'true', '1', 1] %}
+          <option value="true" selected="selected">{{ _('Ya') }}</option>
+          {% else %}
+          <option value="true">{{ _('Ya') }}</option>
+          {% endif %}
         </select>
       </div>
     </div>

@@ -5,6 +5,8 @@ from __future__ import annotations
 import ast
 import re
 import sys
+from html.parser import HTMLParser
+from types import SimpleNamespace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -126,7 +128,10 @@ form_source = read(CMS_FORM)
 require("{% ckan_extends %}" in form_source and "{% block extra_pages_form %}" in form_source, "Form CMS harus mewarisi form upstream dan mengisi block extra_pages_form.")
 require(all(f'name=\"{field}\"' in form_source for field in ("excerpt", "category", "template_type", "featured", "show_in_menu", "seo_title", "seo_description", "og_image", "content_blocks")), "Form CMS belum menampilkan semua field editorial penting.")
 require("errors.content_blocks" in form_source, "Form CMS harus menampilkan kesalahan validasi JSON content blocks.")
-require(not re.search(r"{%\s*set\b", form_source), "Form CMS tidak boleh memakai assignment tag Jinja; gunakan ekspresi inline agar kompatibilitas template tetap sederhana.")
+require(not re.search(r"{%\s*set\b", form_source), "Form CMS tidak boleh memakai assignment tag Jinja; gunakan conditional yang eksplisit.")
+require(not re.search(r"<option\b[^>]*{{", form_source), "Ekspresi Jinja tidak boleh ditempatkan di dalam tag pembuka option; gunakan conditional untuk elemen option utuh.")
+prettierignore = read(ROOT / ".prettierignore")
+require("deploy/ckan/theme/**/*.html" in prettierignore, "Template HTML CKAN berbasis Jinja harus dikecualikan dari Prettier HTML parser.")
 
 # The CSS must remain parseable and preserve the responsive login fallback.
 require(css_source.count("{") == css_source.count("}"), "CSS memiliki jumlah kurung blok yang tidak seimbang.")
@@ -150,6 +155,47 @@ try:
             line = getattr(error, "lineno", "?")
             detail = getattr(error, "message", str(error))
             ERRORS.append(f"Template Jinja tidak valid di {path.relative_to(ROOT)}:{line}: {detail}")
+
+    class OptionSelectionParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.current_select = None
+            self.selected = {}
+
+        def handle_starttag(self, tag, attrs):
+            attributes = dict(attrs)
+            if tag == "select":
+                self.current_select = attributes.get("name")
+                if self.current_select:
+                    self.selected[self.current_select] = []
+            elif tag == "option" and self.current_select and "selected" in attributes:
+                self.selected[self.current_select].append(attributes.get("value"))
+
+        def handle_endtag(self, tag):
+            if tag == "select":
+                self.current_select = None
+
+    renderable_form = form_source.replace("{% ckan_extends %}", "")
+    renderable_form = renderable_form.replace("{% block extra_pages_form %}", "").replace("{% endblock %}", "")
+    renderable_form = renderable_form.replace("{{ super() }}", "")
+    render_env = Environment(autoescape=True)
+    render_env.globals["_"] = lambda value: value
+    for data, expected in (
+        ({"template_type": "", "featured": False, "show_in_menu": False}, {
+            "template_type": ["standard"], "featured": ["false"], "show_in_menu": ["false"]
+        }),
+        ({"template_type": "landing", "featured": "true", "show_in_menu": "true"}, {
+            "template_type": ["landing"], "featured": ["true"], "show_in_menu": ["true"]
+        }),
+        ({"template_type": "policy", "featured": "false", "show_in_menu": "0"}, {
+            "template_type": ["policy"], "featured": ["false"], "show_in_menu": ["false"]
+        }),
+    ):
+        rendered = render_env.from_string(renderable_form).render(data=data, errors=SimpleNamespace(content_blocks=[]))
+        parser = OptionSelectionParser()
+        parser.feed(rendered)
+        for select_name, selected_values in expected.items():
+            require(parser.selected.get(select_name) == selected_values, f"Pilihan CMS {select_name} tidak mempertahankan nilai terpilih {selected_values}.")
 except ImportError:
     ERRORS.append("Jinja2 diperlukan untuk memvalidasi template CKAN; pasang dependency pemeriksaan sebelum menjalankan check-theme.py.")
 
