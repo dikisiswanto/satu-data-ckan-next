@@ -156,7 +156,8 @@ def main() -> None:
         assert (ckan / "theme/ckanext/wajo_theme/assets/css/wajo-theme.css").is_file()
         assert (ckan / "theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css").is_file()
         assert (ckan / "theme/ckanext/wajo_theme/public/logo-kabupaten-wajo.webp").is_file()
-        assert (ckan / "schemas/dataset.yaml").is_file()
+        for schema_name in ("dataset.yaml", "organization.yaml", "group.yaml"):
+            assert (ckan / "schemas" / schema_name).is_file(), f"generated CKAN context must include {schema_name}"
         assert "2.12.1" in result, "generated Dockerfile should use the patch-pinned official base image"
         compose_override = (ROOT / "deploy/ckan/docker-compose.override.yml").read_text()
         ckan_service = compose_override.split("  ckan:\n", 1)[1].split("  # XLoader", 1)[0]
@@ -214,6 +215,9 @@ def main() -> None:
                 "ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
                 "ckanext/wajo_theme/assets/webassets.yml",
                 "ckanext/wajo_theme/schemas/dataset.yaml",
+                "ckanext/wajo_theme/schemas/organization.yaml",
+                "ckanext/wajo_theme/schemas/group.yaml",
+                "ckanext/wajo_theme/public/wajo-admin-forms.js",
                 "ckanext/wajo_theme/public/logo-kabupaten-wajo.webp",
                 "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po",
                 "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-harvest.po",
@@ -229,8 +233,15 @@ def main() -> None:
             [
                 "python3", "-c",
                 "from importlib import resources; "
-                "p = resources.files('ckanext.wajo_theme').joinpath('schemas/dataset.yaml'); "
-                "assert p.is_file() and p.read_text().startswith('dataset_type: dataset')",
+                "base = resources.files('ckanext.wajo_theme'); "
+                "dataset = base.joinpath('schemas/dataset.yaml'); "
+                "organization = base.joinpath('schemas/organization.yaml'); "
+                "group = base.joinpath('schemas/group.yaml'); "
+                "forms_js = base.joinpath('public/wajo-admin-forms.js'); "
+                "assert dataset.is_file() and dataset.read_text().startswith('dataset_type: dataset'); "
+                "assert organization.is_file() and organization.read_text().startswith('organization_type: organization'); "
+                "assert group.is_file() and group.read_text().startswith('group_type: group'); "
+                "assert forms_js.is_file()",
             ],
             cwd=ROOT,
             env={**os.environ, "PYTHONPATH": str(theme_dir)},

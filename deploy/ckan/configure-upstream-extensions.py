@@ -15,6 +15,8 @@ if not dockerfile.is_file():
 copies = {
     project_root / "deploy/ckan/extensions/requirements.txt": ckan_dir / "extensions/requirements.txt",
     project_root / "deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml": ckan_dir / "schemas/dataset.yaml",
+    project_root / "deploy/ckan/theme/ckanext/wajo_theme/schemas/organization.yaml": ckan_dir / "schemas/organization.yaml",
+    project_root / "deploy/ckan/theme/ckanext/wajo_theme/schemas/group.yaml": ckan_dir / "schemas/group.yaml",
     project_root / "deploy/ckan/initialize-extensions.sh": ckan_dir / "docker-entrypoint.d/50-portal-extensions.sh",
     project_root / "deploy/ckan/install-pages.py": ckan_dir / "install-pages.py",
     project_root / "deploy/ckan/compile-id-translations.py": ckan_dir / "compile-id-translations.py",

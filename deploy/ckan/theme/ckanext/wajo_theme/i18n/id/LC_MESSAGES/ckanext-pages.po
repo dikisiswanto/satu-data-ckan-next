@@ -15,7 +15,7 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 msgid " <p>Add blog articles to CKAN here.</p> "
-msgstr " <p>Tambahkan artikel blog ke CKAN melalui halaman ini.</p> "
+msgstr " <p>Kelola berita dan artikel portal melalui halaman ini.</p> "
 
 msgid ""
 " <p>Pages are are simple way to add extra pages to your ckan instance. You can assign an order to"
@@ -37,7 +37,7 @@ msgid "Add Article"
 msgstr "Tambah artikel"
 
 msgid "Add Blog Article"
-msgstr "Tambah artikel blog"
+msgstr "Tambah artikel berita"
 
 msgid "Add Page"
 msgstr "Tambah halaman"
@@ -68,16 +68,16 @@ msgid "Back"
 msgstr "Kembali"
 
 msgid "Blog"
-msgstr "Blog"
+msgstr "Berita dan artikel"
 
 msgid "Blog Articles"
-msgstr "Artikel blog"
+msgstr "Berita dan artikel"
 
 msgid "Blog post"
-msgstr "Artikel blog"
+msgstr "Artikel berita"
 
 msgid "Blog posts"
-msgstr "Artikel blog"
+msgstr "Artikel berita"
 
 msgid "Cancel"
 msgstr "Batal"
@@ -101,7 +101,7 @@ msgid "Create Page"
 msgstr "Buat halaman"
 
 msgid "Create a blog post"
-msgstr "Buat artikel blog"
+msgstr "Buat artikel berita"
 
 msgid "Create a page"
 msgstr "Buat halaman baru"
@@ -138,7 +138,7 @@ msgid "Edit Article"
 msgstr "Ubah artikel"
 
 msgid "Edit Blog Article"
-msgstr "Ubah artikel blog"
+msgstr "Ubah artikel berita"
 
 msgid "Edit Page"
 msgstr "Ubah halaman"
@@ -309,7 +309,7 @@ msgid "Template type"
 msgstr "Jenis templat"
 
 msgid "There are currently no blog articles here"
-msgstr "Belum ada artikel blog."
+msgstr "Belum ada berita atau artikel."
 
 msgid "There are currently no pages here"
 msgstr "Belum ada halaman."
@@ -367,8 +367,11 @@ msgid "Your browser does not support iframes."
 msgstr "Peramban Anda tidak mendukung iframe."
 
 msgid "eg. Blog Article Title"
-msgstr "Contoh: Judul artikel blog"
+msgstr "Contoh: Judul artikel berita"
 
 msgid "eg. Page Title"
 msgstr "Contoh: Judul halaman"
+
+msgid "Content blocks JSON"
+msgstr "Blok konten JSON"
 

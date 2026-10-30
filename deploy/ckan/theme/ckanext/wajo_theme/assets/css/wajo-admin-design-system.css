@@ -652,8 +652,19 @@ body:has(.wajo-login-frame) {
 .wajo-admin-workspace .form-actions .btn-primary {
   min-width: 108px;
 }
-.wajo-admin-workspace .form-actions .btn:not(.btn-primary) {
+.wajo-admin-workspace .form-actions .btn:not(.btn-primary):not(.btn-danger) {
   background: var(--wajo-color-surface);
+}
+.wajo-admin-workspace .form-actions .btn.btn-danger {
+  border-color: var(--wajo-color-danger);
+  background: var(--wajo-color-danger);
+  color: #fff;
+}
+.wajo-admin-workspace .form-actions .btn.btn-danger:hover,
+.wajo-admin-workspace .form-actions .btn.btn-danger:focus-visible {
+  border-color: #922f37;
+  background: #922f37;
+  color: #fff;
 }
 .wajo-admin-workspace .table-responsive:focus-within {
   outline: 2px solid rgb(29 95 167 / 18%);
@@ -1212,4 +1223,9 @@ body:has(.wajo-login-frame) {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* Dynamic Scheming fields: hidden fields must not reserve layout space. */
+.wajo-admin-workspace .wajo-form-field-hidden[hidden] {
+  display: none !important;
 }

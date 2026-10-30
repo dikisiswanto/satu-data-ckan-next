@@ -1442,3 +1442,970 @@ msgstr "Formulir {object_type}"
 msgid "{object_type}s"
 msgstr "{object_type}"
 
+msgid "Sysadmins"
+msgstr "Administrator sistem"
+
+msgid "Config"
+msgstr "Konfigurasi"
+
+msgid "Site Title"
+msgstr "Nama portal"
+
+msgid "Custom Stylesheet"
+msgstr "Stylesheet khusus"
+
+msgid "Site Tag Line"
+msgstr "Slogan portal"
+
+msgid "Site logo"
+msgstr "Logo portal"
+
+msgid "About page text"
+msgstr "Teks halaman Tentang"
+
+msgid "Intro Text"
+msgstr "Teks pengantar"
+
+msgid "Text on home page"
+msgstr "Teks pada halaman beranda"
+
+msgid "Custom CSS"
+msgstr "CSS khusus"
+
+msgid "Customisable css inserted into the page header"
+msgstr "CSS khusus yang disisipkan ke bagian kepala halaman."
+
+msgid "Are you sure you want to reset the config?"
+msgstr "Apakah Anda yakin ingin mengatur ulang konfigurasi?"
+
+msgid "Reset"
+msgstr "Atur ulang"
+
+msgid "Update Config"
+msgstr "Simpan konfigurasi"
+
+msgid "CKAN config options"
+msgstr "Opsi konfigurasi CKAN"
+
+#, python-format
+msgid ""
+"<p><strong>Site Title:</strong> This is the title of this CKAN instance It appears in various "
+"places throughout CKAN.</p> <p><strong>Custom Stylesheet:</strong> Define an alternative main CSS"
+" file.</p> <p><strong>Site Tag Logo:</strong> This is the logo that appears in the header of all "
+"the CKAN instance templates.</p> <p><strong>About:</strong> This text will appear on this CKAN "
+"instances <a href=\"%(about_url)s\">about page</a>.</p> <p><strong>Intro Text:</strong> This text"
+" will appear on this CKAN instances <a href=\"%(home_url)s\">home page</a> as a welcome to "
+"visitors.</p> <p><strong>Custom CSS:</strong> This is a block of CSS that appears in "
+"<code>&lt;head&gt;</code> tag of every page. If you wish to customize the templates more fully we"
+" recommend <a href=\"%(docs_url)s\" target=\"_blank\" rel=\"noreferrer\">reading the "
+"documentation</a>.</p>"
+msgstr ""
+"<p><strong>Nama portal:</strong> Nama yang digunakan untuk instans CKAN ini dan ditampilkan di "
+"berbagai bagian portal.</p> <p><strong>Stylesheet khusus:</strong> Tentukan berkas CSS utama "
+"alternatif.</p> <p><strong>Logo portal:</strong> Logo yang ditampilkan pada bagian kepala templat"
+" CKAN.</p> <p><strong>Tentang:</strong> Teks ini ditampilkan pada <a "
+"href=\"%(about_url)s\">halaman Tentang</a>.</p> <p><strong>Teks pengantar:</strong> Teks ini "
+"ditampilkan pada <a href=\"%(home_url)s\">halaman beranda</a> sebagai sambutan bagi "
+"pengunjung.</p> <p><strong>CSS khusus:</strong> Kode CSS yang disisipkan ke elemen "
+"<code>&lt;head&gt;</code> di setiap halaman. Untuk penyesuaian templat yang lebih luas, silakan "
+"<a href=\"%(docs_url)s\" target=\"_blank\" rel=\"noreferrer\">baca dokumentasi</a>.</p>"
+
+msgid "Administer CKAN"
+msgstr "Administrasi CKAN"
+
+#, python-format
+msgid ""
+"<p>As a sysadmin user you have full control over this CKAN instance. Proceed with care!</p> "
+"<p>For guidance on using sysadmin features, see the CKAN <a href=\"%(docs_url)s\" "
+"target=\"_blank\" rel=\"noreferrer\">sysadmin guide</a></p>"
+msgstr ""
+"<p>Sebagai administrator sistem, Anda memiliki kendali penuh atas instans CKAN ini. Lakukan "
+"perubahan dengan hati-hati.</p> <p>Untuk panduan penggunaan fitur administrator sistem, silakan "
+"baca <a href=\"%(docs_url)s\" target=\"_blank\" rel=\"noreferrer\">panduan administrator "
+"CKAN</a>.</p>"
+
+msgid "Are you sure you want to purge everything?"
+msgstr "Apakah Anda yakin ingin menghapus permanen seluruh data yang telah dihapus?"
+
+msgid "Purge all"
+msgstr "Hapus permanen semua"
+
+msgid "Purge deleted datasets, organizations or groups forever and irreversibly."
+msgstr ""
+"Hapus permanen dataset, organisasi, atau kategori yang sudah dihapus. Tindakan ini tidak dapat "
+"dibatalkan."
+
+msgid "Confirm Delete"
+msgstr "Konfirmasi penghapusan"
+
+msgid "Deleted datasets"
+msgstr "Dataset yang dihapus"
+
+msgid "Deleted organizations"
+msgstr "Organisasi yang dihapus"
+
+msgid "Deleted groups"
+msgstr "Kategori yang dihapus"
+
+#, python-brace-format
+msgid "Navigate to dataset: {title}"
+msgstr "Buka dataset: {title}"
+
+msgid "Massive purge complete"
+msgstr "Penghapusan permanen massal selesai"
+
+#, python-brace-format
+msgid "{number} datasets have been purged"
+msgstr "{number} dataset telah dihapus permanen"
+
+#, python-brace-format
+msgid "{number} organizations have been purged"
+msgstr "{number} organisasi telah dihapus permanen"
+
+#, python-brace-format
+msgid "{number} groups have been purged"
+msgstr "{number} kategori telah dihapus permanen"
+
+msgid "There are no datasets to purge"
+msgstr "Tidak ada dataset yang perlu dihapus permanen"
+
+msgid "There are no organizations to purge"
+msgstr "Tidak ada organisasi yang perlu dihapus permanen"
+
+msgid "There are no groups to purge"
+msgstr "Tidak ada kategori yang perlu dihapus permanen"
+
+msgid "Welcome to CKAN"
+msgstr "Selamat datang di Portal Satu Data Kabupaten Wajo"
+
+msgid ""
+"This is a nice introductory paragraph about CKAN or the site in general. We don't have any copy "
+"to go here yet but soon we will"
+msgstr ""
+"Portal Satu Data Kabupaten Wajo menyediakan akses terpadu ke data resmi Pemerintah Kabupaten Wajo"
+" untuk mendukung transparansi, pelayanan publik, dan pengambilan keputusan berbasis data."
+
+msgid "This is a featured section"
+msgstr "Informasi pilihan"
+
+msgid "Placeholder"
+msgstr "Teks contoh"
+
+msgid "How about creating one?"
+msgstr "Anda dapat membuat yang baru."
+
+msgid "There are currently no organizations for this site"
+msgstr "Belum ada organisasi pada portal ini."
+
+msgid "This organization has no datasets associated to it"
+msgstr "Organisasi ini belum memiliki dataset."
+
+msgid "Deleted"
+msgstr "Dihapus"
+
+msgid "read more"
+msgstr "selengkapnya"
+
+msgid "No License Provided"
+msgstr "Lisensi belum dicantumkan"
+
+msgid "Group Form"
+msgstr "Formulir kategori"
+
+msgid "Edit Group"
+msgstr "Edit kategori"
+
+msgid "Edit role"
+msgstr "Ubah peran"
+
+msgid "Edit the role of the user within the group"
+msgstr "Ubah peran pengguna dalam kategori ini."
+
+msgid "Are you sure you want to delete this member?"
+msgstr "Apakah Anda yakin ingin menghapus anggota ini?"
+
+msgid "Delete member"
+msgstr "Hapus anggota"
+
+msgid "Delete this member from the group"
+msgstr "Hapus anggota ini dari kategori."
+
+msgid "Delete this member from the organization"
+msgstr "Hapus anggota ini dari organisasi."
+
+msgid "Back to all members"
+msgstr "Kembali ke daftar anggota"
+
+msgid "Edit Member"
+msgstr "Edit anggota"
+
+msgid "Existing User"
+msgstr "Pengguna yang sudah terdaftar"
+
+msgid "If you wish to add an existing user, search for their username below."
+msgstr "Untuk menambahkan pengguna yang sudah terdaftar, cari nama penggunanya di bawah ini."
+
+msgid "Update Member"
+msgstr "Simpan perubahan anggota"
+
+msgid ""
+"<p><strong>Admin:</strong> Can add/edit and delete datasets, as well as manage organization "
+"members.</p> <p><strong>Editor:</strong> Can add and edit datasets, but not manage organization "
+"members.</p> <p><strong>Member:</strong> Can view the organization's private datasets, but not "
+"add new datasets.</p>"
+msgstr ""
+"<p><strong>Administrator:</strong> Dapat menambah, mengubah, dan menghapus dataset serta "
+"mengelola anggota organisasi.</p> <p><strong>Editor:</strong> Dapat menambah dan mengubah "
+"dataset, tetapi tidak dapat mengelola anggota organisasi.</p> <p><strong>Anggota:</strong> Dapat "
+"melihat dataset privat organisasi, tetapi tidak dapat menambahkan dataset baru.</p>"
+
+msgid ""
+"CKAN Organizations are used to create, manage and publish collections of datasets. Users can have"
+" different roles within an Organization, depending on their level of authorisation to create, "
+"edit and publish."
+msgstr ""
+"Organisasi digunakan untuk mengelola dan menerbitkan kumpulan dataset milik perangkat daerah. "
+"Setiap pengguna dapat memiliki peran berbeda sesuai kewenangannya dalam membuat, mengubah, dan "
+"menerbitkan dataset."
+
+msgid "My Organization"
+msgstr "Organisasi saya"
+
+msgid "A little information about my organization..."
+msgstr "Tuliskan informasi singkat tentang organisasi ini..."
+
+msgid ""
+"Are you sure you want to delete this Organization? Note*: Deleting cannot be performed while "
+"public or private datasets belong to this organization."
+msgstr ""
+"Apakah Anda yakin ingin menghapus organisasi ini? Organisasi tidak dapat dihapus selama masih "
+"memiliki dataset publik atau privat."
+
+#, python-brace-format
+msgid "View {organization_name}"
+msgstr "Lihat {organization_name}"
+
+#, python-brace-format
+msgid "Open details page for {name}"
+msgstr "Buka halaman detail {name}"
+
+#, python-brace-format
+msgid "View {name}"
+msgstr "Lihat {name}"
+
+#, python-brace-format
+msgid "Unlink {name} from the dataset"
+msgstr "Lepaskan {name} dari dataset"
+
+msgid ""
+"You can use CKAN Groups to create and manage collections of datasets. This could be to catalogue "
+"datasets for a particular project or team, or on a particular theme, or as a very simple way to "
+"help people find and search your own published datasets."
+msgstr ""
+"Kategori data digunakan untuk mengelompokkan dataset berdasarkan tema, program, atau kebutuhan "
+"tertentu agar pengguna lebih mudah menemukan dan menelusuri data yang diterbitkan."
+
+msgid "What are datasets?"
+msgstr "Apa itu dataset?"
+
+msgid ""
+"A CKAN Dataset is a collection of data resources (such as files), together with a description and"
+" other information, at a fixed URL. Datasets are what users see when searching for data."
+msgstr ""
+"Dataset merupakan kumpulan sumber daya data, seperti berkas atau tautan, yang dilengkapi "
+"deskripsi dan metadata pada satu alamat tetap. Dataset adalah unit utama yang ditemukan pengguna "
+"saat menelusuri katalog data."
+
+msgid "Add view"
+msgstr "Tambah tampilan"
+
+msgid "Edit resource"
+msgstr "Edit sumber daya"
+
+#, python-brace-format
+msgid "Current resource: {name}"
+msgstr "Sumber daya saat ini: {name}"
+
+msgid "URL:"
+msgstr "URL:"
+
+#, python-brace-format
+msgid "Resource URL: {url}"
+msgstr "URL sumber daya: {url}"
+
+msgid "Dataset description:"
+msgstr "Deskripsi dataset:"
+
+#, python-format
+msgid "Source: <a href=\"%(url)s\">%(dataset)s</a>"
+msgstr "Sumber: <a href=\"%(url)s\">%(dataset)s</a>"
+
+msgid "No view has been created that is suitable for this resource"
+msgstr "Belum ada tampilan yang sesuai dengan sumber daya ini."
+
+msgid "The site administrators may not have enabled the relevant view plugins"
+msgstr "Administrator portal mungkin belum mengaktifkan plugin tampilan yang diperlukan."
+
+msgid ""
+"If a view requires the DataStore, the DataStore plugin may not be enabled, or the data may not "
+"have been pushed to the DataStore, or the DataStore hasn't finished processing the data yet"
+msgstr ""
+"Jika tampilan memerlukan DataStore, plugin DataStore mungkin belum aktif, data belum dikirim ke "
+"DataStore, atau proses pengolahan data belum selesai."
+
+msgid "Edit Collaborator"
+msgstr "Edit kolaborator"
+
+msgid "Add Collaborator"
+msgstr "Tambah kolaborator"
+
+msgid "Back to all collaborators"
+msgstr "Kembali ke daftar kolaborator"
+
+msgid "Are you sure you want to delete this collaborator?"
+msgstr "Apakah Anda yakin ingin menghapus kolaborator ini?"
+
+msgid "Update Collaborator"
+msgstr "Simpan perubahan kolaborator"
+
+msgid "What are the available roles?"
+msgstr "Apa saja peran yang tersedia?"
+
+msgid ""
+"<p><strong>Admin:</strong> In addition to managing the dataset, admins can add and remove "
+"collaborators from a dataset.</p>"
+msgstr ""
+"<p><strong>Administrator:</strong> Selain mengelola dataset, administrator dapat menambahkan dan "
+"menghapus kolaborator pada dataset.</p>"
+
+msgid ""
+"<p><strong>Editor:</strong> Editors can edit the dataset and its resources, as well accessing the"
+" dataset if private.</p> <p><strong>Member:</strong> Members can access the dataset if private, "
+"but not edit it.</p>"
+msgstr ""
+"<p><strong>Editor:</strong> Dapat mengubah dataset dan sumber dayanya, serta mengakses dataset "
+"privat.</p> <p><strong>Anggota:</strong> Dapat mengakses dataset privat, tetapi tidak dapat "
+"mengubahnya.</p>"
+
+msgid "Add Collaborators"
+msgstr "Tambah kolaborator"
+
+msgid "Delete collaborator"
+msgstr "Hapus kolaborator"
+
+msgid "Delete this collaborator from the dataset"
+msgstr "Hapus kolaborator ini dari dataset."
+
+#, python-brace-format
+msgid "Are you sure you want to delete collaborator - {name}?"
+msgstr "Apakah Anda yakin ingin menghapus kolaborator {name}?"
+
+msgid "Additional Info"
+msgstr "Informasi tambahan"
+
+msgid "Author Email"
+msgstr "Email penulis"
+
+msgid "Maintainer Email"
+msgstr "Email pengelola"
+
+msgid "Update Resource"
+msgstr "Simpan perubahan sumber daya"
+
+msgid "eg. January 2011 Gold Prices"
+msgstr "Contoh: Harga emas Januari 2011"
+
+msgid "Some useful notes about the data"
+msgstr "Catatan tambahan tentang data ini"
+
+msgid "eg. CSV, XML or JSON"
+msgstr "Contoh: CSV, XML, atau JSON"
+
+msgid "This will be guessed automatically. Leave blank if you wish"
+msgstr "Format akan dikenali secara otomatis. Kosongkan jika tidak ingin mengisinya."
+
+msgid "File Size"
+msgstr "Ukuran berkas"
+
+msgid "MIME Type"
+msgstr "Jenis MIME"
+
+msgid "eg. application/json"
+msgstr "Contoh: application/json"
+
+msgid "Save & add another"
+msgstr "Simpan dan tambah lainnya"
+
+msgid "Publish"
+msgstr "Terbitkan"
+
+msgid "What's a resource?"
+msgstr "Apa itu sumber daya?"
+
+msgid "A resource can be any file or link to a file containing useful data."
+msgstr "Sumber daya dapat berupa berkas atau tautan ke berkas yang berisi data."
+
+#, python-brace-format
+msgid "Navigate to resource: {name_or_id}"
+msgstr "Buka sumber daya: {name_or_id}"
+
+msgid "What's a view?"
+msgstr "Apa itu tampilan?"
+
+msgid "A view is a representation of the data held against a resource"
+msgstr "Tampilan adalah cara menyajikan data yang terdapat dalam suatu sumber daya."
+
+msgid "Remove Filter"
+msgstr "Hapus filter"
+
+msgid "Filters"
+msgstr "Filter"
+
+msgid "eg. My View"
+msgstr "Contoh: Tampilan saya"
+
+msgid "eg. Information about my view"
+msgstr "Contoh: Informasi tentang tampilan ini"
+
+#, python-brace-format
+msgid "Datapusher status: {status}."
+msgstr "Status Datapusher: {status}."
+
+msgid "Trackback URL"
+msgstr "URL lacak balik"
+
+#, python-brace-format
+msgid "Filter by: {title}"
+msgstr "Filter berdasarkan: {title}"
+
+#, python-brace-format
+msgid "Search datasets by {name}: {label}"
+msgstr "Cari dataset berdasarkan {name}: {label}"
+
+#, python-brace-format
+msgid "Show More {facet_type}"
+msgstr "Tampilkan lebih banyak {facet_type}"
+
+#, python-brace-format
+msgid "Show Only Popular {facet_type}"
+msgstr "Tampilkan hanya {facet_type} populer"
+
+#, python-brace-format
+msgid "There are no {facet_type} that match this search"
+msgstr "Tidak ada {facet_type} yang sesuai dengan pencarian ini"
+
+msgid "Language"
+msgstr "Bahasa"
+
+msgid "Go"
+msgstr "Cari"
+
+msgid "Order by"
+msgstr "Urutkan berdasarkan"
+
+#, python-brace-format
+msgid "Remove applied filter: {value}"
+msgstr "Hapus filter aktif: {value}"
+
+msgid "Filter Results"
+msgstr "Filter hasil"
+
+msgid "<p class=\"extra\">Please try another search.</p>"
+msgstr "<p class=\"extra\">Silakan coba kata kunci pencarian lain.</p>"
+
+msgid "<p id=\"search-error\"><strong>There was an error while searching.</strong> Please try again.</p>"
+msgstr "<p id=\"search-error\"><strong>Terjadi kesalahan saat mencari.</strong> Silakan coba lagi.</p>"
+
+#, python-brace-format
+msgid "{number} dataset found for \"{query}\""
+msgstr "{number} dataset ditemukan untuk \"{query}\""
+
+#, python-brace-format
+msgid "Search datasets with the tag: {name}"
+msgstr "Cari dataset dengan tag: {name}"
+
+msgid "You haven't created any datasets."
+msgstr "Anda belum membuat dataset."
+
+msgid "Create one now?"
+msgstr "Buat sekarang?"
+
+msgid "You are not a member of any groups."
+msgstr "Anda belum menjadi anggota kategori data mana pun."
+
+msgid "You are not a member of any organizations."
+msgstr "Anda belum menjadi anggota organisasi mana pun."
+
+msgid "Account Info"
+msgstr "Informasi akun"
+
+msgid "Your profile lets other CKAN users know about who you are and what you do."
+msgstr "Profil Anda membantu pengguna CKAN lain mengenal identitas dan peran Anda."
+
+msgid "Logged Out"
+msgstr "Anda telah keluar"
+
+msgid "You are now logged out."
+msgstr "Anda berhasil keluar dari akun."
+
+#, python-brace-format
+msgid "You're already logged in as {user}."
+msgstr "Anda sudah masuk sebagai {user}."
+
+msgid "Why Sign Up?"
+msgstr "Mengapa harus mendaftar?"
+
+msgid "You can also change username. It can not be modified later."
+msgstr "Anda juga dapat mengubah nama pengguna. Nama pengguna tidak dapat diubah kembali setelah ini."
+
+msgid "Simply enter a new password and we'll update your account"
+msgstr "Masukkan kata sandi baru untuk memperbarui akun Anda."
+
+msgid "Email is required"
+msgstr "Alamat email wajib diisi."
+
+msgid "Error sending the email. Try again later or contact an administrator for help"
+msgstr "Email gagal dikirim. Silakan coba lagi nanti atau hubungi administrator."
+
+msgid "A reset link has been emailed to you (unless the account specified does not exist)"
+msgstr "Tautan pengaturan ulang telah dikirim melalui email jika akun tersebut terdaftar."
+
+msgid "Unauthorized to request reset password."
+msgstr "Anda tidak berwenang meminta pengaturan ulang kata sandi."
+
+msgid "Unauthorized to reset password."
+msgstr "Anda tidak berwenang mengatur ulang kata sandi."
+
+msgid "Not authorized to promote user to sysadmin"
+msgstr "Anda tidak berwenang mengangkat pengguna menjadi administrator sistem."
+
+msgid "Redirecting to external site is not allowed."
+msgstr "Pengalihan ke situs eksternal tidak diizinkan."
+
+msgid "Activity not found"
+msgstr "Aktivitas tidak ditemukan."
+
+msgid "Unauthorized to view activity data"
+msgstr "Anda tidak berwenang melihat data aktivitas."
+
+msgid "The detail of this dataset activity is not available"
+msgstr "Rincian aktivitas dataset ini tidak tersedia."
+
+msgid "Invalid parameters"
+msgstr "Parameter tidak valid."
+
+msgid "Follow item not found"
+msgstr "Objek yang diikuti tidak ditemukan."
+
+#, python-brace-format
+msgid "{0} not found"
+msgstr "{0} tidak ditemukan."
+
+msgid "Everything"
+msgstr "Semua aktivitas"
+
+msgid "No activities found matching the specified criteria."
+msgstr "Tidak ada aktivitas yang sesuai dengan kriteria yang ditentukan."
+
+msgid "Activity purged"
+msgstr "Aktivitas telah dihapus permanen."
+
+#, python-format
+msgid "View changes from %(old_select)s to %(new_select)s"
+msgstr "Tampilkan perubahan dari %(old_select)s hingga %(new_select)s"
+
+msgid "Show metadata diff"
+msgstr "Tampilkan perbedaan metadata"
+
+msgid "Hide metadata diff"
+msgstr "Sembunyikan perbedaan metadata"
+
+#, python-format
+msgid "On %(timestamp)s, %(username)s:"
+msgstr "Pada %(timestamp)s, %(username)s:"
+
+#, python-format
+msgid ""
+"You're currently viewing an old version of this dataset. Data files may not match the old version"
+" of the metadata. <a href=\"%(url)s\">View the current version</a>."
+msgstr ""
+"Anda sedang melihat versi lama dataset ini. Berkas data mungkin tidak sesuai dengan metadata "
+"versi lama tersebut. <a href=\"%(url)s\">Lihat versi terbaru</a>."
+
+msgid "No activity found for this type"
+msgstr "Tidak ada aktivitas untuk jenis ini."
+
+msgid "All activity types"
+msgstr "Semua jenis aktivitas"
+
+msgid "Newer activities"
+msgstr "Aktivitas lebih baru"
+
+msgid "Older activities"
+msgstr "Aktivitas lebih lama"
+
+#, python-brace-format
+msgid "{count} member"
+msgid_plural "{count} members"
+msgstr[0] "{count} anggota"
+
+#, python-brace-format
+msgid "{count} collaborator"
+msgid_plural "{count} collaborators"
+msgstr[0] "{count} kolaborator"
+
+#, python-brace-format
+msgid "{number} organization found"
+msgid_plural "{number} organizations found"
+msgstr[0] "{number} organisasi ditemukan"
+
+#, python-brace-format
+msgid "{number} dataset found"
+msgid_plural "{number} datasets found"
+msgstr[0] "{number} dataset ditemukan"
+
+msgid "Breadcrumb"
+msgstr "Jejak navigasi"
+
+msgid "Administrators"
+msgstr "Administrator"
+
+msgid "Email Address"
+msgstr "Alamat email"
+
+msgid "First Name"
+msgstr "Nama depan"
+
+msgid "Last Name"
+msgstr "Nama belakang"
+
+msgid "State"
+msgstr "Status"
+
+msgid "Confirm password"
+msgstr "Konfirmasi kata sandi"
+
+msgid "Current password"
+msgstr "Kata sandi saat ini"
+
+msgid "New password"
+msgstr "Kata sandi baru"
+
+msgid "Repeat password"
+msgstr "Ulangi kata sandi"
+
+msgid "Password is required"
+msgstr "Kata sandi wajib diisi."
+
+msgid "Passwords must match"
+msgstr "Kata sandi harus sama."
+
+msgid "Unsupported format"
+msgstr "Format tidak didukung."
+
+#, python-format
+msgid "Field %d"
+msgstr "Kolom %d"
+
+msgid ""
+"Data Dictionary saved. Any type overrides will take effect when the resource is next uploaded to "
+"DataStore"
+msgstr ""
+"Kamus Data berhasil disimpan. Perubahan tipe akan berlaku saat sumber daya diunggah kembali ke "
+"DataStore."
+
+msgid "There is no API data to load for this resource"
+msgstr "Tidak ada data API yang dapat dimuat untuk sumber daya ini."
+
+msgid "Failed to load data API information"
+msgstr "Gagal memuat informasi API data."
+
+#, python-brace-format
+msgid "Resource/Alias \"{0}\" was not found."
+msgstr "Sumber daya/alias \"{0}\" tidak ditemukan."
+
+#, python-brace-format
+msgid "User {0} not authorized to perform {1} on resource {2}"
+msgstr "Pengguna {0} tidak berwenang menjalankan {1} pada sumber daya {2}."
+
+#, python-brace-format
+msgid "\"{0}\" is not a valid field name"
+msgstr "\"{0}\" bukan nama kolom yang valid."
+
+msgid "Edit Data Dictionary"
+msgstr "Edit Kamus Data"
+
+#, python-format
+msgid "(using the <a href=\"%(url)s\">ckanapi</a> client library)"
+msgstr "(menggunakan pustaka klien <a href=\"%(url)s\">ckanapi</a>)"
+
+msgid "CKAN Data API"
+msgstr "API Data CKAN"
+
+msgid "Access resource data via a web API with powerful query support."
+msgstr "Akses data sumber daya melalui API web dengan dukungan kueri yang lengkap."
+
+#, python-format
+msgid ""
+"Further information in the <a href=\"%(url)s\" target=\"_blank\">main CKAN Data API and DataStore"
+" documentation</a>.</p>"
+msgstr ""
+"Informasi lebih lanjut tersedia pada <a href=\"%(url)s\" target=\"_blank\">dokumentasi utama API "
+"Data CKAN dan DataStore</a>.</p>"
+
+msgid "Code examples:"
+msgstr "Contoh kode:"
+
+msgid "Querying"
+msgstr "Membuat kueri"
+
+msgid "Get 5 results containing \"jones\" in any field:"
+msgstr "Ambil 5 hasil yang memuat \"jones\" pada kolom mana pun:"
+
+msgid "Get results with either \"watershed\" or \"survey\" as subject and \"active\" as its stage:"
+msgstr "Ambil hasil dengan subjek \"watershed\" atau \"survey\" dan tahap \"active\":"
+
+msgid "SQL query example:"
+msgstr "Contoh kueri SQL:"
+
+msgid "Using the API with this Web Browser"
+msgstr "Menggunakan API melalui peramban web ini"
+
+msgid "Some API endpoints may be accessed using a GET query string."
+msgstr "Beberapa endpoint API dapat diakses menggunakan parameter kueri GET."
+
+msgid "Query example (first 5 results)"
+msgstr "Contoh kueri (5 hasil pertama)"
+
+msgid "Query example (results containing 'jones')"
+msgstr "Contoh kueri (hasil yang memuat 'jones')"
+
+msgid "Query example (via SQL statement)"
+msgstr "Contoh kueri (menggunakan pernyataan SQL)"
+
+#, python-brace-format
+msgid "Field {num}."
+msgstr "Kolom {num}."
+
+msgid "Primary key"
+msgstr "Kunci utama"
+
+msgid "Type Override"
+msgstr "Penggantian tipe"
+
+msgid "Label"
+msgstr "Label"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Print"
+msgstr "Cetak"
+
+msgid "TABLE FILTER"
+msgstr "FILTER TABEL"
+
+msgid "COLUMN FILTER/S"
+msgstr "FILTER KOLOM"
+
+msgid "seconds"
+msgstr "detik"
+
+msgid "Double-click to reset filters"
+msgstr "Klik dua kali untuk mengatur ulang filter"
+
+msgid "Table/List toggle"
+msgstr "Ubah tampilan tabel/daftar"
+
+msgid "Copy to clipboard"
+msgstr "Salin ke papan klip"
+
+msgid "Toggle column visibility"
+msgstr "Ubah visibilitas kolom"
+
+msgid "Restore visibility"
+msgstr "Pulihkan visibilitas"
+
+msgid "Show all"
+msgstr "Tampilkan semua"
+
+msgid "Show none"
+msgstr "Jangan tampilkan apa pun"
+
+msgid "Filtered"
+msgstr "Difilter"
+
+msgid "Filtered download"
+msgstr "Unduhan hasil filter"
+
+msgid "Share current view"
+msgstr "Bagikan tampilan saat ini"
+
+msgid "Copied deeplink to clipboard"
+msgstr "Tautan langsung disalin ke papan klip"
+
+msgid "(estimated)"
+msgstr "(perkiraan)"
+
+msgid "Sort"
+msgstr "Urutkan"
+
+msgid ""
+"Press SHIFT key while clicking on\n"
+"sort control for multi-column sort"
+msgstr "Tekan tombol SHIFT sambil mengeklik pengurutan untuk mengurutkan beberapa kolom"
+
+msgid "List view/Responsive display"
+msgstr "Tampilan daftar/responsif"
+
+msgid "Ellipsis length"
+msgstr "Batas panjang teks sebelum elipsis"
+
+msgid ""
+"Length at which data will be truncated with an ellipsis for display. Set to zero for no "
+"truncation, and for data to be wrapped at column name width instead."
+msgstr ""
+"Batas karakter sebelum teks dipotong dan diakhiri elipsis. Isi 0 agar teks tidak dipotong dan "
+"dapat membungkus sesuai lebar kolom."
+
+msgid "Date format"
+msgstr "Format tanggal"
+
+msgid ""
+"Moment.js date format to use for displaying dates (see <a "
+"href=\"https://devhints.io/moment#formatting-1\" target=\"_blank\">Moment.js cheatsheet</a>). If "
+"<b>NONE</b>, the raw timestamp value will be shown."
+msgstr ""
+"Format tanggal Moment.js yang digunakan untuk menampilkan tanggal (lihat <a "
+"href=\"https://devhints.io/moment#formatting-1\" target=\"_blank\">panduan ringkas "
+"Moment.js</a>). Pilih <b>NONE</b> untuk menampilkan nilai timestamp apa adanya."
+
+msgid "Show Columns"
+msgstr "Tampilkan kolom"
+
+msgid "Show All"
+msgstr "Tampilkan semua"
+
+msgid "Hide All"
+msgstr "Sembunyikan semua"
+
+msgid "Column"
+msgstr "Kolom"
+
+msgid "Refit"
+msgstr "Sesuaikan ulang"
+
+msgid "Dataset Revisions per Week"
+msgstr "Perubahan dataset per minggu"
+
+msgid "Expires in"
+msgstr "Kedaluwarsa dalam"
+
+msgid "Units"
+msgstr "Satuan waktu"
+
+msgid "Expires at"
+msgstr "Kedaluwarsa pada"
+
+msgid "Invalid URL."
+msgstr "URL tidak valid."
+
+msgid "Complete"
+msgstr "Selesai"
+
+msgid "Pending"
+msgstr "Menunggu"
+
+msgid "Submitting"
+msgstr "Mengirim"
+
+msgid "Not Uploaded Yet"
+msgstr "Belum diunggah"
+
+#, python-brace-format
+msgid "Unauthorized to delete resource {resource_id}"
+msgstr "Tidak berwenang menghapus sumber daya {resource_id}."
+
+#, python-brace-format
+msgid "Resource not found in datastore {resource_id}"
+msgstr "Sumber daya {resource_id} tidak ditemukan di DataStore."
+
+#, python-brace-format
+msgid "DataStore and Data Dictionary deleted for resource {resource_id}"
+msgstr "DataStore dan Kamus Data untuk sumber daya {resource_id} telah dihapus."
+
+msgid "Are you sure you want to delete the DataStore and Data Dictionary?"
+msgstr "Apakah Anda yakin ingin menghapus DataStore dan Kamus Data?"
+
+msgid "Delete from DataStore"
+msgstr "Hapus dari DataStore"
+
+msgid "Upload to DataStore"
+msgstr "Unggah ke DataStore"
+
+msgid "Upload error:"
+msgstr "Kesalahan saat mengunggah:"
+
+msgid "Error traceback:"
+msgstr "Rincian pelacakan kesalahan:"
+
+msgid "Upload Log"
+msgstr "Log unggahan"
+
+msgid "End of log"
+msgstr "Akhir log"
+
+#, python-brace-format
+msgid "Resource \"{0}\" was not found."
+msgstr "Sumber daya \"{0}\" tidak ditemukan."
+
+msgid "DataStore resource not found"
+msgstr "Sumber daya DataStore tidak ditemukan."
+
+#, python-format
+msgid "Bad request: %s"
+msgstr "Permintaan tidak valid: %s"
+
+#, python-format
+msgid "Access denied: %s"
+msgstr "Akses ditolak: %s"
+
+#, python-format
+msgid "Not found: %s"
+msgstr "Tidak ditemukan: %s"
+
+#, python-brace-format
+msgid "Invalid search query: {error_message}"
+msgstr "Kueri pencarian tidak valid: {error_message}"
+
+msgid "Dataset not found or you have no permission to view it"
+msgstr "Dataset tidak ditemukan atau Anda tidak memiliki izin untuk melihatnya."
+
+msgid "Formats"
+msgstr "Format"
+
+msgid "Licenses"
+msgstr "Lisensi"
+
+#, python-brace-format
+msgid "Unauthorized to delete user with id \"{user_id}\"."
+msgstr "Tidak berwenang menghapus pengguna dengan ID \"{user_id}\"."
+
+msgid "Invalid reset key. Please try again."
+msgstr "Kunci pengaturan ulang tidak valid. Silakan coba lagi."
+
+msgid "Your password has been reset."
+msgstr "Kata sandi Anda berhasil diatur ulang."
+
+msgid "Landing page"
+msgstr "Halaman utama"
+
+msgid "Home page"
+msgstr "Halaman beranda"
+
+msgid "About CKAN"
+msgstr "Tentang CKAN"
+
+msgid "CKAN is the world’s leading open-source data portal platform."
+msgstr "CKAN adalah perangkat lunak sumber terbuka untuk membangun portal data."
+

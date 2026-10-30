@@ -72,6 +72,7 @@ dataset_fields:
   - field_name: portal_type
     label: Tipe konten portal
     preset: select
+    default: dataset
     choices:
       - value: dataset
         label: Dataset
@@ -215,6 +216,7 @@ resource_fields:
   - field_name: portal_resource_role
     label: Peran resource
     preset: select
+    default: data
     choices:
       - value: data
         label: Data terstruktur

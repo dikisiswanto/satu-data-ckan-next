@@ -10,11 +10,16 @@ ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-dcat.po
 ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-harvest.po
 ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-pages.po
 ckanext/wajo_theme/public/logo-kabupaten-wajo.webp
+ckanext/wajo_theme/public/wajo-admin-forms.js
 ckanext/wajo_theme/schemas/dataset.yaml
+ckanext/wajo_theme/schemas/group.yaml
+ckanext/wajo_theme/schemas/organization.yaml
 ckanext/wajo_theme/templates/base.html
 ckanext/wajo_theme/templates/header.html
 ckanext/wajo_theme/templates/page.html
 ckanext/wajo_theme/templates/ckanext_pages/base_form.html
+ckanext/wajo_theme/templates/home/snippets/about_text.html
+ckanext/wajo_theme/templates/home/snippets/promoted.html
 ckanext/wajo_theme/templates/wajo_theme/context_help.html
 ckanext/wajo_theme/templates/wajo_theme/dashboard.html
 ckanext/wajo_theme/templates/wajo_theme/data_preview.html

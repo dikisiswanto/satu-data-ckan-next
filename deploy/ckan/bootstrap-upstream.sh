@@ -96,7 +96,7 @@ import re, sys
 root, upstream, env_file = map(Path, sys.argv[1:])
 current = env_file.read_text().splitlines()
 existing = {m.group(1) for line in current if (m := re.match(r'^([A-Za-z_][A-Za-z0-9_]*)=', line))}
-legacy_datapusher_keys = {"DATAPUSHER_VERSION", "DATAPUSHER_CONTAINER_NAME", "CKAN__DATAPUSHER__URL", "CKAN__DATAPUSHER__CALLBACK_URL_BASE", "CKAN__SCHEMING__DATASET_SCHEMAS", "CKAN__SCHEMING__PRESETS"}
+legacy_datapusher_keys = {"DATAPUSHER_VERSION", "DATAPUSHER_CONTAINER_NAME", "CKAN__DATAPUSHER__URL", "CKAN__DATAPUSHER__CALLBACK_URL_BASE", "CKAN__SCHEMING__DATASET_SCHEMAS", "CKAN__SCHEMING__ORGANIZATION_SCHEMAS", "CKAN__SCHEMING__GROUP_SCHEMAS", "CKAN__SCHEMING__PRESETS"}
 source_files = []
 old_env = upstream / ".env"
 if old_env.exists() and not old_env.is_symlink():
@@ -222,7 +222,7 @@ if not site_url.startswith("https://"):
     raise SystemExit("PUBLIC_SITE_ORIGIN must be an HTTPS URL for public deployment.")
 # Remove stale DataPusher variables during migration so they cannot reappear
 # from an earlier .env.ckan or an old upstream checkout.
-legacy_datapusher_keys = {"DATAPUSHER_VERSION", "DATAPUSHER_CONTAINER_NAME", "CKAN__DATAPUSHER__URL", "CKAN__DATAPUSHER__CALLBACK_URL_BASE", "CKAN__SCHEMING__DATASET_SCHEMAS", "CKAN__SCHEMING__PRESETS"}
+legacy_datapusher_keys = {"DATAPUSHER_VERSION", "DATAPUSHER_CONTAINER_NAME", "CKAN__DATAPUSHER__URL", "CKAN__DATAPUSHER__CALLBACK_URL_BASE", "CKAN__SCHEMING__DATASET_SCHEMAS", "CKAN__SCHEMING__ORGANIZATION_SCHEMAS", "CKAN__SCHEMING__GROUP_SCHEMAS", "CKAN__SCHEMING__PRESETS"}
 lines = [line for line in path.read_text().splitlines() if not ((m := re.match(r'^([A-Za-z_][A-Za-z0-9_]*)=', line)) and m.group(1) in legacy_datapusher_keys)]
 values = {}
 for line in lines:
@@ -274,7 +274,7 @@ legacy_view_plugins = {
     "esri_shapefile_view",
 }
 portal_plugins = {
-    "envvars", "wajo_pages", "wajo_theme", "wajo_harvest_i18n", "wajo_pages_i18n", "wajo_dcat_i18n", "scheming_datasets", "pages", "dcat",
+    "envvars", "wajo_pages", "wajo_theme", "wajo_harvest_i18n", "wajo_pages_i18n", "wajo_dcat_i18n", "scheming_datasets", "scheming_organizations", "scheming_groups", "pages", "dcat",
     "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view",
     "geojson_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
     "datatables_view", "image_view", "text_view", "datastore", "xloader", "activity",
@@ -282,7 +282,7 @@ portal_plugins = {
 }
 plugins = [plugin for plugin in (plugin_raw.split() if plugin_raw else []) if plugin not in portal_plugins and plugin != "datapusher"]
 for plugin in (
-    "scheming_datasets", "wajo_pages", "pages", "dcat", "dcat_rdf_harvester",
+    "scheming_datasets", "scheming_organizations", "scheming_groups", "wajo_pages", "pages", "dcat", "dcat_rdf_harvester",
     "structured_data", "resource_proxy", "datatables_view", "image_view", "text_view",
     "geojson_view", "geo_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
     "datastore", "xloader", "activity", "wajo_harvest_i18n", "wajo_pages_i18n", "wajo_dcat_i18n",
@@ -311,11 +311,23 @@ site_logo = values.get("CKAN__SITE_LOGO", "/logo-kabupaten-wajo.webp").strip().s
 if site_logo in {"", "/base/logo-kabupaten-wajo.webp"}:
     site_logo = "/logo-kabupaten-wajo.webp"
 values["CKAN__SITE_LOGO"] = site_logo
+# CKAN 2.12 FileStore. The official upstream compose mounts ckan_storage at
+# /var/lib/ckan, so this initialized default storage survives container rebuilds.
+# CKAN derives the groups store from this default for organization/group logos.
+values["CKAN__UPLOADS_ENABLED"] = "true"
+values["CKAN__FILES__STORAGE__DEFAULT__TYPE"] = "ckan:fs"
+values["CKAN__FILES__STORAGE__DEFAULT__PATH"] = "/var/lib/ckan/default"
+values["CKAN__FILES__STORAGE__DEFAULT__INITIALIZE"] = "true"
+values["CKAN__MAX_IMAGE_SIZE"] = "5"
+values["CKAN__UPLOAD__GROUP__TYPES"] = "image"
+values["CKAN__UPLOAD__GROUP__MIMETYPES"] = '"image/png image/jpeg image/gif image/webp"'
 values["CKANEXT__XLOADER__API_TOKEN"] = values.get("CKANEXT__XLOADER__API_TOKEN", "").strip().strip("\"").strip("\'")
 values["CKANEXT__XLOADER__JOBS_DB__URI"] = values["CKAN_SQLALCHEMY_URL"]
 values["CKANEXT__XLOADER__SITE_URL"] = "http://ckan:5000"
 values["CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL"] = "http://nextjs:3000/api/internal/ckan/revalidate"
 values["CKAN___SCHEMING__DATASET_SCHEMAS"] = "ckanext.wajo_theme:schemas/dataset.yaml"
+values["CKAN___SCHEMING__ORGANIZATION_SCHEMAS"] = "ckanext.wajo_theme:schemas/organization.yaml"
+values["CKAN___SCHEMING__GROUP_SCHEMAS"] = "ckanext.wajo_theme:schemas/group.yaml"
 values["CKAN___SCHEMING__PRESETS"] = "ckanext.scheming:presets.json"
 values["CKANEXT__PAGES__REVISIONS_LIMIT"] = "5"
 values["CKANEXT__PAGES__REVISIONS_FORCE_LIMIT"] = "true"

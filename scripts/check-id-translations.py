@@ -47,8 +47,11 @@ def main() -> None:
     for domain, catalog in parsed_catalogs.items():
         translated = [message for message in catalog if message.id]
         missing = [message for message in translated if not message.string]
+        fuzzy = [message for message in translated if "fuzzy" in message.flags]
         if missing:
             ERRORS.append(f"{domain}: {len(missing)} maintained message(s) have an empty translation.")
+        if fuzzy:
+            ERRORS.append(f"{domain}: {len(fuzzy)} maintained message(s) are marked fuzzy and will be omitted from compiled catalogs.")
         for message in translated:
             if not message.string:
                 continue
@@ -94,11 +97,57 @@ def main() -> None:
         "System Administrator", "Dashboard", "Home", "Help", "Documentation", "Statistics",
         "Access denied", "Internal server error", "Page not found", "Please check the form for errors",
         "There are errors in the form", "Changes saved", "Changes not saved", "Are you sure you want to continue?",
+        "Sysadmins", "Config", "Site Title", "Custom Stylesheet", "Site logo", "Administer CKAN",
+        "Landing page", "Home page", "Welcome to CKAN", "Placeholder",
+        "This is a nice introductory paragraph about CKAN or the site in general. We don't have any copy to go here yet but soon we will",
+        "CKAN config options", "Deleted organizations", "There are no organizations to purge",
+        "DataStore", "Data Dictionary", "COLUMN FILTER/S", "Double-click to reset filters",
+        "No results found", "No datasets found", "No organizations found", "About CKAN",
     }
     message_ids = {message.id if isinstance(message.id, str) else message.id[0] for message in translated}
     absent = sorted(required - message_ids)
     if absent:
         ERRORS.append(f"Required CKAN core admin translation keys are missing: {', '.join(absent)}")
+
+    expected_translations = {
+        "ckan": {
+            "Landing page": "Halaman utama",
+            "Site Title": "Nama portal",
+            "Administer CKAN": "Administrasi CKAN",
+            "API Endpoint": "Titik akhir API",
+        },
+        "ckanext-pages": {
+            "Blog": "Berita dan artikel",
+            "Add Blog Article": "Tambah artikel berita",
+            "Edit Blog Article": "Ubah artikel berita",
+        },
+    }
+    for domain, expected in expected_translations.items():
+        catalog = parsed_catalogs.get(domain)
+        for source, expected_value in expected.items():
+            message = catalog.get(source) if catalog else None
+            if message is None or message.string != expected_value:
+                actual = message.string if message is not None else "<missing>"
+                ERRORS.append(f"{domain}: expected {source!r} -> {expected_value!r}, got {actual!r}.")
+
+    # Catch accidental untranslated English entries even when msgstr is non-empty.
+    # Canonical identifiers, file/protocol formats and role names may intentionally stay unchanged.
+    unchanged_allowlist = {
+        "ckan": {"API", "Data", "DataStore", "Dataset", "Editor", "Email", "Format", "Metadata", "Slug", "Status", "Tag", "URL", "URL:", "Label", "ID"},
+        "ckanext-dcat": {"GUID", "URI"},
+        "ckanext-harvest": {"Status", "URL"},
+        "ckanext-pages": {"2005-01-01", "Slug", "Status", "URL"},
+    }
+    for domain, catalog in parsed_catalogs.items():
+        permitted = unchanged_allowlist.get(domain, set())
+        for message in catalog:
+            if not message.id or not message.string:
+                continue
+            ids = message.id if isinstance(message.id, tuple) else (message.id,)
+            translations = message.string if isinstance(message.string, tuple) else (message.string,)
+            for source, translation in zip(ids, translations):
+                if source == translation and source not in permitted:
+                    ERRORS.append(f"{domain}: source text remains unchanged without an explicit technical-term allowlist: {source!r}")
 
     extension_required = {
         "ckanext-harvest": {
@@ -204,7 +253,8 @@ def main() -> None:
     total_messages = sum(len([message for message in catalog if message.id]) for catalog in parsed_catalogs.values())
     print(
         f"Indonesian CKAN localization check passed: {total_messages} core/extension messages "
-        "translated, placeholders preserved, and upstream/domain compilation verified."
+        "translated, no accidental source-equals-translation entries, placeholders preserved, "
+        "and upstream/domain compilation verified."
     )
 
 

@@ -126,8 +126,9 @@ CKAN 2.12.1 tetap menjadi backend katalog, autentikasi, otorisasi, CRUD, DataSto
 - Topbar dengan identitas Kabupaten Wajo, tautan portal publik, profil pengguna, pengaturan sistem, dan logout ber-CSRF.
 - Sidebar responsif dengan navigasi Ringkasan, Dataset, Organisasi, Kategori data, Pages, Harvesting, dashboard pribadi, Pengguna, dan Pengaturan CKAN. Menu sensitif ditampilkan sesuai role/permission.
 - Ringkasan khusus di `/admin/` dengan metrik yang diambil dari CKAN Action API menggunakan identitas pengguna yang sedang login, daftar dataset terbaru, dan akses cepat berdasarkan permission.
-- Bahasa Indonesia menjadi default CKAN Admin. Katalog terjemahan dikompilasi saat image dibangun.
+- Bahasa Indonesia menjadi default CKAN Admin. Katalog gettext core/extension dikompilasi saat image dibangun dan katalog JavaScript dibangun setelah plugin aktif.
 - Design system CSS merapikan formulir, tabel, tombol, alert, breadcrumb, pagination, tabs, dropdown, fokus keyboard, serta breakpoint desktop/tablet/mobile.
+- Form custom bersifat kontekstual: halaman Dataset memilih tipe `dataset` secara otomatis; field lanjutan mengikuti tipe konten (dataset/indikator/infografik/publikasi/geospasial); resource mengikuti perannya; organisasi dan kategori memakai schema Scheming terpisah.
 
 Wajo Admin **tidak mengganti route atau workflow native** dataset, resource, organisasi, user, DataStore, Pages, Harvest, Scheming, dan GeoView. Shell ditambahkan secara aditif di `page.html`; form dan action tiap modul tetap berasal dari CKAN/extension upstream. Ini menjaga validasi, CSRF, upload, permission, dan URL existing. Dashboard ringkasan merupakan satu halaman custom yang memanggil Action API CKAN; ia bukan pengganti halaman CRUD.
 
@@ -141,7 +142,7 @@ Untuk mengubah tampilan, edit:
 - `deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html` — halaman Ringkasan.
 - `deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css` — design system dan styling seluruh halaman CKAN.
 
-Jangan mengedit core CKAN atau folder hasil bootstrap `deploy/ckan/upstream`. Perubahan plugin/template/CSS memerlukan bootstrap dan rebuild image CKAN. Static check membangun wheel theme sungguhan dan memastikan semua template, logo, CSS, WebAssets, dan katalog `.po` ikut terkemas.
+Jangan mengedit core CKAN atau folder hasil bootstrap `deploy/ckan/upstream`. Perubahan plugin/template/CSS/schema memerlukan bootstrap dan rebuild image CKAN. Detail pemetaan field, aturan form kondisional, kompatibilitas API, dan cara penerapannya tersedia di [`docs/CKAN-CUSTOM-FORMS-CONTEXT-AWARE.md`](docs/CKAN-CUSTOM-FORMS-CONTEXT-AWARE.md). Static check membangun wheel theme sungguhan dan memastikan semua template, logo, CSS, WebAssets, schema, dan katalog `.po` ikut terkemas.
 
 ## Diagnosis startup CKAN dan design-system guard
 
@@ -181,4 +182,5 @@ dari CKAN 2.12 dan tidak boleh diaktifkan. Bootstrap membersihkan ID lama dari
 - Tema dan shell Wajo Admin: [`docs/WAJO-ADMIN.md`](docs/WAJO-ADMIN.md)
 - Alur DataStore/XLoader dan preview: [`docs/DATASTORE-PREVIEW-SYNC.md`](docs/DATASTORE-PREVIEW-SYNC.md)
 - Cakupan lokalisasi CKAN: [`docs/CKAN-ADMIN-LOKALISASI.md`](docs/CKAN-ADMIN-LOKALISASI.md)
+- Audit mendalam lokalisasi CKAN 2.12.1: [`docs/AUDIT-LOKALISASI-DEEP-DIVE-2026-10-30.md`](docs/AUDIT-LOKALISASI-DEEP-DIVE-2026-10-30.md)
 - Design tokens, ukuran konten, tipografi, komponen, dan aturan responsif: [`docs/WAJO-ADMIN-DESIGN-SYSTEM.md`](docs/WAJO-ADMIN-DESIGN-SYSTEM.md)

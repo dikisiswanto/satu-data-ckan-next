@@ -123,6 +123,18 @@ for glyph in ("gauge-high", "building", "image", "file-lines", "newspaper", "fol
 for retired_glyph in ("building-o", "file-text-o", "newspaper-o", "picture-o", "folder-open-o", "line-chart", "sign-out", "tachometer"):
     require(f"'{retired_glyph}'" not in icon_source, f"Nama glyph Font Awesome lama harus diganti: {retired_glyph}.")
 require("fonts.googleapis.com/css2?family=Inter" in base_source and "fonts.gstatic.com" in base_source and "display=swap" in base_source, "CKAN admin harus memuat Google Font Inter dengan preconnect dan display swap.")
+# CKAN 2.12 FileStore must be enabled and backed by the persistent upstream ckan_storage volume.
+for upload_setting in (
+    "CKAN__UPLOADS_ENABLED=true",
+    "CKAN__FILES__STORAGE__DEFAULT__TYPE=ckan:fs",
+    "CKAN__FILES__STORAGE__DEFAULT__PATH=/var/lib/ckan/default",
+    "CKAN__FILES__STORAGE__DEFAULT__INITIALIZE=true",
+    "CKAN__MAX_IMAGE_SIZE=5",
+    "CKAN__UPLOAD__GROUP__TYPES=image",
+    'CKAN__UPLOAD__GROUP__MIMETYPES="image/png image/jpeg image/gif image/webp"',
+):
+    require(upload_setting in env_source, f"Konfigurasi upload instansi belum lengkap: {upload_setting}.")
+    require(upload_setting.split("=", 1)[0] in bootstrap_source, f"Bootstrap tidak menegakkan konfigurasi upload: {upload_setting}.")
 require("{% ckan_extends %}" in page_source, "page.html harus mewarisi shell CKAN agar block admin upstream tetap utuh.")
 require("wajo-admin-shell" in page_source and 'wajo_theme/sidebar.html' in page_source and "{{ super() }}" in page_source, "Page shell harus menambahkan sidebar secara aditif tanpa mengganti konten core CKAN.")
 require('class="wajo-admin-footer__brand"' in page_source and 'src="/logo-kabupaten-wajo.webp"' in page_source, "Footer admin harus memakai identitas dan logo yang sama dengan header.")
@@ -163,6 +175,8 @@ for selector in (
 ):
     require(selector in design_normalized, f"Design system tidak mencakup selector/responsive rule: {selector}.")
 require(assets_source.index("css/wajo-theme.css") < assets_source.index("css/wajo-admin-design-system.css"), "Design system harus dimuat setelah CSS theme dasar agar token dan komponen konsisten.")
+require(".wajo-admin-workspace .form-actions .btn:not(.btn-primary):not(.btn-danger)" in design_normalized, "Style tombol sekunder tidak boleh menimpa warna tombol hapus/danger.")
+require(".wajo-admin-workspace .form-actions .btn.btn-danger" in design_normalized and "background: var(--wajo-color-danger); color: #fff" in design_normalized, "Tombol hapus pada form actions harus memiliki latar merah solid dan teks putih.")
 require("wajo-theme/%(version)s-wajo-theme.css" in assets_source, "Output bundle harus memakai nama versi agar cache dapat diinvalisasi.")
 require("cssrewrite" not in assets_source, "Bundle Wajo tidak boleh menjalankan cssrewrite pada stylesheet tanpa referensi URL; filter ini memicu kegagalan pemetaan asset di CKAN.")
 
@@ -234,7 +248,7 @@ require("CKANEXT__WAJO_THEME__ADMIN_HOST" in read(ROOT / "deploy/ckan/sync-env.p
 
 # Keep the extension intentionally additive: only common shell templates are overridden.
 actual_templates = sorted(path.relative_to(PACKAGE / "templates").as_posix() for path in (PACKAGE / "templates").rglob("*.html"))
-require(actual_templates == ["base.html", "ckanext_pages/base_form.html", "header.html", "page.html", "wajo_theme/context_help.html", "wajo_theme/dashboard.html", "wajo_theme/data_preview.html", "wajo_theme/icon.html", "wajo_theme/sidebar.html"], "Theme hanya boleh mengganti shell bersama, dashboard Wajo, sidebar, dan form editorial Pages; route/modul CKAN lain harus tetap native.")
+require(actual_templates == ["base.html", "ckanext_pages/base_form.html", "header.html", "home/snippets/about_text.html", "home/snippets/promoted.html", "page.html", "wajo_theme/context_help.html", "wajo_theme/dashboard.html", "wajo_theme/data_preview.html", "wajo_theme/icon.html", "wajo_theme/sidebar.html"], "Theme hanya boleh mengganti shell bersama, dashboard/sidebar, form editorial Pages, dan dua snippet informasi beranda; route/modul CKAN lain harus tetap native.")
 CMS_FORM = PACKAGE / "templates/ckanext_pages/base_form.html"
 dashboard_source = read(DASHBOARD)
 data_preview_source = read(DATA_PREVIEW)
@@ -245,8 +259,23 @@ require("h.url_for(dataset_type ~ '.read', id=item.name)" in dashboard_source, "
 require("request.path" in sidebar_source and "h.url_for('wajo_admin.index')" in sidebar_source, "Sidebar harus mendeteksi route aktif dan memakai route ringkasan Wajo Admin.")
 require("h.url_for('dashboard.datasets')" in sidebar_source and "h.url_for('dashboard.organizations')" in sidebar_source and "h.url_for('dashboard.groups')" in sidebar_source, "Sidebar harus mempertahankan route dashboard native pengguna.")
 require("/pages" in sidebar_source and "/blog" in sidebar_source and "/harvest" in sidebar_source, "Sidebar harus menyediakan tautan ke Pages, Blog, dan Harvest.")
-for required_nav in ("Semua dataset", "Organisasi", "Kategori data", "Publikasi & laporan", "Indikator & statistik", "Infografik", "Halaman portal", "Berita & blog", "Pengambilan data", "DataStore & pratinjau"):
+for required_nav in ("Semua dataset", "Organisasi", "Kategori data", "Publikasi & laporan", "Indikator & statistik", "Infografik", "Halaman portal", "Berita dan artikel", "Pengambilan data", "DataStore & pratinjau"):
     require(required_nav in sidebar_source, f"Sidebar admin belum menyediakan menu {required_nav}.")
+# Replace CKAN's stock English marketing/placeholder copy on the public home page.
+ABOUT_SNIPPET = read(PACKAGE / "templates/home/snippets/about_text.html")
+PROMOTED_SNIPPET = read(PACKAGE / "templates/home/snippets/promoted.html")
+stock_home_phrases = (
+    "Welcome to CKAN",
+    "This is a nice introductory paragraph",
+    "world’s leading open-source data portal platform",
+    "This is a featured section",
+    "Placeholder",
+)
+for phrase in stock_home_phrases:
+    require(phrase not in ABOUT_SNIPPET and phrase not in PROMOTED_SNIPPET, f"Teks promosi/placeholder bawaan CKAN harus diganti pada halaman beranda: {phrase}")
+require("Portal Satu Data Kabupaten Wajo" in ABOUT_SNIPPET and "Portal Satu Data Kabupaten Wajo" in PROMOTED_SNIPPET, "Beranda CKAN harus menggunakan informasi resmi Portal Satu Data Kabupaten Wajo.")
+init_extensions_source = read(ROOT / "deploy/ckan/initialize-extensions.sh")
+require("ckan -c /srv/app/ckan.ini translation js" in init_extensions_source, "Katalog terjemahan JavaScript harus dibangun setelah plugin CKAN aktif agar widget browser ikut berbahasa Indonesia.")
 context_help_source = read(PACKAGE / "templates/wajo_theme/context_help.html")
 for tag in ("portal-publikasi", "portal-indikator", "portal-infografik"):
     require(tag in context_help_source and "current_dataset_tags" in context_help_source, f"Panduan halaman detail harus mengenali dataset dengan tag {tag}.")

@@ -1,0 +1,11 @@
+{% set intro = g.site_intro_text %}
+<div class="module-promotion card box">
+  <div>
+    {% if intro %}
+      {{ h.render_markdown(intro) }}
+    {% else %}
+      <h1 class="page-heading">Portal Satu Data Kabupaten Wajo</h1>
+      <p>Temukan data resmi Pemerintah Kabupaten Wajo dari berbagai perangkat daerah. Telusuri katalog, pelajari metadata, dan gunakan sumber daya yang tersedia untuk mendukung analisis serta pengambilan keputusan.</p>
+    {% endif %}
+  </div>
+</div>

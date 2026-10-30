@@ -7,3 +7,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..900&amp;display=swap" rel="stylesheet" />
   {% asset "wajo_theme/wajo_theme" %}
 {% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script defer src="/wajo-admin-forms.js"></script>
+{% endblock %}

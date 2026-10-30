@@ -47,6 +47,8 @@ if not any(line.startswith("CKAN__PLUGINS=") for line in rendered):
 # makes CKAN crash while loading plugins, before the health check can pass.
 required_scheming = {
     "CKAN___SCHEMING__DATASET_SCHEMAS": "ckanext.wajo_theme:schemas/dataset.yaml",
+    "CKAN___SCHEMING__ORGANIZATION_SCHEMAS": "ckanext.wajo_theme:schemas/organization.yaml",
+    "CKAN___SCHEMING__GROUP_SCHEMAS": "ckanext.wajo_theme:schemas/group.yaml",
     "CKAN___SCHEMING__PRESETS": "ckanext.scheming:presets.json",
 }
 for key, expected in required_scheming.items():
@@ -56,7 +58,12 @@ for key, expected in required_scheming.items():
             f"{key} must be {expected!r}; found {actual!r}. "
             "Run bootstrap-upstream.sh to repair the Scheming module:file configuration."
         )
-for obsolete_key in ("CKAN__SCHEMING__DATASET_SCHEMAS", "CKAN__SCHEMING__PRESETS"):
+for obsolete_key in (
+    "CKAN__SCHEMING__DATASET_SCHEMAS",
+    "CKAN__SCHEMING__ORGANIZATION_SCHEMAS",
+    "CKAN__SCHEMING__GROUP_SCHEMAS",
+    "CKAN__SCHEMING__PRESETS",
+):
     if obsolete_key in values:
         raise SystemExit(
             f"Obsolete Scheming variable {obsolete_key} is still present in .env.ckan; "

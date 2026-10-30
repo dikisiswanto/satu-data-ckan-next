@@ -26,18 +26,18 @@
 
   {% if wajo_datastore_queued != '' %}
     <div class="alert alert-success" role="status">
-      <strong>{{ wajo_datastore_queued }} resource masuk antrean.</strong>
-      {% if wajo_datastore_failed|int > 0 %} {{ wajo_datastore_failed }} resource gagal dikirim; periksa log CKAN/XLoader.{% endif %}
+      <strong>{{ wajo_datastore_queued }} sumber daya masuk antrean.</strong>
+      {% if wajo_datastore_failed|int > 0 %} {{ wajo_datastore_failed }} sumber daya gagal dikirim; periksa log CKAN/XLoader.{% endif %}
       Periksa kembali status pemrosesan beberapa saat kemudian.
     </div>
   {% elif wajo_datastore_error == 'token' %}
-    <div class="alert alert-warning" role="alert">Token XLoader belum dikonfigurasi. Jalankan aktivasi XLoader dari lingkungan server sebelum mengantrekan resource.</div>
+    <div class="alert alert-warning" role="alert">Token XLoader belum dikonfigurasi. Jalankan aktivasi XLoader dari lingkungan server sebelum mengantrekan sumber daya.</div>
   {% elif wajo_datastore_error %}
     <div class="alert alert-danger" role="alert">CKAN tidak dapat menyiapkan antrean. Periksa konfigurasi plugin dan log CKAN/XLoader.</div>
   {% endif %}
 
   <section class="wajo-datastore__progress" aria-label="Ringkasan kesiapan">
-    <div><strong>{{ wajo_datastore_ready }} dari {{ wajo_datastore_total }} pemeriksaan konfigurasi siap</strong><small>Pemeriksaan ini membaca konfigurasi CKAN; status worker tetap perlu dicek pada server.</small></div>
+    <div><strong>{{ wajo_datastore_ready }} dari {{ wajo_datastore_total }} pemeriksaan konfigurasi siap</strong><small>Pemeriksaan ini membaca konfigurasi CKAN; status proses pekerja tetap perlu diperiksa pada server.</small></div>
     <div class="wajo-datastore__progress-track"><span style="width: {{ (wajo_datastore_ready / wajo_datastore_total * 100) if wajo_datastore_total else 0 }}%"></span></div>
   </section>
 
@@ -66,11 +66,11 @@
           <div><h2>Pastikan hak akses DataStore</h2><p>CKAN harus dapat membuat tabel dan membaca kembali data yang sudah dimuat.</p></div>
         </div>
         {% if wajo_datastore_probe is sameas true %}
-          <div class="wajo-datastore-callout is-ok">{{ wajo_icon('check-circle') }}<span><strong>Uji baca berhasil.</strong><small>Setidaknya satu resource yang sudah aktif di DataStore berhasil dibaca.</small></span></div>
+          <div class="wajo-datastore-callout is-ok">{{ wajo_icon('check-circle') }}<span><strong>Uji baca berhasil.</strong><small>Setidaknya satu sumber daya yang sudah aktif di DataStore berhasil dibaca.</small></span></div>
         {% elif wajo_datastore_probe is sameas false %}
           <div class="wajo-datastore-callout is-error">{{ wajo_icon('exclamation-triangle') }}<span><strong>Uji baca gagal.</strong><small>Periksa database DataStore, kredensial baca, dan hak akses tabel.</small></span></div>
         {% else %}
-          <div class="wajo-datastore-callout is-pending">{{ wajo_icon('info-circle') }}<span><strong>Belum ada resource yang bisa diuji.</strong><small>Setelah satu berkas berhasil diproses, halaman ini akan menjalankan uji baca otomatis.</small></span></div>
+          <div class="wajo-datastore-callout is-pending">{{ wajo_icon('info-circle') }}<span><strong>Belum ada sumber daya yang bisa diuji.</strong><small>Setelah satu berkas berhasil diproses, halaman ini akan menjalankan uji baca otomatis.</small></span></div>
         {% endif %}
         <div class="wajo-datastore-command"><code>bash ./deploy/ckan/apply-datastore-permissions.sh</code><button type="button" class="btn btn-default btn-sm" data-copy-command="bash ./deploy/ckan/apply-datastore-permissions.sh">Salin perintah</button></div>
       </section>
@@ -78,9 +78,9 @@
       <section class="wajo-datastore-card">
         <div class="wajo-datastore-card__heading">
           <span class="wajo-datastore-card__number">3</span>
-          <div><h2>Pastikan worker XLoader berjalan</h2><p>Worker mengambil pekerjaan dari antrean. Plugin aktif saja belum cukup jika worker berhenti.</p></div>
+          <div><h2>Pastikan proses pekerja XLoader berjalan</h2><p>Proses pekerja mengambil tugas dari antrean. Plugin yang aktif saja belum cukup apabila proses pekerja berhenti.</p></div>
         </div>
-        <div class="wajo-datastore-callout is-pending">{{ wajo_icon('server') }}<span><strong>Status proses worker tidak dapat dipastikan dari halaman CKAN.</strong><small>Periksa container xloader-worker di server dan pastikan statusnya berjalan/healthy.</small></span></div>
+        <div class="wajo-datastore-callout is-pending">{{ wajo_icon('server') }}<span><strong>Status proses pekerja tidak dapat dipastikan dari halaman CKAN.</strong><small>Periksa container xloader-worker di server dan pastikan statusnya berjalan dan dalam kondisi normal.</small></span></div>
         <div class="wajo-datastore-command"><code>docker compose ps xloader-worker</code><button type="button" class="btn btn-default btn-sm" data-copy-command="docker compose ps xloader-worker">Salin perintah</button></div>
         <div class="wajo-datastore-command"><code>bash ./deploy/ckan/compose.sh cloudflare logs --tail=100 xloader-worker</code><button type="button" class="btn btn-default btn-sm" data-copy-command="bash ./deploy/ckan/compose.sh cloudflare logs --tail=100 xloader-worker">Salin perintah</button></div>
       </section>
@@ -88,11 +88,11 @@
       <section class="wajo-datastore-card">
         <div class="wajo-datastore-card__heading">
           <span class="wajo-datastore-card__number">4</span>
-          <div><h2>Antrekan resource lama</h2><p>Resource yang dibuat sebelum otomatisasi XLoader perlu dikirim ke antrean satu kali.</p></div>
+          <div><h2>Antrekan sumber daya lama</h2><p>Sumber daya yang dibuat sebelum otomatisasi XLoader perlu dikirim ke antrean satu kali.</p></div>
         </div>
         <div class="wajo-datastore-backfill-summary">
-          <div><strong>{{ wajo_datastore_pending|length }}</strong><span>Resource menunggu pratinjau (maksimal 100 dataset terbaru)</span></div>
-          <div><strong>{{ wajo_datastore_ready_resources|length }}</strong><span>Resource sudah memiliki tabel DataStore (hasil pemindaian)</span></div>
+          <div><strong>{{ wajo_datastore_pending|length }}</strong><span>Sumber daya menunggu pratinjau (maksimal 100 dataset terbaru)</span></div>
+          <div><strong>{{ wajo_datastore_ready_resources|length }}</strong><span>Sumber daya sudah memiliki tabel DataStore (hasil pemindaian)</span></div>
         </div>
         {% if wajo_datastore_pending %}
           <ul class="wajo-datastore-resource-list wajo-datastore-resource-list--pending">
@@ -103,20 +103,20 @@
           <form method="post" action="{{ h.url_for('wajo_admin.data_preview_backfill') }}" class="wajo-datastore-backfill-form">
             {{ h.csrf_input() }}
             <button class="btn btn-primary" type="submit" {% if wajo_datastore_ready != wajo_datastore_total %}disabled{% endif %}>
-              {{ wajo_icon('refresh') }} Antrekan hingga 25 resource
+              {{ wajo_icon('refresh') }} Antrekan hingga 25 sumber daya
             </button>
-            <small>Hanya resource publik dengan format tabular yang didukung. Tombol aktif setelah seluruh pemeriksaan konfigurasi lulus; XLoader tetap menentukan kelayakan akhir setiap berkas.</small>
+            <small>Hanya sumber daya publik dengan format tabular yang didukung. Tombol aktif setelah seluruh pemeriksaan konfigurasi lulus; XLoader tetap menentukan kelayakan akhir setiap berkas.</small>
           </form>
         {% else %}
-          <div class="wajo-datastore-callout is-ok">{{ wajo_icon('check-circle') }}<span><strong>Tidak ditemukan resource tabular yang menunggu.</strong><small>Pemindaian dibatasi pada 100 dataset publik terbaru.</small></span></div>
+          <div class="wajo-datastore-callout is-ok">{{ wajo_icon('check-circle') }}<span><strong>Tidak ditemukan sumber daya berbentuk tabel yang menunggu.</strong><small>Pemindaian dibatasi pada 100 dataset publik terbaru.</small></span></div>
         {% endif %}
-        {% if wajo_datastore_scan_limited %}<p class="wajo-datastore-card__note">Pemindaian ini dibatasi untuk menjaga beban server. Gunakan perintah backfill seluruh resource pada panduan deployment untuk katalog besar.</p>{% endif %}
+        {% if wajo_datastore_scan_limited %}<p class="wajo-datastore-card__note">Pemindaian ini dibatasi untuk menjaga beban server. Gunakan perintah pengisian ulang seluruh sumber daya pada panduan deployment untuk katalog besar.</p>{% endif %}
       </section>
 
       <section class="wajo-datastore-card">
         <div class="wajo-datastore-card__heading">
           <span class="wajo-datastore-card__number">5</span>
-          <div><h2>Verifikasi dari halaman dataset</h2><p>Setelah worker menyelesaikan pekerjaan, periksa apakah pratinjau tampil pada detail dataset publik.</p></div>
+          <div><h2>Verifikasi dari halaman dataset</h2><p>Setelah proses pekerja menyelesaikan tugas, periksa apakah pratinjau tampil pada detail dataset publik.</p></div>
         </div>
         {% if wajo_datastore_ready_resources %}
           <ul class="wajo-datastore-resource-list">
@@ -125,7 +125,7 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p class="wajo-datastore-card__note">Belum ada contoh resource yang terindeks pada pemindaian ini. Gunakan tombol antre di langkah sebelumnya, lalu muat ulang halaman ini setelah worker selesai.</p>
+          <p class="wajo-datastore-card__note">Belum ada contoh sumber daya yang terindeks pada pemindaian ini. Gunakan tombol antre di langkah sebelumnya, lalu muat ulang halaman ini setelah proses pekerja selesai.</p>
         {% endif %}
         <a class="btn btn-default" href="{{ h.url_for(h.default_package_type() ~ '.search') }}">Buka katalog dataset {{ wajo_icon('arrow-right') }}</a>
       </section>
@@ -137,8 +137,8 @@
         <h2>Alur setelah ini aktif</h2>
         <ol>
           <li>Admin mengunggah CSV/Excel ke sumber daya.</li>
-          <li>CKAN otomatis mengirim resource ke antrean XLoader.</li>
-          <li>Worker memuat tabel ke DataStore.</li>
+          <li>CKAN otomatis mengirim sumber daya ke antrean XLoader.</li>
+          <li>Proses pekerja memuat tabel ke DataStore.</li>
           <li>Detail dataset menampilkan pratinjau dan API.</li>
           <li>Portal publik menerima invalidasi cache setelah pemuatan selesai.</li>
         </ol>
@@ -150,7 +150,7 @@
       </section>
       <section class="wajo-datastore-sidecard">
         <h2>Perlu bantuan?</h2>
-        <p>Jika resource tetap menunggu, periksa status antrean, log worker, format berkas, token internal, dan izin database.</p>
+        <p>Jika sumber daya tetap menunggu, periksa status antrean, log proses pekerja, format berkas, token internal, dan izin database.</p>
         <a href="{{ g.site_url }}/bantuan" target="_blank" rel="noopener noreferrer">Buka pusat bantuan portal {{ wajo_icon('external-link') }}</a>
       </section>
     </aside>

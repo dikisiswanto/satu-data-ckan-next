@@ -1,0 +1,76 @@
+organization_type: organization
+about: Skema metadata perangkat daerah Kabupaten Wajo
+about_url: https://data.wajokab.go.id/api-data
+
+fields:
+  - field_name: title
+    label: Nama perangkat daerah
+    validators: ignore_missing unicode_safe
+    form_snippet: large_text.html
+    form_attrs:
+      data-module: slug-preview-target
+    form_placeholder: "Contoh: Dinas Kesehatan Kabupaten Wajo"
+
+  - field_name: name
+    label: URL organisasi
+    validators: not_empty unicode_safe name_validator group_name_validator
+    form_snippet: slug.html
+    form_placeholder: dinas-kesehatan
+
+  - field_name: notes
+    label: Profil perangkat daerah
+    form_snippet: markdown.html
+    form_placeholder: Jelaskan tugas, fungsi, dan ruang lingkup data yang dikelola perangkat daerah.
+
+  - field_name: url
+    label: Logo organisasi
+    preset: organization_url_upload
+    form_placeholder: https://.../logo.png
+
+  - field_name: organization_code
+    label: Kode perangkat daerah
+    validators: ignore_missing unicode_safe
+    form_placeholder: "Contoh: 1.02.0.00.0.00.01.0000"
+    help_text: Gunakan kode resmi sesuai struktur organisasi Pemerintah Kabupaten Wajo.
+
+  - field_name: organization_category
+    label: Jenis perangkat daerah
+    preset: select
+    default: dinas
+    choices:
+      - value: dinas
+        label: Dinas
+      - value: badan
+        label: Badan
+      - value: sekretariat
+        label: Sekretariat
+      - value: kecamatan
+        label: Kecamatan
+      - value: rumah-sakit
+        label: Rumah sakit
+      - value: upt
+        label: Unit pelaksana teknis
+      - value: bumd
+        label: BUMD
+      - value: lainnya
+        label: Lainnya
+
+  - field_name: organization_website
+    label: Situs resmi
+    validators: ignore_missing unicode_safe
+    form_placeholder: https://wajokab.go.id
+
+  - field_name: organization_contact_email
+    label: Email pengelola data
+    validators: ignore_missing unicode_safe email_validator
+    form_placeholder: data@wajokab.go.id
+
+  - field_name: organization_contact_phone
+    label: Nomor telepon
+    validators: ignore_missing unicode_safe
+    form_placeholder: (0485) ...
+
+  - field_name: organization_data_contact
+    label: Unit penanggung jawab data
+    validators: ignore_missing unicode_safe
+    form_placeholder: Sekretariat, bidang, atau wali data perangkat daerah

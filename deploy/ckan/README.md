@@ -134,6 +134,24 @@ container yang tidak sehat.
 
 Image CKAN Wajo mendefinisikan `EXTRA_UWSGI_OPTS` sebagai string kosong secara default. CKAN 2.12.1 upstream membaca variabel ini saat menyusun argumen uWSGI; tanpa nilai default, shell dengan `nounset` dapat menghentikan startup dengan pesan `EXTRA_UWSGI_OPTS: unbound variable`. Isi variabel hanya bila diperlukan untuk menambahkan opsi uWSGI khusus.
 
+## FileStore dan logo organisasi
+
+Upload logo organisasi/grup menggunakan FileStore native CKAN 2.12. Bootstrap mengaktifkan `ckan.uploads_enabled` dan storage `ckan.files.storage.default` pada `/var/lib/ckan/default`. Compose upstream memasang volume persisten `ckan_storage` pada `/var/lib/ckan`, sehingga logo tetap tersedia setelah container CKAN dibangun ulang. Storage turunan `groups` menangani logo organisasi/grup; batas ukuran gambar adalah 5 MiB dan MIME type yang diizinkan adalah PNG, JPEG, GIF, serta WebP. SVG sengaja tidak diizinkan karena dapat membawa konten aktif.
+
+Setelah memperbarui konfigurasi, jalankan bootstrap dan recreate CKAN agar env baru diterapkan:
+
+```bash
+bash ./deploy/ckan/bootstrap-upstream.sh
+bash ./deploy/ckan/compose.sh cloudflare up -d --build --force-recreate ckan
+```
+
+Jangan menghapus volume `ckan_storage`. Jika upload masih gagal, periksa log CKAN dan permission mount:
+
+```bash
+bash ./deploy/ckan/compose.sh cloudflare logs --tail=150 ckan
+bash ./deploy/ckan/compose.sh cloudflare exec ckan sh -lc 'id; ls -ld /var/lib/ckan /var/lib/ckan/default /var/lib/ckan/default/storage/uploads/group'
+```
+
 ## 3. Akses admin dan keamanan
 
 `CKAN_ADMIN_GATE_MODE=none` adalah default: hostname admin langsung membuka form login CKAN tanpa prompt Basic Auth tambahan. Login dan izin CKAN tetap berlaku. Root redirect tidak menjadikan seluruh UI CKAN privat; jika ingin menambah lapisan perimeter, pilih satu mode di `.env.ckan`:
@@ -181,7 +199,7 @@ CKAN 2.12.1 tetap menjadi sumber kebenaran untuk data, route, Action API, autent
 - **Sidebar:** Ringkasan, Dataset, Organisasi, Kategori data, Halaman informasi (Pages), Harvesting, Dataset saya, Organisasi saya, Kategori saya, serta Pengguna/Pengaturan CKAN untuk sysadmin. Menu aktif mengikuti path. Tautan fitur tetap menuju endpoint CKAN/extension asli.
 - **Ringkasan `/admin/`:** kartu jumlah dataset yang dapat diakses pengguna, organisasi, kategori/grup, dan dataset yang dibuat pengguna; tabel dataset terbaru; pintasan tambah dataset/organisasi (hanya jika diizinkan); tautan Pages dan Harvest. Angka diambil saat halaman dibuka melalui Action API CKAN, bukan angka statis. Kegagalan satu action dicatat ke log dan tidak membuat dashboard gagal dirender; metrik yang gagal ditampilkan sebagai `—`.
 - **Halaman pengelolaan:** dataset, resource, preview, organisasi, grup, pengguna, DataStore, Pages, Harvest, Scheming, dan GeoView tetap memakai route serta template/fungsi native modul CKAN. Design system Wajo menata shell, tabel, formulir, navigasi, alert, tombol, tabs, dropdown, breadcrumb, pagination, dan responsivitasnya.
-- **Bahasa:** `id` menjadi locale default dengan `en` sebagai pilihan. Katalog gettext dikompilasi ke CKAN saat Docker image dibuat; terjemahan extension pihak ketiga bergantung pada katalog mereka sendiri.
+- **Bahasa:** `id` menjadi locale default dengan `en` sebagai pilihan. Katalog gettext core dan domain Harvest, Pages, serta DCAT dikompilasi ke image; katalog JavaScript dibangun setelah plugin aktif. Theme juga mengganti teks promosi/placeholder bawaan CKAN pada beranda dengan informasi Portal Satu Data Kabupaten Wajo. Terjemahan extension pihak ketiga yang tidak memakai gettext atau domain yang dipelihara tetap perlu diaudit pada halaman aktual.
 
 ### Implementasi dan titik pemeliharaan
 

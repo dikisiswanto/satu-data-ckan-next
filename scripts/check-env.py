@@ -47,7 +47,7 @@ else:
         "CKAN_DB_USER", "CKAN_DB", "DATASTORE_READONLY_USER", "DATASTORE_DB", "NGINX_SSLPORT_HOST",
         "POSTGRES_PASSWORD", "CKAN_DB_PASSWORD", "DATASTORE_READONLY_PASSWORD", "CKAN_SYSADMIN_PASSWORD",
         "CKAN___SECRET_KEY", "CKAN___BEAKER__SESSION__SECRET", "CKAN___API_TOKEN__JWT__ENCODE__SECRET",
-        "CKAN___API_TOKEN__JWT__DECODE__SECRET", "CKAN__PLUGINS", "CKAN___SCHEMING__DATASET_SCHEMAS", "CKAN___SCHEMING__PRESETS", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL",
+        "CKAN___API_TOKEN__JWT__DECODE__SECRET", "CKAN__PLUGINS", "CKAN___SCHEMING__DATASET_SCHEMAS", "CKAN___SCHEMING__ORGANIZATION_SCHEMAS", "CKAN___SCHEMING__GROUP_SCHEMAS", "CKAN___SCHEMING__PRESETS", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL",
         "CKANEXT__PAGES__REVISIONS_LIMIT", "CKANEXT__PAGES__REVISIONS_FORCE_LIMIT", "CKANEXT__PAGES__ALLOW_HTML",
         "CKAN__DATASTORE__SQLSEARCH__ENABLED", "CKAN__HARVEST__MQ__TYPE", "CKAN__HARVEST__MQ__HOSTNAME",
         "CKAN__HARVEST__MQ__PORT", "CKAN__HARVEST__MQ__REDIS_DB", "CKAN__HARVEST__LOG_SCOPE",
@@ -149,7 +149,16 @@ else:
             output = tmp_path / ".env.generated"
             source.write_text(
                 "CKAN__PLUGINS=\"envvars datastore\"\n"
+                "CKAN__UPLOADS_ENABLED=true\n"
+                "CKAN__FILES__STORAGE__DEFAULT__TYPE=ckan:fs\n"
+                "CKAN__FILES__STORAGE__DEFAULT__PATH=/var/lib/ckan/default\n"
+                "CKAN__FILES__STORAGE__DEFAULT__INITIALIZE=true\n"
+                "CKAN__MAX_IMAGE_SIZE=5\n"
+                "CKAN__UPLOAD__GROUP__TYPES=image\n"
+                "CKAN__UPLOAD__GROUP__MIMETYPES=\"image/png image/jpeg image/gif image/webp\"\n"
                 "CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.wajo_theme:schemas/dataset.yaml\n"
+                "CKAN___SCHEMING__ORGANIZATION_SCHEMAS=ckanext.wajo_theme:schemas/organization.yaml\n"
+                "CKAN___SCHEMING__GROUP_SCHEMAS=ckanext.wajo_theme:schemas/group.yaml\n"
                 "CKAN___SCHEMING__PRESETS=ckanext.scheming:presets.json\n"
                 "CKAN_SQLALCHEMY_URL=postgresql://ckan:secret@db/ckan\n"
                 "CLOUDFLARE_TUNNEL_TOKEN=secret-tunnel-token\n"
@@ -173,8 +182,21 @@ else:
                         errors.append(f"Renderer env membocorkan variabel edge {secret} ke service CKAN")
                 if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test" not in generated or output.stat().st_mode & 0o777 != 0o600:
                     errors.append("Renderer env harus mempertahankan konfigurasi CKAN/admin host dan menulis output dengan permission 600")
+                for upload_setting in (
+                    "CKAN__UPLOADS_ENABLED=true",
+                    "CKAN__FILES__STORAGE__DEFAULT__TYPE=ckan:fs",
+                    "CKAN__FILES__STORAGE__DEFAULT__PATH=/var/lib/ckan/default",
+                    "CKAN__FILES__STORAGE__DEFAULT__INITIALIZE=true",
+                    "CKAN__MAX_IMAGE_SIZE=5",
+                    "CKAN__UPLOAD__GROUP__TYPES=image",
+                    'CKAN__UPLOAD__GROUP__MIMETYPES=\"image/png image/jpeg image/gif image/webp\"',
+                ):
+                    if upload_setting not in generated:
+                        errors.append("Renderer harus meneruskan konfigurasi FileStore upload ke CKAN: " + upload_setting)
                 for required_schema in (
                     "CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.wajo_theme:schemas/dataset.yaml",
+                    "CKAN___SCHEMING__ORGANIZATION_SCHEMAS=ckanext.wajo_theme:schemas/organization.yaml",
+                    "CKAN___SCHEMING__GROUP_SCHEMAS=ckanext.wajo_theme:schemas/group.yaml",
                     "CKAN___SCHEMING__PRESETS=ckanext.scheming:presets.json",
                 ):
                     if required_schema not in generated:

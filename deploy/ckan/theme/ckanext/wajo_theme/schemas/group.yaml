@@ -1,0 +1,47 @@
+group_type: group
+about: Skema kategori tematik data Kabupaten Wajo
+about_url: https://data.wajokab.go.id/api-data
+
+fields:
+  - field_name: title
+    label: Nama kategori
+    validators: ignore_missing unicode_safe
+    form_snippet: large_text.html
+    form_attrs:
+      data-module: slug-preview-target
+    form_placeholder: "Contoh: Pendidikan"
+
+  - field_name: name
+    label: URL kategori
+    validators: not_empty unicode_safe name_validator group_name_validator
+    form_snippet: slug.html
+    form_placeholder: pendidikan
+
+  - field_name: notes
+    label: Deskripsi kategori
+    form_snippet: markdown.html
+    form_placeholder: Jelaskan ruang lingkup dan jenis data yang termasuk dalam kategori ini.
+
+  - field_name: url
+    label: URL gambar kategori
+    validators: ignore_missing unicode_safe
+    form_placeholder: https://.../kategori.png
+
+  - field_name: portal_group_category
+    label: Kelompok tematik
+    preset: select
+    default: sektoral
+    choices:
+      - value: sektoral
+        label: Urusan sektoral
+      - value: kewilayahan
+        label: Kewilayahan
+      - value: prioritas-daerah
+        label: Prioritas daerah
+      - value: lintas-sektor
+        label: Lintas sektor
+
+  - field_name: portal_group_scope
+    label: Cakupan kategori
+    validators: ignore_missing unicode_safe
+    form_placeholder: Kabupaten, kecamatan, desa/kelurahan, atau lintas wilayah
