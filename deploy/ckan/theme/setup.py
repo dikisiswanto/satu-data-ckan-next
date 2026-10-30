@@ -13,6 +13,7 @@ setup(
             "assets/webassets.yml",
             "assets/css/*.css",
             "public/*",
+            "i18n/id/LC_MESSAGES/*.po",
         ],
     },
     zip_safe=False,

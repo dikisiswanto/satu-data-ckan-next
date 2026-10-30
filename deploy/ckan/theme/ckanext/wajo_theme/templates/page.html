@@ -1,0 +1,18 @@
+{% ckan_extends %}
+
+{#
+  Anonymous visitors on the CKAN host should see only the authentication flow.
+  The public catalogue lives on the Next.js host. Keep CKAN's native chrome for
+  authenticated administrators so dashboards and editorial workflows are unchanged.
+#}
+{% block header %}
+  {% if c.userobj %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
+
+{% block footer %}
+  {% if c.userobj %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}

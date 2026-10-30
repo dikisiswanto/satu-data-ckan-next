@@ -27,47 +27,33 @@ http://{$PUBLIC_HOST} {
 }
 
 http://{$CKAN_HOST} {
-  # Every response from the admin hostname must stay out of search indexes.
-  # Use a deferred header so it overrides any upstream CKAN X-Robots-Tag value.
+  # Keep the dedicated administration hostname out of search indexes.
   header >X-Robots-Tag "noindex, nofollow, noarchive, nosnippet, noimageindex"
   encode zstd gzip
 
-  # Opening the admin hostname shows the CKAN login form, not its public homepage.
-  # This is a landing-page redirect, not a blanket access-control rule. CKAN still
-  # enforces user authentication and permissions for protected actions.
   route {
-    # Keep the hostname crawlable so search engines can observe X-Robots-Tag.
-    # Do not use Disallow: / here; it can prevent crawlers from seeing noindex.
+    # Do not publish an admin-host sitemap. robots.txt remains readable so the
+    # crawler can observe the X-Robots-Tag response header.
     @adminRobots path /robots.txt
-    respond @adminRobots "User-agent: *
-Allow: /" 200
+    respond @adminRobots "User-agent: *" 200
 
-    # Never publish an admin-host sitemap. Public discovery belongs to Next.js.
     @adminSitemap path /sitemap.xml /sitemap_index.xml /sitemap-*
     respond @adminSitemap "Not Found" 404
 
-    @adminRoot path /
-    redir @adminRoot /user/login?came_from=%2Fdashboard%2Fdatasets 302
-
-    # CKAN remains the private administration interface. Public catalogue and
-    # editorial HTML routes are served by the Next.js hostname instead.
-    @adminActions path /dashboard/* /dataset/new /dataset/edit/* /dataset/resources/* /dataset/delete/* /organization/new /organization/edit/* /group/new /group/edit/* /pages/new /pages/edit/* /pages/delete/* /user/login /user/logout /user/_logout /user/edit/* /user/request_reset /user/reset/* /api/* /base/* /static/* /fanstatic/* /webassets/* /images/* /scripts/* /css/* /js/* /vendor/* /ckan-admin/* /favicon.ico
-    handle @adminActions {
-      basic_auth {
-        {$CKAN_ADMIN_BASIC_AUTH_USER} {$CKAN_ADMIN_BASIC_AUTH_HASH}
-      }
-      reverse_proxy https://nginx:443 {
-        header_up Host {http.request.host}
-        header_up X-Forwarded-Proto https
-        transport http {
-          tls_insecure_skip_verify
-        }
-      }
+    # Optional second perimeter gate. The normal profile uses CKAN login only.
+    basic_auth {
+      {$CKAN_ADMIN_BASIC_AUTH_USER} {$CKAN_ADMIN_BASIC_AUTH_HASH}
     }
-
-    # Public HTML is served only by Next.js; unknown admin-host routes land on the dashboard.
-    handle {
-      redir /dashboard/datasets 302
+    # Proxy every route, including core catalogue views and all installed
+    # extensions. WajoThemePlugin enforces login for this hostname and CKAN's
+    # own permission checks remain authoritative after authentication.
+    reverse_proxy https://nginx:443 {
+      header_up Host {http.request.host}
+      header_up X-Forwarded-Host {http.request.host}
+      header_up X-Forwarded-Proto https
+      transport http {
+        tls_insecure_skip_verify
+      }
     }
   }
 }

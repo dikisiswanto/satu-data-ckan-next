@@ -881,33 +881,39 @@ const server = createServer((request, response) => {
   }
   const match = url.pathname.match(/^\/api\/3\/action\/([a-z][a-z0-9_]*)$/);
   if (!match) {
-    response.writeHead(404).end(
-      JSON.stringify({
-        success: false,
-        error: { message: "Not found", __type: "Not Found" },
-      }),
-    );
+    response
+      .writeHead(404)
+      .end(
+        JSON.stringify({
+          success: false,
+          error: { message: "Not found", __type: "Not Found" },
+        }),
+      );
     return;
   }
   const action = match[1];
   const sendActionResult = () => {
     const result = actionResult(action, url.searchParams);
     if (result?.__not_found) {
-      response.writeHead(200).end(
-        JSON.stringify({
-          success: false,
-          error: { message: "Not found", __type: "Not Found" },
-        }),
-      );
+      response
+        .writeHead(200)
+        .end(
+          JSON.stringify({
+            success: false,
+            error: { message: "Not found", __type: "Not Found" },
+          }),
+        );
       return;
     }
-    response.writeHead(200).end(
-      JSON.stringify({
-        help: `https://docs.ckan.org/en/2.12/api/index.html#${action}`,
-        success: true,
-        result,
-      }),
-    );
+    response
+      .writeHead(200)
+      .end(
+        JSON.stringify({
+          help: `https://docs.ckan.org/en/2.12/api/index.html#${action}`,
+          success: true,
+          result,
+        }),
+      );
   };
   // Deliberately delay public Action API responses in E2E so loading boundaries
   // and layout-shift reservations are exercised instead of only warm responses.

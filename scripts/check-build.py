@@ -40,7 +40,9 @@ def main() -> None:
         assert result.count("COPY --chown=ckan:ckan extensions/requirements.txt") == 1
         assert result.count("RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt") == 1
         assert "COPY --chown=ckan:ckan install-pages.py /tmp/portal-install-pages.py" in result
+        assert "COPY --chown=ckan:ckan compile-id-translations.py /tmp/portal-compile-id-translations.py" in result
         assert "&& python /tmp/portal-install-pages.py" in result
+        assert "&& python /tmp/portal-compile-id-translations.py" in result
         assert 'ENV EXTRA_UWSGI_OPTS=""' in result, "runtime image must define EXTRA_UWSGI_OPTS for upstream start_ckan.sh"
         # Reproduce the upstream strict-shell expansion: unset fails, empty is valid.
         upstream_expansion = 'UWSGI_OPTS=default; if [ -n "$EXTRA_UWSGI_OPTS" ]; then UWSGI_OPTS="$UWSGI_OPTS $EXTRA_UWSGI_OPTS"; fi'
@@ -62,6 +64,21 @@ def main() -> None:
         for token in ("28eba99ad85d3b9037f5aaddad1f083300c69041", "config_declaration.yaml", "migration/pages/alembic.ini", "migration/pages/script.py.mako", "migration/pages/versions/*", "importlib.import_module(\"ckanext.pages.plugin\")"):
             assert token in pages_installer, f"Pages packaging fix missing: {token}"
         # Exercise the packaging repair against a minimal source fixture without network or Docker.
+        compiler_path = ROOT / "deploy/ckan/compile-id-translations.py"
+        compiler_spec = importlib.util.spec_from_file_location("portal_compile_id_translations", compiler_path)
+        assert compiler_spec and compiler_spec.loader
+        compiler = importlib.util.module_from_spec(compiler_spec)
+        compiler_spec.loader.exec_module(compiler)
+        with tempfile.TemporaryDirectory(prefix="portal-ckan-i18n-check-") as locale_dir:
+            catalog_path = ROOT / "deploy/ckan/theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po"
+            compiled = compiler.compile_catalog(catalog_path, Path(locale_dir))
+            assert compiled.is_file() and compiled.stat().st_size > 0
+            import gettext
+            with compiled.open("rb") as mo_file:
+                translated = gettext.GNUTranslations(mo_file)
+            assert translated.gettext("Dashboard") == "Dasbor"
+            assert translated.gettext("Log in") == "Masuk"
+            assert translated.gettext("Organizations") == "Organisasi"
         installer_path = ROOT / "deploy/ckan/install-pages.py"
         spec = importlib.util.spec_from_file_location("portal_install_pages", installer_path)
         assert spec and spec.loader
@@ -122,6 +139,8 @@ def main() -> None:
 
         workflow = (ROOT / ".github/workflows/ci.yml").read_text()
         assert "COPY deploy/ckan/install-pages.py /tmp/install-pages.py" in workflow
+        assert "COPY deploy/ckan/compile-id-translations.py /tmp/compile-id-translations.py" in workflow
+        assert "&& python /tmp/compile-id-translations.py" in workflow
         assert "&& python /tmp/install-pages.py" in workflow
         assert 'ENV EXTRA_UWSGI_OPTS=""' in workflow and "RUN test \"${EXTRA_UWSGI_OPTS+x}\" = x" in workflow, "Docker smoke test must verify the uWSGI default is defined"
         init_script = ckan / "docker-entrypoint.d/50-portal-extensions.sh"

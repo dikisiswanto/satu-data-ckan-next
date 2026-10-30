@@ -234,6 +234,41 @@ requireText(
   "grid-template-columns: minmax(0, 1.08fr) minmax(19rem, 0.92fr)",
   "hero must use a balanced two-column desktop composition",
 );
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "@media (max-width: 1023px)",
+  "hero artwork must have a tablet breakpoint",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "display: none !important;",
+  "hero metric illustration must be hidden on small and medium screens",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "@media (min-width: 1024px)",
+  "desktop metric cards must have a separate visibility rule",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  ".home-hero--loading .home-hero-copy > *",
+  "loading fallback must not replay the hero entrance animation",
+);
+requireText(
+  "src/app/(public)/page.jsx",
+  "displayStat(normalizedCategories.length)",
+  "hero category metric must count unique normalized CKAN categories",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  ".home-hero-visual--loading,",
+  "loading fallback metrics must not replay hero animations when resolved data arrives",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  ".home-stats-wrap {\n    display: none;",
+  "the summary strip must not duplicate hero cards on desktop",
+);
 for (const token of [
   "home-visual-chip-top-left",
   "home-visual-chip-top-right",
@@ -244,19 +279,89 @@ for (const token of [
     failures.push(`homepage hero: missing clickable metric position ${token}`);
 }
 requireText(
+  "src/app/styles/public-home-hero.css",
+  "wajo-chip-enter 650ms",
+  "hero metric cards must animate in before floating",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "wajo-metric-float 6.8s",
+  "hero metric cards must float gently after entrance",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "--chip-float-delay",
+  "hero metric cards must stagger the float phase",
+);
+requireText(
   "src/components/public-scroll-manager.jsx",
   "IntersectionObserver",
-  "homepage sections must reveal in response to scroll position",
+  "public sections must reveal in response to scroll position",
+);
+requireText(
+  "src/components/public-scroll-manager.jsx",
+  ".public-app-shell main.public-interior-page > *",
+  "scroll reveal must cover interior public pages as well as homepage sections",
+);
+requireText(
+  "src/components/public-scroll-manager.jsx",
+  ".public-app-shell main:not(.public-home) > *",
+  "scroll reveal must also cover public routes without the interior-page class",
+);
+requireText(
+  "src/components/public-scroll-manager.jsx",
+  'target.classList.contains("is-scroll-visible")',
+  "already revealed elements must not replay on route rerenders",
+);
+requireText(
+  "src/lib/public-categories.js",
+  "seenIds.has(category.idKey) || seenNames.has(category.nameKey)",
+  "homepage category facets must be deduplicated by slug and display name",
+);
+requireText(
+  "src/components/public-scroll-manager.jsx",
+  `target.closest('[aria-busy="true"]')`,
+  "scroll reveal must not animate loading skeletons",
 );
 requireText(
   "src/app/styles/public-pages-motion.css",
-  "is-scroll-visible",
-  "scroll reveal must have a visible transition state",
+  ".public-app-shell .has-scroll-reveal.is-scroll-visible",
+  "scroll reveal must have a visible transition state throughout the public site",
 );
 requireText(
   "src/app/styles/public-layout-stability.css",
   "flex-direction: column",
   "empty information state must use one vertical column",
+);
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  ".informasi-directory-page > .cms-directory-empty > h2",
+  "empty information title and description must be explicitly stacked",
+);
+requireText(
+  "src/components/site-footer.jsx",
+  'className="h-auto w-[9.5rem] max-w-none shrink-0 object-contain sm:w-[10rem]"',
+  "Satu Data Indonesia mark must render at its full aspect ratio without width clipping",
+);
+requireText(
+  "public/logo-satu-data-indonesia.svg",
+  'viewBox="0 0 1000 640"',
+  "Satu Data Indonesia SVG canvas must include the full wordmark descenders",
+);
+requireText(
+  "src/components/site-header.jsx",
+  "<span>Login</span>",
+  "public management link must use the shorter Login label",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css",
+  ".wajo-admin-brand__copy strong",
+  "CKAN administrator branding needs a protected, legible title treatment",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/webassets.yml",
+  "css/wajo-theme.css",
+  "Wajo admin CSS must be registered as a WebAssets source",
 );
 requireText(
   "src/app/styles/public-home-hero.css",

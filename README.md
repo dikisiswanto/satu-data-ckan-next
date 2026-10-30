@@ -89,7 +89,7 @@ Portal SDI Pusat melakukan harvesting terhadap katalog instansi. Dalam alur ters
 
 `ckanext-harvest` versi `1.6.3` juga dipasang dan diaktifkan pada CKAN Wajo untuk kebutuhan **harvesting dari sisi Wajo**: mengimpor atau menyinkronkan katalog CKAN/DCAT dari sumber lain, misalnya portal OPD atau katalog sektoral. Plugin `harvest` dan `ckan_harvester` serta worker `harvest-gather` dan `harvest-fetch` disediakan untuk kebutuhan tersebut. Tanpa harvest source yang dibuat dan diaktifkan, worker tidak menarik katalog apa pun.
 
-Untuk integrasi dengan SDI Pusat, pastikan endpoint baca katalog pada `CKAN_HOST` dapat diakses tanpa login manusia. Jangan menerapkan Basic Auth Caddy atau Cloudflare Access ke seluruh hostname CKAN tanpa pengecualian untuk endpoint katalog publik yang diperlukan harvester. Autentikasi CKAN tetap melindungi operasi tulis dan area administrasi.
+Untuk integrasi dengan SDI Pusat, gunakan endpoint katalog/API publik pada `PUBLIC_HOST`. `CKAN_HOST` adalah antarmuka administrasi privat: seluruh halaman dan API di host ini mewajibkan login CKAN, sementara Next.js menyediakan facade API publik read-only dan route ekspor/unduhan publik tertentu.
 
 Fungsi extension:
 

@@ -38,9 +38,9 @@ export function SiteFooter() {
           <Image
             src="/logo-satu-data-indonesia.svg"
             alt="Logo Satu Data Indonesia"
-            width={160}
-            height={96}
-            className="h-10 w-auto max-w-[8.5rem] object-contain sm:h-11"
+            width={184}
+            height={118}
+            className="h-auto w-[9.5rem] max-w-none shrink-0 object-contain sm:w-[10rem]"
           />
           <ExternalLink
             size={13}

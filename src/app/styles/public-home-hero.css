@@ -1,3 +1,98 @@
+/* One-time entrance for the desktop hero. Loading fallbacks stay still so the
+   resolved server content does not replay a second entrance after hydration. */
+.home-hero-copy > * {
+  opacity: 0;
+  animation: wajo-copy-enter 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.home-hero-copy > :nth-child(1) {
+  animation-delay: 70ms;
+}
+.home-hero-copy > :nth-child(2) {
+  animation-delay: 150ms;
+}
+.home-hero-copy > :nth-child(3) {
+  animation-delay: 230ms;
+}
+.home-hero-copy > :nth-child(4) {
+  animation-delay: 310ms;
+}
+.home-hero-copy > :nth-child(5) {
+  animation-delay: 390ms;
+}
+.home-hero--loading .home-hero-copy > * {
+  animation: none !important;
+  opacity: 1;
+  transform: none;
+}
+.home-hero-visual {
+  animation: wajo-visual-enter 850ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
+}
+.home-visual-mark {
+  animation: wajo-mark-enter 760ms cubic-bezier(0.22, 1, 0.36, 1) 420ms both;
+}
+.home-visual-caption {
+  animation: wajo-caption-enter 680ms cubic-bezier(0.22, 1, 0.36, 1) 500ms both;
+}
+@keyframes wajo-copy-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes wajo-visual-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes wajo-mark-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, calc(-50% + 10px), 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0);
+  }
+}
+@keyframes wajo-caption-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(50%, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(50%, 0, 0);
+  }
+}
+@keyframes wajo-chip-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 9px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Server Suspense placeholder stays still; only resolved data gets one entrance. */
+.home-hero-visual--loading,
+.home-hero-visual--loading * {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  translate: none !important;
+}
+
 /* One layout owner for the homepage hero, background, copy, and illustration. */
 body:has(.public-home) .home-hero {
   position: relative;
@@ -321,7 +416,11 @@ body:has(.public-home) .home-hero-pattern {
     transform 220ms ease,
     box-shadow 220ms ease,
     border-color 220ms ease;
-  animation: wajo-metric-float 6.8s ease-in-out infinite;
+  animation:
+    wajo-chip-enter 650ms cubic-bezier(0.22, 1, 0.36, 1)
+      var(--chip-enter-delay, 560ms) both,
+    wajo-metric-float 6.8s ease-in-out var(--chip-float-delay, 1.45s) infinite
+      both;
 }
 .home-visual-chip:hover,
 .home-visual-chip:focus-visible {
@@ -334,23 +433,27 @@ body:has(.public-home) .home-hero-pattern {
 .home-visual-chip-top-left {
   top: 1.25rem;
   left: 0.1rem;
-  animation-delay: -1.2s;
+  --chip-enter-delay: 500ms;
+  --chip-float-delay: 1.45s;
 }
 .home-visual-chip-top-right {
   top: 1.25rem;
   right: 0.1rem;
-  animation-delay: -3.4s;
+  --chip-enter-delay: 590ms;
+  --chip-float-delay: 2.05s;
 }
 .home-visual-chip-bottom-left {
   right: auto;
   bottom: 5.4rem;
   left: 0.1rem;
-  animation-delay: -2.1s;
+  --chip-enter-delay: 680ms;
+  --chip-float-delay: 1.75s;
 }
 .home-visual-chip-bottom-right {
   right: 0.1rem;
   bottom: 5.4rem;
-  animation-delay: -4.6s;
+  --chip-enter-delay: 770ms;
+  --chip-float-delay: 2.35s;
 }
 @keyframes wajo-metric-float {
   0%,
@@ -402,34 +505,28 @@ body:has(.public-home) .home-hero-pattern {
   text-align: right;
 }
 
+/* The floating data artwork is desktop-only. On smaller screens the compact
+   data strip below the hero carries the counts without repeating the same cards. */
 @media (max-width: 1023px) {
   .home-hero-inner {
-    grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.72fr);
-    gap: 1.5rem;
-    min-height: 22rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    min-height: 0;
+  }
+  .home-hero-copy {
+    max-width: 54rem;
   }
   .home-hero-visual {
-    min-height: 18rem;
+    display: none !important;
   }
-  .home-visual-chip {
-    min-width: 9.5rem;
-    padding: 0.6rem 0.7rem;
+  .home-stats-wrap {
+    display: block;
   }
-  .home-visual-chip-top-left {
-    top: 1rem;
-    left: 0.1rem;
-  }
-  .home-visual-chip-top-right {
-    top: 1rem;
-    right: 0.1rem;
-  }
-  .home-visual-chip-bottom-left {
-    bottom: 5.4rem;
-    left: 0.1rem;
-  }
-  .home-visual-chip-bottom-right {
-    bottom: 5.4rem;
-    right: 0.1rem;
+}
+
+@media (min-width: 1024px) {
+  .home-stats-wrap {
+    display: none;
   }
 }
 
@@ -461,32 +558,7 @@ body:has(.public-home) .home-hero-pattern {
     margin-top: 1rem;
   }
   .home-hero-visual {
-    display: block;
-    width: min(100%, 25rem);
-    min-height: 18rem;
-    justify-self: center;
-    margin-top: 0.5rem;
-  }
-  .home-visual-chip {
-    min-width: 9rem;
-    max-width: 10rem;
-    padding: 0.55rem 0.65rem;
-  }
-  .home-visual-chip-top-left {
-    top: 0.5rem;
-    left: 0;
-  }
-  .home-visual-chip-top-right {
-    top: 0.5rem;
-    right: 0;
-  }
-  .home-visual-chip-bottom-left {
-    bottom: 4.2rem;
-    left: 0;
-  }
-  .home-visual-chip-bottom-right {
-    bottom: 4.2rem;
-    right: 0;
+    display: none !important;
   }
   .home-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -516,6 +588,7 @@ body:has(.public-home) .home-hero-pattern {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-hero-copy > *,
   .home-hero-visual,
   .home-hero-visual *,
   .home-hero-visual *::before,
@@ -523,13 +596,8 @@ body:has(.public-home) .home-hero-pattern {
     animation: none !important;
     transition: none !important;
     transform: none !important;
+    translate: none !important;
+    opacity: 1 !important;
     will-change: auto !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-visual-chip {
-    animation: none !important;
-    transition: none !important;
   }
 }

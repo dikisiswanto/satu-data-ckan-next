@@ -1,0 +1,453 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: CKAN 2.12.1 - Portal Satu Data Wajo\n"
+"Report-Msgid-Bugs-To: admin@wajokab.go.id\n"
+"POT-Creation-Date: 2026-10-30 00:00+0800\n"
+"PO-Revision-Date: 2026-10-30 00:00+0800\n"
+"Language: id\n"
+"Language-Team: Bahasa Indonesia\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Portal Satu Data Wajo\n"
+
+msgid "Dashboard"
+msgstr "Dasbor"
+
+msgid "Log in"
+msgstr "Masuk"
+
+msgid "Log out"
+msgstr "Keluar"
+
+msgid "Logout"
+msgstr "Keluar"
+
+msgid "Register"
+msgstr "Daftar"
+
+msgid "Account"
+msgstr "Akun"
+
+msgid "Profile settings"
+msgstr "Pengaturan profil"
+
+msgid "Toggle navigation"
+msgstr "Tampilkan atau sembunyikan navigasi"
+
+msgid "Navigate to Home - {site_title}"
+msgstr "Buka beranda - {site_title}"
+
+msgid "Remember me"
+msgstr "Ingat saya"
+
+msgid "You're already logged in"
+msgstr "Anda sudah masuk"
+
+msgid "You need to log out before you can log in with another account."
+msgstr "Anda harus keluar terlebih dahulu sebelum masuk menggunakan akun lain."
+
+msgid "Log out now"
+msgstr "Keluar sekarang"
+
+msgid "Username"
+msgstr "Nama pengguna"
+
+msgid "username"
+msgstr "nama pengguna"
+
+msgid "Username or Email"
+msgstr "Nama pengguna atau email"
+
+msgid "Email or username"
+msgstr "Email atau nama pengguna"
+
+msgid "Password"
+msgstr "Kata sandi"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Full Name"
+msgstr "Nama lengkap"
+
+msgid "Create Account"
+msgstr "Buat akun"
+
+msgid "Registration"
+msgstr "Pendaftaran"
+
+msgid "Register for an Account"
+msgstr "Daftarkan akun"
+
+msgid "Reset Your Password"
+msgstr "Atur ulang kata sandi"
+
+msgid "Password Reset"
+msgstr "Pengaturan ulang kata sandi"
+
+msgid "Reset your password"
+msgstr "Atur ulang kata sandi"
+
+msgid "Request Reset"
+msgstr "Minta pengaturan ulang"
+
+msgid "Login failed. Bad username or password."
+msgstr "Gagal masuk. Nama pengguna atau kata sandi salah."
+
+msgid "Login failed. Bad username or password or CAPTCHA."
+msgstr "Gagal masuk. Nama pengguna, kata sandi, atau CAPTCHA tidak sesuai."
+
+msgid "Datasets"
+msgstr "Dataset"
+
+msgid "Dataset"
+msgstr "Dataset"
+
+msgid "Add Dataset"
+msgstr "Tambah dataset"
+
+msgid "Create Dataset"
+msgstr "Buat dataset"
+
+msgid "Edit datasets"
+msgstr "Ubah dataset"
+
+msgid "My Datasets"
+msgstr "Dataset saya"
+
+msgid "Organizations"
+msgstr "Organisasi"
+
+msgid "Organization"
+msgstr "Organisasi"
+
+msgid "Create an Organization"
+msgstr "Buat organisasi"
+
+msgid "Create Organization"
+msgstr "Buat organisasi"
+
+msgid "Update Organization"
+msgstr "Perbarui organisasi"
+
+msgid "Save Organization"
+msgstr "Simpan organisasi"
+
+msgid "My Organizations"
+msgstr "Organisasi saya"
+
+msgid "Groups"
+msgstr "Grup"
+
+msgid "Group"
+msgstr "Grup"
+
+msgid "My Groups"
+msgstr "Grup saya"
+
+msgid "Users"
+msgstr "Pengguna"
+
+msgid "User"
+msgstr "Pengguna"
+
+msgid "Members"
+msgstr "Anggota"
+
+msgid "Member"
+msgstr "Anggota"
+
+msgid "Admin"
+msgstr "Administrator"
+
+msgid "Editor"
+msgstr "Editor"
+
+msgid "Role"
+msgstr "Peran"
+
+msgid "Search"
+msgstr "Cari"
+
+msgid "Search Users"
+msgstr "Cari pengguna"
+
+msgid "Search Datasets"
+msgstr "Cari dataset"
+
+msgid "Search Organizations"
+msgstr "Cari organisasi"
+
+msgid "Search Groups"
+msgstr "Cari grup"
+
+msgid "No datasets found"
+msgstr "Dataset tidak ditemukan"
+
+msgid "No organizations found"
+msgstr "Organisasi tidak ditemukan"
+
+msgid "No groups found"
+msgstr "Grup tidak ditemukan"
+
+msgid "No results found"
+msgstr "Tidak ada hasil yang ditemukan"
+
+msgid "Add"
+msgstr "Tambah"
+
+msgid "Add new"
+msgstr "Tambah baru"
+
+msgid "Add Member"
+msgstr "Tambah anggota"
+
+msgid "Add resource"
+msgstr "Tambah sumber daya"
+
+msgid "Add a new resource"
+msgstr "Tambah sumber daya baru"
+
+msgid "Edit"
+msgstr "Ubah"
+
+msgid "Delete"
+msgstr "Hapus"
+
+msgid "Remove"
+msgstr "Hapus"
+
+msgid "View"
+msgstr "Lihat"
+
+msgid "Preview"
+msgstr "Pratinjau"
+
+msgid "Download"
+msgstr "Unduh"
+
+msgid "Create"
+msgstr "Buat"
+
+msgid "Save"
+msgstr "Simpan"
+
+msgid "Save changes"
+msgstr "Simpan perubahan"
+
+msgid "Cancel"
+msgstr "Batal"
+
+msgid "Continue"
+msgstr "Lanjutkan"
+
+msgid "Back"
+msgstr "Kembali"
+
+msgid "Previous"
+msgstr "Sebelumnya"
+
+msgid "Next"
+msgstr "Berikutnya"
+
+msgid "Submit"
+msgstr "Kirim"
+
+msgid "Update"
+msgstr "Perbarui"
+
+msgid "Upload"
+msgstr "Unggah"
+
+msgid "Upload a file"
+msgstr "Unggah berkas"
+
+msgid "Actions"
+msgstr "Tindakan"
+
+msgid "Name"
+msgstr "Nama"
+
+msgid "Title"
+msgstr "Judul"
+
+msgid "Description"
+msgstr "Deskripsi"
+
+msgid "Tags"
+msgstr "Tag"
+
+msgid "Tag"
+msgstr "Tag"
+
+msgid "License"
+msgstr "Lisensi"
+
+msgid "Visibility"
+msgstr "Visibilitas"
+
+msgid "Public"
+msgstr "Publik"
+
+msgid "Private"
+msgstr "Privat"
+
+msgid "Resources"
+msgstr "Sumber daya"
+
+msgid "Resource"
+msgstr "Sumber daya"
+
+msgid "Data"
+msgstr "Data"
+
+msgid "Files"
+msgstr "Berkas"
+
+msgid "File"
+msgstr "Berkas"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Format"
+msgstr "Format"
+
+msgid "Created"
+msgstr "Dibuat"
+
+msgid "Last Modified"
+msgstr "Terakhir diubah"
+
+msgid "Metadata"
+msgstr "Metadata"
+
+msgid "Information"
+msgstr "Informasi"
+
+msgid "About"
+msgstr "Tentang"
+
+msgid "Activity"
+msgstr "Aktivitas"
+
+msgid "History"
+msgstr "Riwayat"
+
+msgid "Revisions"
+msgstr "Revisi"
+
+msgid "Date"
+msgstr "Tanggal"
+
+msgid "Required field"
+msgstr "Kolom wajib diisi"
+
+msgid "Organization Form"
+msgstr "Formulir organisasi"
+
+msgid "Dataset Form"
+msgstr "Formulir dataset"
+
+msgid "Description of the dataset"
+msgstr "Deskripsi dataset"
+
+msgid "A short description of the dataset..."
+msgstr "Deskripsi singkat dataset..."
+
+msgid "There is no description for this organization."
+msgstr "Belum ada deskripsi untuk organisasi ini."
+
+msgid "What are Organizations?"
+msgstr "Apa itu organisasi?"
+
+msgid "What are Groups?"
+msgstr "Apa itu grup?"
+
+msgid "Create datasets, groups and other exciting things"
+msgstr "Buat dataset, grup, dan berbagai konten lainnya"
+
+msgid "Social"
+msgstr "Media sosial"
+
+msgid "API Tokens"
+msgstr "Token API"
+
+msgid "Create API Token"
+msgstr "Buat token API"
+
+msgid "Last Active"
+msgstr "Terakhir aktif"
+
+msgid "The username is already associated with another account. Please use a different username."
+msgstr "Nama pengguna ini sudah digunakan oleh akun lain. Silakan gunakan nama pengguna yang berbeda."
+
+msgid "Please enter both passwords"
+msgstr "Silakan isi kedua kolom kata sandi"
+
+msgid "Passwords must be strings"
+msgstr "Kata sandi harus berupa teks"
+
+msgid "Your password must be 8 characters or longer"
+msgstr "Kata sandi harus terdiri dari minimal 8 karakter"
+
+msgid "Are you sure you want to purge datasets?"
+msgstr "Apakah Anda yakin ingin menghapus dataset secara permanen?"
+
+msgid "Total number of Datasets"
+msgstr "Jumlah seluruh dataset"
+
+msgid "Total datasets"
+msgstr "Jumlah dataset"
+
+msgid "All dataset revisions"
+msgstr "Seluruh revisi dataset"
+
+msgid "New datasets"
+msgstr "Dataset baru"
+
+msgid "Most Edited Datasets"
+msgstr "Dataset paling sering diubah"
+
+msgid "Number of edits"
+msgstr "Jumlah perubahan"
+
+msgid "No edited datasets"
+msgstr "Belum ada dataset yang diubah"
+
+msgid "Largest Groups"
+msgstr "Grup dengan dataset terbanyak"
+
+msgid "Number of datasets"
+msgstr "Jumlah dataset"
+
+msgid "No groups"
+msgstr "Belum ada grup"
+
+msgid "Top Tags"
+msgstr "Tag terpopuler"
+
+msgid "Tag Name"
+msgstr "Nama tag"
+
+msgid "Number of Datasets"
+msgstr "Jumlah dataset"
+
+msgid "Users Creating Most Datasets"
+msgstr "Pengguna dengan dataset terbanyak"
+
+msgid "Statistics Menu"
+msgstr "Menu statistik"
+
+msgid "Total Number of Datasets"
+msgstr "Jumlah seluruh dataset"
+
+msgid "%(count)s dataset found for \"%(query)s\"."
+msgid_plural "%(count)s datasets found for \"%(query)s\"."
+msgstr[0] "%(count)s dataset ditemukan untuk \"%(query)s\"."
+
+msgid "%(count)s dataset found."
+msgid_plural "%(count)s datasets found."
+msgstr[0] "%(count)s dataset ditemukan."

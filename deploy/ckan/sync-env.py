@@ -54,6 +54,7 @@ derived = {
     "PUBLIC_SITE_ORIGIN": public_url,
     "CKAN_ADMIN_URL": admin_url,
     "CKAN_SITE_URL": public_url,
+    "CKANEXT__WAJO_THEME__ADMIN_HOST": values["CKAN_HOST"].lower(),
 }
 written, output = set(), []
 for line in lines:

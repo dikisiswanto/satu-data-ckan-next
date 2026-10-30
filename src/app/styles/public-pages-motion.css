@@ -1,128 +1,20 @@
-/* Calm, editorial hero entrance. No bouncing, spinning, or animated layout. */
-.home-hero-copy > * {
+/* Scroll-position transitions shared by homepage sections and interior pages. */
+.public-app-shell .has-scroll-reveal {
   opacity: 0;
-  animation: wajo-copy-enter 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.home-hero-copy > :nth-child(1) {
-  animation-delay: 70ms;
-}
-.home-hero-copy > :nth-child(2) {
-  animation-delay: 150ms;
-}
-.home-hero-copy > :nth-child(3) {
-  animation-delay: 230ms;
-}
-.home-hero-copy > :nth-child(4) {
-  animation-delay: 310ms;
-}
-.home-hero-copy > :nth-child(5) {
-  animation-delay: 390ms;
-}
-
-.home-hero-visual {
-  animation: wajo-visual-enter 850ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
-}
-.home-visual-mark {
-  animation: wajo-mark-enter 760ms cubic-bezier(0.22, 1, 0.36, 1) 420ms both;
-}
-.home-visual-caption {
-  animation: wajo-caption-enter 680ms cubic-bezier(0.22, 1, 0.36, 1) 500ms both;
-}
-.home-visual-chip-top {
-  animation: wajo-chip-enter 650ms cubic-bezier(0.22, 1, 0.36, 1) 560ms both;
-}
-.home-visual-chip-bottom {
-  animation: wajo-chip-enter 650ms cubic-bezier(0.22, 1, 0.36, 1) 650ms both;
-}
-
-@keyframes wajo-copy-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 12px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-@keyframes wajo-visual-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 14px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-@keyframes wajo-mark-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(-50%, calc(-50% + 10px), 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(-50%, -50%, 0);
-  }
-}
-@keyframes wajo-caption-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(50%, 8px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(50%, 0, 0);
-  }
-}
-@keyframes wajo-chip-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 9px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-.home-hero-visual--loading,
-.home-hero-visual--loading * {
-  animation: none !important;
-  opacity: 1 !important;
-  transform: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-hero-copy > *,
-  .home-hero-visual,
-  .home-visual-mark,
-  .home-visual-caption,
-  .home-visual-chip-top,
-  .home-visual-chip-bottom {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-
-/* Subtle scroll-position reveals for homepage sections. */
-.home-content .has-scroll-reveal {
-  opacity: 0;
-  transform: translate3d(0, 18px, 0);
+  transform: translate3d(0, 14px, 0);
   transition:
-    opacity 620ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 460ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform;
 }
-.home-content .has-scroll-reveal.is-scroll-visible {
+.public-app-shell .has-scroll-reveal.is-scroll-visible {
   opacity: 1;
   transform: translate3d(0, 0, 0);
   will-change: auto;
 }
 @media (prefers-reduced-motion: reduce) {
-  .home-content .has-scroll-reveal,
-  .home-content .has-scroll-reveal.is-scroll-visible {
+  .public-app-shell .has-scroll-reveal,
+  .public-app-shell .has-scroll-reveal.is-scroll-visible {
     opacity: 1;
     transform: none;
     transition: none;

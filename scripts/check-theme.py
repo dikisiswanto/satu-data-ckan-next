@@ -14,9 +14,12 @@ PLUGIN = PACKAGE / "plugin.py"
 SETUP = THEME / "setup.py"
 BASE = PACKAGE / "templates/base.html"
 HEADER = PACKAGE / "templates/header.html"
+PAGE = PACKAGE / "templates/page.html"
 CSS = PACKAGE / "assets/css/wajo-theme.css"
 ASSETS = PACKAGE / "assets/webassets.yml"
 LOGO = PACKAGE / "public/logo-kabupaten-wajo.webp"
+INDONESIAN_PO = PACKAGE / "i18n/id/LC_MESSAGES/ckan.po"
+TRANSLATION_COMPILER = ROOT / "deploy/ckan/compile-id-translations.py"
 ENV_EXAMPLE = ROOT / ".env.ckan.example"
 BOOTSTRAP = ROOT / "deploy/ckan/bootstrap-upstream.sh"
 ERRORS: list[str] = []
@@ -38,13 +41,14 @@ plugin_source = read(PLUGIN)
 setup_source = read(SETUP)
 base_source = read(BASE)
 header_source = read(HEADER)
+page_source = read(PAGE)
 css_source = read(CSS)
 assets_source = read(ASSETS)
 env_source = read(ENV_EXAMPLE)
 bootstrap_source = read(BOOTSTRAP)
 
 # Catch syntax errors in the Python package without importing CKAN at test time.
-for path in (PLUGIN, SETUP):
+for path in (PLUGIN, SETUP, TRANSLATION_COMPILER):
     source = read(path)
     try:
         ast.parse(source, filename=str(path))
@@ -55,6 +59,11 @@ for path in (PLUGIN, SETUP):
 for expected in (
     "class WajoThemePlugin(plugins.SingletonPlugin)",
     "plugins.implements(plugins.IConfigurer)",
+    "plugins.implements(plugins.IMiddleware)",
+    "def make_middleware(self, app, config):",
+    "current_user.is_authenticated",
+    "ckanext.wajo_theme.admin_host",
+    "keep_admin_redirect_on_admin_host",
     'toolkit.add_template_directory(config, "templates")',
     'toolkit.add_public_directory(config, "public")',
     'toolkit.add_resource("assets", "wajo_theme")',
@@ -68,9 +77,10 @@ require(bool(styles_block) and "{{ super() }}" in styles_body, "base.html harus 
 asset_call = re.compile(r"{%\s*asset\s+(['\"])wajo_theme/wajo_theme\1\s*%}")
 require(bool(asset_call.search(styles_body)), "Bundle WebAssets wajo_theme harus dimuat di dalam block styles pada base.html.")
 require("{% ckan_extends %}" in header_source, "header.html harus mewarisi header CKAN.")
+require("{% ckan_extends %}" in page_source, "page.html harus mewarisi shell CKAN agar block admin upstream tetap utuh.")
 require("{% block header_logo %}" in header_source, "Override header harus memakai block header_logo CKAN 2.12.1.")
 require("h.url_for('dashboard.datasets') if c.userobj else h.url_for('user.login')" in header_source, "Tautan logo harus aman untuk pengguna login maupun belum login.")
-require("g.site_title" in header_source and "h.url_for_static_or_external(g.site_logo)" in header_source, "Branding harus tetap mengikuti konfigurasi site title/logo CKAN.")
+require("g.site_title" in header_source and "g.site_logo or '/logo-kabupaten-wajo.webp'" in header_source and "h.url_for_static_or_external" in header_source, "Branding harus mengikuti konfigurasi CKAN dan memiliki fallback logo extension yang pasti tersedia.")
 
 # Verify WebAssets bundle name and its CSS file are consistent.
 require(bool(re.search(r"(?m)^wajo_theme:\s*$", assets_source)), "webassets.yml harus mendeklarasikan bundle wajo_theme.")
@@ -97,10 +107,17 @@ for expected in (
     "templates *.html",
     "assets *.yml *.css",
     "public *",
+    "i18n *.po",
 ):
     require(expected in manifest, f"MANIFEST.in tidak memasukkan {expected}.")
 configurator = read(ROOT / "deploy/ckan/configure-upstream-extensions.py")
 require("shutil.copytree(theme_source, theme_destination)" in configurator, "Bootstrap tidak menyalin source extension theme ke build context.")
+require("compile-id-translations.py" in configurator and "portal-compile-id-translations.py" in configurator and "ckan.po" in configurator, "Docker build harus mengompilasi katalog Bahasa Indonesia ke CKAN core i18n directory.")
+require(INDONESIAN_PO.is_file() and INDONESIAN_PO.stat().st_size > 1000, "Katalog terjemahan CKAN Bahasa Indonesia tidak ditemukan atau terlalu kecil.")
+require('"i18n/id/LC_MESSAGES/*.po"' in setup_source, "Wheel theme harus menyertakan katalog PO Bahasa Indonesia.")
+require("CKAN__LOCALE_DEFAULT=id" in env_source and 'CKAN__LOCALES_OFFERED="id en"' in env_source, "CKAN harus memakai Bahasa Indonesia sebagai locale default dan menyediakan English sebagai pilihan.")
+require('values["CKAN__LOCALE_DEFAULT"] = "id"' in bootstrap_source and 'values["CKAN__LOCALES_OFFERED"]' in bootstrap_source, "Bootstrap harus menegakkan locale Bahasa Indonesia walaupun .env lama belum memiliki locale config.")
+require("nplurals=1; plural=0;" in INDONESIAN_PO.read_text(encoding="utf-8"), "Katalog Bahasa Indonesia harus menggunakan aturan plural satu bentuk.")
 require("USER root\nRUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in configurator, "Docker build harus memasang extension/theme secara global sebagai root sebelum kembali ke user runtime CKAN.")
 plugin_order_match = re.search(r"for plugin in \(\s*([\s\S]*?)\s*\):", bootstrap_source)
 plugin_order = re.findall(r'"([a-z0-9_]+)"', plugin_order_match.group(1)) if plugin_order_match else []
@@ -113,15 +130,22 @@ require("plugins.append(\"wajo_theme\")" in bootstrap_source, "Plugin theme haru
 require('plugins.append("envvars")' in bootstrap_source, "Plugin envvars harus tetap berada terakhir.")
 workflow = read(ROOT / ".github/workflows/ci.yml")
 require("COPY deploy/ckan/theme/ /tmp/portal-ckan-theme/" in workflow, "CI Docker smoke image harus memasukkan source package wajo_theme.")
+require("compile-id-translations.py" in workflow and "/tmp/compile-id-translations.py" in workflow, "CI Docker smoke image harus mengompilasi katalog CKAN Bahasa Indonesia.")
 require("USER root" in workflow and "RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in workflow and "check-plugins.py" in workflow, "CI harus memasang extension/theme secara global sebagai root sebelum memeriksa entry point plugin.")
 for caddy_name in ("Caddyfile", "Caddyfile.basic-auth", "Caddyfile.tunnel", "Caddyfile.tunnel.access", "Caddyfile.tunnel.basic-auth"):
     caddy = read(ROOT / "deploy/ckan" / caddy_name)
-    require("came_from=%2Fdashboard%2Fdatasets" in caddy, f"{caddy_name}: redirect login harus kembali ke dashboard dataset, bukan halaman konfigurasi khusus sysadmin.")
-    require("%2Fckan-admin%2Fconfig%2F" not in caddy, f"{caddy_name}: landing admin lama hanya bisa diakses sysadmin dan membingungkan editor.")
+    admin_block = caddy.split("{$CKAN_HOST}", 1)[-1]
+    require("reverse_proxy https://nginx:443" in admin_block, f"{caddy_name}: semua route host admin harus diteruskan ke CKAN.")
+    require("X-Forwarded-Host {http.request.host}" in admin_block, f"{caddy_name}: hostname asli harus diteruskan ke CKAN untuk auth guard.")
+    require("@adminSitemap path" in admin_block, f"{caddy_name}: sitemap host admin harus tetap ditutup.")
+    require("redir https://{$PUBLIC_HOST}{uri}" not in admin_block, f"{caddy_name}: route CKAN tidak boleh dialihkan ke Next.js setelah login.")
+    require("@adminActions path" not in admin_block, f"{caddy_name}: jangan gunakan allowlist route yang membuat menu/extension CKAN tidak bisa diakses.")
+require("/logo-kabupaten-wajo.webp" in plugin_source, "Aset logo perlu dikecualikan secara eksplisit dari login guard.")
+require("CKANEXT__WAJO_THEME__ADMIN_HOST" in read(ROOT / "deploy/ckan/sync-env.py"), "Hostname admin yang dipakai auth guard harus diturunkan dari CKAN_HOST.")
 
 # Keep the extension intentionally additive: only common shell templates are overridden.
 actual_templates = sorted(path.relative_to(PACKAGE / "templates").as_posix() for path in (PACKAGE / "templates").rglob("*.html"))
-require(actual_templates == ["base.html", "ckanext_pages/base_form.html", "header.html"], "Theme hanya boleh mengganti shell bersama dan form editorial Pages, bukan template fitur CKAN lainnya.")
+require(actual_templates == ["base.html", "ckanext_pages/base_form.html", "header.html", "page.html"], "Theme hanya boleh mengganti shell bersama (base/header/page) dan form editorial Pages, bukan template fitur CKAN lainnya.")
 CMS_FORM = PACKAGE / "templates/ckanext_pages/base_form.html"
 form_source = read(CMS_FORM)
 require("{% ckan_extends %}" in form_source and "{% block extra_pages_form %}" in form_source, "Form CMS harus mewarisi form upstream dan mengisi block extra_pages_form.")
@@ -134,11 +158,13 @@ require(not re.search(r"<option\b[^>]*\{\{", form_source), "Form CMS tidak boleh
 
 # The CSS must remain parseable and preserve the responsive login fallback.
 require(css_source.count("{") == css_source.count("}"), "CSS memiliki jumlah kurung blok yang tidak seimbang.")
-require(":has(#field-login)" in css_source, "Layout login khusus tidak ditemukan.")
+require(".login-main:has(#field-login)" in css_source, "Layout login harus menargetkan wrapper login CKAN 2.12, bukan selector .main yang tidak digunakan.")
+require(".login-wrapper > .login-container" in css_source and ".login-wrapper > .login-form" in css_source, "Login harus memakai layout satu kolom yang sesuai dengan markup CKAN 2.12.")
 require("@media (max-width: 991.98px)" in css_source, "Layout login/header harus punya breakpoint tablet/mobile.")
 require("@media (prefers-reduced-motion: reduce)" in css_source, "Theme harus menghormati prefers-reduced-motion.")
 require(":focus-visible" in css_source, "Focus indicator keyboard tidak ditemukan.")
 require("position: fixed" not in css_source, "Theme tidak boleh membuat overlay fixed global yang berpotensi menutup kontrol CKAN.")
+require("Refined administration workspace" in css_source and ".masthead .navbar-left" in css_source and ".table tbody tr:hover" in css_source, "Theme administrasi harus memiliki shell, navigasi, tabel, dan responsivitas yang konsisten.")
 
 # Parse Jinja and CSS with the parsers already present in a CKAN dev environment.
 try:
@@ -146,7 +172,7 @@ try:
 
     env = Environment()
     normalized_form = form_source.replace("{% ckan_extends %}", '{% extends "base.html" %}')
-    for path, source in ((BASE, base_source), (HEADER, header_source), (CMS_FORM, form_source)):
+    for path, source in ((BASE, base_source), (HEADER, header_source), (PAGE, page_source), (CMS_FORM, form_source)):
         normalized = source.replace("{% ckan_extends %}", '{% extends "base.html" %}')
         normalized = re.sub(r"{%\s*asset\s+(['\"]).*?\1\s*%}", "{% set wajo_theme_asset_loaded = true %}", normalized)
         try:
@@ -155,6 +181,27 @@ try:
             line = getattr(error, "lineno", "?")
             detail = getattr(error, "message", str(error))
             ERRORS.append(f"Template Jinja tidak valid di {path.relative_to(ROOT)}:{line}: {detail}")
+
+    # Verify anonymous users get a focused login/public shell while authenticated
+    # administrators retain the upstream CKAN header/footer and page content.
+    normalized_page = page_source.replace("{% ckan_extends %}", '{% extends "upstream_page.html" %}')
+    chrome_env = Environment(loader=DictLoader({
+        "upstream_page.html": (
+            "{% block header %}UPSTREAM_HEADER{% endblock %}"
+            "{% block content %}ADMIN_CONTENT{% endblock %}"
+            "{% block footer %}UPSTREAM_FOOTER{% endblock %}"
+        ),
+        "page.html": normalized_page,
+    }))
+    chrome_template = chrome_env.get_template("page.html")
+    anonymous_render = chrome_template.render(c={"userobj": None})
+    admin_render = chrome_template.render(c={"userobj": object()})
+    require("UPSTREAM_HEADER" not in anonymous_render and "UPSTREAM_FOOTER" not in anonymous_render,
+            "Header/footer CKAN harus disembunyikan untuk pengguna anonim.")
+    require("ADMIN_CONTENT" in anonymous_render,
+            "Menyembunyikan chrome anonim tidak boleh menghilangkan konten halaman/login.")
+    require("UPSTREAM_HEADER" in admin_render and "UPSTREAM_FOOTER" in admin_render and "ADMIN_CONTENT" in admin_render,
+            "Header/footer dan konten CKAN harus tetap tampil untuk administrator yang login.")
 
     # Exercise select rendering so the selected options remain correct on create/edit.
     render_env = Environment(loader=DictLoader({
@@ -211,4 +258,4 @@ if ERRORS:
         print(f"- {error}", file=sys.stderr)
     raise SystemExit(1)
 
-print("CKAN admin theme/CMS regression check passed: CKAN 2.12 template blocks, Jinja/CSS syntax, WebAssets, logo, Pages schema/form, packaging, plugin order, responsive login, and additive template scope verified.")
+print("CKAN admin theme/CMS regression check passed: CKAN 2.12 templates, WebAssets, Bahasa Indonesia catalog/default locale, logo, Pages schema/form, packaging, plugin order, responsive login, and additive template scope verified.")

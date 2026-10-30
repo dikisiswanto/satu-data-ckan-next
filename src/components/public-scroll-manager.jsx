@@ -9,6 +9,13 @@ const PAGINATED_PUBLIC_LISTS = {
   "/statistik": "statistics-list",
 };
 
+const PUBLIC_REVEAL_SELECTOR = [
+  ".public-app-shell .home-content .home-section",
+  ".public-app-shell .home-content > .home-feature-row",
+  ".public-app-shell main.public-interior-page > *",
+  ".public-app-shell main:not(.public-home) > *",
+].join(", ");
+
 /**
  * Public route changes start at the top. Query pagination is the exception:
  * keep the reader focused on the list whose contents changed.
@@ -34,28 +41,23 @@ export function PublicScrollManager() {
       },
       { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
     );
-    const scan = (root) => {
+    const register = (target) => {
       if (
-        root instanceof Element &&
-        root.matches(
-          ".home-content .home-section, .home-content .home-feature-row",
-        ) &&
-        !observed.has(root)
-      ) {
-        root.classList.add("has-scroll-reveal");
-        observed.add(root);
-        observer.observe(root);
-      }
-      root
-        .querySelectorAll?.(
-          ".home-content .home-section, .home-content .home-feature-row",
-        )
-        .forEach((target) => {
-          if (observed.has(target)) return;
-          target.classList.add("has-scroll-reveal");
-          observed.add(target);
-          observer.observe(target);
-        });
+        observed.has(target) ||
+        target.classList.contains("is-scroll-visible") ||
+        target.closest('[aria-busy="true"]')
+      )
+        return;
+      // Re-register a still-hidden node if the observer is recreated during a
+      // route transition, but never animate an already revealed node again.
+      target.classList.add("has-scroll-reveal");
+      observed.add(target);
+      observer.observe(target);
+    };
+    const scan = (root) => {
+      if (root instanceof Element && root.matches(PUBLIC_REVEAL_SELECTOR))
+        register(root);
+      root.querySelectorAll?.(PUBLIC_REVEAL_SELECTOR).forEach(register);
     };
 
     scan(document);

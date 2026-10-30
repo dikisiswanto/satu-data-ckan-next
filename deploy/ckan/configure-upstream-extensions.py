@@ -17,6 +17,7 @@ copies = {
     project_root / "deploy/ckan/schemas/dataset.yaml": ckan_dir / "schemas/dataset.yaml",
     project_root / "deploy/ckan/initialize-extensions.sh": ckan_dir / "docker-entrypoint.d/50-portal-extensions.sh",
     project_root / "deploy/ckan/install-pages.py": ckan_dir / "install-pages.py",
+    project_root / "deploy/ckan/compile-id-translations.py": ckan_dir / "compile-id-translations.py",
 }
 for source, destination in copies.items():
     if not source.is_file():
@@ -44,12 +45,14 @@ COPY --chown=ckan:ckan schemas/dataset.yaml /srv/app/ckanext-schemas/dataset.yam
 COPY --chown=ckan:ckan docker-entrypoint.d/50-portal-extensions.sh /docker-entrypoint.d/50-portal-extensions.sh
 COPY --chown=ckan:ckan theme/ /tmp/portal-ckan-theme/
 COPY --chown=ckan:ckan install-pages.py /tmp/portal-install-pages.py
+COPY --chown=ckan:ckan compile-id-translations.py /tmp/portal-compile-id-translations.py
 # Install standard extensions and Wajo theme, then build ckanext-pages from
 # its pinned upstream source with missing wheel package-data restored.
 USER root
 RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme \
     && python /tmp/portal-install-pages.py \
-    && rm -f /tmp/portal-ckan-extensions.txt /tmp/portal-install-pages.py \
+    && python /tmp/portal-compile-id-translations.py /tmp/portal-ckan-theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po "$(python -c 'import ckan; from pathlib import Path; print(Path(ckan.__file__).resolve().parent / "i18n")')" \
+    && rm -f /tmp/portal-ckan-extensions.txt /tmp/portal-install-pages.py /tmp/portal-compile-id-translations.py \
     && rm -rf /tmp/portal-ckan-theme
 # The upstream start_ckan.sh reads EXTRA_UWSGI_OPTS without a nounset-safe fallback.
 # Define an empty default; an explicit runtime environment may still override it.

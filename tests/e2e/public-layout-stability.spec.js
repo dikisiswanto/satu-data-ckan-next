@@ -141,3 +141,18 @@ test("Pahami Data illustration stays visible below the copy on mobile", async ({
     cardBox.x + cardBox.width + 1,
   );
 });
+
+test("public interior pages receive a subtle one-time scroll reveal", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/informasi", { waitUntil: "networkidle" });
+  const revealTarget = page.locator("main.public-interior-page > *").first();
+  await expect(revealTarget).toHaveClass(/has-scroll-reveal/);
+  await expect(revealTarget).toHaveClass(/is-scroll-visible/);
+  const transition = await revealTarget.evaluate(
+    (element) => getComputedStyle(element).transitionDuration,
+  );
+  expect(transition).toContain("0.46s");
+});

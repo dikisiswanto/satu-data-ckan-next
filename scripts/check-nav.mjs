@@ -53,12 +53,18 @@ if (
     "SiteFooter tidak boleh mengulang navigasi utama; tautan halaman sudah tersedia pada header dan breadcrumb.",
   );
 }
+const sdiLogo = readFileSync(
+  path.join(root, "public/logo-satu-data-indonesia.svg"),
+  "utf8",
+);
 if (
   !footer.includes('href="https://data.go.id"') ||
-  !footer.includes("width={160}")
+  !footer.includes("width={184}") ||
+  !footer.includes("height={118}") ||
+  !sdiLogo.includes('viewBox="0 0 1000 640"')
 ) {
   errors.push(
-    "Footer harus menampilkan penanda SDI berukuran kecil dan tautan ke portal resmi data.go.id.",
+    "Footer harus menampilkan logo SDI utuh dengan rasio intrinsik yang benar dan tautan ke portal resmi data.go.id.",
   );
 }
 if (

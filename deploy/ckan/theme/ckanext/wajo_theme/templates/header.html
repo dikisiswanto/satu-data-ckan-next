@@ -2,13 +2,9 @@
 
 {% block header_logo %}
   <a class="logo wajo-admin-brand" href="{{ h.url_for('dashboard.datasets') if c.userobj else h.url_for('user.login') }}" aria-label="{{ _('Portal Satu Data Kabupaten Wajo - Dashboard') if c.userobj else _('Portal Satu Data Kabupaten Wajo - Login') }}">
-    {% if g.site_logo %}
-      <img src="{{ h.url_for_static_or_external(g.site_logo) }}" alt="{{ g.site_title }}" />
-    {% else %}
-      <span class="wajo-admin-brand__fallback" aria-hidden="true">SD</span>
-    {% endif %}
+    <img src="{{ h.url_for_static_or_external(g.site_logo or '/logo-kabupaten-wajo.webp') }}" alt="Lambang Kabupaten Wajo" width="48" height="56" />
     <span class="wajo-admin-brand__copy">
-      <strong>{{ g.site_title }}</strong>
+      <strong>{{ g.site_title or _('Portal Satu Data Kabupaten Wajo') }}</strong>
       <small>Ruang Pengelola Data</small>
     </span>
   </a>

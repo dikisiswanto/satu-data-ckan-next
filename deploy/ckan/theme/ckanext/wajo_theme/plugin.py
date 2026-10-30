@@ -1,6 +1,7 @@
 """Register Wajo admin theme and editorial metadata schema for ckanext-pages."""
 
 import json
+from urllib.parse import urlsplit, urlunsplit
 
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
@@ -88,11 +89,103 @@ class WajoPagesSchemaPlugin(plugins.SingletonPlugin):
 
 
 class WajoThemePlugin(plugins.SingletonPlugin):
-    """Load the Wajo-branded CKAN admin templates and WebAssets bundle."""
+    """Load the Wajo theme and enforce authentication on the admin hostname."""
 
     plugins.implements(plugins.IConfigurer)
+    plugins.implements(plugins.IMiddleware)
+
+    # These assets are required to render the CKAN login form. They are static
+    # files, not public catalogue pages or user-uploaded resources.
+    _LOGIN_PATHS = {"/user/login", "/user/login_generic"}
+    _STATIC_PREFIXES = (
+        "/base/", "/static/", "/fanstatic/", "/webassets/", "/images/",
+        "/scripts/", "/css/", "/js/", "/vendor/",
+    )
+    _STATIC_PATHS = {"/favicon.ico", "/logo-kabupaten-wajo.webp"}
 
     def update_config(self, config):
         toolkit.add_template_directory(config, "templates")
         toolkit.add_public_directory(config, "public")
         toolkit.add_resource("assets", "wajo_theme")
+
+    def make_middleware(self, app, config):
+        """Gate every browser/API route on CKAN_HOST while leaving internal CKAN API use intact.
+
+        CKAN invokes IMiddleware for both legacy and Flask stacks. Only register
+        Flask hooks on the Flask application; the CKAN 2.12 request identity hook
+        is registered before extension middleware, so current_user is resolved
+        before this access check runs.
+        """
+        if not hasattr(app, "before_request") or not hasattr(app, "after_request"):
+            return app
+
+        from flask import jsonify, redirect, request, url_for
+        from flask_login import current_user
+
+        admin_host = str(config.get("ckanext.wajo_theme.admin_host", "")).strip().lower()
+        public_site = urlsplit(str(config.get("ckan.site_url", "")))
+        public_host = (public_site.netloc or "").lower()
+
+        def is_admin_request():
+            host = (request.host or "").split(":", 1)[0].lower()
+            return bool(admin_host) and host == admin_host
+
+        def is_login_asset(path):
+            normalized = (path or "/").lower()
+            return (
+                normalized in self._STATIC_PATHS
+                or any(normalized.startswith(prefix) for prefix in self._STATIC_PREFIXES)
+            )
+
+        @app.before_request
+        def require_admin_login():
+            if not is_admin_request():
+                return None
+
+            path = request.path or "/"
+            if is_login_asset(path):
+                return None
+
+            if path in self._LOGIN_PATHS:
+                if current_user.is_authenticated and request.method in {"GET", "HEAD"}:
+                    return redirect(url_for("dashboard.datasets"))
+                return None
+
+            if current_user.is_authenticated:
+                if path == "/":
+                    return redirect(url_for("dashboard.datasets"))
+                return None
+
+            if path.startswith("/api/"):
+                return jsonify({
+                    "success": False,
+                    "error": {
+                        "message": "Login diperlukan untuk mengakses CKAN Admin.",
+                        "__type": "Authorization Error",
+                    },
+                }), 401
+
+            # Keep the requested CKAN page and query string so successful login
+            # returns to the page the administrator originally opened.
+            came_from = request.full_path.rstrip("?")
+            if not came_from.startswith("/") or came_from.startswith("//"):
+                came_from = "/dashboard/datasets"
+            return redirect(url_for("user.login", came_from=came_from))
+
+        @app.after_request
+        def keep_admin_redirect_on_admin_host(response):
+            """Rewrite CKAN_SITE_URL redirects to CKAN_HOST for browser navigation only."""
+            if not is_admin_request():
+                return response
+            location = response.headers.get("Location")
+            if not location:
+                return response
+            target = urlsplit(location)
+            if not target.netloc or target.netloc.lower() != public_host:
+                return response
+            response.headers["Location"] = urlunsplit((
+                "https", admin_host, target.path or "/", target.query, target.fragment,
+            ))
+            return response
+
+        return app

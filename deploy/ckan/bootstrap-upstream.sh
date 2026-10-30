@@ -299,6 +299,11 @@ values["CKAN__BASE_PUBLIC_FOLDER"] = "public-midnight-blue"
 values["CKAN__BASE_TEMPLATES_FOLDER"] = "templates-midnight-blue"
 values["CKAN__SITE_TITLE"] = values.get("CKAN__SITE_TITLE", "Portal Satu Data Kabupaten Wajo").strip().strip("\"").strip("\'") or "Portal Satu Data Kabupaten Wajo"
 values["CKAN__SITE_DESCRIPTION"] = values.get("CKAN__SITE_DESCRIPTION", "Portal data resmi Pemerintah Kabupaten Wajo").strip().strip("\"").strip("\'") or "Portal data resmi Pemerintah Kabupaten Wajo"
+# Keep the CKAN administrator interface in Indonesian by default. English remains
+# available for support and imported extension screens that have no id catalog.
+values["CKAN__LOCALE_DEFAULT"] = "id"
+values["CKAN__LOCALES_OFFERED"] = "\"id en\""
+values["CKAN__LOCALE_ORDER"] = "\"id en\""
 site_logo = values.get("CKAN__SITE_LOGO", "/logo-kabupaten-wajo.webp").strip().strip("\"").strip("\'")
 # Migrate the previous generated path: extension public assets are exposed at the URL root.
 if site_logo in {"", "/base/logo-kabupaten-wajo.webp"}:

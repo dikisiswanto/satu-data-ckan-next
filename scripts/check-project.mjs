@@ -199,8 +199,8 @@ const checks = [
   ],
   [
     "src/components/site-footer.jsx",
-    /data\.go\.id[\s\S]*logo-satu-data-indonesia\.svg[\s\S]*alt="Logo Satu Data Indonesia"[\s\S]*width=\{160\}/,
-    "Footer harus menampilkan logo SDI kecil dan menautkan ke portal resminya.",
+    /data\.go\.id[\s\S]*logo-satu-data-indonesia\.svg[\s\S]*alt="Logo Satu Data Indonesia"[\s\S]*width=\{184\}[\s\S]*height=\{118\}/,
+    "Footer harus menampilkan logo SDI utuh dengan rasio intrinsik dan menautkan ke portal resminya.",
   ],
   [
     "deploy/ckan/docker-compose.override.yml",
@@ -319,27 +319,27 @@ const checks = [
   ],
   [
     "deploy/ckan/Caddyfile",
-    /@ckanPublic[\s\S]*reverse_proxy nextjs:3000[\s\S]*@adminRoot path \/[\s\S]*redir @adminRoot \/user\/login\?came_from=%2Fdashboard%2Fdatasets 302[\s\S]*reverse_proxy https:\/\/nginx:443/,
-    "Caddy publik harus tetap mengarahkan portal ke Next.js dan root CKAN Admin ke form login native.",
+    /@ckanPublic[\s\S]*reverse_proxy nextjs:3000[\s\S]*@adminRobots path \/robots\.txt[\s\S]*reverse_proxy https:\/\/nginx:443/,
+    "Caddy harus memisahkan hostname publik Next.js dan meneruskan semua route admin ke CKAN.",
   ],
   [
     "deploy/ckan/Caddyfile.tunnel",
-    /@ckanPublic[\s\S]*reverse_proxy nextjs:3000[\s\S]*@adminRoot path \/[\s\S]*redir @adminRoot \/user\/login\?came_from=%2Fdashboard%2Fdatasets 302[\s\S]*reverse_proxy https:\/\/nginx:443/,
-    "Tunnel harus mengarahkan root CKAN Admin ke form login native tanpa gerbang Caddy default.",
+    /@ckanPublic[\s\S]*reverse_proxy nextjs:3000[\s\S]*@adminRobots path \/robots\.txt[\s\S]*reverse_proxy https:\/\/nginx:443/,
+    "Tunnel harus memisahkan hostname publik Next.js dan meneruskan semua route admin ke CKAN.",
   ],
   [
     "deploy/ckan/Caddyfile.tunnel.access",
-    /@adminRoot path \/[\s\S]*redir @adminRoot \/user\/login\?came_from=%2Fdashboard%2Fdatasets 302[\s\S]*reverse_proxy https:\/\/nginx:443/,
-    "Profil Access harus merutekan root ke form login CKAN.",
+    /Cloudflare Access[\s\S]*@adminRobots path \/robots\.txt[\s\S]*reverse_proxy https:\/\/nginx:443/,
+    "Profil Access harus melewati Cloudflare Access dan meneruskan seluruh route admin ke CKAN.",
   ],
   [
     "deploy/ckan/Caddyfile.basic-auth",
-    /@adminRoot path \/[\s\S]*redir @adminRoot \/user\/login[\s\S]*basic_auth[\s\S]*reverse_proxy https:\/\/nginx:443/,
-    "Basic Auth Caddy harus tersedia sebagai opsi eksplisit, bukan default.",
+    /@adminRobots path \/robots\.txt[\s\S]*basic_auth[\s\S]*reverse_proxy https:\/\/nginx:443/,
+    "Basic Auth Caddy harus tersedia sebagai opsi eksplisit untuk seluruh route admin.",
   ],
   [
     "deploy/ckan/Caddyfile.tunnel.basic-auth",
-    /@adminRoot path \/[\s\S]*redir @adminRoot \/user\/login[\s\S]*basic_auth[\s\S]*reverse_proxy https:\/\/nginx:443/,
+    /@adminRobots path \/robots\.txt[\s\S]*basic_auth[\s\S]*reverse_proxy https:\/\/nginx:443/,
     "Basic Auth Caddy harus tersedia sebagai opsi eksplisit di profil Tunnel.",
   ],
   [
@@ -603,64 +603,46 @@ for (const file of [
   "deploy/ckan/Caddyfile",
   "deploy/ckan/Caddyfile.tunnel",
   "deploy/ckan/Caddyfile.tunnel.access",
-]) {
-  try {
-    const source = await readFile(path.join(root, file), "utf8");
-    const adminBlock = source.split("{$CKAN_HOST}")[1] || "";
-    if (
-      !adminBlock.includes("@adminRoot path /") ||
-      !adminBlock.includes("/user/login?came_from=%2Fdashboard%2Fdatasets") ||
-      !adminBlock.includes("reverse_proxy https://nginx:443")
-    ) {
-      errors.push(
-        `${file}: host admin harus mengarahkan root ke login CKAN lalu meneruskan route lainnya.`,
-      );
-    }
-    if (adminBlock.includes("basic_auth")) {
-      errors.push(
-        `${file}: Basic Auth tidak boleh aktif pada konfigurasi default tanpa-gate/Access.`,
-      );
-    }
-    if (
-      adminBlock.includes("@publicResourceDownload") ||
-      adminBlock.includes("handle @publicResourceDownload")
-    ) {
-      errors.push(
-        `${file}: host admin tidak boleh memiliki bypass untuk unduhan resource publik.`,
-      );
-    }
-    if (
-      !adminBlock.includes("@adminActions path") ||
-      !adminBlock.includes("/dashboard/*") ||
-      !adminBlock.includes("redir /dashboard/datasets 302")
-    ) {
-      errors.push(
-        `${file}: host CKAN Admin harus membatasi HTML ke login/aksi admin dan mengalihkan route publik ke dashboard.`,
-      );
-    }
-  } catch {
-    errors.push(
-      `Tidak dapat membaca file untuk pemeriksaan host admin: ${file}`,
-    );
-  }
-}
-for (const file of [
   "deploy/ckan/Caddyfile.basic-auth",
   "deploy/ckan/Caddyfile.tunnel.basic-auth",
 ]) {
   try {
     const source = await readFile(path.join(root, file), "utf8");
+    const adminBlock = source.split("{$CKAN_HOST}")[1] || "";
     if (
-      !source.includes("/user/login?came_from=%2Fdashboard%2Fdatasets") ||
-      !source.includes("basic_auth") ||
-      !source.includes("reverse_proxy https://nginx:443")
+      !adminBlock.includes("@adminRobots path /robots.txt") ||
+      !adminBlock.includes("@adminSitemap path") ||
+      !adminBlock.includes("reverse_proxy https://nginx:443")
     ) {
       errors.push(
-        `${file}: konfigurasi gerbang Basic Auth opsional tidak lengkap.`,
+        `${file}: host admin harus memblokir sitemap dan meneruskan seluruh route ke CKAN.`,
+      );
+    }
+    if (!adminBlock.includes("X-Forwarded-Host {http.request.host}")) {
+      errors.push(
+        `${file}: Caddy harus meneruskan Host asli untuk autentikasi berbasis CKAN_HOST.`,
+      );
+    }
+    if (
+      adminBlock.includes("@adminActions path") ||
+      adminBlock.includes("redir https://{$PUBLIC_HOST}{uri} 302")
+    ) {
+      errors.push(
+        `${file}: tidak boleh ada allowlist path atau redirect halaman admin ke portal publik.`,
+      );
+    }
+    if (file.endsWith(".basic-auth") && !adminBlock.includes("basic_auth")) {
+      errors.push(
+        `${file}: profil Basic Auth eksplisit harus tetap mengaktifkan perimeter gate.`,
+      );
+    }
+    if (!file.endsWith(".basic-auth") && adminBlock.includes("basic_auth")) {
+      errors.push(
+        `${file}: Basic Auth tidak boleh aktif pada konfigurasi default/Cloudflare Access.`,
       );
     }
   } catch {
-    errors.push(`Tidak dapat membaca konfigurasi Basic Auth opsional: ${file}`);
+    errors.push(`Tidak dapat membaca konfigurasi host admin: ${file}`);
   }
 }
 
@@ -684,7 +666,7 @@ for (const file of [
       );
     }
     if (
-      !/[@]adminRobots path \/robots\.txt[\s\S]*respond @adminRobots "User-agent: \*[\s\S]*?Allow: \/" 200/.test(
+      !/[@]adminRobots path \/robots\.txt[\s\S]*respond @adminRobots "User-agent: \*" 200/.test(
         adminBlock,
       )
     ) {

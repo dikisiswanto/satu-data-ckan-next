@@ -17,6 +17,54 @@ test("homepage exposes CKAN-driven category cards with exact public dataset coun
   await expect(health).toHaveAttribute("href", "/dataset?kategori=kesehatan");
 });
 
+test("homepage category cards are unique and use semantically matched icons", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const categories = page.locator(".home-topic-card");
+  const names = await categories.locator(".home-topic-name").allTextContents();
+  const normalized = names.map((name) =>
+    name
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toLocaleLowerCase("id-ID"),
+  );
+  expect(new Set(normalized).size).toBe(names.length);
+  await expect(
+    categories
+      .filter({ hasText: "Pendidikan" })
+      .locator("[data-category-icon='graduation-cap']"),
+  ).toHaveCount(1);
+  await expect(
+    categories
+      .filter({ hasText: "Kesehatan" })
+      .locator("[data-category-icon='heart-pulse']"),
+  ).toHaveCount(1);
+  await expect(
+    categories
+      .filter({ hasText: "Publikasi Statistik" })
+      .locator("[data-category-icon='file-text']"),
+  ).toHaveCount(1);
+});
+
+test("hero artwork and summary counts never duplicate each other across breakpoints", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await expect(page.locator(".home-hero-visual")).toBeVisible();
+  await expect(page.locator(".home-stats-wrap")).toBeHidden();
+
+  await page.setViewportSize({ width: 900, height: 900 });
+  await expect(page.locator(".home-hero-visual")).toBeHidden();
+  await expect(page.locator(".home-stats-wrap")).toBeVisible();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator(".home-hero-visual")).toBeHidden();
+  await expect(page.locator(".home-stats-wrap")).toBeVisible();
+});
+
 test("information page keeps a compact title and description rhythm", async ({
   page,
 }) => {
@@ -365,7 +413,7 @@ test("public breadcrumbs and shared navigation make every section discoverable",
     page.getByRole("button", { name: /salin contoh kode/i }).first(),
   ).toBeVisible();
   const primaryHeader = page.locator(".site-header");
-  for (const [_label, href] of [
+  for (const [, href] of [
     ["Dataset", "/dataset"],
     ["Statistik", "/statistik"],
     ["Infografik", "/infografik"],

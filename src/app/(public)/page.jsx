@@ -19,6 +19,14 @@ import {
   MapPinned,
   Network,
   Sprout,
+  Fish,
+  Factory,
+  Droplets,
+  Scale,
+  ShieldCheck,
+  House,
+  Handshake,
+  Trees,
   UsersRound,
   FolderOpen,
 } from "lucide-react";
@@ -200,10 +208,12 @@ function HomeHeroContent({
   facetsUnavailable = false,
   loading = false,
 }) {
-  const topicLinks = getTopicLinks(availableCategories);
+  const normalizedCategories =
+    normalizePublicCategoryFacets(availableCategories);
+  const topicLinks = getTopicLinks(normalizedCategories);
   return (
     <section
-      className="home-hero"
+      className={`home-hero${loading ? " home-hero--loading" : ""}`}
       style={{ "--home-hero-image": `url("${siteConfig.heroImage}")` }}
       aria-busy={loading ? "true" : undefined}
     >
@@ -313,7 +323,7 @@ function HomeHeroContent({
                       aria-hidden="true"
                     />
                   ) : (
-                    displayStat(availableCategories.length)
+                    displayStat(normalizedCategories.length)
                   )}
                 </strong>
                 <small>Kategori data</small>
@@ -375,7 +385,7 @@ function HomeHeroContent({
                   />
                 ) : (
                   displayStat(
-                    facetsUnavailable ? null : availableCategories.length,
+                    facetsUnavailable ? null : normalizedCategories.length,
                   )
                 )}
               </strong>
@@ -431,15 +441,218 @@ function HomeHeroContent({
   );
 }
 
+const categoryIconRules = [
+  {
+    keywords: [
+      "kependudukan",
+      "penduduk",
+      "demografi",
+      "keluarga",
+      "catatan sipil",
+      "administrasi kependudukan",
+    ],
+    Icon: UsersRound,
+    iconName: "users-round",
+  },
+  {
+    keywords: [
+      "pendidikan",
+      "sekolah",
+      "guru",
+      "siswa",
+      "peserta didik",
+      "perguruan tinggi",
+    ],
+    Icon: GraduationCap,
+    iconName: "graduation-cap",
+  },
+  {
+    keywords: [
+      "kesehatan",
+      "rumah sakit",
+      "puskesmas",
+      "tenaga medis",
+      "kesehatan masyarakat",
+    ],
+    Icon: HeartPulse,
+    iconName: "heart-pulse",
+  },
+  {
+    keywords: ["perikanan", "perikanan tangkap", "budidaya ikan", "kelautan"],
+    Icon: Fish,
+    iconName: "fish",
+  },
+  {
+    keywords: [
+      "pertanian",
+      "perkebunan",
+      "peternakan",
+      "pangan",
+      "tanaman",
+      "hortikultura",
+    ],
+    Icon: Sprout,
+    iconName: "sprout",
+  },
+  {
+    keywords: [
+      "kehutanan",
+      "lingkungan",
+      "persampahan",
+      "sampah",
+      "iklim",
+      "konservasi",
+      "ekologi",
+    ],
+    Icon: Trees,
+    iconName: "trees",
+  },
+  {
+    keywords: [
+      "geospasial",
+      "wilayah",
+      "peta",
+      "geografi",
+      "tata ruang",
+      "batas wilayah",
+      "geodesi",
+      "pertanahan",
+      "agraria",
+    ],
+    Icon: MapPinned,
+    iconName: "map-pinned",
+  },
+  {
+    keywords: ["industri", "pabrik", "manufaktur"],
+    Icon: Factory,
+    iconName: "factory",
+  },
+  {
+    keywords: [
+      "ekonomi",
+      "perdagangan",
+      "keuangan",
+      "pdrb",
+      "koperasi",
+      "umkm",
+      "investasi",
+      "perbankan",
+    ],
+    Icon: BarChart3,
+    iconName: "chart",
+  },
+  {
+    keywords: [
+      "air",
+      "sungai",
+      "irigasi",
+      "sanitasi",
+      "sumber daya air",
+      "drainase",
+    ],
+    Icon: Droplets,
+    iconName: "droplets",
+  },
+  {
+    keywords: [
+      "infrastruktur",
+      "jalan",
+      "jembatan",
+      "perhubungan",
+      "transportasi",
+      "pekerjaan umum",
+      "angkutan",
+    ],
+    Icon: Network,
+    iconName: "network",
+  },
+  {
+    keywords: [
+      "sosial",
+      "kesejahteraan",
+      "kemiskinan",
+      "ketenagakerjaan",
+      "perlindungan sosial",
+    ],
+    Icon: Handshake,
+    iconName: "handshake",
+  },
+  {
+    keywords: [
+      "pemerintahan",
+      "perangkat daerah",
+      "organisasi",
+      "administrasi",
+      "kelembagaan",
+      "aparatur",
+      "desa",
+      "kelurahan",
+      "kecamatan",
+    ],
+    Icon: Building2,
+    iconName: "building-2",
+  },
+  {
+    keywords: ["perumahan", "permukiman", "rumah", "bangunan"],
+    Icon: House,
+    iconName: "house",
+  },
+  {
+    keywords: [
+      "bencana",
+      "kebencanaan",
+      "keamanan",
+      "ketertiban",
+      "perlindungan",
+    ],
+    Icon: ShieldCheck,
+    iconName: "shield-check",
+  },
+  {
+    keywords: [
+      "hukum",
+      "regulasi",
+      "peraturan",
+      "perundang-undangan",
+      "legislasi",
+    ],
+    Icon: Scale,
+    iconName: "scale",
+  },
+  {
+    keywords: ["pariwisata", "wisata", "budaya", "destinasi", "rekreasi"],
+    Icon: MapPinned,
+    iconName: "map-pinned",
+  },
+  {
+    keywords: ["olahraga", "kepemudaan", "pemuda"],
+    Icon: UsersRound,
+    iconName: "users-round",
+  },
+  {
+    keywords: ["informasi", "publikasi", "dokumen", "arsip", "kearsipan"],
+    Icon: FileText,
+    iconName: "file-text",
+  },
+  {
+    keywords: ["statistik", "indikator", "indeks", "survei", "sensus"],
+    Icon: FileChartColumn,
+    iconName: "file-chart-column",
+  },
+];
+
 function getCategoryVisual(category) {
-  const normalized = `${category.name} ${category.id}`.toLocaleLowerCase(
-    "id-ID",
+  const normalized = `${category.name} ${category.id}`
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("id-ID");
+  const match = categoryIconRules.find(({ keywords }) =>
+    keywords.some((keyword) => normalized.includes(keyword)),
   );
-  const match = topics.find((topic) => {
-    const label = topic.label.toLocaleLowerCase("id-ID");
-    return normalized.includes(label) || label.includes(normalized);
-  });
-  return { Icon: match?.icon || FolderOpen };
+  return {
+    Icon: match?.Icon || FolderOpen,
+    iconName: match?.iconName || "folder-open",
+  };
 }
 
 function HomeCategoryCards({ categories = [], unavailable = false }) {
@@ -462,7 +675,7 @@ function HomeCategoryCards({ categories = [], unavailable = false }) {
       {normalizedCategories.length ? (
         <div className="home-topic-grid">
           {normalizedCategories.slice(0, 10).map((category) => {
-            const { Icon } = getCategoryVisual(category);
+            const { Icon, iconName } = getCategoryVisual(category);
             return (
               <Link
                 key={category.id}
@@ -470,7 +683,7 @@ function HomeCategoryCards({ categories = [], unavailable = false }) {
                 className="home-topic-card group"
                 aria-label={`${category.name}, ${displayStat(category.count)} dataset`}
               >
-                <span className="home-topic-icon">
+                <span className="home-topic-icon" data-category-icon={iconName}>
                   <Icon size={22} strokeWidth={1.9} aria-hidden="true" />
                 </span>
                 <span className="home-topic-name">{category.name}</span>

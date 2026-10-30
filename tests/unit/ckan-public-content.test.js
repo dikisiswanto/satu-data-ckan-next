@@ -491,6 +491,23 @@ describe("CKAN-driven public category cards", () => {
     ).toEqual([{ id: "kependudukan", name: "Kependudukan", count: 0 }]);
   });
 
+  it("removes duplicate IDs and display names regardless of case or accents", () => {
+    expect(
+      normalizePublicCategoryFacets([
+        { id: "kesehatan", name: "Kesehatan", count: 12 },
+        { id: "kesehatan-lain", name: "KESEHATAN", count: 9 },
+        { id: "lingkungan", name: "Lingkungan Hidup", count: 7 },
+        { id: "lingkungan", name: "Lingkungan", count: 4 },
+        { id: "ekonomi", name: "Ékonomi", count: 3 },
+        { id: "ekonomi-lain", name: "Ekonomi", count: 2 },
+      ]),
+    ).toEqual([
+      { id: "kesehatan", name: "Kesehatan", count: 12 },
+      { id: "lingkungan", name: "Lingkungan Hidup", count: 7 },
+      { id: "ekonomi", name: "Ékonomi", count: 3 },
+    ]);
+  });
+
   it("reads dataset counts from CKAN package_search group facets", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(

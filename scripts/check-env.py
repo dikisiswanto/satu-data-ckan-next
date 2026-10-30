@@ -108,6 +108,7 @@ else:
             "PUBLIC_SITE_ORIGIN=https://portal.example.test",
             "CKAN_ADMIN_URL=https://admin.example.test",
             "CKAN_SITE_URL=https://portal.example.test",
+            "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test",
         )
         if result.returncode != 0 or any(value not in synced for value in expected_urls):
             errors.append("sync-env.py tidak memisahkan URL publik dan URL admin setelah hostname diubah")
@@ -153,6 +154,7 @@ else:
                 "PUBLIC_SITE_ORIGIN=https://data.example.test\n"
                 "CKANEXT__XLOADER__API_TOKEN=sensitive-xloader-token\n"
                 "CKANEXT__XLOADER__JOBS_DB__URI=postgresql://ckan:secret@db/ckan\n"
+                "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test\n"
             )
             result = subprocess.run([sys.executable, str(renderer), str(source), str(output)], capture_output=True, text=True)
             if result.returncode != 0:
@@ -162,8 +164,8 @@ else:
                 for secret in ("CLOUDFLARE_TUNNEL_TOKEN", "CKAN_ADMIN_BASIC_AUTH_PASSWORD", "CKAN_ADMIN_BASIC_AUTH_HASH", "NEXT_PUBLIC_SITE_URL", "PUBLIC_SITE_ORIGIN", "CKANEXT__XLOADER__API_TOKEN", "CKANEXT__XLOADER__JOBS_DB__URI"):
                     if re.search(rf"^{secret}=", generated, re.M):
                         errors.append(f"Renderer env membocorkan variabel edge {secret} ke service CKAN")
-                if "CKAN_SQLALCHEMY_URL=" not in generated or output.stat().st_mode & 0o777 != 0o600:
-                    errors.append("Renderer env harus mempertahankan konfigurasi CKAN dan menulis output dengan permission 600")
+                if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test" not in generated or output.stat().st_mode & 0o777 != 0o600:
+                    errors.append("Renderer env harus mempertahankan konfigurasi CKAN/admin host dan menulis output dengan permission 600")
 if "--env-file \"$ENV_FILE\"" not in wrapper.read_text():
     errors.append("compose.sh harus memakai .env.ckan sebagai satu-satunya env file untuk interpolasi Compose")
 if "--env-file \"$UPSTREAM/.env\"" in apply_script:

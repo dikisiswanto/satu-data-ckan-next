@@ -482,16 +482,21 @@
   margin-block-start: clamp(1.5rem, 2.5vw, 2rem);
 }
 
-/* Empty CMS state spans the directory width instead of inheriting a card column. */
+/* The empty information panel is one full-width, vertically stacked message. */
 .informasi-directory-page > .cms-directory-empty {
-  grid-column: 1 / -1;
+  box-sizing: border-box;
+  display: flex;
   inline-size: 100%;
   max-inline-size: none;
   min-block-size: 9rem;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   text-align: center;
 }
-.informasi-directory-page:has(> .cms-directory-empty) {
-  display: block;
+.informasi-directory-page > .cms-directory-empty > h2,
+.informasi-directory-page > .cms-directory-empty > p {
+  margin: 0;
+  max-inline-size: 42rem;
 }
