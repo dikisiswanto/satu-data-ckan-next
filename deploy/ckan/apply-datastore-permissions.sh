@@ -21,6 +21,18 @@ python3 "$ROOT/deploy/ckan/render-upstream-env.py" "$ENV_FILE" "$UPSTREAM/.env.g
 
 COMPOSE=(docker compose --project-directory "$UPSTREAM" --env-file "$ENV_FILE" -f "$UPSTREAM/docker-compose.yml" -f "$UPSTREAM/docker-compose.override.yml")
 
+# Do not run CKAN CLI against a container that is still restarting or unhealthy.
+CKAN_CID="$("${COMPOSE[@]}" ps -q ckan | tail -n 1)"
+if [[ -z "$CKAN_CID" ]]; then
+  echo "Container CKAN belum dibuat. Jalankan Compose untuk service ckan terlebih dahulu." >&2
+  exit 3
+fi
+CKAN_HEALTH="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$CKAN_CID" 2>/dev/null || true)"
+if [[ "$CKAN_HEALTH" != "healthy" ]]; then
+  echo "CKAN belum sehat (status: ${CKAN_HEALTH:-unknown}). Periksa 'compose.sh <profil> logs --tail=120 ckan' dan ulangi setelah status healthy." >&2
+  exit 3
+fi
+
 # CKAN 2.12 requires its DataStore permissions SQL to be applied after initialization
 # and after upgrades. The db service runs the PostgreSQL bootstrap superuser specified
 # by POSTGRES_USER; psql stops the transaction if any statement fails.

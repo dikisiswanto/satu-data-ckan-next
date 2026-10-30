@@ -83,7 +83,7 @@ const required = [
   "src/components/public-context-guide.jsx",
   "src/app/api/public/resource-preview/route.js",
   "tests/unit/delimited-preview.test.js",
-  "deploy/ckan/schemas/dataset.yaml",
+  "deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml",
   "deploy/ckan/configure-upstream-extensions.py",
   "deploy/ckan/install-pages.py",
   "deploy/ckan/theme/setup.py",
@@ -294,7 +294,7 @@ const checks = [
     "Unduhan indikator harus memakai URL resource publik dan tidak membocorkan hostname admin.",
   ],
   [
-    "deploy/ckan/schemas/dataset.yaml",
+    "deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml",
     /field_name: portal_data_start[\s\S]*preset: date[\s\S]*field_name: portal_publication_date[\s\S]*preset: date[\s\S]*field_name: portal_definition/,
     "Schema CKAN harus memuat definisi indikator dan validasi tanggal metadata.",
   ],

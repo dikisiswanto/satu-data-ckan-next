@@ -139,6 +139,9 @@ else:
     for token in ("CLOUDFLARE_", "CKAN_ADMIN_BASIC_AUTH_", "NEXT_PUBLIC_", "CKANEXT__XLOADER__", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_"):
         if token not in render_text:
             errors.append(f"Renderer tidak mengecualikan variabel edge sensitif {token}")
+    for token in ("module:file configuration", "ckanext.wajo_theme:schemas/dataset.yaml", "ckanext.scheming:presets.json"):
+        if token not in render_text:
+            errors.append(f"Renderer tidak memvalidasi kontrak Scheming: {token}")
     else:
         with tempfile.TemporaryDirectory(prefix="portal-env-source-check-") as tmp:
             tmp_path = Path(tmp)
@@ -146,6 +149,8 @@ else:
             output = tmp_path / ".env.generated"
             source.write_text(
                 "CKAN__PLUGINS=\"envvars datastore\"\n"
+                "CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.wajo_theme:schemas/dataset.yaml\n"
+                "CKAN___SCHEMING__PRESETS=ckanext.scheming:presets.json\n"
                 "CKAN_SQLALCHEMY_URL=postgresql://ckan:secret@db/ckan\n"
                 "CLOUDFLARE_TUNNEL_TOKEN=secret-tunnel-token\n"
                 "CKAN_ADMIN_BASIC_AUTH_PASSWORD=secret-admin-password\n"
@@ -168,6 +173,23 @@ else:
                         errors.append(f"Renderer env membocorkan variabel edge {secret} ke service CKAN")
                 if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test" not in generated or output.stat().st_mode & 0o777 != 0o600:
                     errors.append("Renderer env harus mempertahankan konfigurasi CKAN/admin host dan menulis output dengan permission 600")
+                for required_schema in (
+                    "CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.wajo_theme:schemas/dataset.yaml",
+                    "CKAN___SCHEMING__PRESETS=ckanext.scheming:presets.json",
+                ):
+                    if required_schema not in generated:
+                        errors.append("Renderer env harus mempertahankan referensi Scheming module:file: " + required_schema)
+
+                invalid_source = tmp_path / ".env.invalid-scheming.ckan"
+                invalid_output = tmp_path / ".env.invalid-scheming.generated"
+                invalid_source.write_text(
+                    "CKAN__PLUGINS=\"envvars scheming_datasets\"\n"
+                    "CKAN___SCHEMING__DATASET_SCHEMAS=/srv/app/ckanext-schemas/dataset.yaml\n"
+                    "CKAN___SCHEMING__PRESETS=ckanext.scheming:presets.json\n"
+                )
+                invalid_result = subprocess.run([sys.executable, str(renderer), str(invalid_source), str(invalid_output)], capture_output=True, text=True)
+                if invalid_result.returncode == 0 or "module:file configuration" not in (invalid_result.stdout + invalid_result.stderr):
+                    errors.append("Renderer harus menolak Scheming filesystem path sebelum CKAN dapat restart-loop")
 if "--env-file \"$ENV_FILE\"" not in wrapper.read_text():
     errors.append("compose.sh harus memakai .env.ckan sebagai satu-satunya env file untuk interpolasi Compose")
 if "--env-file \"$UPSTREAM/.env\"" in apply_script:

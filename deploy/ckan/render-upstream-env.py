@@ -25,8 +25,9 @@ excluded_keys = {
 }
 rendered = []
 seen = set()
+values = {}
 for line in source.read_text().splitlines():
-    match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)=", line)
+    match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$", line)
     if not match:
         continue
     key = match.group(1)
@@ -35,10 +36,32 @@ for line in source.read_text().splitlines():
     if key in seen:
         raise SystemExit(f"Duplicate environment key in canonical .env.ckan: {key}")
     seen.add(key)
+    values[key] = match.group(2).strip().strip('"').strip("'")
     rendered.append(line)
 
 if not any(line.startswith("CKAN__PLUGINS=") for line in rendered):
     raise SystemExit("CKAN__PLUGINS missing; run bootstrap before rendering the CKAN environment.")
+
+# Scheming expects package-resource references in `module:file` form. A stale
+# filesystem path (the former /srv/app/ckanext-schemas/dataset.yaml value)
+# makes CKAN crash while loading plugins, before the health check can pass.
+required_scheming = {
+    "CKAN___SCHEMING__DATASET_SCHEMAS": "ckanext.wajo_theme:schemas/dataset.yaml",
+    "CKAN___SCHEMING__PRESETS": "ckanext.scheming:presets.json",
+}
+for key, expected in required_scheming.items():
+    actual = values.get(key, "")
+    if actual != expected:
+        raise SystemExit(
+            f"{key} must be {expected!r}; found {actual!r}. "
+            "Run bootstrap-upstream.sh to repair the Scheming module:file configuration."
+        )
+for obsolete_key in ("CKAN__SCHEMING__DATASET_SCHEMAS", "CKAN__SCHEMING__PRESETS"):
+    if obsolete_key in values:
+        raise SystemExit(
+            f"Obsolete Scheming variable {obsolete_key} is still present in .env.ckan; "
+            "run bootstrap-upstream.sh to remove it."
+        )
 if any(line.startswith(prefix) for line in rendered for prefix in (
     "CLOUDFLARE_TUNNEL_TOKEN=", "CKAN_ADMIN_BASIC_AUTH_PASSWORD=", "CKAN_ADMIN_BASIC_AUTH_HASH=", "NEXT_PUBLIC_", "CKANEXT__XLOADER__", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_", "CKAN_REVALIDATE_SECRET="
 )):

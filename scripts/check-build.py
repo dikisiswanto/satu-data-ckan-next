@@ -40,6 +40,8 @@ def main() -> None:
         assert result.count(MARKER) == 1, "generated Dockerfile block must be idempotent"
         assert result.count("COPY --chown=ckan:ckan extensions/requirements.txt") == 1
         assert result.count("RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt") == 1
+        assert "/srv/app/ckanext-schemas/dataset.yaml" not in result, "Scheming must not point at a bare filesystem path that cannot be imported as module:file"
+        assert "ckanext.wajo_theme:schemas/dataset.yaml" in (ROOT / "deploy/ckan/bootstrap-upstream.sh").read_text()
         assert "COPY --chown=ckan:ckan install-pages.py /tmp/portal-install-pages.py" in result
         assert "COPY --chown=ckan:ckan compile-id-translations.py /tmp/portal-compile-id-translations.py" in result
         assert "&& python /tmp/portal-install-pages.py" in result
@@ -173,6 +175,10 @@ def main() -> None:
         assert 'ENV EXTRA_UWSGI_OPTS=""' in workflow and "RUN test \"${EXTRA_UWSGI_OPTS+x}\" = x" in workflow, "Docker smoke test must verify the uWSGI default is defined"
         init_script = ckan / "docker-entrypoint.d/50-portal-extensions.sh"
         assert init_script.is_file() and init_script.stat().st_mode & 0o111
+        datastore_permissions = (ROOT / "deploy/ckan/apply-datastore-permissions.sh").read_text()
+        xloader_enable = (ROOT / "deploy/ckan/enable-xloader.sh").read_text()
+        assert 'CKAN_HEALTH' in datastore_permissions and '"$CKAN_HEALTH" != "healthy"' in datastore_permissions, "DataStore permissions must require a healthy CKAN container"
+        assert 'CKAN_HEALTH' in xloader_enable and '"$CKAN_HEALTH" != "healthy"' in xloader_enable, "XLoader token creation must require a healthy CKAN container"
 
         # Build the actual Wajo theme wheel in a temporary directory and verify
         # that every shell/dashboard asset is present in the installable artifact.
@@ -207,6 +213,7 @@ def main() -> None:
                 "ckanext/wajo_theme/assets/css/wajo-theme.css",
                 "ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
                 "ckanext/wajo_theme/assets/webassets.yml",
+                "ckanext/wajo_theme/schemas/dataset.yaml",
                 "ckanext/wajo_theme/public/logo-kabupaten-wajo.webp",
                 "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po",
                 "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-harvest.po",
@@ -216,7 +223,23 @@ def main() -> None:
             missing_theme_files = required_theme_files - wheel_files
             assert not missing_theme_files, f"Wajo theme wheel is missing files: {sorted(missing_theme_files)}"
 
-    print("CKAN Docker overlay, Wajo Admin wheel packaging, and ckanext-pages package-data fixtures passed.")
+        # Scheming resolves the configured `module:file` reference from the
+        # installed extension package, not from an arbitrary filesystem path.
+        resource_probe = subprocess.run(
+            [
+                "python3", "-c",
+                "from importlib import resources; "
+                "p = resources.files('ckanext.wajo_theme').joinpath('schemas/dataset.yaml'); "
+                "assert p.is_file() and p.read_text().startswith('dataset_type: dataset')",
+            ],
+            cwd=ROOT,
+            env={**os.environ, "PYTHONPATH": str(theme_dir)},
+            capture_output=True,
+            text=True,
+        )
+        assert resource_probe.returncode == 0, "Scheming module:file resource must resolve from ckanext.wajo_theme package data: " + resource_probe.stderr
+
+    print("CKAN Docker overlay, Wajo Admin wheel packaging, Scheming package-resource resolution, and ckanext-pages package-data fixtures passed.")
 
 
 if __name__ == "__main__":

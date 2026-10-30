@@ -272,7 +272,7 @@ bash ./deploy/ckan/apply-datastore-permissions.sh
 bash ./deploy/ckan/enable-xloader.sh cloudflare
 ```
 
-Buat dataset publik di CKAN Admin. Untuk menampilkan konten khusus portal, gunakan tag yang sesuai: `portal-indikator`, `portal-infografik`, atau `portal-publikasi`. Indikator membutuhkan resource tabular yang telah dimuat ke DataStore; kolom minimum adalah `period`, `region`, dan `value`. Detail format field tersedia pada schema `schemas/dataset.yaml` serta panduan portal di `/api-data`.
+Buat dataset publik di CKAN Admin. Untuk menampilkan konten khusus portal, gunakan tag yang sesuai: `portal-indikator`, `portal-infografik`, atau `portal-publikasi`. Indikator membutuhkan resource tabular yang telah dimuat ke DataStore; kolom minimum adalah `period`, `region`, dan `value`. Detail format field tersedia pada schema `ckanext.wajo_theme:schemas/dataset.yaml` serta panduan portal di `/api-data`.
 
 ## 9. Verifikasi source image CKAN 2.12.1
 

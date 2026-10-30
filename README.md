@@ -62,6 +62,7 @@ bash ./deploy/ckan/enable-xloader.sh cloudflare
 ```
 
 Ganti argumen `cloudflare` menjadi `manual` jika memakai ingress langsung. Perintah operasional lainnya tersedia di [`deploy/ckan/README.md`](deploy/ckan/README.md).
+Jika CKAN tidak sehat saat start, lihat [diagnosis startup Scheming dan design-system](docs/CKAN-STARTUP-AND-DESIGN-SYSTEM-FIX.md) sebelum menjalankan perintah DataStore/XLoader.
 
 ## Akun sysadmin awal
 
@@ -141,6 +142,10 @@ Untuk mengubah tampilan, edit:
 - `deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css` — design system dan styling seluruh halaman CKAN.
 
 Jangan mengedit core CKAN atau folder hasil bootstrap `deploy/ckan/upstream`. Perubahan plugin/template/CSS memerlukan bootstrap dan rebuild image CKAN. Static check membangun wheel theme sungguhan dan memastikan semua template, logo, CSS, WebAssets, dan katalog `.po` ikut terkemas.
+
+## Diagnosis startup CKAN dan design-system guard
+
+Jika CKAN menjadi unhealthy saat `ckanext-scheming` dimuat, periksa referensi schema `module:file` di `.env.ckan` dan `deploy/ckan/upstream/.env.generated`. Renderer environment sekarang menolak path filesystem lama sebelum container dimulai. Panduan diagnosis dan urutan pemulihan tersedia di [`docs/CKAN-STARTUP-AND-DESIGN-SYSTEM-FIX.md`](docs/CKAN-STARTUP-AND-DESIGN-SYSTEM-FIX.md) dan laporan terbaru [`docs/AUDIT-CI-SCHEMING-STARTUP-FIX-2026-10-30.md`](docs/AUDIT-CI-SCHEMING-STARTUP-FIX-2026-10-30.md).
 
 ## Pemeriksaan kualitas
 

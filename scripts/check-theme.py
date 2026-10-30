@@ -21,6 +21,7 @@ DATA_PREVIEW = PACKAGE / "templates/wajo_theme/data_preview.html"
 SIDEBAR = PACKAGE / "templates/wajo_theme/sidebar.html"
 ASSETS = PACKAGE / "assets/webassets.yml"
 DESIGN_SYSTEM = PACKAGE / "assets/css/wajo-admin-design-system.css"
+SCHEMA = PACKAGE / "schemas/dataset.yaml"
 LOGO = PACKAGE / "public/logo-kabupaten-wajo.webp"
 INDONESIAN_PO = PACKAGE / "i18n/id/LC_MESSAGES/ckan.po"
 HARVEST_PO = PACKAGE / "i18n/id/LC_MESSAGES/ckanext-harvest.po"
@@ -82,6 +83,8 @@ for expected in (
     require(expected in plugin_source, f"Registrasi theme CKAN tidak lengkap: {expected}")
 
 require('url_prefix="/admin"' in plugin_source, "Ringkasan Wajo Admin harus memiliki URL khusus agar redirect root tidak berputar.")
+require(SCHEMA.is_file(), "Schema dataset Wajo harus dipaketkan di dalam extension agar Scheming dapat memuatnya sebagai module:file.")
+require('values["CKAN___SCHEMING__DATASET_SCHEMAS"] = "ckanext.wajo_theme:schemas/dataset.yaml"' in bootstrap_source, "scheming.dataset_schemas harus memakai format module:file yang valid, bukan path filesystem polos.")
 require("CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index" in env_source, "Login CKAN harus diarahkan ke halaman ringkasan Wajo Admin.")
 require('values["CKAN__AUTH__ROUTE_AFTER_LOGIN"] = "wajo_admin.index"' in bootstrap_source, "Bootstrap harus mengunci redirect login ke route Wajo Admin.")
 
@@ -108,6 +111,7 @@ require("css/wajo-theme.css" in assets_source, "Bundle wajo_theme harus memuat C
 require("css/wajo-admin-design-system.css" in assets_source, "Bundle harus memuat lapisan design system admin setelah theme dasar.")
 require(DESIGN_SYSTEM.is_file(), "File design system Wajo Admin tidak ditemukan.")
 design_source = read(DESIGN_SYSTEM)
+design_normalized = re.sub(r"\s+", " ", design_source)
 for token in (
     "--wajo-color-primary: #1d5fa7", "--wajo-color-ink: #1b3440",
     "--wajo-color-muted: #586d76", "--wajo-color-canvas: #f5f7f6",
@@ -120,7 +124,7 @@ for token in (
     "--wajo-shadow-sm",
     "--wajo-color-success: #28784f", "--wajo-color-danger: #b33d46",
 ):
-    require(token in design_source, f"Design token wajib tidak ditemukan: {token}.")
+    require(token in design_normalized, f"Design token wajib tidak ditemukan: {token}.")
 for selector in (
     ".wajo-admin-topbar__inner", ".wajo-admin-shell", ".wajo-admin-workspace #content",
     ".wajo-admin-workspace .module", ".wajo-admin-workspace .table",
@@ -134,7 +138,7 @@ for selector in (
     "@media (prefers-reduced-motion: reduce)", "--wajo-heading-1",
     "--wajo-heading-2", "--wajo-text-base",
 ):
-    require(selector in design_source, f"Design system tidak mencakup selector/responsive rule: {selector}.")
+    require(selector in design_normalized, f"Design system tidak mencakup selector/responsive rule: {selector}.")
 require(assets_source.index("css/wajo-theme.css") < assets_source.index("css/wajo-admin-design-system.css"), "Design system harus dimuat setelah CSS theme dasar agar token dan komponen konsisten.")
 require("wajo-theme/%(version)s-wajo-theme.css" in assets_source, "Output bundle harus memakai nama versi agar cache dapat diinvalisasi.")
 require("cssrewrite" not in assets_source, "Bundle Wajo tidak boleh menjalankan cssrewrite pada stylesheet tanpa referensi URL; filter ini memicu kegagalan pemetaan asset di CKAN.")
@@ -245,10 +249,13 @@ require("@media (max-width: 991.98px)" in css_source, "Layout login/header harus
 require(re.search(r"@media \(max-width: 991\.98px\)\s*\{[\s\S]{0,500}\.wajo-admin-menu-toggle\s*\{\s*display:\s*inline-flex", css_source), "Tombol navigasi admin harus terlihat dan dapat digunakan pada tablet/mobile.")
 require(".wajo-admin-footer__brand img" in css_source, "Logo footer admin harus memiliki ukuran dan object-fit yang eksplisit.")
 require("@media (prefers-reduced-motion: reduce)" in css_source, "Theme harus menghormati prefers-reduced-motion.")
-require(".wajo-admin-workspace .btn { min-height: var(--wajo-button-height)" in design_source, "Tombol admin harus memakai tinggi kanonis design system.")
-require(".wajo-admin-workspace .btn { min-height: 44px; }" in design_source, "Target tombol admin pada mobile harus minimal 44px.")
-require(".wajo-admin-workspace .pagination .page-link { min-width: 44px; min-height: 44px; }" in design_source, "Pagination mobile harus memiliki target sentuh yang memadai.")
-require("font-size: 1rem; }" in design_source[design_source.find(".wajo-login-frame .login-main:has(#field-login) .form-control"):], "Input login harus memakai ukuran teks yang nyaman dibaca.")
+require(bool(re.search(r"\.wajo-admin-workspace \.btn\s*\{[^}]*min-height:\s*var\(--wajo-button-height\)", design_normalized)), "Tombol admin harus memakai tinggi kanonis design system.")
+mobile_rules = design_normalized.split("@media (max-width: 767.98px)", 1)[-1]
+require(bool(re.search(r"\.wajo-admin-workspace \.btn\s*\{[^}]*min-height:\s*44px", mobile_rules)), "Target tombol admin pada mobile harus minimal 44px.")
+require(bool(re.search(r"\.wajo-admin-workspace \.pagination \.page-link\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px", mobile_rules)), "Pagination mobile harus memiliki target sentuh yang memadai.")
+login_control_match = re.search(r"\.wajo-login-frame \.login-main:has\(#field-login\) \.form-control\s*\{([^}]*)\}", design_normalized)
+require(bool(login_control_match and re.search(r"font-size:\s*1rem", login_control_match.group(1))), "Input login harus memakai ukuran teks yang nyaman dibaca.")
+require('"schemas/*.yaml"' in setup_source and "recursive-include ckanext/wajo_theme/schemas *.yaml" in read(THEME / "MANIFEST.in"), "Schema Scheming harus masuk ke wheel extension sebagai package data.")
 require(":focus-visible" in css_source, "Focus indicator keyboard tidak ditemukan.")
 require("position: fixed" not in css_source, "Theme tidak boleh membuat overlay fixed global yang berpotensi menutup kontrol CKAN.")
 require(".wajo-admin-topbar" in css_source and ".wajo-admin-shell" in css_source and ".wajo-admin-sidebar" in css_source and ".wajo-dashboard__metrics" in css_source and ".table tbody tr:hover" in css_source, "Theme administrasi harus memiliki topbar, shell, sidebar, dashboard, tabel, dan responsivitas yang konsisten.")

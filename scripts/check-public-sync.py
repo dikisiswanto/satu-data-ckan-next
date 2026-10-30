@@ -16,11 +16,11 @@ public_route = (root / "src/app/api/3/action/[...action]/route.js").read_text()
 detail = (root / "src/app/(public)/dataset/[slug]/page.jsx").read_text()
 preview = (root / "src/components/dataset-resource-preview.jsx").read_text()
 
-if 'values["CKAN___SCHEMING__DATASET_SCHEMAS"]' not in bootstrap or 'values["CKAN___SCHEMING__PRESETS"]' not in bootstrap:
+if 'values["CKAN___SCHEMING__DATASET_SCHEMAS"] = "ckanext.wajo_theme:schemas/dataset.yaml"' not in bootstrap or 'values["CKAN___SCHEMING__PRESETS"]' not in bootstrap:
     errors.append("Scheming harus memakai CKAN___SCHEMING__... (konfigurasi extension tanpa prefix ckan.)")
 if '"CKAN__SCHEMING__DATASET_SCHEMAS"' not in bootstrap or '"CKAN__SCHEMING__PRESETS"' not in bootstrap:
     errors.append("Bootstrap harus membersihkan environment Scheming lama yang salah prefix-nya.")
-if 'dataset_type: dataset' not in (root / "deploy/ckan/schemas/dataset.yaml").read_text():
+if 'dataset_type: dataset' not in (root / "deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml").read_text():
     errors.append("Schema dataset CKAN harus tetap mendaftarkan type dataset.")
 if '"activity"' not in bootstrap or "db upgrade -p activity" not in (root / "deploy/ckan/initialize-extensions.sh").read_text():
     errors.append("Activity plugin/migrasi harus aktif agar package_activity_list terdaftar.")

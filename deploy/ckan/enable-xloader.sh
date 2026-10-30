@@ -39,6 +39,21 @@ for line in path.read_text().splitlines():
 PY
 }
 
+# Use the same filtered Compose sources as the deployment, but no ingress overlay is
+# needed to inspect the internal CKAN service health.
+UPSTREAM="$ROOT/deploy/ckan/upstream"
+COMPOSE=(docker compose --project-directory "$UPSTREAM" --env-file "$ENV_FILE" -f "$UPSTREAM/docker-compose.yml" -f "$UPSTREAM/docker-compose.override.yml")
+CKAN_CID="$("${COMPOSE[@]}" ps -q ckan | tail -n 1)"
+if [[ -z "$CKAN_CID" ]]; then
+  echo "Container CKAN belum dibuat. Jalankan Compose untuk service ckan terlebih dahulu." >&2
+  exit 3
+fi
+CKAN_HEALTH="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$CKAN_CID" 2>/dev/null || true)"
+if [[ "$CKAN_HEALTH" != "healthy" ]]; then
+  echo "CKAN belum sehat (status: ${CKAN_HEALTH:-unknown}); token XLoader tidak dibuat. Perbaiki log CKAN dan ulangi setelah status healthy." >&2
+  exit 3
+fi
+
 SYSADMIN="$(read_env CKAN_SYSADMIN_NAME)"
 SYSADMIN="${SYSADMIN:-ckan_admin}"
 TOKEN="$(read_env CKANEXT__XLOADER__API_TOKEN)"

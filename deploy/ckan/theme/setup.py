@@ -13,6 +13,7 @@ setup(
             "templates/wajo_theme/*.html",
             "assets/webassets.yml",
             "assets/css/*.css",
+            "schemas/*.yaml",
             "public/*",
             "i18n/id/LC_MESSAGES/*.po",
         ],

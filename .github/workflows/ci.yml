@@ -61,7 +61,7 @@ jobs:
             deploy/ckan/docker-compose.override.yml \
             deploy/ckan/docker-compose.cloudflare.yml \
             deploy/ckan/docker-compose.manual.yml \
-            deploy/ckan/schemas/dataset.yaml \
+            deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml \
             .github/workflows/ci.yml
           bash -n scripts/check-static.sh deploy/ckan/bootstrap-upstream.sh deploy/ckan/compose.sh deploy/ckan/sync-ckan-base-source.sh deploy/ckan/prepare-ckan-base.sh deploy/ckan/enable-xloader.sh deploy/ckan/initialize-extensions.sh deploy/ckan/apply-datastore-permissions.sh
           python3 scripts/check-build.py
