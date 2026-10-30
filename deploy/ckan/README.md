@@ -177,6 +177,8 @@ Bootstrap menyalin `deploy/ckan/theme/` ke build context CKAN dan memasang packa
 
 Theme dibangun di atas Midnight Blue bawaan CKAN 2.12, sehingga form, navigation, CSRF, autentikasi, dan alur permission CKAN tetap berasal dari CKAN. `ckanext-theming` tidak diaktifkan: extension itu masih berupa prototipe dan tidak ditemukan sebagai dependency dalam source arsip yang diterima. Untuk mengubah warna/layout, edit `deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css`. Untuk mengubah identitas header, edit `templates/header.html`; untuk memelihara versi plugin, edit `setup.py`.
 
+Hostname CKAN Admin hanya menjadi antarmuka autentikasi dan administrasi. Caddy meneruskan allowlist route admin, API, dan static assets; route HTML lain diarahkan ke dashboard sehingga katalog publik tidak menduplikasi Next.js. Pastikan setiap fitur admin/extension baru menambahkan route yang diperlukan ke matcher `@adminActions` pada seluruh varian Caddy yang digunakan. Bundle Wajo tidak memakai filter `cssrewrite`: stylesheet saat ini tidak memiliki referensi `url()` dan filter tersebut menyebabkan WebAssets gagal memetakan URL sumber CSS pada login CKAN.
+
 Setelah mengubah theme, jalankan `bash ./deploy/ckan/bootstrap-upstream.sh` untuk menyalin source theme ke build context, lalu bangun ulang image dan recreate CKAN:
 
 ```bash

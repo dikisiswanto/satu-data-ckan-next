@@ -21,6 +21,59 @@ export function PublicScrollManager() {
   const previousRouteRef = useRef(null);
 
   useEffect(() => {
+    if (!("IntersectionObserver" in window)) return;
+
+    const observed = new WeakSet();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-scroll-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+    );
+    const scan = (root) => {
+      if (
+        root instanceof Element &&
+        root.matches(
+          ".home-content .home-section, .home-content .home-feature-row",
+        ) &&
+        !observed.has(root)
+      ) {
+        root.classList.add("has-scroll-reveal");
+        observed.add(root);
+        observer.observe(root);
+      }
+      root
+        .querySelectorAll?.(
+          ".home-content .home-section, .home-content .home-feature-row",
+        )
+        .forEach((target) => {
+          if (observed.has(target)) return;
+          target.classList.add("has-scroll-reveal");
+          observed.add(target);
+          observer.observe(target);
+        });
+    };
+
+    scan(document);
+    const mutations = new MutationObserver((records) => {
+      records.forEach((record) =>
+        record.addedNodes.forEach((node) => {
+          if (node instanceof Element) scan(node);
+        }),
+      );
+    });
+    mutations.observe(document.body, { childList: true, subtree: true });
+    return () => {
+      mutations.disconnect();
+      observer.disconnect();
+    };
+  }, [pathname]);
+
+  useEffect(() => {
     const previous = previousRouteRef.current;
     previousRouteRef.current = { pathname, queryKey, page };
 

@@ -55,7 +55,7 @@ if (
 }
 if (
   !footer.includes('href="https://data.go.id"') ||
-  !footer.includes("width={82}")
+  !footer.includes("width={160}")
 ) {
   errors.push(
     "Footer harus menampilkan penanda SDI berukuran kecil dan tautan ke portal resmi data.go.id.",

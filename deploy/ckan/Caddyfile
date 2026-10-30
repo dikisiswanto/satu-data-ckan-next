@@ -44,14 +44,24 @@ Allow: /" 200
 
     @adminRoot path /
     redir @adminRoot /user/login?came_from=%2Fdashboard%2Fdatasets 302
-    handle {
+
+    # CKAN remains the private administration interface. Public catalogue and
+    # editorial HTML routes are served by the Next.js hostname instead.
+    @adminActions path /dashboard/* /dataset/new /dataset/edit/* /dataset/resources/* /dataset/delete/* /organization/new /organization/edit/* /group/new /group/edit/* /pages/new /pages/edit/* /pages/delete/* /user/login /user/logout /user/_logout /user/edit/* /user/request_reset /user/reset/* /api/* /base/* /static/* /fanstatic/* /webassets/* /images/* /scripts/* /css/* /js/* /vendor/* /ckan-admin/* /favicon.ico
+    handle @adminActions {
       reverse_proxy https://nginx:443 {
         header_up Host {http.request.host}
-        header_up X-Forwarded-Proto {http.request.scheme}
+        header_up X-Forwarded-Proto https
         transport http {
           tls_insecure_skip_verify
         }
       }
+    }
+
+    # Unknown HTML routes are intentionally not served here: public discovery
+    # belongs to Next.js. Authenticated administrators land on their dashboard.
+    handle {
+      redir /dashboard/datasets 302
     }
   }
 }

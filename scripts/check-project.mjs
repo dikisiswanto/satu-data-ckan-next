@@ -199,7 +199,7 @@ const checks = [
   ],
   [
     "src/components/site-footer.jsx",
-    /data\.go\.id[\s\S]*logo-satu-data-indonesia\.svg[\s\S]*alt="Logo Satu Data Indonesia"[\s\S]*width=\{82\}/,
+    /data\.go\.id[\s\S]*logo-satu-data-indonesia\.svg[\s\S]*alt="Logo Satu Data Indonesia"[\s\S]*width=\{160\}/,
     "Footer harus menampilkan logo SDI kecil dan menautkan ke portal resminya.",
   ],
   [
@@ -627,6 +627,15 @@ for (const file of [
     ) {
       errors.push(
         `${file}: host admin tidak boleh memiliki bypass untuk unduhan resource publik.`,
+      );
+    }
+    if (
+      !adminBlock.includes("@adminActions path") ||
+      !adminBlock.includes("/dashboard/*") ||
+      !adminBlock.includes("redir /dashboard/datasets 302")
+    ) {
+      errors.push(
+        `${file}: host CKAN Admin harus membatasi HTML ke login/aksi admin dan mengalihkan route publik ke dashboard.`,
       );
     }
   } catch {

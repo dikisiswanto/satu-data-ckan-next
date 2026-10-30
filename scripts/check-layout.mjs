@@ -220,7 +220,7 @@ for (const token of [
   "Cari dataset, tema, atau kata kunci…",
   'submitLabel="Cari"',
   "Coba cari",
-  "Satu tempat untuk menemukan data daerah",
+  "Data daerah, terhubung dalam satu portal",
   "Organisasi aktif",
   "Indikator publik",
   "Dataset terbuka",
@@ -233,6 +233,30 @@ requireText(
   "src/app/styles/public-home-hero.css",
   "grid-template-columns: minmax(0, 1.08fr) minmax(19rem, 0.92fr)",
   "hero must use a balanced two-column desktop composition",
+);
+for (const token of [
+  "home-visual-chip-top-left",
+  "home-visual-chip-top-right",
+  "home-visual-chip-bottom-left",
+  "home-visual-chip-bottom-right",
+]) {
+  if (!homePage.includes(token))
+    failures.push(`homepage hero: missing clickable metric position ${token}`);
+}
+requireText(
+  "src/components/public-scroll-manager.jsx",
+  "IntersectionObserver",
+  "homepage sections must reveal in response to scroll position",
+);
+requireText(
+  "src/app/styles/public-pages-motion.css",
+  "is-scroll-visible",
+  "scroll reveal must have a visible transition state",
+);
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  "flex-direction: column",
+  "empty information state must use one vertical column",
 );
 requireText(
   "src/app/styles/public-home-hero.css",

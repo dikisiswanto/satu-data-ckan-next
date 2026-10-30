@@ -1,291 +1,131 @@
-@media (max-width: 680px) {
-  .home-hero-inner {
-    @apply grid-cols-1 gap-[1rem] pt-[1.75rem] pb-[1.5rem];
-  }
-
-  .home-stats {
-    @apply grid-cols-1;
-  }
-
-  .home-section {
-    @apply pt-[2rem] pb-[2rem];
-  }
-
-  .home-section-heading {
-    @apply items-start flex-col gap-[.7rem];
-  }
-
-  .home-topic-grid {
-    @apply grid-cols-2;
-  }
+/* Calm, editorial hero entrance. No bouncing, spinning, or animated layout. */
+.home-hero-copy > * {
+  opacity: 0;
+  animation: wajo-copy-enter 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .public-app-shell .public-link,
-  .home-section-link,
-  .home-section-link:hover {
-    transition: none !important;
-    animation: none !important;
-  }
+.home-hero-copy > :nth-child(1) {
+  animation-delay: 70ms;
 }
-
-.public-app-shell > header {
-  @apply border-t-[3px] border-t-[var(--app-primary)] shadow-[0_2px_8px_rgb(26_58_68_/_3%)];
+.home-hero-copy > :nth-child(2) {
+  animation-delay: 150ms;
 }
-
-.public-app-shell .public-link {
-  @apply underline-offset-[5px] decoration-[transparent]
-  transition-[color_150ms_ease,_text-decoration-color_150ms_ease];
+.home-hero-copy > :nth-child(3) {
+  animation-delay: 230ms;
 }
-
-.public-app-shell .public-link:hover {
-  @apply [color:var(--app-primary)] underline decoration-[#a9c7e9];
+.home-hero-copy > :nth-child(4) {
+  animation-delay: 310ms;
 }
-
-.public-app-shell footer {
-  @apply border-t-[3px] border-t-[#d5e4f0] bg-[#f3f7fb];
-}
-
-.public-app-shell .eyebrow {
-  @apply [color:var(--app-primary)];
-}
-
-.home-stats {
-  @apply border-[#d8e4ee] shadow-[0_2px_7px_rgb(24_58_68_/_3%)];
-}
-
-.home-section-link {
-  @apply border-[#d2e2f0] bg-[#f7faff] [color:var(--app-primary)];
-}
-
-.home-section-link:hover {
-  @apply [background:var(--app-accent)] border-[#8fb5df];
-}
-
-.organization-detail-band {
-  @apply bg-[#eaf1f3] border-b-[#d4e1e4];
-}
-
-.organization-detail-meta svg {
-  @apply [color:var(--app-primary)];
-}
-
-/* Subtle motion gives the homepage data illustration depth without moving the
-   surrounding layout or interfering with the clickable metric chips. */
-.home-hero-visual {
-  isolation: isolate;
-}
-
-.home-orbit-one {
-  transform-origin: center;
-}
-
-.home-orbit-two {
-  transform-origin: center;
-}
-
-.home-visual-mark {
-  will-change: transform;
-}
-
-.home-visual-mark svg {
-  transform-origin: center;
-}
-
-@keyframes wajo-orbit-breathe {
-  0%,
-  100% {
-    opacity: 0.72;
-    scale: 1;
-  }
-  50% {
-    opacity: 1;
-    scale: 1.035;
-  }
-}
-
-@keyframes wajo-orbit-rotate {
-  to {
-    rotate: 360deg;
-  }
-}
-
-@keyframes wajo-database-glow {
-  0%,
-  100% {
-    opacity: 0.9;
-    scale: 1;
-  }
-  50% {
-    opacity: 1;
-    scale: 1.045;
-  }
-}
-
-@keyframes wajo-live-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgb(35 154 121 / 28%);
-  }
-  70%,
-  100% {
-    box-shadow: 0 0 0 7px rgb(35 154 121 / 0%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-orbit-one,
-  .home-orbit-two,
-  .home-visual-mark,
-  .home-visual-mark svg,
-  .home-visual-chip-top,
-  .home-visual-chip-bottom,
-  .home-live-dot {
-    animation: none !important;
-    will-change: auto;
-  }
-}
-
-/* Motion is intentionally confined to the right-side hero illustration.
-   Each animated element has one animation owner to avoid stacked/replayed motion. */
-.home-hero-copy,
-.home-hero-copy *,
-.home-hero-copy *::before,
-.home-hero-copy *::after {
-  animation: none !important;
-  transition: none !important;
-}
-
-/* The summary strip sits below the hero, so it stays static as well. */
-.home-stats,
-.home-stats *,
-.home-stats *::before,
-.home-stats *::after,
-.home-stats-note {
-  animation: none !important;
-  transition: none !important;
+.home-hero-copy > :nth-child(5) {
+  animation-delay: 390ms;
 }
 
 .home-hero-visual {
-  animation: home-hero-visual-enter 1100ms cubic-bezier(0.16, 1, 0.3, 1) 250ms
-    both;
+  animation: wajo-visual-enter 850ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
 }
-
-.home-orbit-one {
-  animation: wajo-orbit-breathe 10s ease-in-out infinite;
-}
-
-.home-orbit-two {
-  animation: wajo-orbit-rotate 34s linear infinite;
-}
-
 .home-visual-mark {
-  animation: home-hero-pop-enter 760ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both;
+  animation: wajo-mark-enter 760ms cubic-bezier(0.22, 1, 0.36, 1) 420ms both;
 }
-
-.home-visual-mark svg {
-  animation: wajo-database-glow 4.5s ease-in-out infinite;
-}
-
 .home-visual-caption {
-  animation: home-hero-element-enter 740ms cubic-bezier(0.16, 1, 0.3, 1) 600ms
-    both;
+  animation: wajo-caption-enter 680ms cubic-bezier(0.22, 1, 0.36, 1) 500ms both;
 }
-
 .home-visual-chip-top {
-  animation: home-hero-chip-enter 720ms cubic-bezier(0.16, 1, 0.3, 1) 700ms both;
+  animation: wajo-chip-enter 650ms cubic-bezier(0.22, 1, 0.36, 1) 560ms both;
 }
-
 .home-visual-chip-bottom {
-  animation: home-hero-chip-enter 760ms cubic-bezier(0.16, 1, 0.3, 1) 850ms both;
+  animation: wajo-chip-enter 650ms cubic-bezier(0.22, 1, 0.36, 1) 650ms both;
 }
 
-.home-live-dot {
-  animation: wajo-live-pulse 2.5s ease-out infinite;
+@keyframes wajo-copy-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes wajo-visual-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes wajo-mark-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, calc(-50% + 10px), 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0);
+  }
+}
+@keyframes wajo-caption-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(50%, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(50%, 0, 0);
+  }
+}
+@keyframes wajo-chip-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 9px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
-/* Suspense renders a static hero fallback before the data-backed hero. Do not
-   animate that fallback: the visual entry should play only after real content mounts. */
 .home-hero-visual--loading,
-.home-hero-visual--loading *,
-.home-hero-visual--loading *::before,
-.home-hero-visual--loading *::after {
+.home-hero-visual--loading * {
   animation: none !important;
-  transition: none !important;
-  will-change: auto !important;
-}
-
-@keyframes home-hero-element-enter {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 32px, 0) scale(0.94);
-  }
-  68% {
-    opacity: 1;
-    transform: translate3d(0, -6px, 0) scale(1.025);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-@keyframes home-hero-visual-enter {
-  0% {
-    opacity: 0;
-    transform: translate3d(28px, 20px, 0) rotate(5deg) scale(0.84);
-  }
-  65% {
-    opacity: 1;
-    transform: translate3d(-4px, -3px, 0) rotate(-1.25deg) scale(1.035);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) rotate(0) scale(1);
-  }
-}
-
-@keyframes home-hero-pop-enter {
-  0% {
-    opacity: 0;
-    scale: 0.62;
-  }
-  70% {
-    opacity: 1;
-    scale: 1.09;
-  }
-  100% {
-    opacity: 1;
-    scale: 1;
-  }
-}
-
-@keyframes home-hero-chip-enter {
-  0% {
-    opacity: 0;
-    scale: 0.72;
-  }
-  72% {
-    opacity: 1;
-    scale: 1.06;
-  }
-  100% {
-    opacity: 1;
-    scale: 1;
-  }
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-hero-copy > *,
   .home-hero-visual,
-  .home-hero-visual *,
-  .home-hero-visual *::before,
-  .home-hero-visual *::after {
+  .home-visual-mark,
+  .home-visual-caption,
+  .home-visual-chip-top,
+  .home-visual-chip-bottom {
     animation: none !important;
-    transition: none !important;
     opacity: 1 !important;
     transform: none !important;
-    translate: none !important;
-    rotate: none !important;
-    scale: none !important;
-    will-change: auto !important;
+  }
+}
+
+/* Subtle scroll-position reveals for homepage sections. */
+.home-content .has-scroll-reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.home-content .has-scroll-reveal.is-scroll-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-content .has-scroll-reveal,
+  .home-content .has-scroll-reveal.is-scroll-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
   }
 }

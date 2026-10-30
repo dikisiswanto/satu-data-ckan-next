@@ -255,47 +255,90 @@ function HomeHeroContent({
             <span className="home-live-dot" />
             <span>
               <strong>{siteConfig.shortName}</strong>
-              <small>Satu tempat untuk menemukan data daerah</small>
+              <small>Data daerah, terhubung dalam satu portal</small>
             </span>
           </div>
-          <Link
-            href="/organisasi"
-            className="home-visual-chip home-visual-chip-top"
+          <div
+            className="home-visual-metrics"
+            aria-label="Ringkasan cepat portal"
           >
-            <Building2 size={17} aria-hidden="true" />
-            <span>
-              <strong className="home-metric-value">
-                {loading ? (
-                  <span
-                    className="loading-skeleton home-metric-skeleton"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  displayStat(stats?.organizations)
-                )}
-              </strong>
-              <small>Organisasi aktif</small>
-            </span>
-          </Link>
-          <Link
-            href="/statistik"
-            className="home-visual-chip home-visual-chip-bottom"
-          >
-            <FileChartColumn size={17} aria-hidden="true" />
-            <span>
-              <strong className="home-metric-value">
-                {loading ? (
-                  <span
-                    className="loading-skeleton home-metric-skeleton"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  displayStat(stats?.indicators)
-                )}
-              </strong>
-              <small>Indikator publik</small>
-            </span>
-          </Link>
+            <Link
+              href="/dataset"
+              className="home-visual-chip home-visual-chip-top home-visual-chip-top-left"
+            >
+              <Database size={17} aria-hidden="true" />
+              <span>
+                <strong className="home-metric-value">
+                  {loading ? (
+                    <span
+                      className="loading-skeleton home-metric-skeleton"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    displayStat(stats?.datasets)
+                  )}
+                </strong>
+                <small>Dataset terbuka</small>
+              </span>
+            </Link>
+            <Link
+              href="/organisasi"
+              className="home-visual-chip home-visual-chip-top home-visual-chip-top-right"
+            >
+              <Building2 size={17} aria-hidden="true" />
+              <span>
+                <strong className="home-metric-value">
+                  {loading ? (
+                    <span
+                      className="loading-skeleton home-metric-skeleton"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    displayStat(stats?.organizations)
+                  )}
+                </strong>
+                <small>Organisasi aktif</small>
+              </span>
+            </Link>
+            <Link
+              href="/dataset"
+              className="home-visual-chip home-visual-chip-bottom home-visual-chip-bottom-left"
+            >
+              <FolderOpen size={17} aria-hidden="true" />
+              <span>
+                <strong className="home-metric-value">
+                  {loading || facetsUnavailable ? (
+                    <span
+                      className="loading-skeleton home-metric-skeleton"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    displayStat(availableCategories.length)
+                  )}
+                </strong>
+                <small>Kategori data</small>
+              </span>
+            </Link>
+            <Link
+              href="/statistik"
+              className="home-visual-chip home-visual-chip-bottom home-visual-chip-bottom-right"
+            >
+              <FileChartColumn size={17} aria-hidden="true" />
+              <span>
+                <strong className="home-metric-value">
+                  {loading ? (
+                    <span
+                      className="loading-skeleton home-metric-skeleton"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    displayStat(stats?.indicators)
+                  )}
+                </strong>
+                <small>Indikator publik</small>
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
       <div className="page-container home-stats-wrap">

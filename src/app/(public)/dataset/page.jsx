@@ -201,11 +201,11 @@ export default async function DatasetCatalogPage({ searchParams }) {
               <Button
                 type="submit"
                 size="lg"
-                className="min-h-12 w-full shrink-0 sm:w-auto sm:self-end"
+                className="min-h-12 w-full shrink-0 sm:mt-7 sm:w-auto sm:self-start"
               >
                 <Search size={16} aria-hidden="true" /> Cari dataset
               </Button>
-              <details className="relative z-10 w-full min-w-0 shrink-0 sm:w-auto sm:self-end open:z-[41]">
+              <details className="relative z-10 w-full min-w-0 shrink-0 sm:mt-7 sm:w-auto sm:self-start open:z-[41]">
                 <summary
                   aria-label="Buka filter katalog"
                   className="flex h-12 cursor-pointer list-none items-center justify-center gap-2 rounded-control border border-line bg-surface px-4 text-sm font-semibold text-ink transition-colors hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus [&::-webkit-details-marker]:hidden [details[open]_&]:border-primary [details[open]_&]:bg-[#f0f7ff] [details[open]_&]:text-primary"

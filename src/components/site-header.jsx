@@ -186,7 +186,7 @@ export function SiteHeader() {
             className="hidden min-h-10 items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 xl:inline-flex sm:px-4"
           >
             <LockKeyhole size={15} aria-hidden="true" />
-            <span>Portal Pengelola</span>
+            <span>Login</span>
           </a>
 
           <div className="relative xl:hidden" ref={menuRef}>
@@ -257,7 +257,7 @@ export function SiteHeader() {
                 className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
               >
                 <LockKeyhole size={16} aria-hidden="true" />
-                <span>Masuk ke Portal Pengelola</span>
+                <span>Login</span>
               </a>
             </div>
           </div>

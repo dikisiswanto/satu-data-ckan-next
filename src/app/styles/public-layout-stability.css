@@ -430,10 +430,14 @@
 }
 
 /* The information index uses a tighter editorial heading rhythm. */
+.public-app-shell .informasi-directory-page {
+  padding-block-start: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+
 .public-app-shell .informasi-directory-page .public-page-heading {
   gap: 0.45rem;
   margin-block-end: 1rem;
-  padding-block-end: 0.9rem;
+  padding-block-end: 0.75rem;
 }
 
 .public-app-shell .informasi-directory-page .public-page-heading > div {
@@ -459,4 +463,35 @@
 
 .public-app-shell .informasi-directory-page .cms-directory-nav {
   margin-block-start: 0.5rem;
+}
+
+.public-app-shell .informasi-directory-page .cms-directory-card {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.public-app-shell .informasi-directory-page .cms-directory-card p {
+  min-height: 0;
+}
+
+.public-app-shell
+  .informasi-directory-page
+  .cms-directory-section
+  + .cms-directory-section {
+  margin-block-start: clamp(1.5rem, 2.5vw, 2rem);
+}
+
+/* Empty CMS state spans the directory width instead of inheriting a card column. */
+.informasi-directory-page > .cms-directory-empty {
+  grid-column: 1 / -1;
+  inline-size: 100%;
+  max-inline-size: none;
+  min-block-size: 9rem;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.informasi-directory-page:has(> .cms-directory-empty) {
+  display: block;
 }
