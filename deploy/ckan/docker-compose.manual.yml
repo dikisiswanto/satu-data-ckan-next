@@ -1,0 +1,28 @@
+# Manual DNS mode. Caddy binds the public HTTP/HTTPS ports and obtains TLS
+# certificates automatically from Let's Encrypt when DNS/ports are correct.
+services:
+  caddy:
+    image: caddy:2.11.7-alpine
+    profiles: ["manual"]
+    restart: unless-stopped
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST}
+      CKAN_HOST: ${CKAN_HOST}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../../../deploy/ckan/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - ckannet
+    depends_on:
+      nextjs:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+coverage
+playwright-report
+test-results
+.env
+.env.*
+!.env.ckan.example
+deploy/ckan/upstream
+tests
+*.log
+.DS_Store

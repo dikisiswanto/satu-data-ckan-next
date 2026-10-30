@@ -1,0 +1,149 @@
+@theme inline {
+  --color-canvas: var(--app-canvas);
+  --color-surface: var(--app-surface);
+  --color-ink: var(--app-text);
+  --color-muted: var(--app-text-muted);
+  --color-line: var(--app-border);
+  --color-primary: var(--app-primary);
+  --color-primary-foreground: var(--app-primary-foreground);
+  --color-accent: var(--app-accent);
+  --color-focus: var(--app-focus);
+  --font-sans: var(--font-inter), Inter, ui-sans-serif, system-ui;
+  --radius-control: var(--app-radius-control);
+  --radius-card: var(--app-radius-card);
+  --shadow-subtle: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+:root {
+  color-scheme: light;
+  --app-canvas: #f5f7f6;
+  --app-surface: #ffffff;
+  --app-text: #1b3440;
+  --app-text-muted: #586d76;
+  --app-border: #d8e2e4;
+  --app-primary: #1d5fa7;
+  --app-primary-foreground: #ffffff;
+  --app-accent: #eaf2ff;
+  --app-focus: #1d5fa7;
+  --app-radius-control: 0.625rem;
+  --app-radius-card: 0.75rem;
+  /* Shared type scale: keep public and authenticated portal content aligned. */
+  --type-base: 1rem;
+  --type-h1: clamp(1.875rem, 2.5vw, 2.5rem);
+  --leading-body: 1.7;
+  --leading-heading: 1.12;
+}
+
+@layer base {
+  * {
+    @apply border-line;
+  }
+
+  html {
+    @apply scroll-smooth bg-canvas;
+  }
+
+  body {
+    @apply min-h-screen bg-canvas font-sans text-ink antialiased;
+    font-size: var(--type-base);
+    line-height: var(--leading-body);
+  }
+
+  h1 {
+    line-height: var(--leading-heading);
+    text-wrap: balance;
+  }
+
+  h2,
+  h3 {
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    @apply bg-accent text-ink;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-focus ring-offset-2 ring-offset-canvas;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight;
+  }
+}
+
+@layer components {
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-control
+    focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground;
+  }
+
+  .page-container {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-space {
+    @apply py-12 sm:py-16 lg:py-20;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.16em] text-primary;
+  }
+
+  .surface-panel {
+    @apply rounded-card border bg-surface
+    shadow-[0_1px_2px_rgb(15_35_50_/_0/**/.035),_0_12px_32px_rgb(15_35_50_/_0/**/.035)];
+  }
+
+  .public-app-shell {
+    @apply min-h-[100vh] flex flex-col;
+  }
+
+  .public-page-content {
+    @apply flex-[1_0_auto];
+  }
+
+  .public-page-content > main {
+    @apply min-h-[54vh];
+  }
+
+  .loading-skeleton {
+    @apply rounded-md bg-[#edf1f4];
+  }
+
+  .public-link {
+    @apply rounded-sm underline-offset-4 transition-colors duration-150 hover:text-primary
+    focus-visible:outline-none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.home-hero {
+  @apply relative overflow-hidden bg-[#123e42] text-[#fffefa];
+}
+
+.home-hero-inner {
+  @apply relative grid grid-cols-[minmax(0,_1/**/.08fr)_minmax(280px,_/**/.72fr)] gap-[3rem_5rem] items-center pt-[4.25rem]
+  pb-[1.5rem];
+}
+
+.home-hero-copy {
+  @apply p-[1.25rem_0_2/**/.25rem];
+}

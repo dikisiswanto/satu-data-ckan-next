@@ -1,0 +1,57 @@
+{
+  admin off
+}
+
+{$PUBLIC_HOST} {
+  encode zstd gzip
+  @ckanPublic path_regexp ckanPublic ^/(?:catalog\.(?:rdf|ttl|jsonld|xml|n3)|dataset/[^/]+\.(?:rdf|ttl|jsonld|n3)|dataset/[^/]+/resource/[^/]+/download/[^/]+)$
+  handle @ckanPublic {
+    reverse_proxy https://nginx:443 {
+      header_up Host {http.request.host}
+      header_up X-Forwarded-Proto {http.request.scheme}
+      transport http {
+        tls_insecure_skip_verify
+      }
+    }
+  }
+  handle {
+    reverse_proxy nextjs:3000 {
+      header_up Host {http.request.host}
+      header_up X-Forwarded-Proto {http.request.scheme}
+    }
+  }
+}
+
+{$CKAN_HOST} {
+  # Every response from the admin hostname must stay out of search indexes.
+  # Use a deferred header so it overrides any upstream CKAN X-Robots-Tag value.
+  header >X-Robots-Tag "noindex, nofollow, noarchive, nosnippet, noimageindex"
+  encode zstd gzip
+
+  # Opening the admin hostname shows the CKAN login form, not its public homepage.
+  # This is a landing-page redirect, not a blanket access-control rule. CKAN still
+  # enforces user authentication and permissions for protected actions.
+  route {
+    # Keep the hostname crawlable so search engines can observe X-Robots-Tag.
+    # Do not use Disallow: / here; it can prevent crawlers from seeing noindex.
+    @adminRobots path /robots.txt
+    respond @adminRobots "User-agent: *
+Allow: /" 200
+
+    # Never publish an admin-host sitemap. Public discovery belongs to Next.js.
+    @adminSitemap path /sitemap.xml /sitemap_index.xml /sitemap-*
+    respond @adminSitemap "Not Found" 404
+
+    @adminRoot path /
+    redir @adminRoot /user/login?came_from=%2Fckan-admin%2Fconfig%2F 302
+    handle {
+      reverse_proxy https://nginx:443 {
+        header_up Host {http.request.host}
+        header_up X-Forwarded-Proto {http.request.scheme}
+        transport http {
+          tls_insecure_skip_verify
+        }
+      }
+    }
+  }
+}

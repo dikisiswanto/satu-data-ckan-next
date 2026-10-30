@@ -1,0 +1,276 @@
+/* Cross-portal quality pass: consistent controls, focus visibility and page rhythm. */
+:root {
+  --brand-navy: #173b5b;
+  --brand-blue: #1d5fa7;
+  --brand-teal: #1d5fa7;
+  --brand-border: #d5e0e8;
+  --brand-muted: #526777;
+  --brand-focus-ring: rgb(36 109 229 / 24%);
+}
+
+html {
+  scroll-padding-top: 5.5rem;
+}
+
+#konten-utama {
+  scroll-margin-top: 5.5rem;
+}
+
+.public-app-shell
+  :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea){
+  color: #263f52;
+  border-color: var(--brand-border);
+  border-radius: 0.625rem;
+  background-color: #fff;
+  font: inherit;
+}
+
+.public-app-shell
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea
+  ):focus-visible{
+  border-color: var(--brand-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--brand-focus-ring);
+}
+
+.public-app-shell :is(input:not([type="checkbox"]):not([type="radio"]), select){
+  min-height: 2.75rem;
+}
+
+.public-app-shell :is(button, a){
+  -webkit-tap-highlight-color: transparent;
+}
+
+.public-app-shell a:focus-visible, .public-app-shell button:focus-visible, .public-app-shell summary:focus-visible{
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 3px;
+}
+
+.public-interior-page .public-page-heading {
+  gap: 1.25rem;
+}
+
+.public-interior-page .public-page-heading h1 {
+  text-wrap: balance;
+}
+
+.public-interior-page .public-page-heading p:not(.eyebrow) {
+  text-wrap: pretty;
+}
+
+
+
+
+
+.site-header .public-link:focus-visible{
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 2px;
+}
+
+@media (max-width: 639px) {
+  .public-interior-page .public-page-heading {
+    gap: 0.875rem;
+  }
+
+  
+}
+
+/* Brand alignment uses the shared tokens from foundation.css. */
+.public-app-shell .public-link:hover {
+  color: #174f8b;
+  text-decoration-color: #9dbfe2;
+}
+
+/* Homepage: a true edge-to-edge image starts behind the sticky navigation. */
+body:has(.public-home) .site-header {
+  position: sticky;
+  top: 0;
+  margin-bottom: 0;
+}
+
+body:has(.public-home) .site-header-at-top {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+/* Resolve hero-header icon contrast in CSS before client hydration or scroll. */
+.site-header-at-top .homepage-header-icon {
+  color: #ffffff !important;
+}
+
+.site-header-scrolled .homepage-header-icon {
+  color: #263f52 !important;
+}
+
+body:has(.public-home) .site-header-at-top a[aria-label="Cari dataset"],
+body:has(.public-home)
+  .site-header-at-top
+  button[aria-controls="site-mobile-navigation"] {
+  color: #ffffff !important;
+}
+
+body:has(.public-home) .site-header-scrolled {
+  background: rgb(255 255 255 / 96%) !important;
+  border-color: #dbe5ed !important;
+  box-shadow: 0 8px 26px rgb(15 35 50 / 9%) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+body:has(.public-home) .site-header-scrolled a[aria-label="Cari dataset"],
+body:has(.public-home)
+  .site-header-scrolled
+  button[aria-controls="site-mobile-navigation"] {
+  color: #263f52 !important;
+}
+
+body:has(.public-home)
+  .site-header-scrolled
+  .page-container
+  > nav
+  .public-link {
+  color: #40566a;
+}
+
+body:has(.public-home)
+  .site-header-scrolled
+  .page-container
+  > nav
+  .public-link:hover {
+  color: #174f8b;
+}
+
+body:has(.public-home) .site-header-scrolled .site-brand-copy,
+body:has(.public-home) .site-header-scrolled .site-brand-copy > span {
+  color: #263f52;
+}
+
+body:has(.public-home)
+  .site-header-scrolled
+  .site-brand-copy
+  > span:first-child {
+  color: #647887;
+}
+
+/* Avoid mixing saturated green and blue as competing primary colors on the home page. */
+.home-stat-green .home-stat-icon {
+  background-color: #e8f1ff !important;
+  color: #1d5fa7 !important;
+}
+
+.home-empty-datasets {
+  background: linear-gradient(135deg, #f1f7ff 0%, #ffffff 75%) !important;
+}
+
+/* The home header overlays the hero instead of consuming vertical space. */
+body:has(.public-home) .site-header-at-top {
+  position: absolute !important;
+  inset: 0 0 auto;
+  width: 100%;
+  margin: 0;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body:has(.public-home) .site-header-scrolled {
+  position: fixed !important;
+  inset: 0 0 auto;
+  width: 100%;
+  margin: 0;
+  background: rgb(255 255 255 / 97%) !important;
+  border-color: #dbe5ed !important;
+  box-shadow: 0 8px 26px rgb(15 35 50 / 10%) !important;
+}
+
+body:has(.public-home) .home-hero {
+  margin-top: 0 !important;
+  padding-top: 8.5rem !important;
+  background-color: #102a43 !important;
+  background-image:
+    linear-gradient(
+      90deg,
+      rgb(5 21 39 / 88%) 0%,
+      rgb(8 30 52 / 76%) 48%,
+      rgb(9 31 52 / 50%) 100%
+    ),
+    var(--home-hero-image, url("/portal-social.svg")) !important;
+  background-position:
+    center,
+    center 48% !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+}
+
+body:has(.public-home) .home-hero-kicker,
+body:has(.public-home) .home-hero h1,
+body:has(.public-home) .home-hero-description,
+body:has(.public-home) .home-search-suggestions {
+  color: #ffffff !important;
+}
+
+body:has(.public-home) .home-hero-kicker > span {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 18%) !important;
+}
+
+body:has(.public-home) .home-visual-chip,
+body:has(.public-home) .home-visual-caption {
+  background: #ffffff !important;
+  border-color: rgb(255 255 255 / 92%) !important;
+  color: #1d5fa7 !important;
+  box-shadow: 0 12px 32px rgb(4 20 36 / 22%) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body:has(.public-home) .home-visual-chip strong,
+body:has(.public-home) .home-visual-caption strong {
+  color: #173b5b !important;
+}
+
+body:has(.public-home) .home-visual-chip small,
+body:has(.public-home) .home-visual-caption small {
+  color: #526777 !important;
+}
+
+/* Keep dashboard sections and form panels aligned to the full main-column width. */
+
+
+
+
+/* Shared typography scale across public pages and navigation. */
+.public-interior-page .public-page-heading h1 {
+  font-size: var(--type-h1);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.035em;
+}
+
+.public-interior-page .public-page-heading p:not(.eyebrow),
+.public-interior-page > p:not(.eyebrow) {
+  font-size: var(--type-base);
+  line-height: var(--leading-body);
+}
+
+@media (min-width: 1280px) {
+  body:has(.public-home) .home-hero {
+    padding-top: 9rem !important;
+  }
+}
+
+@media (max-width: 639px) {
+  body:has(.public-home) .home-hero {
+    padding-top: 7.5rem !important;
+    background-position:
+      center,
+      56% center !important;
+  }
+}
+
+
+
+

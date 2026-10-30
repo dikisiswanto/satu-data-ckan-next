@@ -1,0 +1,24 @@
+import { getPublicSiteOrigin } from "@/lib/site-config";
+
+export default function robots() {
+  const base = getPublicSiteOrigin();
+  return {
+    rules: [
+      {
+        userAgent: "*",
+        // Public content can be indexed. The CKAN admin is on a separate protected
+        // hostname; private records must be protected by CKAN permissions, not robots.txt.
+        allow: [
+          "/",
+          "/dataset",
+          "/statistik",
+          "/infografik",
+          "/organisasi",
+          "/bantuan",
+          "/api-data",
+        ],
+      },
+    ],
+    ...(base ? { sitemap: `${base}/sitemap.xml` } : {}),
+  };
+}

@@ -1,0 +1,12 @@
+# Dependency trees
+node_modules/
+**/node_modules/
+
+# Build output and generated artifacts
+.next/
+out/
+build/
+dist/
+coverage/
+playwright-report/
+test-results/

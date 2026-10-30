@@ -1,0 +1,239 @@
+/* Public UI responsive hardening. Keep wide data tables scrollable inside their own region. */
+.public-app-shell,
+.public-app-shell .public-page-content,
+.public-app-shell .public-page-content > main,
+.public-app-shell main,
+.public-app-shell .page-container,
+.public-app-shell .public-interior-page {
+  min-width: 0;
+}
+
+.public-app-shell {
+  width: 100%;
+  overflow-x: clip;
+}
+
+.public-app-shell :where(.grid, .flex) > * {
+  min-width: 0;
+}
+
+.public-app-shell
+  :where(h1, h2, h3, h4, p, a, span, small, strong, dd, dt, li, code, label) {
+  overflow-wrap: anywhere;
+}
+
+.public-app-shell :where(input, select, textarea, button) {
+  max-width: 100%;
+}
+
+.public-app-shell :where(img, video, canvas) {
+  max-width: 100%;
+}
+
+.public-app-shell :where(svg) {
+  flex-shrink: 0;
+}
+
+.public-app-shell :where(pre, code) {
+  overflow-wrap: anywhere;
+}
+
+.public-app-shell pre {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.public-app-shell
+  :where(.overflow-x-auto, [role="region"][aria-label*="Tabel"]) {
+  min-width: 0;
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.public-app-shell table {
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+}
+
+.public-app-shell .public-table-scroll-region {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+}
+
+.public-app-shell .public-table-scroll-region table {
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+}
+
+.public-app-shell .public-table-scroll-region th,
+.public-app-shell .public-table-scroll-region td {
+  max-width: 16rem;
+  overflow-wrap: anywhere;
+}
+
+.public-search-form {
+  min-width: 0;
+}
+
+.public-search-form > :where(div, button) {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* The panel is positioned relative to the small details trigger. A generic
+   max-width: 100% here collapses the desktop panel to the trigger's width. */
+
+.public-app-shell .home-topic-card,
+.public-app-shell .home-dataset-card,
+.public-app-shell .home-feature,
+.public-app-shell .surface-panel,
+.public-app-shell .public-empty-panel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.public-app-shell .home-dataset-body {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.public-app-shell .home-dataset-meta {
+  flex-wrap: wrap;
+}
+
+.public-app-shell .home-feature-copy {
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  .public-app-shell .page-container {
+    padding-inline: 1rem;
+  }
+
+  .public-app-shell .section-space {
+    padding-block: 2rem;
+  }
+
+  .public-app-shell .home-dataset-art {
+    width: 76px;
+  }
+
+  .public-app-shell .home-dataset-body {
+    padding: 0.85rem 2rem 0.85rem 0.85rem;
+  }
+
+  .public-app-shell .home-section-link {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .public-app-shell .home-feature-visualization .home-feature-copy {
+    max-width: 100%;
+    padding-bottom: 5.75rem;
+  }
+
+  .public-app-shell .home-data-art {
+    bottom: 0.75rem;
+    right: 0.75rem;
+    width: 29%;
+    opacity: 0.72;
+  }
+
+  .public-app-shell .home-data-art-tile {
+    min-height: 3.25rem;
+    padding: 0.5rem;
+  }
+
+  .public-app-shell .home-data-art-tile-dataset {
+    min-height: 6rem;
+  }
+
+  .public-app-shell .public-search-form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .public-app-shell .public-search-form > button {
+    width: 100%;
+  }
+
+  .public-app-shell .public-table-scroll-region {
+    max-width: calc(100vw - 2rem);
+    scrollbar-width: thin;
+  }
+
+}
+
+@media (max-width: 359px) {
+  .public-app-shell .page-container {
+    padding-inline: 0.75rem;
+  }
+
+  .public-app-shell .home-topic-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .public-app-shell .home-dataset-art {
+    width: 64px;
+  }
+
+  .public-app-shell .home-dataset-body {
+    padding-left: 0.7rem;
+    padding-right: 1.8rem;
+  }
+}
+
+/* Reserve metric/card geometry while dynamic server components are pending. */
+.home-metric-skeleton {
+  display: inline-block;
+  width: 4.75rem;
+  height: 1.05em;
+  vertical-align: middle;
+}
+
+.home-visual-chip .home-metric-skeleton {
+  width: 3.25rem;
+}
+
+.home-dataset-card-skeleton {
+  min-height: 14rem;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.home-dataset-card-skeleton .home-dataset-art {
+  min-height: 14rem;
+  align-self: stretch;
+}
+
+.home-dataset-art-skeleton {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 14rem;
+  border-radius: 0;
+}
+
+@media (max-width: 639px) {
+  .home-dataset-card-skeleton {
+    min-height: 12rem;
+  }
+
+  .home-dataset-card-skeleton .home-dataset-art,
+  .home-dataset-art-skeleton {
+    min-height: 12rem;
+  }
+}

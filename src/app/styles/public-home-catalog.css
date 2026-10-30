@@ -1,0 +1,97 @@
+.home-section {
+  @apply pt-[3.75rem] pb-[3.75rem];
+}
+
+.home-topic-grid {
+  @apply grid-cols-5 gap-[.65rem];
+}
+
+/* Header navigation styles are centralized in overrides.css. */
+
+@media (max-width: 1023px) {
+  .home-hero-inner {
+    @apply grid-cols-[minmax(0,_1fr)_minmax(260px,_/**/.8fr)] gap-[1.5rem];
+  }
+}
+
+@media (max-width: 680px) {
+  .home-hero-inner {
+    @apply grid-cols-1 gap-[1.5rem] pt-[2rem] pb-[2rem];
+  }
+
+  .home-section {
+    @apply pt-[2.75rem] pb-[2.75rem];
+  }
+}
+
+/* Keep tour highlighting declarative so it cannot desynchronize React's DOM
+   during fast App Router transitions or trigger hydration mismatch warnings. */
+
+/* Public route transitions stay static; only the homepage hero has a one-time, flow-safe entrance sequence. */
+
+.home-hero-inner {
+  @apply pt-[2.4rem] pb-[2.4rem] gap-[1.75rem];
+}
+
+.home-stats {
+  @apply grid grid-cols-3 gap-0 mt-[1rem] border border-[#d4dfe5] rounded-[.5rem] bg-[#fff] overflow-hidden;
+}
+
+.home-section {
+  @apply pt-[2.6rem] pb-[2.6rem];
+}
+
+.home-section-heading {
+  @apply mb-[1.15rem] gap-[1.25rem];
+}
+
+.home-topic-grid {
+  @apply gap-[.55rem];
+}
+
+.home-section-link {
+  @apply inline-flex items-center gap-[.45rem] flex-none border border-[#cbd9e0] rounded-[.4rem] p-[.62rem_/**/.8rem]
+  text-[#245b76] text-[.8rem] font-[650];
+}
+
+.home-section-link:hover {
+  @apply border-[#91afbf] bg-[#f3f8fa];
+}
+
+.public-page-content .section-space {
+  @apply pt-[2.5rem] pb-[3rem];
+}
+
+.organization-detail-band {
+  @apply border-b border-b-[#d6e0e5] bg-[#edf2f4];
+}
+
+.organization-detail-meta {
+  @apply flex flex-wrap gap-[.65rem_1/**/.2rem];
+}
+
+.organization-detail-meta > span {
+  @apply inline-flex items-center gap-[.4rem] text-[#526d7b] text-[.8rem];
+}
+
+.organization-detail-meta svg {
+  @apply text-[#477b91];
+}
+
+.organization-detail-meta strong {
+  @apply text-[#23495e];
+}
+
+.organization-datasets-section {
+  @apply min-h-[30vh];
+}
+
+@media (max-width: 1023px) {
+  .home-hero-inner {
+    @apply grid-cols-[minmax(0,_1fr)_minmax(260px,_/**/.8fr)];
+  }
+
+  .home-topic-grid {
+    @apply grid-cols-3;
+  }
+}

@@ -1,0 +1,38 @@
+# Cloudflare Tunnel mode. cloudflared reaches only Caddy on tunnelnet; Caddy also
+# joins CKAN/Next.js networks to route traffic. No inbound host ports are published.
+services:
+  edge-tunnel:
+    image: caddy:2.11.7-alpine
+    profiles: ["cloudflare"]
+    restart: unless-stopped
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST}
+      CKAN_HOST: ${CKAN_HOST}
+    volumes:
+      - ../../../deploy/ckan/Caddyfile.tunnel:/etc/caddy/Caddyfile:ro
+    networks:
+      - ckannet
+      - tunnelnet
+    depends_on:
+      nextjs:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.5
+    profiles: ["cloudflare"]
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?Set CLOUDFLARE_TUNNEL_TOKEN in .env.ckan before using Cloudflare Tunnel}
+    networks:
+      - tunnelnet
+    depends_on:
+      edge-tunnel:
+        condition: service_started
+
+networks:
+  # cloudflared can only reach the Caddy edge router, not CKAN internals directly.
+  tunnelnet:
+    driver: bridge

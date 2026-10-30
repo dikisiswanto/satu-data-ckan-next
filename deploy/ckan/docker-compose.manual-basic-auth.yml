@@ -1,0 +1,7 @@
+services:
+  caddy:
+    environment:
+      CKAN_ADMIN_BASIC_AUTH_USER: ${CKAN_ADMIN_BASIC_AUTH_USER:?Set CKAN_ADMIN_BASIC_AUTH_USER in .env.ckan}
+      CKAN_ADMIN_BASIC_AUTH_HASH: ${CKAN_ADMIN_BASIC_AUTH_HASH:?Run bootstrap with CKAN_ADMIN_GATE_MODE=basic_auth}
+    volumes:
+      - ../../../deploy/ckan/Caddyfile.basic-auth:/etc/caddy/Caddyfile:ro

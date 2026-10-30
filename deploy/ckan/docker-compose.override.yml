@@ -1,0 +1,119 @@
+# Placed beside official ckan/ckan-docker/docker-compose.yml by bootstrap-upstream.sh.
+# This service joins CKAN's private service network; its port is never published.
+services:
+  # Keep XLoader's API token and jobs DB URI out of the upstream env_file, which
+  # would otherwise expose them to unrelated DB/Solr/Redis/Nginx containers.
+  ckan:
+    environment:
+      CKANEXT__XLOADER__API_TOKEN: ${CKANEXT__XLOADER__API_TOKEN}
+      CKANEXT__XLOADER__JOBS_DB__URI: ${CKANEXT__XLOADER__JOBS_DB__URI}
+      CKANEXT__XLOADER__SITE_URL: ${CKANEXT__XLOADER__SITE_URL}
+
+  # XLoader jobs run in the same pinned CKAN image and private networks.
+  xloader-worker:
+    extends:
+      file: docker-compose.yml
+      service: ckan
+    command: ["ckan", "-c", "/srv/app/ckan.ini", "jobs", "worker"]
+    environment:
+      CKANEXT__XLOADER__API_TOKEN: ${CKANEXT__XLOADER__API_TOKEN}
+      CKANEXT__XLOADER__JOBS_DB__URI: ${CKANEXT__XLOADER__JOBS_DB__URI}
+      CKANEXT__XLOADER__SITE_URL: ${CKANEXT__XLOADER__SITE_URL}
+      CKAN_SKIP_EXTENSION_MIGRATIONS: "true"
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    depends_on:
+      ckan:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  nextjs:
+    build:
+      context: ../../../
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        NEXT_PUBLIC_CKAN_ADMIN_URL: ${NEXT_PUBLIC_CKAN_ADMIN_URL}
+        NEXT_PUBLIC_GEOPORTAL_URL: ${NEXT_PUBLIC_GEOPORTAL_URL}
+        NEXT_PUBLIC_REGION_NAME: ${NEXT_PUBLIC_REGION_NAME}
+        NEXT_PUBLIC_BRAND_PROFILE: ${NEXT_PUBLIC_BRAND_PROFILE}
+        NEXT_PUBLIC_REGION_SHORT_NAME: ${NEXT_PUBLIC_REGION_SHORT_NAME}
+        NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME}
+        NEXT_PUBLIC_SHORT_NAME: ${NEXT_PUBLIC_SHORT_NAME}
+        NEXT_PUBLIC_ORGANIZATION_NAME: ${NEXT_PUBLIC_ORGANIZATION_NAME}
+        NEXT_PUBLIC_PUBLIC_SUBTITLE: ${NEXT_PUBLIC_PUBLIC_SUBTITLE}
+        NEXT_PUBLIC_SITE_DESCRIPTION: ${NEXT_PUBLIC_SITE_DESCRIPTION}
+        NEXT_PUBLIC_LOGO_PATH: ${NEXT_PUBLIC_LOGO_PATH}
+        NEXT_PUBLIC_LOGO_ALT: ${NEXT_PUBLIC_LOGO_ALT}
+        NEXT_PUBLIC_HERO_IMAGE: ${NEXT_PUBLIC_HERO_IMAGE}
+        NEXT_PUBLIC_ICON_PATH: ${NEXT_PUBLIC_ICON_PATH}
+        NEXT_PUBLIC_PWA_ICON_192: ${NEXT_PUBLIC_PWA_ICON_192}
+        NEXT_PUBLIC_PWA_ICON_512: ${NEXT_PUBLIC_PWA_ICON_512}
+        NEXT_PUBLIC_PPID_NAME: ${NEXT_PUBLIC_PPID_NAME}
+        NEXT_PUBLIC_PPID_URL: ${NEXT_PUBLIC_PPID_URL}
+        NEXT_PUBLIC_PPID_CONTACT_URL: ${NEXT_PUBLIC_PPID_CONTACT_URL}
+        NEXT_PUBLIC_PPID_ADDRESS: ${NEXT_PUBLIC_PPID_ADDRESS}
+        NEXT_PUBLIC_PPID_EMAIL: ${NEXT_PUBLIC_PPID_EMAIL}
+        NEXT_PUBLIC_PPID_PHONE: ${NEXT_PUBLIC_PPID_PHONE}
+        NEXT_PUBLIC_LOCALE: ${NEXT_PUBLIC_LOCALE}
+        NEXT_PUBLIC_TIME_ZONE: ${NEXT_PUBLIC_TIME_ZONE}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      CKAN_API_INTERNAL_URL: ${CKAN_API_INTERNAL_URL}
+      CKAN_API_TIMEOUT_MS: ${CKAN_API_TIMEOUT_MS}
+      CKAN_INDICATOR_TAG: ${CKAN_INDICATOR_TAG}
+      CKAN_INFOGRAPHIC_TAG: ${CKAN_INFOGRAPHIC_TAG}
+      CKAN_PUBLICATION_TAG: ${CKAN_PUBLICATION_TAG}
+      PUBLIC_SITE_ORIGIN: ${PUBLIC_SITE_ORIGIN}
+      PUBLIC_API_CORS_ORIGINS: ${PUBLIC_API_CORS_ORIGINS}
+      CKAN_ADMIN_URL: ${CKAN_ADMIN_URL}
+    networks:
+      - ckannet
+    depends_on:
+      ckan:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+
+  # CKAN Harvester consumers enable scheduled/manual imports from other CKAN/DCAT catalogs.
+  # They reuse the same image, configuration, network and secrets as the CKAN service.
+  harvest-gather:
+    extends:
+      file: docker-compose.yml
+      service: ckan
+    command: ["ckan", "-c", "/srv/app/ckan.ini", "harvester", "gather-consumer"]
+    environment:
+      CKAN_SKIP_EXTENSION_MIGRATIONS: "true"
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    depends_on:
+      ckan:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  harvest-fetch:
+    extends:
+      file: docker-compose.yml
+      service: ckan
+    command: ["ckan", "-c", "/srv/app/ckan.ini", "harvester", "fetch-consumer"]
+    environment:
+      CKAN_SKIP_EXTENSION_MIGRATIONS: "true"
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    depends_on:
+      ckan:
+        condition: service_healthy
+      redis:
+        condition: service_started
