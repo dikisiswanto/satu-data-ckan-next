@@ -17,6 +17,7 @@ except (OSError, json.JSONDecodeError) as exc:
     raise SystemExit(f"Cannot read package metadata: {exc}")
 
 scripts = package.get("scripts", {})
+dev_dependencies = package.get("devDependencies", {})
 expected_check = "npm run check:static && npm run lint"
 expected_static = "bash scripts/check-static.sh"
 if scripts.get("check") != expected_check:
@@ -28,6 +29,10 @@ root_lock = lock.get("packages", {}).get("", {})
 for field in ("name", "version"):
     if root_lock.get(field) != package.get(field):
         errors.append(f"package-lock root {field} must match package.json")
+if not dev_dependencies.get("eslint"):
+    errors.append("ESLint must be declared in devDependencies so npm ci installs the linter used by npm run check")
+if "node_modules/eslint" not in lock.get("packages", {}):
+    errors.append("package-lock.json must include node_modules/eslint for reproducible CI linting")
 
 workflow_dir = ROOT / ".github/workflows"
 workflows = sorted(workflow_dir.glob("*.yml")) + sorted(workflow_dir.glob("*.yaml"))
@@ -55,6 +60,10 @@ for path in workflows:
 ci = (workflow_dir / "ci.yml").read_text() if (workflow_dir / "ci.yml").is_file() else ""
 if "npm run check" not in ci:
     errors.append("ci.yml must run `npm run check` in the public portal verification job")
+install_position = ci.find("npm ci")
+check_position = ci.find("npm run check")
+if install_position < 0 or check_position < 0 or install_position > check_position:
+    errors.append("ci.yml must run `npm ci` before `npm run check` so ESLint and other locked dev dependencies are installed")
 if "bash scripts/check-static.sh" not in ci:
     errors.append("ci.yml must run the shared static checker directly in deployment-config")
 

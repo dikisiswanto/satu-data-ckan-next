@@ -275,6 +275,7 @@ export function OrganizationDirectory({ organizations = [] }) {
               const datasetCount = organizationDatasetCount(organization);
               return (
                 <article
+                  data-public-list-item="true"
                   key={organization.id || organization.name}
                   className="organization-directory-card group flex min-w-0 flex-col rounded-2xl border border-line bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-[#b9cfdd] hover:shadow-[0_12px_28px_rgb(23_55_78_/_0.08)] motion-reduce:transform-none motion-reduce:transition-none"
                 >

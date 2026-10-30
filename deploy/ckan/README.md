@@ -171,17 +171,53 @@ Pada pola integrasi SDI, Sekretariat SDI Pusat membuat harvest source di portal 
 
 Untuk integrasi pusat, gunakan `PUBLIC_HOST` sebagai origin katalog/API publik. `CKAN_HOST` sengaja menjadi hostname administrasi yang mewajibkan login dan tidak boleh dipakai sebagai endpoint harvesting anonim. Public Action API tetap disediakan oleh facade Next.js read-only; ekspor katalog dan unduhan tertentu diteruskan ke CKAN melalui route publik. Jangan menonaktifkan proteksi login pada `CKAN_HOST`.
 
-## 6. Theme admin Wajo
+## 6. Wajo Admin — custom CKAN administration UI
 
-Bootstrap menyalin `deploy/ckan/theme/` ke build context CKAN dan memasang package `ckanext-wajo-theme`. Plugin `wajo_theme` mendaftarkan template override dan WebAssets CSS, serta mengganti blok logo header dengan identitas Portal Satu Data. CSS ditambahkan ke `base.html` sehingga digunakan oleh login, dashboard, form dataset/resource, organisasi, konfigurasi dan halaman admin lainnya.
+CKAN 2.12.1 tetap menjadi sumber kebenaran untuk data, route, Action API, autentikasi, authorization, form validation, CSRF, upload, DataStore, dan seluruh extension. `ckanext-wajo-theme` menambahkan **Wajo Admin** sebagai pengalaman UI administrasi khusus tanpa memodifikasi source core CKAN.
 
-Theme dibangun di atas Midnight Blue bawaan CKAN 2.12, sehingga form, navigation, CSRF, autentikasi, dan alur permission CKAN tetap berasal dari CKAN. `ckanext-theming` tidak diaktifkan: extension itu masih berupa prototipe dan tidak ditemukan sebagai dependency dalam source arsip yang diterima. Untuk mengubah warna/layout, edit `deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css`. Untuk mengubah identitas header, edit `templates/header.html`; untuk memelihara versi plugin, edit `setup.py`.
+### Bagian antarmuka
 
-Hostname CKAN Admin adalah antarmuka login dan administrasi yang sepenuhnya dipisahkan dari katalog publik Next.js. Caddy meneruskan seluruh path pada `CKAN_HOST` ke CKAN agar semua menu inti dan route extension tetap bekerja setelah login; tidak ada allowlist path yang perlu diperbarui setiap kali extension menambah halaman. Middleware `wajo_theme` mewajibkan sesi CKAN terautentikasi untuk semua halaman dan Action API pada hostname tersebut. Pengunjung anonim hanya dapat membuka `/user/login` dan aset statis yang dibutuhkan untuk merendernya; halaman lain dialihkan ke login, sedangkan API mengembalikan 401. Middleware hanya aktif bila Host cocok dengan `CKANEXT__WAJO_THEME__ADMIN_HOST`, sehingga request internal Next.js ke `http://ckan:5000` serta ekspor publik pada `PUBLIC_HOST` tetap berfungsi. Redirect browser yang memakai `CKAN_SITE_URL` akan dilokalkan ke `CKAN_HOST`; nilai `CKAN_SITE_URL` tetap memakai `PUBLIC_HOST` untuk metadata/export publik. Bundle Wajo tidak memakai filter `cssrewrite`: stylesheet saat ini tidak memiliki referensi `url()` dan filter tersebut menyebabkan WebAssets gagal memetakan URL sumber CSS pada login CKAN.
+- **Topbar:** logo Kabupaten Wajo, nama Wajo Admin, tautan ke portal publik Next.js, identitas pengguna, akses pengaturan untuk sysadmin, dan tombol logout dengan token CSRF.
+- **Sidebar:** Ringkasan, Dataset, Organisasi, Kategori data, Halaman informasi (Pages), Harvesting, Dataset saya, Organisasi saya, Kategori saya, serta Pengguna/Pengaturan CKAN untuk sysadmin. Menu aktif mengikuti path. Tautan fitur tetap menuju endpoint CKAN/extension asli.
+- **Ringkasan `/wajo-admin/`:** kartu jumlah dataset yang dapat diakses pengguna, organisasi, kategori/grup, dan dataset yang dibuat pengguna; tabel dataset terbaru; pintasan tambah dataset/organisasi (hanya jika diizinkan); tautan Pages dan Harvest. Angka diambil saat halaman dibuka melalui Action API CKAN, bukan angka statis. Kegagalan satu action dicatat ke log dan tidak membuat dashboard gagal dirender; metrik yang gagal ditampilkan sebagai `—`.
+- **Halaman pengelolaan:** dataset, resource, preview, organisasi, grup, pengguna, DataStore, Pages, Harvest, Scheming, dan GeoView tetap memakai route serta template/fungsi native modul CKAN. Design system Wajo menata shell, tabel, formulir, navigasi, alert, tombol, tabs, dropdown, breadcrumb, pagination, dan responsivitasnya.
+- **Bahasa:** `id` menjadi locale default dengan `en` sebagai pilihan. Katalog gettext dikompilasi ke CKAN saat Docker image dibuat; terjemahan extension pihak ketiga bergantung pada katalog mereka sendiri.
 
-Setelah mengubah theme, middleware login, atau Caddy route, jalankan `bash ./deploy/ckan/bootstrap-upstream.sh` untuk menyalin source theme ke build context. Rebuild CKAN dan recreate edge router agar perubahan plugin dan Caddyfile sama-sama aktif:
+### Implementasi dan titik pemeliharaan
+
+| File                                                           | Tanggung jawab                                                   |
+| -------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `theme/ckanext/wajo_theme/templates/header.html`               | Topbar, logo, profil, logout                                     |
+| `theme/ckanext/wajo_theme/templates/page.html`                 | Shell yang membungkus halaman admin native                       |
+| `theme/ckanext/wajo_theme/templates/wajo_theme/sidebar.html`   | Navigasi dan status aktif                                        |
+| `theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html` | Ringkasan Wajo Admin                                             |
+| `theme/ckanext/wajo_theme/assets/css/wajo-theme.css`           | Design system dan styling lintas modul                           |
+| `theme/ckanext/wajo_theme/plugin.py`                           | Plugin, middleware host admin, blueprint dashboard, Pages schema |
+
+`page.html` menggunakan `ckan_extends` dan hanya menambahkan shell di sekitar `super()` untuk pengguna yang telah login. Form CRUD tiap modul tidak ditulis ulang. Template tambahan harus tetap aditif dan mengikuti block CKAN 2.12.1; jangan menyalin seluruh template upstream hanya demi styling karena akan membuat maintenance dan upgrade lebih sulit.
+
+Blueprint Wajo Admin terdaftar dengan `url_prefix="/wajo-admin"`. Prefix ini penting: route ringkasan harus tetap `/wajo-admin/`, bukan `/`, untuk menghindari loop ketika middleware mengarahkan root hostname ke halaman ringkasan. Bootstrap menegakkan `CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index`, sehingga login berhasil diarahkan ke dashboard Wajo Admin.
+
+### Pemisahan host publik dan host administrasi
+
+Hostname CKAN adalah antarmuka administrasi privat; Next.js tetap menjadi satu-satunya katalog publik. Caddy meneruskan seluruh path `CKAN_HOST` ke CKAN—tanpa allowlist halaman—agar route core dan extension baru tetap terjangkau. Middleware `wajo_theme` mengunci semua halaman dan Action API di hostname admin:
+
+- Pengunjung anonim hanya dapat memuat `/user/login` dan aset statis yang diperlukan untuk halaman login.
+- Permintaan halaman lain diarahkan ke login dengan `came_from` agar setelah autentikasi pengguna kembali ke path yang diminta.
+- Action API admin tanpa sesi menghasilkan JSON `401`.
+- Pengguna yang sudah login dapat membuka route CKAN core maupun extension; izin CRUD tetap tunduk pada permission/role CKAN.
+- Middleware hanya berlaku pada `CKANEXT__WAJO_THEME__ADMIN_HOST`; request internal dari Next.js ke service CKAN dan request ke `PUBLIC_HOST` tidak dikunci oleh guard ini.
+- Redirect browser dari `CKAN_SITE_URL` dilokalkan kembali ke `CKAN_HOST`. Nilai `CKAN_SITE_URL` tetap menunjuk host publik untuk metadata/ekspor.
+
+Filter `cssrewrite` tidak digunakan pada bundle WebAssets Wajo karena stylesheet tidak menggunakan URL relatif dan filter tersebut pernah gagal memetakan asset ke URL pada halaman login.
+
+### Rebuild setelah perubahan
+
+Bootstrap menyalin source extension ke build context dan menurunkan `CKANEXT__WAJO_THEME__ADMIN_HOST` dari `CKAN_HOST`. Setelah mengubah plugin, template, CSS, atau konfigurasi route-after-login, rebuild CKAN:
 
 ```bash
+bash ./deploy/ckan/bootstrap-upstream.sh
+
 # Cloudflare Tunnel
 bash ./deploy/ckan/compose.sh cloudflare up -d --build --force-recreate ckan edge-tunnel
 
@@ -189,29 +225,29 @@ bash ./deploy/ckan/compose.sh cloudflare up -d --build --force-recreate ckan edg
 bash ./deploy/ckan/compose.sh manual up -d --build --force-recreate ckan caddy
 ```
 
-Untuk Cloudflare Access, gunakan profil `cloudflare-access` dan service `edge-tunnel`. Jangan hanya recreate CKAN ketika Caddyfile berubah; jangan pula hanya restart Caddy ketika source `wajo_theme` berubah. Jika tampilan lama masih muncul, cek asset bundle CKAN dan cache browser; jangan mengedit `deploy/ckan/upstream` karena folder itu dihasilkan bootstrap.
+Jangan menghapus volume database, Solr, Redis, atau filestore untuk menerapkan perubahan theme. Folder `deploy/ckan/upstream` merupakan hasil bootstrap dan tidak diedit manual.
 
 ## 7. Audit theme dan penerimaan UI admin
 
-Theme sengaja hanya meng-override `base.html` dan `header.html`; form login, dashboard, dataset, organisasi, resource, preview, DataStore, Harvest, Scheming, Pages, dan halaman konfigurasi tetap memakai template/komponen fitur bawaan CKAN 2.12.1. CSS adalah lapisan tambahan, bukan pengganti JS, form action, token CSRF, endpoint, atau permission CKAN.
+Static guard `scripts/check-theme.py` mem-parsing template Jinja, memeriksa route `/wajo-admin`, locale, kontrak shell, role-aware quick actions, dan scope template. `scripts/check-auth-middleware.py` menguji login guard, redirect, API `401`, dan view dashboard dengan stub Action API. `scripts/check-build.py` membuat wheel `ckanext-wajo-theme` pada direktori sementara lalu memverifikasi bahwa plugin, header/page/sidebar/dashboard, logo, WebAssets/CSS, dan katalog `.po` benar-benar ikut terkemas. `bash scripts/check-static.sh` menjalankan seluruh pemeriksaan tersebut.
 
-Sebelum menyatakan UI admin siap produksi, verifikasi melalui browser desktop dan mobile dengan akun sysadmin serta akun organisasi/editor:
+Browser acceptance test tetap diperlukan pada container CKAN yang berjalan. Gunakan akun sysadmin dan akun editor/organisasi:
 
-| Area            | Alur yang harus dicoba                                                 | Kriteria lulus                                                                                                                                     |
-| --------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Shell/login     | `/`, `/user/login`, login gagal/berhasil, logout                       | Anonim hanya melihat login; logo/CSS tampil; login berhasil tetap di hostname CKAN dan masuk dashboard; CSRF tetap bekerja                         |
-| Dashboard       | `/dashboard/datasets`, `/dashboard/organizations`, `/dashboard/groups` | Menu aktif, tabel, filter, pagination, dan empty state terbaca                                                                                     |
-| Dataset         | `/dataset`, `/dataset/new`, detail, resource, edit, preview            | Menu pencarian, detail, Scheming field, validasi, upload, preview, visibility, save/cancel berfungsi; semua route dapat dibuka hanya setelah login |
-| Resource        | Tambah/edit resource, upload file, resource detail                     | Form, progress/error upload, tab, action, dan metadata tetap dapat digunakan                                                                       |
-| Data preview    | Table/DataStore, image, text, GeoJSON, peta, WMTS, shapefile           | Viewer tidak tertutup/terpotong; tabel, toolbar, legend, dan pesan error terbaca                                                                   |
-| Organisasi/Grup | Daftar, detail, create/edit, members                                   | Navigasi daftar/detail/create/edit/member berfungsi setelah login; sidebar, facet, tabel anggota, action dan permission tidak berubah              |
-| Administrasi    | `/ckan-admin/config`, pengguna, revisi, route extension                | Pengaturan, tabel, form, role, dan pesan sistem tetap berjalan; route extension baru ikut terjangkau tanpa allowlist Caddy                         |
-| Harvest/Pages   | Daftar sumber, job, log, halaman statis                                | Extension UI tetap tampil; worker/job tidak dipengaruhi theme                                                                                      |
-| Responsif/a11y  | Lebar 1440, 1024, 768, 390, 320 px; keyboard-only                      | Tidak ada overflow horizontal; login menumpuk rapi; focus terlihat; reduced motion dihormati                                                       |
+| Area                 | Alur yang harus dicoba                             | Kriteria lulus                                                                                             |
+| -------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Login dan shell      | `/`, `/user/login`, login gagal/berhasil, logout   | Anonim hanya melihat login; logo/CSS tampil; login berhasil menuju `/wajo-admin/`; logout kembali ke login |
+| Ringkasan            | `/wajo-admin/`                                     | Angka sesuai Action API; kegagalan API tidak merusak dashboard; quick actions mengikuti permission         |
+| Dataset              | pencarian, detail, create/edit, resource, preview  | Filter, pagination, Scheming, validasi, upload, visibility, save/cancel dan unduhan berfungsi              |
+| Resource & DataStore | add/edit/upload resource, table preview, DataStore | Form, progress/error upload, tabel, toolbar, DataStore query dan pesan error berfungsi                     |
+| Organisasi & grup    | index, detail, create/edit, anggota                | Navigasi, facet, tabel anggota, action dan hak akses tetap mengikuti CKAN                                  |
+| Pengguna & sistem    | daftar/detail pengguna, konfigurasi, revisi        | Khusus sysadmin sesuai permission; tidak ada akses tambahan yang diberikan oleh theme                      |
+| Pages & Harvest      | daftar, form, halaman, harvest source/job/log      | Route extension tetap terbuka setelah login dan worker tidak dipengaruhi oleh CSS/template                 |
+| GeoView              | GeoJSON, WMTS, shapefile, peta                     | Viewer tidak tertutup/terpotong oleh shell/sidebar; legenda dan toolbar tetap dapat digunakan              |
+| Responsif/a11y       | lebar 1440, 1024, 768, 390, 320 px; keyboard-only  | Tidak ada overflow horizontal; sidebar dapat dibuka/tutup; focus terlihat; reduced motion dihormati        |
 
-Periksa juga `https://CKAN_HOST/logo-kabupaten-wajo.webp` harus merespons `200` dengan `Content-Type: image/webp`, dan asset CSS hasil WebAssets harus merespons `200`. Logo tetap dapat dimuat sebelum login karena hanya file statis yang dikecualikan dari guard; `add_public_directory()` mengekspos isi folder `public` pada URL root, bukan di bawah `/base/`. Skrip `bash ./deploy/ckan/diagnose-admin.sh` membaca `CKAN_HOST` dari `.env.ckan` dan menandai login `200/302`, dashboard anonim `302`, serta API admin anonim `401` sebagai status yang diharapkan.
+Periksa `https://CKAN_HOST/logo-kabupaten-wajo.webp` mengembalikan `200` dengan `Content-Type: image/webp`, dan stylesheet WebAssets merespons `200`. `bash ./deploy/ckan/diagnose-admin.sh` memeriksa pola status yang diharapkan: login `200/302`, dashboard anonim `302`, API admin anonim `401`.
 
-Validasi source yang tersedia: `bash scripts/check-static.sh` menjalankan guard theme, packaging overlay, route publik, API contract, dan pemeriksaan CSS. `npm run check:static` memakai entry point yang sama; `npm run check` menambahkan ESLint. `npm run test`, `npm run test:e2e`, dan `npm run build` menguji aplikasi publik Next.js. CI smoke image memasang package theme lokal sebelum memeriksa entry point. Pengujian visual semua halaman CKAN tetap wajib dilakukan pada container CKAN yang benar-benar berjalan; pemeriksaan source/CI tidak menggantikan browser acceptance test.
+Status source check tidak menggantikan tes browser. Production build CKAN, visual acceptance, upload, DataStore, dan workflow extension harus dijalankan pada VPS/container target sebelum deployment dinyatakan tuntas.
 
 ## 8. Persiapan data dan extension
 

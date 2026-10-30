@@ -51,7 +51,7 @@ COPY --chown=ckan:ckan compile-id-translations.py /tmp/portal-compile-id-transla
 USER root
 RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme \
     && python /tmp/portal-install-pages.py \
-    && python /tmp/portal-compile-id-translations.py /tmp/portal-ckan-theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po "$(python -c 'import ckan; from pathlib import Path; print(Path(ckan.__file__).resolve().parent / "i18n")')" \
+    && python /tmp/portal-compile-id-translations.py /tmp/portal-ckan-theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po "$(python -c 'import ckan; from pathlib import Path; print(Path(ckan.__file__).resolve().parent / "i18n")')" "$(python -c 'import importlib.util; from pathlib import Path; spec = importlib.util.find_spec("ckanext.wajo_theme"); print(Path(next(iter(spec.submodule_search_locations))) / "i18n")')" \
     && rm -f /tmp/portal-ckan-extensions.txt /tmp/portal-install-pages.py /tmp/portal-compile-id-translations.py \
     && rm -rf /tmp/portal-ckan-theme
 # The upstream start_ckan.sh reads EXTRA_UWSGI_OPTS without a nounset-safe fallback.

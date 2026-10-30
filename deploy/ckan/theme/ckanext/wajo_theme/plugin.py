@@ -1,10 +1,12 @@
 """Register Wajo admin theme and editorial metadata schema for ckanext-pages."""
 
 import json
+import logging
 from urllib.parse import urlsplit, urlunsplit
 
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
+from ckan.lib.plugins import DefaultTranslation
 from ckanext.pages.interfaces import IPagesSchema
 
 
@@ -21,6 +23,7 @@ ALLOWED_CONTENT_BLOCK_TYPES = {
 }
 MAX_CONTENT_BLOCKS_BYTES = 80_000
 MAX_CONTENT_BLOCK_COUNT = 16
+LOG = logging.getLogger(__name__)
 
 
 def validate_content_blocks(key, data, errors, context):
@@ -88,11 +91,30 @@ class WajoPagesSchemaPlugin(plugins.SingletonPlugin):
         return schema
 
 
+class WajoHarvestTranslationPlugin(plugins.SingletonPlugin, DefaultTranslation):
+    """Load the maintained Indonesian catalog for ckanext-harvest UI strings."""
+
+    plugins.implements(plugins.ITranslation)
+
+    def i18n_domain(self):
+        return "ckanext-harvest"
+
+
+class WajoPagesTranslationPlugin(plugins.SingletonPlugin, DefaultTranslation):
+    """Load the maintained Indonesian catalog for ckanext-pages UI strings."""
+
+    plugins.implements(plugins.ITranslation)
+
+    def i18n_domain(self):
+        return "ckanext-pages"
+
+
 class WajoThemePlugin(plugins.SingletonPlugin):
     """Load the Wajo theme and enforce authentication on the admin hostname."""
 
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IMiddleware)
+    plugins.implements(plugins.IBlueprint)
 
     # These assets are required to render the CKAN login form. They are static
     # files, not public catalogue pages or user-uploaded resources.
@@ -148,12 +170,12 @@ class WajoThemePlugin(plugins.SingletonPlugin):
 
             if path in self._LOGIN_PATHS:
                 if current_user.is_authenticated and request.method in {"GET", "HEAD"}:
-                    return redirect(url_for("dashboard.datasets"))
+                    return redirect(url_for("wajo_admin.index"))
                 return None
 
             if current_user.is_authenticated:
                 if path == "/":
-                    return redirect(url_for("dashboard.datasets"))
+                    return redirect(url_for("wajo_admin.index"))
                 return None
 
             if path.startswith("/api/"):
@@ -168,8 +190,8 @@ class WajoThemePlugin(plugins.SingletonPlugin):
             # Keep the requested CKAN page and query string so successful login
             # returns to the page the administrator originally opened.
             came_from = request.full_path.rstrip("?")
-            if not came_from.startswith("/") or came_from.startswith("//"):
-                came_from = "/dashboard/datasets"
+            if path == "/" or not came_from.startswith("/") or came_from.startswith("//"):
+                came_from = url_for("wajo_admin.index")
             return redirect(url_for("user.login", came_from=came_from))
 
         @app.after_request
@@ -189,3 +211,58 @@ class WajoThemePlugin(plugins.SingletonPlugin):
             return response
 
         return app
+
+    def get_blueprint(self):
+        """Register the Wajo Admin overview without replacing CKAN's core routes."""
+        from flask import Blueprint
+        from flask_login import current_user
+        from ckan.lib import base
+
+        blueprint = Blueprint("wajo_admin", __name__, url_prefix="/wajo-admin")
+
+        @blueprint.get("/")
+        def index():
+            if not current_user.is_authenticated:
+                from flask import redirect, url_for
+                return redirect(url_for("user.login", came_from=url_for("wajo_admin.index")))
+
+            action_context = {
+                "user": current_user.name,
+                "auth_user_obj": current_user,
+                "for_view": True,
+            }
+
+            def call_action(action_name, data_dict):
+                try:
+                    return toolkit.get_action(action_name)(action_context, data_dict)
+                except Exception:  # Dashboard cards must not make the admin app unavailable.
+                    LOG.exception("Unable to load Wajo Admin dashboard data from %s", action_name)
+                    return None
+
+            dataset_payload = call_action(
+                "package_search",
+                {"rows": 6, "sort": "metadata_modified desc"},
+            )
+            organization_payload = call_action("organization_list", {"all_fields": True})
+            group_payload = call_action("group_list", {"all_fields": True})
+            mine_payload = call_action(
+                "package_search",
+                {"rows": 0, "fq": "creator_user_id:%s" % current_user.id},
+            )
+
+            dataset_result = dataset_payload if isinstance(dataset_payload, dict) else {}
+            mine_result = mine_payload if isinstance(mine_payload, dict) else {}
+            recent_datasets = dataset_result.get("results", [])
+            stats = {
+                "datasets": dataset_result.get("count"),
+                "organizations": len(organization_payload) if isinstance(organization_payload, list) else None,
+                "groups": len(group_payload) if isinstance(group_payload, list) else None,
+                "my_datasets": mine_result.get("count"),
+            }
+            return base.render("wajo_theme/dashboard.html", {
+                "wajo_admin_stats": stats,
+                "wajo_admin_recent_datasets": recent_datasets,
+            })
+
+        return blueprint
+

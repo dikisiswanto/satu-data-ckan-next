@@ -17,6 +17,8 @@ required = {
     "pages",
     "wajo_pages",
     "wajo_theme",
+    "wajo_harvest_i18n",
+    "wajo_pages_i18n",
     "dcat",
     "dcat_rdf_harvester",
     "structured_data",
@@ -33,8 +35,8 @@ required = {
 missing = sorted(required - registered)
 if missing:
     sys.exit("Missing CKAN plugin entry points: " + ", ".join(missing))
-# Entry-point presence alone is insufficient: XLoader 2.5.2 could be registered
-# while its mandatory chardet runtime import was missing. Verify the real modules.
+# Entry-point presence alone is insufficient: XLoader must also import its
+# mandatory chardet runtime module. Verify actual imports and translation domains.
 expected_versions = {"ckanext-xloader": "2.6.0", "chardet": "7.6.0"}
 for distribution, expected in expected_versions.items():
     try:
@@ -53,4 +55,23 @@ except Exception as exc:
 if not callable(UniversalDetector):
     sys.exit("chardet.universaldetector.UniversalDetector is not callable")
 
-print("CKAN extension entry points and XLoader runtime imports verified:", ", ".join(sorted(required)))
+try:
+    from pathlib import Path
+    theme_plugin = import_module("ckanext.wajo_theme.plugin")
+    for class_name, domain in (
+        ("WajoHarvestTranslationPlugin", "ckanext-harvest"),
+        ("WajoPagesTranslationPlugin", "ckanext-pages"),
+    ):
+        plugin_class = getattr(theme_plugin, class_name)
+        translation_plugin = plugin_class()
+        i18n_directory = Path(translation_plugin.i18n_directory())
+        if translation_plugin.i18n_domain() != domain:
+            raise RuntimeError(f"{class_name} has the wrong gettext domain")
+        if "id" not in translation_plugin.i18n_locales():
+            raise RuntimeError(f"{class_name} does not advertise Indonesian locale")
+        if not (i18n_directory / "id/LC_MESSAGES" / f"{domain}.mo").is_file():
+            raise RuntimeError(f"Compiled Indonesian catalog is missing for {domain}")
+except Exception as exc:
+    sys.exit(f"Wajo Admin extension translation runtime check failed: {exc}")
+
+print("CKAN extension entry points, XLoader imports, and Indonesian translation domains verified:", ", ".join(sorted(required)))

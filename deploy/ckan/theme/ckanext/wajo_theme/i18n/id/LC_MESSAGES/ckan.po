@@ -451,3 +451,293 @@ msgstr[0] "%(count)s dataset ditemukan untuk \"%(query)s\"."
 msgid "%(count)s dataset found."
 msgid_plural "%(count)s datasets found."
 msgstr[0] "%(count)s dataset ditemukan."
+
+# Additional core CKAN and extension interface labels maintained by Wajo.
+
+msgid "Filter"
+msgstr "Saring"
+
+msgid "Apply"
+msgstr "Terapkan"
+
+msgid "Clear"
+msgstr "Bersihkan"
+
+msgid "Open"
+msgstr "Buka"
+
+msgid "Close"
+msgstr "Tutup"
+
+msgid "Create new"
+msgstr "Buat baru"
+
+msgid "Discard changes"
+msgstr "Batalkan perubahan"
+
+msgid "Confirm"
+msgstr "Konfirmasi"
+
+msgid "Are you sure?"
+msgstr "Apakah Anda yakin?"
+
+msgid "Action"
+msgstr "Tindakan"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Active"
+msgstr "Aktif"
+
+msgid "Inactive"
+msgstr "Tidak aktif"
+
+msgid "Enabled"
+msgstr "Diaktifkan"
+
+msgid "Disabled"
+msgstr "Dinonaktifkan"
+
+msgid "Draft"
+msgstr "Draf"
+
+msgid "Published"
+msgstr "Diterbitkan"
+
+msgid "Unpublished"
+msgstr "Belum diterbitkan"
+
+msgid "This field is required"
+msgstr "Kolom ini wajib diisi"
+
+msgid "No data available"
+msgstr "Tidak ada data tersedia"
+
+msgid "Loading..."
+msgstr "Memuat..."
+
+msgid "Please wait..."
+msgstr "Mohon tunggu..."
+
+msgid "Show more"
+msgstr "Tampilkan lebih banyak"
+
+msgid "Show less"
+msgstr "Tampilkan lebih sedikit"
+
+msgid "Sort by"
+msgstr "Urutkan berdasarkan"
+
+msgid "Filter by"
+msgstr "Saring berdasarkan"
+
+msgid "All"
+msgstr "Semua"
+
+msgid "Created on"
+msgstr "Dibuat pada"
+
+msgid "Last modified"
+msgstr "Terakhir diubah"
+
+msgid "Owner"
+msgstr "Pemilik"
+
+msgid "Author"
+msgstr "Penulis"
+
+msgid "Add Resource"
+msgstr "Tambah sumber daya"
+
+msgid "Data Dictionary"
+msgstr "Kamus data"
+
+msgid "Preview resource"
+msgstr "Pratinjau sumber daya"
+
+msgid "View resource"
+msgstr "Lihat sumber daya"
+
+msgid "Download resource"
+msgstr "Unduh sumber daya"
+
+msgid "Manage"
+msgstr "Kelola"
+
+msgid "Settings"
+msgstr "Pengaturan"
+
+msgid "Administration"
+msgstr "Administrasi"
+
+msgid "Site Settings"
+msgstr "Pengaturan situs"
+
+msgid "System settings"
+msgstr "Pengaturan sistem"
+
+msgid "Activity Stream"
+msgstr "Riwayat aktivitas"
+
+msgid "Recent activity"
+msgstr "Aktivitas terbaru"
+
+msgid "Add member"
+msgstr "Tambah anggota"
+
+msgid "Manage members"
+msgstr "Kelola anggota"
+
+msgid "Permissions"
+msgstr "Hak akses"
+
+msgid "Permission"
+msgstr "Hak akses"
+
+msgid "API Token"
+msgstr "Token API"
+
+msgid "Harvest"
+msgstr "Pengambilan data"
+
+msgid "Harvest Sources"
+msgstr "Sumber pengambilan data"
+
+msgid "Harvest Source"
+msgstr "Sumber pengambilan data"
+
+msgid "Add Harvest Source"
+msgstr "Tambah sumber pengambilan data"
+
+msgid "Harvest Jobs"
+msgstr "Tugas pengambilan data"
+
+msgid "Harvest Job"
+msgstr "Tugas pengambilan data"
+
+msgid "Reharvest"
+msgstr "Ambil ulang data"
+
+msgid "Run now"
+msgstr "Jalankan sekarang"
+
+msgid "Last run"
+msgstr "Terakhir dijalankan"
+
+msgid "Next run"
+msgstr "Jadwal berikutnya"
+
+msgid "Source URL"
+msgstr "URL sumber"
+
+msgid "Source type"
+msgstr "Jenis sumber"
+
+msgid "Job status"
+msgstr "Status tugas"
+
+msgid "Pages"
+msgstr "Halaman"
+
+msgid "Page"
+msgstr "Halaman"
+
+msgid "Add Page"
+msgstr "Tambah halaman"
+
+msgid "New Page"
+msgstr "Halaman baru"
+
+msgid "Edit Page"
+msgstr "Ubah halaman"
+
+msgid "Delete Page"
+msgstr "Hapus halaman"
+
+msgid "Page title"
+msgstr "Judul halaman"
+
+msgid "Page content"
+msgstr "Konten halaman"
+
+msgid "Slug"
+msgstr "Slug"
+
+msgid "Menu label"
+msgstr "Label menu"
+
+msgid "Featured"
+msgstr "Unggulan"
+
+msgid "Show in menu"
+msgstr "Tampilkan di menu"
+
+msgid "DataStore"
+msgstr "DataStore"
+
+msgid "Data Explorer"
+msgstr "Penjelajah data"
+
+msgid "Metadata fields"
+msgstr "Kolom metadata"
+
+msgid "Validation"
+msgstr "Validasi"
+
+msgid "Error"
+msgstr "Kesalahan"
+
+msgid "Warning"
+msgstr "Peringatan"
+
+msgid "Success"
+msgstr "Berhasil"
+
+msgid "Search datasets"
+msgstr "Cari dataset"
+
+msgid "Search organizations"
+msgstr "Cari organisasi"
+
+msgid "Search groups"
+msgstr "Cari grup"
+
+msgid "Search users"
+msgstr "Cari pengguna"
+
+msgid "Add organization"
+msgstr "Tambah organisasi"
+
+msgid "Add group"
+msgstr "Tambah grup"
+
+msgid "Create organization"
+msgstr "Buat organisasi"
+
+msgid "Create group"
+msgstr "Buat grup"
+
+msgid "Update dataset"
+msgstr "Perbarui dataset"
+
+msgid "Delete dataset"
+msgstr "Hapus dataset"
+
+msgid "Delete organization"
+msgstr "Hapus organisasi"
+
+msgid "Delete group"
+msgstr "Hapus grup"
+
+msgid "Are you sure you want to delete this dataset?"
+msgstr "Apakah Anda yakin ingin menghapus dataset ini?"
+
+msgid "Are you sure you want to delete this resource?"
+msgstr "Apakah Anda yakin ingin menghapus sumber daya ini?"
+
+msgid "Are you sure you want to delete this organization?"
+msgstr "Apakah Anda yakin ingin menghapus organisasi ini?"
+
+msgid "No users found"
+msgstr "Tidak ada pengguna yang ditemukan"

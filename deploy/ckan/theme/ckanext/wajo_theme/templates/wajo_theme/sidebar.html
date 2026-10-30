@@ -1,0 +1,67 @@
+{% set active_path = request.path or '/' %}
+{% set dataset_type = h.default_package_type() %}
+{% set org_type = h.default_group_type('organization') %}
+{% set group_type = h.default_group_type('group') %}
+<aside class="wajo-admin-sidebar collapse d-lg-block" id="wajo-admin-sidebar">
+  <div class="wajo-admin-sidebar__inner">
+    <div class="wajo-admin-sidebar__context">
+      <span class="wajo-admin-sidebar__eyebrow">RUANG KERJA</span>
+      <strong>Pengelolaan Data</strong>
+      <span>Administrasi Satu Data Wajo</span>
+    </div>
+
+    <nav class="wajo-admin-nav" aria-label="Navigasi administrasi">
+      <span class="wajo-admin-nav__label">UTAMA</span>
+      <a class="wajo-admin-nav__item{% if active_path.startswith('/wajo-admin') %} is-active{% endif %}" href="{{ h.url_for('wajo_admin.index') }}">
+        <i class="fa fa-th-large" aria-hidden="true"></i><span>Ringkasan</span>
+      </a>
+      <a class="wajo-admin-nav__item{% if active_path.startswith('/dataset') %} is-active{% endif %}" href="{{ h.url_for(dataset_type ~ '.search') }}">
+        <i class="fa fa-database" aria-hidden="true"></i><span>Dataset</span>
+      </a>
+      {% if h.check_access('organization_list') %}
+        <a class="wajo-admin-nav__item{% if active_path.startswith('/organization') %} is-active{% endif %}" href="{{ h.url_for(org_type ~ '.index') }}">
+          <i class="fa fa-building-o" aria-hidden="true"></i><span>Organisasi</span>
+        </a>
+      {% endif %}
+      {% if h.check_access('group_list') %}
+        <a class="wajo-admin-nav__item{% if active_path.startswith('/group') %} is-active{% endif %}" href="{{ h.url_for(group_type ~ '.index') }}">
+          <i class="fa fa-tags" aria-hidden="true"></i><span>Kategori data</span>
+        </a>
+      {% endif %}
+
+      <span class="wajo-admin-nav__label">PUBLIKASI & KONTEN</span>
+      <a class="wajo-admin-nav__item{% if active_path.startswith('/pages') %} is-active{% endif %}" href="/pages">
+        <i class="fa fa-file-text-o" aria-hidden="true"></i><span>Halaman informasi</span><span class="wajo-admin-nav__external">CMS</span>
+      </a>
+      <a class="wajo-admin-nav__item{% if active_path.startswith('/harvest') %} is-active{% endif %}" href="/harvest">
+        <i class="fa fa-refresh" aria-hidden="true"></i><span>Harvesting</span>
+      </a>
+
+      <span class="wajo-admin-nav__label">AKUN SAYA</span>
+      <a class="wajo-admin-nav__item{% if active_path == '/dashboard/datasets' %} is-active{% endif %}" href="{{ h.url_for('dashboard.datasets') }}">
+        <i class="fa fa-folder-open-o" aria-hidden="true"></i><span>Dataset saya</span>
+      </a>
+      <a class="wajo-admin-nav__item{% if active_path == '/dashboard/organizations' %} is-active{% endif %}" href="{{ h.url_for('dashboard.organizations') }}">
+        <i class="fa fa-university" aria-hidden="true"></i><span>Organisasi saya</span>
+      </a>
+      <a class="wajo-admin-nav__item{% if active_path == '/dashboard/groups' %} is-active{% endif %}" href="{{ h.url_for('dashboard.groups') }}">
+        <i class="fa fa-folder-o" aria-hidden="true"></i><span>Kategori saya</span>
+      </a>
+
+      {% if c.userobj.sysadmin %}
+        <span class="wajo-admin-nav__label">SISTEM</span>
+        <a class="wajo-admin-nav__item{% if active_path.startswith('/user') %} is-active{% endif %}" href="/user/">
+          <i class="fa fa-users" aria-hidden="true"></i><span>Pengguna</span>
+        </a>
+        <a class="wajo-admin-nav__item{% if active_path.startswith('/ckan-admin') %} is-active{% endif %}" href="{{ h.url_for('admin.index') }}">
+          <i class="fa fa-cogs" aria-hidden="true"></i><span>Pengaturan CKAN</span>
+        </a>
+      {% endif %}
+    </nav>
+
+    <div class="wajo-admin-sidebar__footer">
+      <span class="wajo-admin-status-dot" aria-hidden="true"></span>
+      <span><strong>CKAN 2.12</strong><small>Mesin pengelola data</small></span>
+    </div>
+  </div>
+</aside>

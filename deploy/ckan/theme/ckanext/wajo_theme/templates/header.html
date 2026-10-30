@@ -1,11 +1,48 @@
 {% ckan_extends %}
 
-{% block header_logo %}
-  <a class="logo wajo-admin-brand" href="{{ h.url_for('dashboard.datasets') if c.userobj else h.url_for('user.login') }}" aria-label="{{ _('Portal Satu Data Kabupaten Wajo - Dashboard') if c.userobj else _('Portal Satu Data Kabupaten Wajo - Login') }}">
-    <img src="{{ h.url_for_static_or_external(g.site_logo or '/logo-kabupaten-wajo.webp') }}" alt="Lambang Kabupaten Wajo" width="48" height="56" />
-    <span class="wajo-admin-brand__copy">
-      <strong>{{ g.site_title or _('Portal Satu Data Kabupaten Wajo') }}</strong>
-      <small>Ruang Pengelola Data</small>
-    </span>
-  </a>
+{# Wajo Admin top bar. Native CKAN routes, user identity and CSRF logout remain intact. #}
+{% block header_wrapper %}
+  <header class="wajo-admin-topbar">
+    <div class="wajo-admin-topbar__inner">
+      <a class="wajo-admin-brand" href="{{ h.url_for('wajo_admin.index') }}" aria-label="Wajo Admin — Ringkasan">
+        <span class="wajo-admin-brand__mark">
+          <img src="{{ h.url_for_static_or_external(g.site_logo or '/logo-kabupaten-wajo.webp') }}" alt="" width="42" height="48" />
+        </span>
+        <span class="wajo-admin-brand__copy">
+          <strong>Wajo Admin</strong>
+          <small>PORTAL SATU DATA KABUPATEN WAJO</small>
+        </span>
+      </a>
+
+      <div class="wajo-admin-topbar__actions">
+        <button class="wajo-admin-menu-toggle btn" type="button" data-bs-toggle="collapse" data-bs-target="#wajo-admin-sidebar" aria-controls="wajo-admin-sidebar" aria-expanded="false" aria-label="Buka navigasi">
+          <i class="fa fa-bars" aria-hidden="true"></i>
+        </button>
+        <a class="wajo-admin-public-link" href="{{ g.site_url }}" target="_blank" rel="noopener noreferrer">
+          <i class="fa fa-external-link" aria-hidden="true"></i>
+          <span>Lihat portal</span>
+        </a>
+        {% if c.userobj %}
+          <div class="wajo-admin-user">
+            <span class="wajo-admin-user__avatar">{{ h.user_image((c.user if c and c.user else ''), size=30) }}</span>
+            <span class="wajo-admin-user__identity">
+              <strong>{{ c.userobj.display_name or c.userobj.name }}</strong>
+              <small>{{ 'Administrator sistem' if c.userobj.sysadmin else 'Pengelola data' }}</small>
+            </span>
+          </div>
+          {% if c.userobj.sysadmin %}
+            <a class="wajo-admin-icon-button" href="{{ h.url_for('admin.index') }}" aria-label="Pengaturan sistem" title="Pengaturan sistem">
+              <i class="fa fa-sliders" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+          <form class="wajo-admin-logout" action="{{ h.url_for('user.logout') }}" method="post">
+            {{ h.csrf_input() }}
+            <button class="wajo-admin-icon-button" type="submit" aria-label="Keluar" title="Keluar">
+              <i class="fa fa-sign-out" aria-hidden="true"></i>
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </header>
 {% endblock %}

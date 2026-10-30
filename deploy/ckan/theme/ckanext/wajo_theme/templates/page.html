@@ -1,12 +1,26 @@
 {% ckan_extends %}
 
 {#
-  Anonymous visitors on the CKAN host should see only the authentication flow.
-  The public catalogue lives on the Next.js host. Keep CKAN's native chrome for
-  authenticated administrators so dashboards and editorial workflows are unchanged.
+  Anonymous visitors on the CKAN host only receive the login flow. For signed-in
+  administrators, wrap native CKAN page content in the Wajo Admin application
+  shell. CKAN's own content blocks, forms, actions and extension routes remain
+  responsible for all CRUD and workflow behaviour.
 #}
 {% block header %}
   {% if c.userobj %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% if c.userobj %}
+    <div class="wajo-admin-shell">
+      {% include "wajo_theme/sidebar.html" %}
+      <div class="wajo-admin-workspace">
+        {{ super() }}
+      </div>
+    </div>
+  {% else %}
     {{ super() }}
   {% endif %}
 {% endblock %}

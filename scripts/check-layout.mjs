@@ -296,18 +296,23 @@ requireText(
 requireText(
   "src/components/public-scroll-manager.jsx",
   "IntersectionObserver",
-  "public sections must reveal in response to scroll position",
+  "public content-list items must reveal in response to scroll position",
 );
 requireText(
   "src/components/public-scroll-manager.jsx",
-  ".public-app-shell main.public-interior-page > *",
-  "scroll reveal must cover interior public pages as well as homepage sections",
+  '[data-public-list-item="true"]',
+  "scroll reveal must target only explicit content-list items",
 );
-requireText(
-  "src/components/public-scroll-manager.jsx",
-  ".public-app-shell main:not(.public-home) > *",
-  "scroll reveal must also cover public routes without the interior-page class",
-);
+if (
+  read("src/components/public-scroll-manager.jsx").includes(
+    "main:not(.public-home) > *",
+  ) ||
+  read("src/components/public-scroll-manager.jsx").includes("home-section")
+) {
+  failures.push(
+    "public scroll reveal must not animate page shells, section wrappers, or route content as a whole",
+  );
+}
 requireText(
   "src/components/public-scroll-manager.jsx",
   'target.classList.contains("is-scroll-visible")',
@@ -325,8 +330,33 @@ requireText(
 );
 requireText(
   "src/app/styles/public-pages-motion.css",
-  ".public-app-shell .has-scroll-reveal.is-scroll-visible",
-  "scroll reveal must have a visible transition state throughout the public site",
+  '[data-public-list-item="true"].has-scroll-reveal.is-scroll-visible',
+  "only explicitly marked content-list items may reveal on scroll",
+);
+requireText(
+  "src/components/dataset-card.jsx",
+  'data-public-list-item="true"',
+  "dataset cards must opt in to the subtle list transition",
+);
+requireText(
+  "src/components/organization-directory.jsx",
+  'data-public-list-item="true"',
+  "organization list cards must opt in to the subtle list transition",
+);
+requireText(
+  "src/components/cms/content-card.jsx",
+  'data-public-list-item="true"',
+  "CMS content cards must opt in to the subtle list transition",
+);
+requireText(
+  "src/app/(public)/publikasi/page.jsx",
+  'data-public-list-item="true"',
+  "publication list items must opt in to the subtle list transition",
+);
+requireText(
+  "src/app/(public)/infografik/page.jsx",
+  'data-public-list-item="true"',
+  "infographic list items must opt in to the subtle list transition",
 );
 requireText(
   "src/app/styles/public-layout-stability.css",

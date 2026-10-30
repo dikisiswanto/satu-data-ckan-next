@@ -404,13 +404,13 @@ const checks = [
   ],
   [
     "deploy/ckan/theme/ckanext/wajo_theme/templates/header.html",
-    /wajo-admin-brand[\s\S]*g\.site_logo[\s\S]*g\.site_title/,
-    "Header login/admin CKAN harus memuat identitas dan logo Portal Satu Data Wajo.",
+    /wajo-admin-brand[\s\S]*g\.site_logo[\s\S]*wajo-admin-user[\s\S]*user\.logout/,
+    "Header Wajo Admin harus memuat identitas, logo, profil pengelola, dan logout dengan CSRF.",
   ],
   [
     "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css",
-    /--wajo-green-950[\s\S]*account-masthead[\s\S]*main:has\(#field-login\)[\s\S]*prefers-reduced-motion/,
-    "Theme harus menata warna, login, header, dan menghormati reduced-motion.",
+    /--wajo-forest-950[\s\S]*wajo-admin-topbar[\s\S]*wajo-admin-sidebar[\s\S]*login-main:has\(#field-login\)[\s\S]*prefers-reduced-motion/,
+    "Theme harus menata application shell, sidebar, dashboard, login, dan menghormati reduced-motion.",
   ],
   [
     "deploy/ckan/configure-upstream-extensions.py",

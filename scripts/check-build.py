@@ -6,6 +6,7 @@ import subprocess
 import tarfile
 import tempfile
 import shutil
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIGURE = ROOT / "deploy/ckan/configure-upstream-extensions.py"
@@ -71,14 +72,36 @@ def main() -> None:
         compiler_spec.loader.exec_module(compiler)
         with tempfile.TemporaryDirectory(prefix="portal-ckan-i18n-check-") as locale_dir:
             catalog_path = ROOT / "deploy/ckan/theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po"
-            compiled = compiler.compile_catalog(catalog_path, Path(locale_dir))
+            from babel.messages.catalog import Catalog
+            from babel.messages.mofile import write_mo
+            locale_root = Path(locale_dir)
+            base_mo = locale_root / "id/LC_MESSAGES/ckan.mo"
+            base_mo.parent.mkdir(parents=True)
+            base_catalog = Catalog(locale="id", domain="ckan")
+            base_catalog.add("Dashboard", "Dasbor upstream")
+            base_catalog.add("Core-only label", "Label inti")
+            with base_mo.open("wb") as handle:
+                write_mo(handle, base_catalog)
+            compiled = compiler.compile_catalog(catalog_path, locale_root)
             assert compiled.is_file() and compiled.stat().st_size > 0
+            extension_output = locale_root / "wajo-theme-i18n"
+            compiled_domains = compiler.compile_extension_catalogs(catalog_path, extension_output)
+            assert {path.name for path in compiled_domains} == {"ckanext-harvest.mo", "ckanext-pages.mo"}
+            import gettext
+            for domain, msgid, msgstr in (
+                ("ckanext-harvest", "Harvest Sources", "Sumber pengambilan data"),
+                ("ckanext-pages", "Add Page", "Tambah halaman"),
+            ):
+                with (extension_output / "id/LC_MESSAGES" / f"{domain}.mo").open("rb") as mo_file:
+                    domain_translations = gettext.GNUTranslations(mo_file)
+                assert domain_translations.gettext(msgid) == msgstr
             import gettext
             with compiled.open("rb") as mo_file:
                 translated = gettext.GNUTranslations(mo_file)
-            assert translated.gettext("Dashboard") == "Dasbor"
+            assert translated.gettext("Dashboard") == "Dasbor", "Wajo custom translations must override upstream strings"
             assert translated.gettext("Log in") == "Masuk"
             assert translated.gettext("Organizations") == "Organisasi"
+            assert translated.gettext("Core-only label") == "Label inti", "upstream Indonesian strings absent from Wajo PO must be preserved"
         installer_path = ROOT / "deploy/ckan/install-pages.py"
         spec = importlib.util.spec_from_file_location("portal_install_pages", installer_path)
         assert spec and spec.loader
@@ -122,6 +145,8 @@ def main() -> None:
         assert "theme/ /tmp/portal-ckan-theme/" in result, "custom theme source must be copied into the build"
         assert "USER root\nRUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in result
         assert "wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin" in (ckan / "theme/setup.py").read_text()
+        assert "wajo_harvest_i18n = ckanext.wajo_theme.plugin:WajoHarvestTranslationPlugin" in (ckan / "theme/setup.py").read_text()
+        assert "wajo_pages_i18n = ckanext.wajo_theme.plugin:WajoPagesTranslationPlugin" in (ckan / "theme/setup.py").read_text()
         assert (ckan / "theme/ckanext/wajo_theme/templates/base.html").is_file()
         assert (ckan / "theme/ckanext/wajo_theme/templates/header.html").is_file()
         assert (ckan / "theme/ckanext/wajo_theme/assets/css/wajo-theme.css").is_file()
@@ -146,7 +171,45 @@ def main() -> None:
         init_script = ckan / "docker-entrypoint.d/50-portal-extensions.sh"
         assert init_script.is_file() and init_script.stat().st_mode & 0o111
 
-    print("CKAN Docker overlay and ckanext-pages wheel package-data repair pass fixture checks.")
+        # Build the actual Wajo theme wheel in a temporary directory and verify
+        # that every shell/dashboard asset is present in the installable artifact.
+        theme_dir = ROOT / "deploy/ckan/theme"
+        with tempfile.TemporaryDirectory(prefix="portal-wajo-theme-wheel-") as wheel_tmp:
+            wheel_root = Path(wheel_tmp)
+            subprocess.run(
+                [
+                    "python3", "setup.py", "bdist_wheel",
+                    "--dist-dir", str(wheel_root / "dist"),
+                    "--bdist-dir", str(wheel_root / "bdist"),
+                    "build", "--build-base", str(wheel_root / "build"),
+                ],
+                cwd=theme_dir,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            wheels = list((wheel_root / "dist").glob("ckanext_wajo_theme-*.whl"))
+            assert len(wheels) == 1, "Wajo theme build must produce exactly one wheel"
+            with zipfile.ZipFile(wheels[0]) as wheel:
+                wheel_files = set(wheel.namelist())
+            required_theme_files = {
+                "ckanext/wajo_theme/plugin.py",
+                "ckanext/wajo_theme/templates/base.html",
+                "ckanext/wajo_theme/templates/header.html",
+                "ckanext/wajo_theme/templates/page.html",
+                "ckanext/wajo_theme/templates/wajo_theme/dashboard.html",
+                "ckanext/wajo_theme/templates/wajo_theme/sidebar.html",
+                "ckanext/wajo_theme/assets/css/wajo-theme.css",
+                "ckanext/wajo_theme/assets/webassets.yml",
+                "ckanext/wajo_theme/public/logo-kabupaten-wajo.webp",
+                "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po",
+                "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-harvest.po",
+                "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-pages.po",
+            }
+            missing_theme_files = required_theme_files - wheel_files
+            assert not missing_theme_files, f"Wajo theme wheel is missing files: {sorted(missing_theme_files)}"
+
+    print("CKAN Docker overlay, Wajo Admin wheel packaging, and ckanext-pages package-data fixtures passed.")
 
 
 if __name__ == "__main__":

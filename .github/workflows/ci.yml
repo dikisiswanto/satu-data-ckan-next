@@ -98,7 +98,7 @@ jobs:
           COPY scripts/check-plugins.py /tmp/check-plugins.py
           RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme \
               && python /tmp/install-pages.py \
-              && python /tmp/compile-id-translations.py /tmp/portal-ckan-theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po "$(python -c 'import ckan; from pathlib import Path; print(Path(ckan.__file__).resolve().parent / "i18n")')" \
+              && python /tmp/compile-id-translations.py /tmp/portal-ckan-theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po "$(python -c 'import ckan; from pathlib import Path; print(Path(ckan.__file__).resolve().parent / "i18n")')" "$(python -c 'import importlib.util; from pathlib import Path; spec = importlib.util.find_spec("ckanext.wajo_theme"); print(Path(next(iter(spec.submodule_search_locations))) / "i18n")')" \
               && python /tmp/check-plugins.py
           DOCKER
           docker build -f Dockerfile.ckan-extension-smoke -t portal-ckan-extension-smoke .

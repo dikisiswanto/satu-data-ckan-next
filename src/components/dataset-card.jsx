@@ -38,7 +38,10 @@ export function DatasetCard({ dataset }) {
   const lastUpdated = dataset.metadata_modified || dataset.metadata_created;
 
   return (
-    <Card className="flex h-full flex-col shadow-[0_4px_20px_rgb(24_58_68_/_0.04)] transition hover:-translate-y-0.5 hover:shadow-md">
+    <Card
+      data-public-list-item="true"
+      className="flex h-full flex-col shadow-[0_4px_20px_rgb(24_58_68_/_0.04)] transition hover:-translate-y-0.5 hover:shadow-md"
+    >
       <CardHeader className="flex-1">
         <div className="flex items-start justify-between gap-3">
           <Badge variant="primary">{ckanPackageCategory(dataset)}</Badge>

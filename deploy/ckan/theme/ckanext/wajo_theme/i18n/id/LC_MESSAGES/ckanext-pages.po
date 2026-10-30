@@ -1,0 +1,241 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Portal Satu Data Wajo\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-10-30 09:22+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: id\n"
+"Language-Team: Bahasa Indonesia\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Actions"
+msgstr "Tindakan"
+
+msgid "Add Page"
+msgstr "Tambah halaman"
+
+msgid "Add to menu"
+msgstr "Tambahkan ke menu"
+
+msgid "Apply"
+msgstr "Terapkan"
+
+msgid "Are you sure you want to delete this page?"
+msgstr "Yakin ingin menghapus halaman ini?"
+
+msgid "Author"
+msgstr "Penulis"
+
+msgid "Back"
+msgstr "Kembali"
+
+msgid "Blog"
+msgstr "Blog"
+
+msgid "Blog post"
+msgstr "Artikel blog"
+
+msgid "Blog posts"
+msgstr "Artikel blog"
+
+msgid "Cancel"
+msgstr "Batal"
+
+msgid "Category"
+msgstr "Kategori"
+
+msgid "Clear"
+msgstr "Hapus pilihan"
+
+msgid "Content"
+msgstr "Konten"
+
+msgid "Create"
+msgstr "Buat"
+
+msgid "Create Page"
+msgstr "Buat halaman"
+
+msgid "Create a blog post"
+msgstr "Buat artikel blog"
+
+msgid "Create a page"
+msgstr "Buat halaman baru"
+
+msgid "Created"
+msgstr "Dibuat"
+
+msgid "Created on"
+msgstr "Dibuat pada"
+
+msgid "Delete"
+msgstr "Hapus"
+
+msgid "Delete Page"
+msgstr "Hapus halaman"
+
+msgid "Description"
+msgstr "Deskripsi"
+
+msgid "Display in navigation"
+msgstr "Tampilkan pada navigasi"
+
+msgid "Draft"
+msgstr "Draf"
+
+msgid "Edit"
+msgstr "Ubah"
+
+msgid "Edit Page"
+msgstr "Ubah halaman"
+
+msgid "Excerpt"
+msgstr "Ringkasan"
+
+msgid "Featured"
+msgstr "Unggulan"
+
+msgid "Filter"
+msgstr "Saring"
+
+msgid "Manage content"
+msgstr "Kelola konten"
+
+msgid "Manage pages"
+msgstr "Kelola halaman"
+
+msgid "Menu label"
+msgstr "Label menu"
+
+msgid "Menu order"
+msgstr "Urutan menu"
+
+msgid "Name"
+msgstr "Nama"
+
+msgid "New Page"
+msgstr "Halaman baru"
+
+msgid "Next"
+msgstr "Berikutnya"
+
+msgid "No pages available"
+msgstr "Belum ada halaman"
+
+msgid "No pages found"
+msgstr "Tidak ada halaman"
+
+msgid "Open Graph image"
+msgstr "Gambar Open Graph"
+
+msgid "Page"
+msgstr "Halaman"
+
+msgid "Page Content"
+msgstr "Konten halaman"
+
+msgid "Page Name"
+msgstr "Nama halaman"
+
+msgid "Page Title"
+msgstr "Judul halaman"
+
+msgid "Page content"
+msgstr "Konten halaman"
+
+msgid "Page created"
+msgstr "Halaman berhasil dibuat"
+
+msgid "Page deleted"
+msgstr "Halaman berhasil dihapus"
+
+msgid "Page name"
+msgstr "Nama halaman"
+
+msgid "Page title"
+msgstr "Judul halaman"
+
+msgid "Page updated"
+msgstr "Halaman berhasil diperbarui"
+
+msgid "Pages"
+msgstr "Halaman"
+
+msgid "Previous"
+msgstr "Sebelumnya"
+
+msgid "Private"
+msgstr "Pribadi"
+
+msgid "Public"
+msgstr "Publik"
+
+msgid "Publication date"
+msgstr "Tanggal publikasi"
+
+msgid "Publish"
+msgstr "Terbitkan"
+
+msgid "Publish date"
+msgstr "Tanggal terbit"
+
+msgid "Published"
+msgstr "Diterbitkan"
+
+msgid "SEO description"
+msgstr "Deskripsi SEO"
+
+msgid "SEO title"
+msgstr "Judul SEO"
+
+msgid "Save"
+msgstr "Simpan"
+
+msgid "Save changes"
+msgstr "Simpan perubahan"
+
+msgid "Search pages..."
+msgstr "Cari halaman..."
+
+msgid "Settings"
+msgstr "Pengaturan"
+
+msgid "Show in menu"
+msgstr "Tampilkan di menu"
+
+msgid "Slug"
+msgstr "Slug"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Template"
+msgstr "Templat"
+
+msgid "Template type"
+msgstr "Jenis templat"
+
+msgid "Title"
+msgstr "Judul"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "URL slug"
+msgstr "Slug URL"
+
+msgid "Updated"
+msgstr "Diperbarui"
+
+msgid "Updated on"
+msgstr "Diperbarui pada"
+
+msgid "View Page"
+msgstr "Lihat halaman"
+

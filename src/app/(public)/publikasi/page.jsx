@@ -61,6 +61,7 @@ export default async function PublicationsPage({ searchParams }) {
         <div className="grid gap-4 lg:grid-cols-2">
           {items.map((item) => (
             <article
+              data-public-list-item="true"
               key={item.name}
               className="group flex min-w-0 gap-4 rounded-2xl border border-line bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-6"
             >

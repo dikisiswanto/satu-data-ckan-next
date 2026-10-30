@@ -274,7 +274,7 @@ legacy_view_plugins = {
     "esri_shapefile_view",
 }
 portal_plugins = {
-    "envvars", "wajo_pages", "wajo_theme", "scheming_datasets", "pages", "dcat",
+    "envvars", "wajo_pages", "wajo_theme", "wajo_harvest_i18n", "wajo_pages_i18n", "scheming_datasets", "pages", "dcat",
     "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view",
     "geojson_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
     "datatables_view", "image_view", "text_view", "datastore", "xloader",
@@ -285,7 +285,7 @@ for plugin in (
     "scheming_datasets", "wajo_pages", "pages", "dcat", "dcat_rdf_harvester",
     "structured_data", "resource_proxy", "datatables_view", "image_view", "text_view",
     "geojson_view", "geo_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
-    "datastore", "xloader",
+    "datastore", "xloader", "wajo_harvest_i18n", "wajo_pages_i18n",
 ):
     if plugin not in plugins:
         plugins.append(plugin)
@@ -304,6 +304,8 @@ values["CKAN__SITE_DESCRIPTION"] = values.get("CKAN__SITE_DESCRIPTION", "Portal 
 values["CKAN__LOCALE_DEFAULT"] = "id"
 values["CKAN__LOCALES_OFFERED"] = "\"id en\""
 values["CKAN__LOCALE_ORDER"] = "\"id en\""
+# Use the Wajo Admin overview as the default post-login landing page.
+values["CKAN__AUTH__ROUTE_AFTER_LOGIN"] = "wajo_admin.index"
 site_logo = values.get("CKAN__SITE_LOGO", "/logo-kabupaten-wajo.webp").strip().strip("\"").strip("\'")
 # Migrate the previous generated path: extension public assets are exposed at the URL root.
 if site_logo in {"", "/base/logo-kabupaten-wajo.webp"}:

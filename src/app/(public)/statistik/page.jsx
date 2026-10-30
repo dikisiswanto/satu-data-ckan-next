@@ -77,6 +77,7 @@ export default async function StatistikPage({ searchParams }) {
           >
             {indicators.map((indicator, index) => (
               <article
+                data-public-list-item="true"
                 key={indicator.name}
                 className={`statistics-card statistics-card-tone-${index % 4}`}
               >

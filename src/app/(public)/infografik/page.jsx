@@ -59,6 +59,7 @@ export default async function InfografikPage({ searchParams }) {
             const imageUrl = safeHttpUrl(item.cover?.url);
             return (
               <article
+                data-public-list-item="true"
                 key={item.name}
                 className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >

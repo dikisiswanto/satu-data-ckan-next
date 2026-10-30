@@ -23,6 +23,27 @@ function extractActionNames(source, label) {
 }
 
 const routeActions = extractActionNames(apiRoute, "Route API");
+const REQUIRED_ACTIONS = [
+  "status_show",
+  "package_search",
+  "package_show",
+  "package_activity_list",
+  "organization_list",
+  "organization_show",
+  "group_list",
+  "group_show",
+  "tag_list",
+  "resource_show",
+  "file_show",
+  "datastore_search",
+];
+for (const action of REQUIRED_ACTIONS) {
+  if (!routeActions.includes(action)) {
+    errors.push(
+      `Route API: action publik wajib \`${action}\` hilang dari allowlist.`,
+    );
+  }
+}
 const endpointBlock = apiPage.match(/const endpoints = \[([\s\S]*?)\n\];/);
 const pageActions = endpointBlock
   ? [...endpointBlock[1].matchAll(/name:\s*"([a-z_]+)"/g)].map(
@@ -42,7 +63,7 @@ for (const [label, actions] of [
   const extra = actions.filter((action) => !routeActions.includes(action));
   if (missing.length || extra.length) {
     errors.push(
-      `${label}: daftar action tidak sama dengan allowlist route. Hilang: ${missing.join(", ") || "-"}; ekstra: ${extra.join(", ") || "-"}.`,
+      `${label}: daftar action tidak sama dengan allowlist route. Tambahkan action yang hilang ke tabel/daftar endpoint dokumentasi dan hapus action yang sudah tidak diizinkan. Hilang: ${missing.join(", ") || "-"}; ekstra: ${extra.join(", ") || "-"}.`,
     );
   }
   if (new Set(actions).size !== actions.length)
@@ -96,5 +117,5 @@ if (errors.length) {
   process.exit(1);
 }
 process.stdout.write(
-  `API documentation consistency passed: ${routeActions.length} allowlisted actions match UI and Markdown contracts; cache and harvesting notes aligned.\n`,
+  `API documentation consistency passed: ${routeActions.length} allowlisted actions (including all ${REQUIRED_ACTIONS.length} required actions) match the public API page and docs/API.md; visibility/cache rules, activity privacy, and harvesting checkpoint guidance align.\n`,
 );

@@ -127,6 +127,7 @@ export default async function InformasiPage() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {featuredPages.map((page) => (
               <Link
+                data-public-list-item="true"
                 key={page.name}
                 href={`/informasi/${encodeURIComponent(page.name)}`}
                 className="cms-directory-card rounded-2xl border border-line bg-white p-5 transition hover:border-primary/40 hover:shadow-sm"

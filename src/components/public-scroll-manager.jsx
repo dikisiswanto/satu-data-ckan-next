@@ -9,12 +9,9 @@ const PAGINATED_PUBLIC_LISTS = {
   "/statistik": "statistics-list",
 };
 
-const PUBLIC_REVEAL_SELECTOR = [
-  ".public-app-shell .home-content .home-section",
-  ".public-app-shell .home-content > .home-feature-row",
-  ".public-app-shell main.public-interior-page > *",
-  ".public-app-shell main:not(.public-home) > *",
-].join(", ");
+// Only individual content-list items reveal on scroll. Page shells, headings,
+// hero sections, and route transitions stay static to avoid flashing.
+const PUBLIC_REVEAL_SELECTOR = '[data-public-list-item="true"]';
 
 /**
  * Public route changes start at the top. Query pagination is the exception:

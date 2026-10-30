@@ -11,7 +11,10 @@ export function CmsContentCard({ page, href, kind = "Halaman informasi" }) {
     getPublicSiteOrigin(),
   );
   return (
-    <article className="group overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article
+      data-public-list-item="true"
+      className="group overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+    >
       <Link
         href={href}
         className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"

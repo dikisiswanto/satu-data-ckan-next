@@ -1,20 +1,23 @@
-/* Scroll-position transitions shared by homepage sections and interior pages. */
-.public-app-shell .has-scroll-reveal {
+/* Subtle entrance for explicit public content-list items only. Route changes,
+   page shells, headings, hero sections, and loading placeholders stay static. */
+.public-app-shell [data-public-list-item="true"].has-scroll-reveal {
   opacity: 0;
-  transform: translate3d(0, 14px, 0);
+  transform: translate3d(0, 6px, 0);
   transition:
-    opacity 460ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 220ms ease-out,
+    transform 220ms ease-out;
   will-change: opacity, transform;
 }
-.public-app-shell .has-scroll-reveal.is-scroll-visible {
+.public-app-shell
+  [data-public-list-item="true"].has-scroll-reveal.is-scroll-visible {
   opacity: 1;
   transform: translate3d(0, 0, 0);
   will-change: auto;
 }
 @media (prefers-reduced-motion: reduce) {
-  .public-app-shell .has-scroll-reveal,
-  .public-app-shell .has-scroll-reveal.is-scroll-visible {
+  .public-app-shell [data-public-list-item="true"].has-scroll-reveal,
+  .public-app-shell
+    [data-public-list-item="true"].has-scroll-reveal.is-scroll-visible {
     opacity: 1;
     transform: none;
     transition: none;

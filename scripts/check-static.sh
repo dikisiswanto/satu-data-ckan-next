@@ -15,6 +15,7 @@ run_check python3 scripts/check-ci.py
 run_check python3 scripts/check-env.py
 run_check python3 scripts/check-base.py
 run_check python3 scripts/check-theme.py
+run_check python3 scripts/check-id-translations.py
 run_check python3 scripts/check-auth-middleware.py
 run_check python3 scripts/check-build.py
 run_check python3 scripts/check-plugins-config.py

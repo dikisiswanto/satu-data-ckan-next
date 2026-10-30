@@ -116,9 +116,29 @@ Route publik CMS:
 
 Panduan field, template, komponen, media, keamanan, dan alur publikasi tersedia di [`docs/CMS.md`](docs/CMS.md).
 
-## Theme CKAN Admin
+## Wajo Admin — antarmuka administrasi CKAN
 
-CKAN Admin menggunakan Midnight Blue bawaan CKAN 2.12 dan extension lokal `wajo_theme`. Extension menambahkan logo Wajo, branding, CSS responsif, indikator fokus, dan styling untuk login serta halaman administrasi. Template fitur CKAN tetap diwarisi dari upstream agar autentikasi, CSRF, form, permission, dan alur extension tidak diganti.
+CKAN 2.12.1 tetap menjadi backend katalog, autentikasi, otorisasi, CRUD, DataStore, dan extension. Antarmuka administrasinya menggunakan **Wajo Admin**, custom application shell pada extension lokal `ckanext-wajo-theme`:
+
+- Topbar dengan identitas Kabupaten Wajo, tautan portal publik, profil pengguna, pengaturan sistem, dan logout ber-CSRF.
+- Sidebar responsif dengan navigasi Ringkasan, Dataset, Organisasi, Kategori data, Pages, Harvesting, dashboard pribadi, Pengguna, dan Pengaturan CKAN. Menu sensitif ditampilkan sesuai role/permission.
+- Ringkasan khusus di `/wajo-admin/` dengan metrik yang diambil dari CKAN Action API menggunakan identitas pengguna yang sedang login, daftar dataset terbaru, dan akses cepat berdasarkan permission.
+- Bahasa Indonesia menjadi default CKAN Admin. Katalog terjemahan dikompilasi saat image dibangun.
+- Design system CSS merapikan formulir, tabel, tombol, alert, breadcrumb, pagination, tabs, dropdown, fokus keyboard, serta breakpoint desktop/tablet/mobile.
+
+Wajo Admin **tidak mengganti route atau workflow native** dataset, resource, organisasi, user, DataStore, Pages, Harvest, Scheming, dan GeoView. Shell ditambahkan secara aditif di `page.html`; form dan action tiap modul tetap berasal dari CKAN/extension upstream. Ini menjaga validasi, CSRF, upload, permission, dan URL existing. Dashboard ringkasan merupakan satu halaman custom yang memanggil Action API CKAN; ia bukan pengganti halaman CRUD.
+
+Blueprint ringkasan memakai prefix `/wajo-admin`, sedangkan root hostname admin mengarahkan pengguna terautentikasi ke ringkasan tersebut. `CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index` dipastikan oleh bootstrap. Pengunjung anonim pada `CKAN_HOST` hanya dapat membuka login dan aset login; halaman lain meminta autentikasi dan Action API admin tanpa sesi mendapat `401`. Setelah login, seluruh path CKAN dan extension diteruskan ke CKAN, tanpa allowlist route yang dapat mematikan menu baru.
+
+Untuk mengubah tampilan, edit:
+
+- `deploy/ckan/theme/ckanext/wajo_theme/templates/header.html` — topbar dan identitas.
+- `deploy/ckan/theme/ckanext/wajo_theme/templates/page.html` — application shell.
+- `deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/sidebar.html` — navigasi.
+- `deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html` — halaman Ringkasan.
+- `deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css` — design system dan styling seluruh halaman CKAN.
+
+Jangan mengedit core CKAN atau folder hasil bootstrap `deploy/ckan/upstream`. Perubahan plugin/template/CSS memerlukan bootstrap dan rebuild image CKAN. Static check membangun wheel theme sungguhan dan memastikan semua template, logo, CSS, WebAssets, dan katalog `.po` ikut terkemas.
 
 ## Pemeriksaan kualitas
 

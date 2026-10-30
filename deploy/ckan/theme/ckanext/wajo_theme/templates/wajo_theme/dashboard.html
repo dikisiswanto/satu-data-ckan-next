@@ -1,0 +1,95 @@
+{% extends "page.html" %}
+{% set dataset_type = h.default_package_type() %}
+
+{% block subtitle %}Ringkasan{% endblock %}
+{% block breadcrumb_content %}
+  <li class="active">Ringkasan</li>
+{% endblock %}
+{% block secondary %}{% endblock %}
+{% block primary_content %}
+  <section class="wajo-dashboard" aria-labelledby="wajo-dashboard-title">
+    <div class="wajo-dashboard__welcome">
+      <div>
+        <span class="wajo-dashboard__eyebrow">PUSAT KENDALI PENGELOLAAN DATA</span>
+        <h1 id="wajo-dashboard-title">Selamat datang, {{ c.userobj.display_name or c.userobj.name }}</h1>
+        <p>Pantau katalog, kelola publikasi, dan lanjutkan pekerjaan pengelolaan data Kabupaten Wajo.</p>
+      </div>
+      <div class="wajo-dashboard__welcome-mark" aria-hidden="true"><i class="fa fa-bar-chart"></i></div>
+    </div>
+
+    <div class="wajo-dashboard__section-heading">
+      <div><span class="wajo-dashboard__eyebrow">GAMBARAN KATALOG</span><h2>Ringkasan data</h2></div>
+      <a href="{{ g.site_url }}" target="_blank" rel="noopener noreferrer">Buka portal publik <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+    </div>
+
+    <div class="wajo-dashboard__metrics">
+      <a class="wajo-metric-card wajo-metric-card--green" href="{{ h.url_for(dataset_type ~ '.search') }}">
+        <span class="wajo-metric-card__icon"><i class="fa fa-database" aria-hidden="true"></i></span>
+        <span class="wajo-metric-card__label">Dataset yang dapat diakses</span>
+        <strong>{{ wajo_admin_stats.datasets if wajo_admin_stats.datasets is not none else '—' }}</strong>
+        <small>Lihat katalog dataset <i class="fa fa-arrow-right" aria-hidden="true"></i></small>
+      </a>
+      <a class="wajo-metric-card wajo-metric-card--gold" href="{{ h.url_for(h.default_group_type('organization') ~ '.index') }}">
+        <span class="wajo-metric-card__icon"><i class="fa fa-building-o" aria-hidden="true"></i></span>
+        <span class="wajo-metric-card__label">Organisasi</span>
+        <strong>{{ wajo_admin_stats.organizations if wajo_admin_stats.organizations is not none else '—' }}</strong>
+        <small>Lihat organisasi <i class="fa fa-arrow-right" aria-hidden="true"></i></small>
+      </a>
+      <a class="wajo-metric-card wajo-metric-card--blue" href="{{ h.url_for(h.default_group_type('group') ~ '.index') }}">
+        <span class="wajo-metric-card__icon"><i class="fa fa-tags" aria-hidden="true"></i></span>
+        <span class="wajo-metric-card__label">Kategori data</span>
+        <strong>{{ wajo_admin_stats.groups if wajo_admin_stats.groups is not none else '—' }}</strong>
+        <small>Lihat kategori <i class="fa fa-arrow-right" aria-hidden="true"></i></small>
+      </a>
+      <a class="wajo-metric-card wajo-metric-card--purple" href="{{ h.url_for('dashboard.datasets') }}">
+        <span class="wajo-metric-card__icon"><i class="fa fa-folder-open-o" aria-hidden="true"></i></span>
+        <span class="wajo-metric-card__label">Dataset saya</span>
+        <strong>{{ wajo_admin_stats.my_datasets if wajo_admin_stats.my_datasets is not none else '—' }}</strong>
+        <small>Kelola dataset sendiri <i class="fa fa-arrow-right" aria-hidden="true"></i></small>
+      </a>
+    </div>
+
+    <div class="wajo-dashboard__grid">
+      <section class="wajo-dashboard-panel wajo-dashboard-panel--recent">
+        <div class="wajo-dashboard-panel__header">
+          <div><span class="wajo-dashboard__eyebrow">PEMBARUAN KATALOG</span><h2>Dataset terbaru</h2></div>
+          <a href="{{ h.url_for(dataset_type ~ '.search') }}">Semua dataset <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </div>
+        {% if wajo_admin_recent_datasets %}
+          <div class="table-responsive">
+            <table class="table wajo-admin-table align-middle mb-0">
+              <thead><tr><th>Nama dataset</th><th>Organisasi</th><th>Terakhir diperbarui</th><th>Status</th></tr></thead>
+              <tbody>
+                {% for item in wajo_admin_recent_datasets %}
+                  <tr>
+                    <td><a class="wajo-admin-table__title" href="{{ h.url_for(dataset_type ~ '.read', id=item.name) }}">{{ item.title or item.name }}</a><small>{{ item.name }}</small></td>
+                    <td>{{ item.organization.title if item.organization else '—' }}</td>
+                    <td>{{ h.render_datetime(item.metadata_modified) or '—' }}</td>
+                    <td><span class="wajo-admin-status-pill{% if item.private %} is-private{% endif %}">{{ 'Privat' if item.private else 'Publik' }}</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="wajo-admin-empty"><span><i class="fa fa-database" aria-hidden="true"></i></span><strong>Belum ada dataset untuk ditampilkan</strong><p>Dataset yang dapat Anda akses akan muncul di sini.</p></div>
+        {% endif %}
+      </section>
+
+      <aside class="wajo-dashboard-panel wajo-dashboard-panel--actions">
+        <div class="wajo-dashboard-panel__header"><div><span class="wajo-dashboard__eyebrow">AKSES CEPAT</span><h2>Mulai pekerjaan</h2></div></div>
+        <div class="wajo-dashboard-quicklinks">
+          {% if h.check_access('package_create') %}
+            <a href="{{ h.url_for(dataset_type ~ '.new') }}"><span class="wajo-dashboard-quicklinks__icon"><i class="fa fa-plus" aria-hidden="true"></i></span><span><strong>Tambah dataset</strong><small>Daftarkan dataset baru</small></span><i class="fa fa-angle-right" aria-hidden="true"></i></a>
+          {% endif %}
+          {% if h.check_access('organization_create') %}
+            <a href="{{ h.url_for(h.default_group_type('organization') ~ '.new') }}"><span class="wajo-dashboard-quicklinks__icon"><i class="fa fa-building-o" aria-hidden="true"></i></span><span><strong>Buat organisasi</strong><small>Kelola perangkat daerah</small></span><i class="fa fa-angle-right" aria-hidden="true"></i></a>
+          {% endif %}
+          <a href="/pages"><span class="wajo-dashboard-quicklinks__icon"><i class="fa fa-file-text-o" aria-hidden="true"></i></span><span><strong>Kelola informasi</strong><small>Halaman dan konten portal</small></span><i class="fa fa-angle-right" aria-hidden="true"></i></a>
+          <a href="/harvest"><span class="wajo-dashboard-quicklinks__icon"><i class="fa fa-refresh" aria-hidden="true"></i></span><span><strong>Kelola harvesting</strong><small>Perbarui sumber data</small></span><i class="fa fa-angle-right" aria-hidden="true"></i></a>
+        </div>
+        <div class="wajo-dashboard-tip"><i class="fa fa-lightbulb-o" aria-hidden="true"></i><p><strong>Pengingat publikasi</strong>Pastikan judul, deskripsi, organisasi pemilik, lisensi, dan resource telah lengkap sebelum dataset dipublikasikan.</p></div>
+      </aside>
+    </div>
+  </section>
+{% endblock %}

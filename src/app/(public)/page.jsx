@@ -134,7 +134,7 @@ function DatasetPreviewCard({ dataset, index }) {
   const Icon = topic?.icon || FileText;
   const tone = topic?.tone || "blue";
   return (
-    <article className="home-dataset-card group">
+    <article data-public-list-item="true" className="home-dataset-card group">
       <div
         className={`home-dataset-art home-dataset-art-${tone}`}
         aria-hidden="true"
@@ -680,6 +680,7 @@ function HomeCategoryCards({ categories = [], unavailable = false }) {
               <Link
                 key={category.id}
                 href={`/dataset?kategori=${encodeURIComponent(category.id)}`}
+                data-public-list-item="true"
                 className="home-topic-card group"
                 aria-label={`${category.name}, ${displayStat(category.count)} dataset`}
               >
@@ -895,6 +896,7 @@ function HomeIndicatorHighlights({ indicators = [] }) {
                   : "Belum tersedia";
             return (
               <article
+                data-public-list-item="true"
                 key={indicator.name}
                 className="home-indicator-card group relative overflow-hidden rounded-2xl border border-line bg-white p-5 shadow-[0_5px_24px_rgb(23_51_75_/_0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgb(23_51_75_/_0.09)] motion-reduce:transform-none motion-reduce:transition-none"
               >
@@ -993,7 +995,11 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
               {infographics.slice(0, 2).map((item) => {
                 const imageUrl = safeHttpUrl(item.cover?.url);
                 return (
-                  <article key={item.name} className="group min-w-0">
+                  <article
+                    data-public-list-item="true"
+                    key={item.name}
+                    className="group min-w-0"
+                  >
                     <Link
                       href={`/infografik/${encodeURIComponent(item.name)}`}
                       className="block overflow-hidden rounded-xl border border-line bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
@@ -1069,6 +1075,7 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
             <div className="divide-y divide-line">
               {publications.slice(0, 3).map((item) => (
                 <article
+                  data-public-list-item="true"
                   key={item.name}
                   className="home-publication-row flex gap-3 py-4 first:pt-0 last:pb-0"
                 >
@@ -1261,6 +1268,7 @@ async function HomeCmsNewsHighlights() {
         <div className="grid gap-4 md:grid-cols-3">
           {posts.map((post) => (
             <article
+              data-public-list-item="true"
               key={post.name}
               className="home-news-card rounded-2xl border border-line bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
