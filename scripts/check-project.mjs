@@ -78,6 +78,7 @@ const required = [
   "src/lib/ckan/public-resource-url.js",
   "deploy/ckan/schemas/dataset.yaml",
   "deploy/ckan/configure-upstream-extensions.py",
+  "deploy/ckan/install-pages.py",
   "deploy/ckan/theme/setup.py",
   "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
   "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
@@ -230,8 +231,13 @@ const checks = [
   ],
   [
     "deploy/ckan/extensions/requirements.txt",
-    /ckanext-scheming==3\.1\.0[\s\S]*ckanext-pages @ https:\/\/codeload\.github\.com\/ckan\/ckanext-pages\/tar\.gz\/28eba99ad85d3b9037f5aaddad1f083300c69041[\s\S]*ckanext-dcat==2\.4\.4[\s\S]*ckanext-xloader==2\.5\.2[\s\S]*ckanext-geoview==0\.3\.2[\s\S]*ckanext-harvest==1\.6\.3/,
-    "Extension CKAN harus dipatok; Pages memakai commit upstream yang memuat dukungan CKAN 2.12.",
+    /ckanext-scheming==3\.1\.0[\s\S]*ckanext-dcat==2\.4\.4[\s\S]*ckanext-xloader==2\.5\.2[\s\S]*ckanext-geoview==0\.3\.2[\s\S]*ckanext-harvest==1\.6\.3/,
+    "Extension CKAN harus dipatok; Pages dibangun melalui installer package-data upstream.",
+  ],
+  [
+    "deploy/ckan/install-pages.py",
+    /28eba99ad85d3b9037f5aaddad1f083300c69041[\s\S]*config_declaration\.yaml[\s\S]*migration\/pages\/alembic\.ini[\s\S]*migration\/pages\/script\.py\.mako/,
+    "Builder Pages harus mematok commit dan menyertakan file konfigurasi serta migrasi Alembic.",
   ],
   [
     "src/proxy.js",

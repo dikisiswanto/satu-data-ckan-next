@@ -1,8 +1,7 @@
 # Official CKAN extensions pinned for reproducible CKAN 2.12.1 builds.
-# ckanext-pages is installed from the upstream commit that merged CKAN 2.12 support
-# (PR #149); upstream documents Git/source installation rather than a PyPI pin.
+# ckanext-pages is built separately by deploy/ckan/install-pages.py because its
+# upstream wheel omits the config declaration and Alembic migration assets.
 ckanext-scheming==3.1.0
-ckanext-pages @ https://codeload.github.com/ckan/ckanext-pages/tar.gz/28eba99ad85d3b9037f5aaddad1f083300c69041
 ckanext-dcat==2.4.4
 ckanext-xloader==2.5.2
 ckanext-geoview==0.3.2

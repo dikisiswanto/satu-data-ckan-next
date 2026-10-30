@@ -68,7 +68,7 @@ jobs:
           python3 - <<'PY'
           import ast
           from pathlib import Path
-          for name in ('deploy/ckan/configure-upstream-extensions.py', 'deploy/ckan/render-upstream-env.py', 'deploy/ckan/sync-env.py', 'scripts/check-build.py', 'scripts/check-plugins-config.py', 'scripts/check-theme.py', 'scripts/check-base.py', 'scripts/check-plugins.py', 'scripts/check-env.py'):
+          for name in ('deploy/ckan/configure-upstream-extensions.py', 'deploy/ckan/install-pages.py', 'deploy/ckan/render-upstream-env.py', 'deploy/ckan/sync-env.py', 'scripts/check-build.py', 'scripts/check-plugins-config.py', 'scripts/check-theme.py', 'scripts/check-base.py', 'scripts/check-plugins.py', 'scripts/check-env.py'):
               ast.parse(Path(name).read_text())
               print(f'valid Python: {name}')
           PY
@@ -91,8 +91,10 @@ jobs:
           USER root
           COPY deploy/ckan/extensions/requirements.txt /tmp/portal-ckan-extensions.txt
           COPY deploy/ckan/theme/ /tmp/portal-ckan-theme/
+          COPY deploy/ckan/install-pages.py /tmp/install-pages.py
           COPY scripts/check-plugins.py /tmp/check-plugins.py
           RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme \
+              && python /tmp/install-pages.py \
               && python /tmp/check-plugins.py
           DOCKER
           docker build -f Dockerfile.ckan-extension-smoke -t portal-ckan-extension-smoke .

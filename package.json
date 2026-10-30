@@ -15,7 +15,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "check": "python3 scripts/check-env-single-source.py && python3 scripts/check-ckan-base-source.py && python3 scripts/check-ckan-admin-theme.py && python3 scripts/check-ckan-build-overlay.py && node scripts/check-ui-css.mjs && node scripts/check-public-navigation.mjs && node scripts/check-api-doc-consistency.mjs && node scripts/check-project.mjs && node scripts/check-local-imports.mjs",
+    "check": "npm run check:static && npm run lint",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -23,7 +23,8 @@
     "test:coverage": "vitest run --coverage",
     "security:check": "npm audit --omit=dev",
     "format:write": "prettier --write src tests scripts deploy/ckan README.md package.json",
-    "format:check": "prettier --check src tests scripts deploy/ckan README.md package.json"
+    "format:check": "prettier --check src tests scripts deploy/ckan README.md package.json",
+    "check:static": "python3 scripts/check-env.py && python3 scripts/check-base.py && python3 scripts/check-theme.py && python3 scripts/check-build.py && python3 scripts/check-plugins-config.py && node scripts/check-css.mjs && node scripts/check-nav.mjs && node scripts/check-api.mjs && node scripts/check-project.mjs && node scripts/check-imports.mjs && node scripts/check-layout.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.5",

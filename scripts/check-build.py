@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Regression test for the generated CKAN Dockerfile overlay (no Docker needed)."""
 from pathlib import Path
+import importlib.util
 import subprocess
 import tarfile
 import tempfile
@@ -38,12 +39,48 @@ def main() -> None:
         assert result.count(MARKER) == 1, "generated Dockerfile block must be idempotent"
         assert result.count("COPY --chown=ckan:ckan extensions/requirements.txt") == 1
         assert result.count("RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt") == 1
+        assert "COPY --chown=ckan:ckan install-pages.py /tmp/portal-install-pages.py" in result
+        assert "&& python /tmp/portal-install-pages.py" in result
         assert sum(line.strip() == "USER root" for line in result.splitlines()) == 2, "root must be explicit for extension install, after the fixture's initial root user"
         assert sum(line.strip() == "USER ckan" for line in result.splitlines()) == 1, "the original CKAN runtime user boundary must be preserved"
         requirements = (ckan / "extensions/requirements.txt").read_text()
         assert "ckanext-scheming==3.1.0" in requirements
-        assert "ckanext-pages @ https://codeload.github.com/ckan/ckanext-pages/tar.gz/28eba99ad85d3b9037f5aaddad1f083300c69041" in requirements
-        assert "ckanext-pages==0.5.2" not in requirements, "Pages must not be resolved from the unavailable PyPI pin"
+        assert not any(line.strip().startswith("ckanext-pages") for line in requirements.splitlines()), "Pages must be installed by the source package-data builder"
+        pages_installer = (ROOT / "deploy/ckan/install-pages.py").read_text()
+        for token in ("28eba99ad85d3b9037f5aaddad1f083300c69041", "config_declaration.yaml", "migration/pages/alembic.ini", "migration/pages/script.py.mako", "migration/pages/versions/*", "importlib.import_module(\"ckanext.pages.plugin\")"):
+            assert token in pages_installer, f"Pages packaging fix missing: {token}"
+        # Exercise the packaging repair against a minimal source fixture without network or Docker.
+        installer_path = ROOT / "deploy/ckan/install-pages.py"
+        spec = importlib.util.spec_from_file_location("portal_install_pages", installer_path)
+        assert spec and spec.loader
+        installer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(installer)
+        with tempfile.TemporaryDirectory(prefix="portal-pages-package-check-") as fixture_dir:
+            fixture = Path(fixture_dir)
+            (fixture / "pyproject.toml").write_text(
+                '[build-system]\nrequires = ["setuptools"]\nbuild-backend = "setuptools.build_meta"\n'
+                '[project]\nname = "ckanext-pages"\nversion = "0.5.2"\n'
+                '[tool.setuptools]\ninclude-package-data = true\n'
+                '[tool.setuptools.package-data]\n"*" = ["theme/*/*.html"]\n'
+                '[tool.setuptools.packages]\nfind = {}\n'
+            )
+            (fixture / "MANIFEST.in").write_text("recursive-include ckanext/pages/assets *\n")
+            for relative in installer.REQUIRED_FILES:
+                target = fixture / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("fixture\n")
+            versions = fixture / "ckanext/pages/migration/pages/versions"
+            versions.mkdir(parents=True, exist_ok=True)
+            (versions / "001_fixture.py").write_text('revision = "001"\n')
+            installer.verify_source_assets(fixture)
+            installer.patch_package_metadata(fixture)
+            installer.verify_source_assets(fixture)
+            import tomllib
+            package_data = tomllib.loads((fixture / "pyproject.toml").read_text())["tool"]["setuptools"]["package-data"]["ckanext.pages"]
+            assert set(package_data) >= {"config_declaration.yaml", "migration/pages/*", "migration/pages/versions/*"}
+            manifest = (fixture / "MANIFEST.in").read_text()
+            assert "include ckanext/pages/config_declaration.yaml" in manifest
+            assert "recursive-include ckanext/pages/migration *" in manifest
         assert "ckanext-dcat==2.4.4" in (ckan / "extensions/requirements.txt").read_text()
         assert "ckanext-xloader==2.5.2" in (ckan / "extensions/requirements.txt").read_text()
         assert "ckanext-geoview==0.3.2" in (ckan / "extensions/requirements.txt").read_text()
@@ -57,10 +94,13 @@ def main() -> None:
         assert (ckan / "theme/ckanext/wajo_theme/public/logo-kabupaten-wajo.webp").is_file()
         assert (ckan / "schemas/dataset.yaml").is_file()
         assert "2.12.1" in result, "generated Dockerfile should use the patch-pinned official base image"
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text()
+        assert "COPY deploy/ckan/install-pages.py /tmp/install-pages.py" in workflow
+        assert "&& python /tmp/install-pages.py" in workflow
         init_script = ckan / "docker-entrypoint.d/50-portal-extensions.sh"
         assert init_script.is_file() and init_script.stat().st_mode & 0o111
 
-    print("CKAN Docker overlay passes idempotency, extension, and packaged-theme smoke checks.")
+    print("CKAN Docker overlay and ckanext-pages wheel package-data repair pass fixture checks.")
 
 
 if __name__ == "__main__":

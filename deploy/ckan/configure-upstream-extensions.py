@@ -16,6 +16,7 @@ copies = {
     project_root / "deploy/ckan/extensions/requirements.txt": ckan_dir / "extensions/requirements.txt",
     project_root / "deploy/ckan/schemas/dataset.yaml": ckan_dir / "schemas/dataset.yaml",
     project_root / "deploy/ckan/initialize-extensions.sh": ckan_dir / "docker-entrypoint.d/50-portal-extensions.sh",
+    project_root / "deploy/ckan/install-pages.py": ckan_dir / "install-pages.py",
 }
 for source, destination in copies.items():
     if not source.is_file():
@@ -42,12 +43,13 @@ COPY --chown=ckan:ckan extensions/requirements.txt /tmp/portal-ckan-extensions.t
 COPY --chown=ckan:ckan schemas/dataset.yaml /srv/app/ckanext-schemas/dataset.yaml
 COPY --chown=ckan:ckan docker-entrypoint.d/50-portal-extensions.sh /docker-entrypoint.d/50-portal-extensions.sh
 COPY --chown=ckan:ckan theme/ /tmp/portal-ckan-theme/
-# The upstream base image may default to an unprivileged CKAN user. Install
-# extensions globally as root, then let the original USER ckan boundary below
-# restore the runtime identity.
+COPY --chown=ckan:ckan install-pages.py /tmp/portal-install-pages.py
+# Install standard extensions and Wajo theme, then build ckanext-pages from
+# its pinned upstream source with missing wheel package-data restored.
 USER root
 RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme \
-    && rm -f /tmp/portal-ckan-extensions.txt \
+    && python /tmp/portal-install-pages.py \
+    && rm -f /tmp/portal-ckan-extensions.txt /tmp/portal-install-pages.py \
     && rm -rf /tmp/portal-ckan-theme
 
 '''

@@ -2,7 +2,7 @@
 
 ## Arsitektur
 
-`ckanext-pages` tetap berjalan di CKAN 2.12.1 dan menjadi sumber kebenaran konten serta hak akses. Extension lokal `wajo_pages` menambahkan metadata editorial melalui `IPagesSchema`; nilai disimpan sebagai extras CKAN Pages, tanpa tabel CMS kedua. Next.js mengambil konten dari Action API CKAN melalui server component/server utility, kemudian merender seluruh halaman publik dengan komponen portal.
+`ckanext-pages` tetap berjalan di CKAN 2.12.1 dan menjadi sumber kebenaran konten serta hak akses. Karena wheel upstream belum menyertakan deklarasi konfigurasi dan berkas migrasi Alembic (issue [#150](https://github.com/ckan/ckanext-pages/issues/150)), `deploy/ckan/install-pages.py` melengkapi metadata package saat build, memverifikasi isi wheel, dan menguji import plugin sebelum image digunakan. Extension lokal `wajo_pages` menambahkan metadata editorial melalui `IPagesSchema`; nilai disimpan sebagai extras CKAN Pages, tanpa tabel CMS kedua. Next.js mengambil konten dari Action API CKAN melalui server component/server utility, kemudian merender seluruh halaman publik dengan komponen portal.
 
 Browser tidak memanggil action Pages secara langsung. Token admin CKAN tidak dipakai maupun dikirim ke browser. Action `ckanext_pages_list` dan `ckanext_pages_show` tidak ditambahkan ke facade `/api/3/action` publik. Daftar anonim CKAN Pages hanya menampilkan konten publik; detail halaman tetap melewati pemeriksaan privacy upstream. Permintaan CMS memakai `no-store` agar perubahan visibilitas tidak tertahan di cache permanen.
 
