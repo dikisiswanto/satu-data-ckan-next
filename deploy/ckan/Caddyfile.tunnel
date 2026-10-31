@@ -12,7 +12,7 @@ http://{$PUBLIC_HOST} {
   # not by the Next.js portal. The CKAN site_url deliberately stays on the
   # public host, so these narrow routes must reach CKAN or Next.js will answer
   # the iframe request with its global X-Frame-Options: DENY.
-  @ckanResourceView path_regexp ckanResourceView ^/dataset/[^/]+/resource/[a-fA-F0-9-]{16,64}/view/[a-fA-F0-9-]{16,64}/?$
+  @ckanResourceView path_regexp ckanResourceView ^/dataset/[^/]+/resource/[^/]+/(view/[^/]+|preview|embed)/?$
   handle @ckanResourceView {
     reverse_proxy https://nginx:443 {
       header_up Host {http.request.host}
@@ -22,7 +22,7 @@ http://{$PUBLIC_HOST} {
       # that one trusted parent origin; do not make the entire portal frameable.
       header_down -X-Frame-Options
       header_down -Content-Security-Policy
-      header_down Content-Security-Policy "frame-ancestors https://{$CKAN_HOST}"
+      header_down Content-Security-Policy "frame-ancestors 'self' https://{$CKAN_HOST} https://{$PUBLIC_HOST}"
       header_down Cache-Control "private, no-store"
       transport http {
         tls_insecure_skip_verify
@@ -33,7 +33,7 @@ http://{$PUBLIC_HOST} {
   # CKAN's viewer HTML references WebAssets and CKAN static resources from
   # root-relative URLs. Keep these asset prefixes on CKAN; Next.js owns all
   # other public paths.
-  @ckanViewerAssets path /webassets/* /base/* /static/*
+  @ckanViewerAssets path /webassets/* /base/* /static/* /fanstatic/*
   handle @ckanViewerAssets {
     reverse_proxy https://nginx:443 {
       header_up Host {http.request.host}
@@ -69,7 +69,7 @@ http://{$PUBLIC_HOST} {
       header_up X-Forwarded-Proto {http.request.scheme}
     }
   }
-  @ckanPublic path_regexp ckanPublic ^/(?:catalog\.(?:rdf|ttl|jsonld|xml|n3)|dataset/[^/]+\.(?:rdf|ttl|jsonld|n3))$
+  @ckanPublic path_regexp ckanPublic ^/(catalog\.(rdf|ttl|jsonld|xml|n3)|dataset/[^/]+\.(rdf|ttl|jsonld|n3))$
   handle @ckanPublic {
     reverse_proxy https://nginx:443 {
       header_up Host {http.request.host}
@@ -102,6 +102,25 @@ http://{$CKAN_HOST} {
 
     @adminSitemap path /sitemap.xml /sitemap_index.xml /sitemap-*
     respond @adminSitemap "Not Found" 404
+
+    # ResourceView may be generated against CKAN_HOST in existing datasets.
+    # Keep its iframe policy deterministic on the admin origin as well as the
+    # equivalent public-host route; all other CKAN pages retain native headers.
+    @adminResourceView path_regexp adminResourceView ^/dataset/[^/]+/resource/[^/]+/(view/[^/]+|preview|embed)/?$
+    handle @adminResourceView {
+      reverse_proxy https://nginx:443 {
+        header_up Host {http.request.host}
+        header_up X-Forwarded-Host {http.request.host}
+        header_up X-Forwarded-Proto https
+        header_down -X-Frame-Options
+        header_down -Content-Security-Policy
+        header_down Content-Security-Policy "frame-ancestors 'self' https://{$PUBLIC_HOST}"
+        header_down Cache-Control "private, no-store"
+        transport http {
+          tls_insecure_skip_verify
+        }
+      }
+    }
 
     # Proxy every route, including core catalogue views and all installed
     # extensions. WajoThemePlugin enforces login for this hostname and CKAN's

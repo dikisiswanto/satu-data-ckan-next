@@ -145,6 +145,12 @@ else:
         if staging_result.returncode != 0 or "NEXT_PUBLIC_CKAN_ADMIN_URL=https://ckan.silirdev.com" not in staging_synced or "CKAN_ADMIN_URL=https://ckan.silirdev.com" not in staging_synced or "NEXT_PUBLIC_SITE_URL=https://data.silirdev.com" not in staging_synced or "CKAN___SESSION_COOKIE_DOMAIN=.silirdev.com" not in staging_synced:
             errors.append("Perubahan CKAN_HOST ke ckan.silirdev.com harus menyelaraskan URL dan cookie session lintas subdomain")
 
+        cross_domain_env = Path(tmp) / ".env.cross-domain.ckan"
+        cross_domain_env.write_text("PUBLIC_HOST=data.silirdev.com\nCKAN_HOST=ckan.wajokab.go.id\n")
+        cross_domain_result = subprocess.run([sys.executable, str(syncer), str(cross_domain_env)], capture_output=True, text=True)
+        if cross_domain_result.returncode == 0 or "must share the same parent DNS zone" not in cross_domain_result.stderr:
+            errors.append("sync-env.py harus menolak portal dan CKAN admin pada registrable domain berbeda karena cookie tidak dapat dibagikan lintas domain")
+
         deep_env = Path(tmp) / ".env.deep-host.ckan"
         deep_env.write_text("PUBLIC_HOST=data.silirdev.com\nCKAN_HOST=ckan.data.silirdev.com\n")
         deep_result = subprocess.run([sys.executable, str(syncer), str(deep_env)], capture_output=True, text=True)

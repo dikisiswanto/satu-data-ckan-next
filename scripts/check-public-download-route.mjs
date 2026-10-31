@@ -56,10 +56,25 @@ for (const file of caddyFiles) {
     /@ckanResourceView path_regexp[\s\S]*reverse_proxy https:\/\/nginx:443/,
     `${file}: CKAN ResourceView iframe must bypass Next.js X-Frame-Options`,
   );
+  assert.ok(
+    source.includes("(view/[^/]+|preview|embed)"),
+    `${file}: CKAN view, preview and embed routes must all reach CKAN`,
+  );
+  assert.ok(
+    source.includes(
+      "@adminResourceView path_regexp adminResourceView ^/dataset/[^/]+/resource/[^/]+/(view/[^/]+|preview|embed)/?$",
+    ),
+    `${file}: admin-host CKAN preview endpoints must retain the same iframe policy`,
+  );
+  assert.doesNotMatch(
+    source,
+    /\(\?:/,
+    `${file}: Caddy uses Go RE2; non-capturing groups are unsupported`,
+  );
   assert.match(
     source,
-    /header_down -X-Frame-Options[\s\S]*frame-ancestors https:\/\/\{\$CKAN_HOST\}/,
-    `${file}: ResourceView must allow only the CKAN admin parent frame`,
+    /header_down -X-Frame-Options[\s\S]*frame-ancestors \'self\' https:\/\/\{\$CKAN_HOST\} https:\/\/\{\$PUBLIC_HOST\}/,
+    `${file}: ResourceView must allow only the first-party CKAN and portal parent frames`,
   );
   assert.match(
     source,
@@ -248,6 +263,20 @@ assert.match(
   sessionAwarePublicActionRoute,
   /resolveAuthorizedPackageResources/,
 );
+assert.match(
+  sessionAwarePublicActionRoute,
+  /if \(action === "package_search" && sessionCookie\) params\.include_private = true/,
+);
+assert.match(
+  sessionAwarePublicActionRoute,
+  /ckanAction\(action, params, \{ revalidate: 0, sessionCookie \}\)/,
+  "CKAN package_search must receive the exact signed browser session with include_private.",
+);
+assert.match(
+  sessionAwarePublicActionRoute,
+  /getViewerRecord\("package_show", \{ id: identifier \}, sessionCookie\)/,
+  "Private package details must be authorized by CKAN for the exact forwarded user session.",
+);
 const previewRoute = await readFile(
   "src/app/api/public/resource-preview/route.js",
   "utf8",
@@ -286,8 +315,22 @@ const bootstrap = await readFile("deploy/ckan/bootstrap-upstream.sh", "utf8");
 assert.match(bootstrap, /CKANEXT__SPATIAL__COMMON_MAP__TYPE.*custom/);
 assert.match(
   bootstrap,
-  /CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL.*tile\.openstreetmap\.org/,
+  /CKANEXT__SPATIAL__COMMON_MAP__CUSTOM__URL.*tile\.openstreetmap\.org/,
 );
+assert.doesNotMatch(
+  bootstrap,
+  /values\["CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL"\]\s*=/,
+);
+assert.match(
+  bootstrap,
+  /legacy_map_url_key = "CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL"[\s\S]*values\.pop\(legacy_map_url_key, None\)/,
+);
+const envExampleMap = await readFile(".env.ckan.example", "utf8");
+assert.match(
+  envExampleMap,
+  /^CKANEXT__SPATIAL__COMMON_MAP__CUSTOM__URL=https:\/\/tile\.openstreetmap\.org/m,
+);
+assert.doesNotMatch(envExampleMap, /CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL/);
 const geoPreview = await readFile(
   "src/components/geojson-resource-preview.jsx",
   "utf8",
@@ -304,3 +347,8 @@ const geoCss = await readFile(
   "utf8",
 );
 assert.match(geoCss, /format-label\[data-format="geojson" i\]::before/);
+
+const datasetCard = await readFile("src/components/dataset-card.jsx", "utf8");
+assert.match(datasetCard, /isGeoJSONResource/);
+assert.match(datasetCard, /bg-emerald-50[^\n]*text-emerald-900/);
+assert.match(datasetCard, /GeoJSON/);

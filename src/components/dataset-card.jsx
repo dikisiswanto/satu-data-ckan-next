@@ -13,6 +13,7 @@ import {
   ckanExtraValue,
   ckanPackageCategory,
   ckanResourceFormat,
+  isGeoJSONResource,
 } from "@/lib/ckan/client";
 
 export function DatasetCard({ dataset }) {
@@ -24,10 +25,18 @@ export function DatasetCard({ dataset }) {
       )
     : [];
   const formats = [
-    ...new Set(resources.map(ckanResourceFormat).filter(Boolean)),
-  ]
-    .slice(0, 3)
-    .map((format) => format.toUpperCase());
+    ...new Map(
+      resources
+        .map((resource) => {
+          const geojson = isGeoJSONResource(resource);
+          const label = geojson
+            ? "GeoJSON"
+            : ckanResourceFormat(resource).toUpperCase();
+          return [label, { label, geojson }];
+        })
+        .filter(([label]) => Boolean(label)),
+    ).values(),
+  ].slice(0, 3);
   const referencePeriod = ckanExtraValue(dataset, [
     "portal_reference_period",
     "portal_period",
@@ -83,9 +92,24 @@ export function DatasetCard({ dataset }) {
               </span>
             ) : null}
             {formats.length ? (
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-canvas px-2 py-1 leading-5">
-                <FileType size={13} aria-hidden="true" className="shrink-0" />
-                <span>{formats.join(" · ")}</span>
+              <span className="inline-flex flex-wrap items-center gap-1.5">
+                <FileType
+                  size={13}
+                  aria-hidden="true"
+                  className="mr-0.5 shrink-0 text-muted"
+                />
+                {formats.map((format) => (
+                  <span
+                    key={format.label}
+                    className={
+                      format.geojson
+                        ? "inline-flex items-center rounded-md border border-emerald-700/25 bg-emerald-50 px-2 py-1 font-semibold leading-5 text-emerald-900"
+                        : "inline-flex items-center rounded-md border border-line bg-canvas px-2 py-1 leading-5 text-ink"
+                    }
+                  >
+                    {format.label}
+                  </span>
+                ))}
                 {resources.length > formats.length ? (
                   <span className="text-muted/80">
                     +{resources.length - formats.length} berkas

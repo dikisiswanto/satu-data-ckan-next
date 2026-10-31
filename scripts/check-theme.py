@@ -104,6 +104,7 @@ require("wajo-admin-user" in header_source and "h.csrf_input()" in header_source
 icon_source = read(PACKAGE / "templates/wajo_theme/icon.html")
 require("wajo_theme/icon.html" in read(SIDEBAR) and 'class="fa fa-' in icon_source and "wajo-icons.svg#" not in icon_source and 'src="/logo-kabupaten-wajo.webp"' in header_source, "Ikon admin harus memakai pustaka Font Awesome bawaan CKAN, bukan SVG buatan sendiri, dan logo lokal extension.")
 require("fa-solid" in icon_source, "Ikon Wajo harus memakai family solid Font Awesome Free yang dibundel CKAN 2.12.1.")
+require("'map': 'map-location-dot'" in icon_source, "Aksi data geospasial harus memakai glyph Font Awesome map-location-dot yang jelas.")
 
 icon_template_sources = "\n".join(path.read_text(encoding="utf-8") for path in (PACKAGE / "templates").rglob("*.html"))
 icon_calls = set(re.findall(r"wajo_icon\('([^']+)'", icon_template_sources))
@@ -115,7 +116,7 @@ valid_free_solid_glyphs = {
     "right-from-bracket", "chart-bar", "angle-right", "plus", "lightbulb",
     "newspaper", "book", "chart-line", "image", "table", "server",
     "cloud-arrow-down", "shield", "check", "circle-check", "circle-exclamation",
-    "triangle-exclamation", "circle-info", "map", "pen-to-square", "pencil",
+    "triangle-exclamation", "circle-info", "map", "map-location-dot", "pen-to-square", "pencil",
 }
 require(icon_calls.issubset(icon_map), f"Semua pemanggilan wajo_icon harus memiliki pemetaan: {sorted(icon_calls - icon_map.keys())}.")
 require(set(icon_map.values()).issubset(valid_free_solid_glyphs), f"Glyph harus tersedia pada Font Awesome Free Solid CKAN: {sorted(set(icon_map.values()) - valid_free_solid_glyphs)}.")
@@ -359,6 +360,20 @@ admin_design_source = read(PACKAGE / "assets/css/wajo-admin-design-system.css")
 require('.wajo-admin-workspace .resource-item > a.heading .format-label[data-format="geojson" i]' in admin_design_source, "GeoJSON format badge must override the linked resource heading color with a specific selector.")
 require('.format-label[data-format="geojson" i]::before' in admin_design_source, "GeoJSON format badge must include a visible map glyph.")
 require("-webkit-text-fill-color: #14532d !important" in admin_design_source and "background: #e7f6ec !important" in admin_design_source, "GeoJSON badge must retain readable high-contrast text and background inside CKAN resource links.")
+require(".wajo-admin-shell .resource-item .format-label" in admin_design_source and "#294b61" in admin_design_source, "All native format chips must fall back to a readable neutral palette if a GeoJSON selector variant is missing.")
+require('.dataset-resources a.label[data-format="geojson" i]' in admin_design_source and '.resource-item .format-label[data-format="geojson" i]' in admin_design_source, "GeoJSON label must target CKAN's native dataset list and resource detail markup outside the admin-only shell.")
+require('content: "\\f5a0"' in admin_design_source and 'font-family: "Font Awesome 6 Free"' in admin_design_source, "GeoJSON badge must use the larger Font Awesome map-location-dot glyph.")
+require(".btn-outline-primary" in admin_design_source and "-webkit-text-fill-color: #29483a !important" in admin_design_source, "Light and outline CKAN buttons must not inherit white text on pale backgrounds.")
+require(".wajo-admin-workspace .btn-primary { background: #176b52 !important; }" in admin_design_source, "Filled CKAN buttons must have an explicit contrasting background, not white-on-white inherited styling.")
+require(".wajo-create-type--geo .wajo-create-type__icon .fa-map-location-dot" in admin_design_source, "Geospatial quick-action Font Awesome icon must be larger than body text.")
+REQUIRE_SHELL_WIDE = (
+    ".wajo-admin-shell .btn-primary { background-color: #176b52 !important; }" in admin_design_source
+    and ".wajo-admin-shell .btn-success { background-color: #176b3a !important; }" in admin_design_source
+    and ".wajo-admin-shell :is(.btn-light, .btn-white" in admin_design_source
+    and "-webkit-text-fill-color: #fff !important" in admin_design_source
+)
+require(REQUIRE_SHELL_WIDE, "All CKAN shell buttons, including extension/modal actions outside the workspace wrapper, must keep legible foreground/background contrast.")
+require(".wajo-admin-shell .wajo-create-type--geo .wajo-create-type__icon .fa-map-location-dot" in admin_design_source and "font-size: 1.9rem !important" in admin_design_source, "Map actions must use a larger Font Awesome map-location-dot icon.")
 for token in (".wajo-pages-admin-route .wajo-admin-workspace .pages-form", ".wajo-pages-editor", ".wajo-md-preview", ".blog-item", "module-content > ul:not(.nav):not(.pagination)", "table-backed editorial collections", "wajo-pages-admin-list-route", ".table-responsive > table tbody td", "ul.list-unstyled:not(.nav):not(.pagination)"):
     require(token in admin_design_source, f"Pages/News admin layout must define responsive editorial cards and previews: {token}.")
 public_motion_source = read(ROOT / "src/app/styles/public-pages-motion.css")
@@ -478,6 +493,11 @@ try:
         ERRORS.append("CSS tidak valid: " + "; ".join(error.message for error in css_errors))
 except ImportError:
     pass
+
+admin_design_source = read(ROOT / "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css")
+require(".wajo-admin-shell .btn-primary { background-color: #176b52 !important; }" in admin_design_source, "Primary CKAN admin buttons must retain a colored fill across the entire shell.")
+require(".wajo-admin-shell :is(.btn-light, .btn-white" in admin_design_source and "-webkit-text-fill-color: #29483a !important;" in admin_design_source, "Light/outline CKAN admin buttons must use dark readable text across the entire shell.")
+require("font-size: 1.9rem !important;" in admin_design_source and ".fa-map-location-dot" in admin_design_source, "The CKAN geospatial quick action must use a clearly visible Font Awesome map icon.")
 
 if ERRORS:
     print(f"CKAN admin theme regression check failed ({len(ERRORS)}):", file=sys.stderr)

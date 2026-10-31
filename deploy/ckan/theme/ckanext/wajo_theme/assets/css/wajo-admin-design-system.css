@@ -2894,3 +2894,443 @@ body:has(.wajo-login-frame) {
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 6.5 6-3.5 6 3.5 6-3.5v14.5L15 21l-6-3.5L3 21z'/%3E%3Cpath d='M9 3v14.5M15 6.5V21'/%3E%3C/svg%3E")
     center / contain no-repeat;
 }
+
+/* Final contrast guard for CKAN-native buttons. CKAN extensions sometimes
+   supply white text on a white default/secondary button; keep every variant
+   readable while preserving explicit semantic button colors. */
+.wajo-admin-workspace
+  .btn:not(.btn-primary):not(.btn-success):not(.btn-danger):not(
+    .btn-warning
+  ):not(.btn-info):not(.btn-dark) {
+  color: #344c40 !important;
+  -webkit-text-fill-color: #344c40;
+}
+.wajo-admin-workspace .btn-primary,
+.wajo-admin-workspace .btn-success,
+.wajo-admin-workspace .btn-danger,
+.wajo-admin-workspace .btn-warning,
+.wajo-admin-workspace .btn-info,
+.wajo-admin-workspace .btn-dark {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff;
+}
+.wajo-admin-workspace .btn-light,
+.wajo-admin-workspace .btn-default,
+.wajo-admin-workspace .btn-secondary,
+.wajo-admin-workspace .btn-outline-primary,
+.wajo-admin-workspace .btn-outline-secondary {
+  background-color: #fff;
+  color: #344c40 !important;
+  -webkit-text-fill-color: #344c40;
+}
+.wajo-admin-workspace .btn :is(i, svg, span),
+.wajo-admin-workspace .btn-light :is(i, svg, span),
+.wajo-admin-workspace .btn-default :is(i, svg, span),
+.wajo-admin-workspace .btn-secondary :is(i, svg, span) {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* GeoJSON is a green geospatial format, not a purple/red status label. Apply
+   outside the workspace wrapper too because CKAN's dataset result snippets
+   can render the resource format token one level above the workspace node. */
+.wajo-admin-shell .format-label[data-format="geojson" i],
+.wajo-admin-shell .format-label[title="geojson" i],
+.wajo-admin-shell .format-label--geojson,
+.wajo-admin-workspace .resource-item .format-label[data-format="geojson" i],
+.wajo-admin-workspace .resource-item .format-label[title="geojson" i] {
+  border: 1px solid #9bc9aa !important;
+  background: #e5f4e9 !important;
+  color: #174b2c !important;
+  -webkit-text-fill-color: #174b2c !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+}
+.wajo-admin-shell .format-label[data-format="geojson" i] *,
+.wajo-admin-shell .format-label[title="geojson" i] *,
+.wajo-admin-shell .format-label--geojson * {
+  color: #174b2c !important;
+  -webkit-text-fill-color: #174b2c !important;
+}
+.wajo-admin-shell .resource-item .format-label[data-format="geojson" i]::before,
+.wajo-admin-shell .resource-item .format-label[title="geojson" i]::before,
+.wajo-admin-shell .resource-item .format-label--geojson::before {
+  content: "\f279" !important;
+  display: inline-block;
+  width: 1.15rem;
+  margin-inline-end: 0.38rem;
+  color: currentColor !important;
+  font-family:
+    "Font Awesome 6 Free", "Font Awesome 5 Free", FontAwesome, sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+}
+
+.wajo-admin-workspace
+  .resource-item
+  .format-label[data-format="geojson" i]::before,
+.wajo-admin-workspace .resource-item .format-label[title="geojson" i]::before,
+.wajo-admin-workspace
+  .resource-item
+  .format-label.format-label--geojson::before,
+.wajo-admin-workspace .format-label--geojson::before {
+  background: none !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+}
+
+/* CKAN 2.12 dataset results also use native .label/.badge chips in some
+   extension templates. Keep their default purple/red palette from leaking
+   through when the resource heading is a linked element. */
+.wajo-admin-shell .resource-item .format-label,
+.wajo-admin-shell .resource-item .label,
+.wajo-admin-shell .resource-item .badge,
+.wajo-admin-shell .dataset-resources .label,
+.wajo-admin-shell .dataset-resources .badge {
+  border: 1px solid #c9d8e3 !important;
+  border-radius: 999px !important;
+  background: #eef4f8 !important;
+  color: #294b61 !important;
+  -webkit-text-fill-color: #294b61 !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+  text-decoration: none !important;
+}
+.wajo-admin-shell .resource-item .format-label[data-format="geojson" i],
+.wajo-admin-shell .resource-item .format-label[title="geojson" i],
+.wajo-admin-shell .resource-item .format-label--geojson,
+.wajo-admin-shell .resource-item .label[title="geojson" i],
+.wajo-admin-shell .resource-item .badge[data-format="geojson" i],
+.wajo-admin-shell .dataset-resources [data-format="geojson" i] {
+  border-color: #86b99a !important;
+  background: #e4f3e9 !important;
+  color: #174b2c !important;
+  -webkit-text-fill-color: #174b2c !important;
+}
+.wajo-admin-shell .resource-item .format-label[data-format="geojson" i]::before,
+.wajo-admin-shell .resource-item .format-label[title="geojson" i]::before,
+.wajo-admin-shell .resource-item .format-label--geojson::before {
+  width: 1.3rem;
+  min-width: 1.3rem;
+  margin-inline-end: 0.42rem;
+  font-size: 1.18rem;
+}
+
+/* Correct contrast for less-common CKAN/extension button variants. Keep the
+   semantic filled variants white-on-color; all light/outline variants stay
+   dark-on-light even when upstream extension CSS assigns white text. */
+.wajo-admin-workspace
+  :is(
+    .btn-light,
+    .btn-white,
+    .btn-outline-light,
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-success,
+    .btn-outline-danger,
+    .btn-outline-warning,
+    .btn-outline-info,
+    .btn-outline-dark,
+    .btn-default,
+    .btn-secondary
+  ) {
+  border-color: #cbd8d1 !important;
+  background: #f7faf8 !important;
+  color: #29483a !important;
+  -webkit-text-fill-color: #29483a !important;
+}
+.wajo-admin-workspace
+  :is(
+    .btn-light,
+    .btn-white,
+    .btn-outline-light,
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-success,
+    .btn-outline-danger,
+    .btn-outline-warning,
+    .btn-outline-info,
+    .btn-outline-dark,
+    .btn-default,
+    .btn-secondary
+  ):hover,
+.wajo-admin-workspace
+  :is(
+    .btn-light,
+    .btn-white,
+    .btn-outline-light,
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-success,
+    .btn-outline-danger,
+    .btn-outline-warning,
+    .btn-outline-info,
+    .btn-outline-dark,
+    .btn-default,
+    .btn-secondary
+  ):focus-visible {
+  border-color: #a9c4b4 !important;
+  background: #eaf3ed !important;
+  color: #173f2d !important;
+  -webkit-text-fill-color: #173f2d !important;
+}
+.wajo-admin-workspace
+  :is(.btn-primary, .btn-success, .btn-danger, .btn-info, .btn-dark) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+.wajo-create-type--geo .wajo-create-type__icon .fa-map-location-dot {
+  font-size: 1.42rem;
+  line-height: 1;
+}
+.wajo-admin-shell .resource-item .fa-map,
+.wajo-admin-shell .resource-item .fa-map-location-dot,
+.wajo-admin-shell .resource-item .fa-map-marked-alt,
+.wajo-admin-shell .resource-item .fa-map-marker-alt,
+.wajo-admin-shell .resource-item .fa-location-dot {
+  width: 1.35rem;
+  min-width: 1.35rem;
+  font-size: 1.22rem !important;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* CKAN's native dataset list uses .dataset-resources a.label[data-format].
+   These selectors intentionally work on both the public CKAN catalogue and
+   the authenticated admin shell; a shell-only selector misses public list
+   markup and lets Bootstrap's purple/red label palette win. */
+.dataset-resources a.label[data-format],
+.dataset-resources a.label[title],
+.resource-item .format-label[data-format],
+.resource-item .format-label[title] {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.28rem;
+  border: 1px solid #cbd8e2 !important;
+  border-radius: 999px !important;
+  background: #eef4f8 !important;
+  color: #294b61 !important;
+  -webkit-text-fill-color: #294b61 !important;
+  font-weight: 750 !important;
+  line-height: 1.45;
+  text-decoration: none !important;
+  opacity: 1 !important;
+}
+.dataset-resources a.label[data-format="geojson" i],
+.dataset-resources a.label[title="geojson" i],
+.resource-item .format-label[data-format="geojson" i],
+.resource-item .format-label[title="geojson" i],
+.resource-item .format-label--geojson {
+  border-color: #78b58d !important;
+  background: #e4f4e9 !important;
+  color: #174b2c !important;
+  -webkit-text-fill-color: #174b2c !important;
+  box-shadow: inset 0 0 0 1px rgb(23 75 44 / 4%);
+}
+.dataset-resources a.label[data-format="geojson" i]::before,
+.dataset-resources a.label[title="geojson" i]::before,
+.resource-item .format-label[data-format="geojson" i]::before,
+.resource-item .format-label[title="geojson" i]::before,
+.resource-item .format-label--geojson::before {
+  content: "\f5a0";
+  display: inline-block;
+  width: 1.18rem;
+  min-width: 1.18rem;
+  color: currentColor !important;
+  font-family:
+    "Font Awesome 6 Free", "Font Awesome 5 Free", FontAwesome, sans-serif;
+  font-size: 1.08rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+}
+.dataset-resources a.label[data-format="geojson" i] *,
+.dataset-resources a.label[title="geojson" i] *,
+.resource-item .format-label[data-format="geojson" i] *,
+.resource-item .format-label[title="geojson" i] * {
+  color: #174b2c !important;
+  -webkit-text-fill-color: #174b2c !important;
+}
+
+/* Explicit backgrounds prevent white-on-white buttons when an extension
+   supplies only a text color or overrides Bootstrap's default button fill. */
+.wajo-admin-shell
+  .wajo-admin-workspace
+  :is(.btn-primary, .btn-success, .btn-danger, .btn-info, .btn-dark) {
+  border-color: transparent !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+.wajo-admin-shell .wajo-admin-workspace .btn-primary {
+  background: #176b52 !important;
+}
+.wajo-admin-shell .wajo-admin-workspace .btn-success {
+  background: #176b3a !important;
+}
+.wajo-admin-shell .wajo-admin-workspace .btn-danger {
+  background: #b42318 !important;
+}
+.wajo-admin-shell .wajo-admin-workspace .btn-info {
+  background: #145b78 !important;
+}
+.wajo-admin-shell .wajo-admin-workspace .btn-dark {
+  background: #243b32 !important;
+}
+.wajo-admin-shell .wajo-admin-workspace .btn-warning {
+  border-color: #d6a83a !important;
+  background: #f8d775 !important;
+  color: #46320b !important;
+  -webkit-text-fill-color: #46320b !important;
+}
+.wajo-admin-shell
+  .wajo-admin-workspace
+  :is(
+    .btn-light,
+    .btn-white,
+    .btn-outline-light,
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-success,
+    .btn-outline-danger,
+    .btn-outline-warning,
+    .btn-outline-info,
+    .btn-outline-dark,
+    .btn-default,
+    .btn-secondary
+  ) {
+  border: 1px solid #cbd8d1 !important;
+  background: #f7faf8 !important;
+  color: #29483a !important;
+  -webkit-text-fill-color: #29483a !important;
+}
+.wajo-admin-shell
+  .wajo-admin-workspace
+  :is(
+    .btn-light,
+    .btn-white,
+    .btn-outline-light,
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-success,
+    .btn-outline-danger,
+    .btn-outline-warning,
+    .btn-outline-info,
+    .btn-outline-dark,
+    .btn-default,
+    .btn-secondary
+  ):is(:hover, :focus-visible) {
+  border-color: #a9c4b4 !important;
+  background: #eaf3ed !important;
+  color: #173f2d !important;
+  -webkit-text-fill-color: #173f2d !important;
+}
+.wajo-admin-shell .wajo-admin-workspace .btn :is(i, svg, span) {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Larger Font Awesome geospatial affordance. */
+.wajo-admin-shell
+  .wajo-create-type--geo
+  .wajo-create-type__icon
+  .fa-map-location-dot {
+  font-size: 1.65rem !important;
+  line-height: 1;
+}
+
+/* Final shell-wide contrast guard: some CKAN extension actions live outside
+   .wajo-admin-workspace (tabs, modal footers, resource view actions). */
+.wajo-admin-shell
+  :is(.btn-primary, .btn-success, .btn-danger, .btn-info, .btn-dark) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border-color: transparent !important;
+}
+.wajo-admin-shell .btn-primary {
+  background-color: #176b52 !important;
+}
+.wajo-admin-shell .btn-success {
+  background-color: #176b3a !important;
+}
+.wajo-admin-shell .btn-danger {
+  background-color: #b42318 !important;
+}
+.wajo-admin-shell .btn-info {
+  background-color: #145b78 !important;
+}
+.wajo-admin-shell .btn-dark {
+  background-color: #243b32 !important;
+}
+.wajo-admin-shell .btn-warning {
+  border-color: #d6a83a !important;
+  background-color: #f8d775 !important;
+  color: #46320b !important;
+  -webkit-text-fill-color: #46320b !important;
+}
+.wajo-admin-shell
+  :is(
+    .btn-light,
+    .btn-white,
+    .btn-outline-light,
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-success,
+    .btn-outline-danger,
+    .btn-outline-warning,
+    .btn-outline-info,
+    .btn-outline-dark,
+    .btn-default,
+    .btn-secondary
+  ) {
+  border: 1px solid #cbd8d1 !important;
+  background: #f7faf8 !important;
+  color: #29483a !important;
+  -webkit-text-fill-color: #29483a !important;
+}
+.wajo-admin-shell
+  :is(
+    .btn-light,
+    .btn-white,
+    .btn-outline-light,
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-success,
+    .btn-outline-danger,
+    .btn-outline-warning,
+    .btn-outline-info,
+    .btn-outline-dark,
+    .btn-default,
+    .btn-secondary
+  ):is(:hover, :focus-visible) {
+  border-color: #a9c4b4 !important;
+  background: #eaf3ed !important;
+  color: #173f2d !important;
+  -webkit-text-fill-color: #173f2d !important;
+}
+.wajo-admin-shell .btn :is(i, svg, span) {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.wajo-admin-shell .wajo-create-type--geo .wajo-create-type__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-basis: 2.25rem;
+}
+.wajo-admin-shell
+  .wajo-create-type--geo
+  .wajo-create-type__icon
+  .fa-map-location-dot {
+  font-size: 1.9rem !important;
+  line-height: 1;
+}
+.dataset-resources a.label[data-format="geojson" i]::before,
+.dataset-resources a.label[title="geojson" i]::before,
+.resource-item .format-label[data-format="geojson" i]::before,
+.resource-item .format-label[title="geojson" i]::before,
+.resource-item .format-label--geojson::before {
+  width: 1.35rem;
+  min-width: 1.35rem;
+  font-size: 1.24rem;
+}

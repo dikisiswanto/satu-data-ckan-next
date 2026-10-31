@@ -93,7 +93,7 @@ function buildCkanFilters({ organizationId, category, year, format }) {
   return filters;
 }
 
-async function queryPublishedDatasets(options = {}) {
+async function queryPublishedDatasets(options = {}, sessionCookie = null) {
   const {
     query = "",
     limit = 24,
@@ -127,18 +127,34 @@ async function queryPublishedDatasets(options = {}) {
     start: (page - 1) * perPage,
     sort: order,
     fq: buildCkanFilters({ organizationId, category, year, format }),
+    sessionCookie,
+    // Retain private resource candidates only for an authenticated search;
+    // each is verified with resource_show below before reaching the page.
+    includePrivateResources: Boolean(sessionCookie),
   });
+  const searchRows = Array.isArray(result.results) ? result.results : [];
+  const visibleRows = sessionCookie
+    ? await Promise.all(
+        searchRows.map((pkg) =>
+          resolveAuthorizedPackageResources(pkg, sessionCookie),
+        ),
+      )
+    : searchRows;
   return {
     // package_search returns CKAN Package dictionaries. Don't translate them
     // into synthetic `slug`, `published_at`, `dataset_resources`, or versions.
-    data: Array.isArray(result.results) ? result.results : [],
+    data: visibleRows,
     meta: toPageMeta(Number(result.count || 0), page, perPage),
   };
 }
 
-export async function getPublishedDatasetsResult(options = {}) {
+export async function getPublishedDatasetsResult(
+  options = {},
+  rawSessionCookie = null,
+) {
+  const sessionCookie = normalizeCkanSessionCookieValue(rawSessionCookie);
   try {
-    const result = await queryPublishedDatasets(options);
+    const result = await queryPublishedDatasets(options, sessionCookie);
     return { ...result, unavailable: false };
   } catch (error) {
     console.error("ckan_public_dataset_search_failed", {
@@ -151,9 +167,14 @@ export async function getPublishedDatasets(options = {}) {
   return (await getPublishedDatasetsResult(options)).data;
 }
 
-export async function getPublishedDatasetFacetsResult() {
+export async function getPublishedDatasetFacetsResult(rawSessionCookie = null) {
+  const sessionCookie = normalizeCkanSessionCookieValue(rawSessionCookie);
   try {
-    const result = await searchPackages({ rows: 0, facets: true });
+    const result = await searchPackages({
+      rows: 0,
+      facets: true,
+      sessionCookie,
+    });
     const facets = result.search_facets || {};
     const categories = (facets.groups?.items || [])
       .map((item) => ({

@@ -347,14 +347,20 @@ values["CKAN__VIEWS__DEFAULT_VIEWS"] = "datatables_view image_view text_view geo
 # ckanext-geoview Leaflet viewers otherwise have no configured basemap; old
 # Stamen defaults were retired. This uses an attributable XYZ OSM tile layer.
 values["CKANEXT__SPATIAL__COMMON_MAP__TYPE"] = "custom"
-values["CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL"] = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+values["CKANEXT__SPATIAL__COMMON_MAP__CUSTOM__URL"] = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 values["CKANEXT__SPATIAL__COMMON_MAP__ATTRIBUTION"] = "© OpenStreetMap contributors"
 
 # Append missing keys and replace existing keys without destroying comments/order.
 written = set()
 out = []
+legacy_map_url_key = "CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL"
+values.pop(legacy_map_url_key, None)
 for line in lines:
     m = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)=', line)
+    # Remove the former flat CUSTOM_URL key; GeoView reads custom.url, which
+    # ckanext-envvars represents with the nested CUSTOM__URL environment name.
+    if m and m.group(1) == legacy_map_url_key:
+        continue
     if m and m.group(1) in values:
         key = m.group(1)
         out.append(f"{key}={values[key]}")

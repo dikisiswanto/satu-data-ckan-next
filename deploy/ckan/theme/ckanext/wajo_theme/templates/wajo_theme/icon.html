@@ -27,7 +27,7 @@
     'book': 'book',
     'chart-line': 'chart-line',
     'image': 'image',
-    'map': 'map',
+    'map': 'map-location-dot',
     'table': 'table',
     'server': 'server',
     'cloud-download': 'cloud-arrow-down',
@@ -38,5 +38,5 @@
     'exclamation-triangle': 'triangle-exclamation',
     'info-circle': 'circle-info'
   } %}
-  <i class="fa fa-{{ icons.get(name, 'circle-question') }} fa-solid {{ class_name }}" aria-hidden="true"></i>
+  <i class="fa fa-{{ icons.get(name, 'circle-question') }} fa-solid{% if name == 'map' %} fa-2x{% endif %} {{ class_name }}" aria-hidden="true"></i>
 {%- endmacro %}

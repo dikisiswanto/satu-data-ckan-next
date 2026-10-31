@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { cookies } from "next/headers";
 import {
   ArrowUpRight,
   Check,
@@ -23,6 +24,10 @@ import {
   getSocialMetadata,
   siteConfig,
 } from "@/lib/site-config";
+import {
+  CKAN_SESSION_COOKIE_NAME,
+  normalizeCkanSessionCookieValue,
+} from "@/lib/ckan/session";
 
 export const metadata = {
   title: "Katalog Dataset",
@@ -37,6 +42,10 @@ export const metadata = {
 
 export default async function DatasetCatalogPage({ searchParams }) {
   const params = await searchParams;
+  const cookieStore = await cookies();
+  const sessionCookie = normalizeCkanSessionCookieValue(
+    cookieStore.get(CKAN_SESSION_COOKIE_NAME)?.value || null,
+  );
   const query =
     typeof params?.q === "string" ? params.q.trim().slice(0, 100) : "";
   const requestedCategory =
@@ -84,17 +93,20 @@ export default async function DatasetCatalogPage({ searchParams }) {
       : 1;
   const pageSize = 24;
   const [facetsResult, datasetResult] = await Promise.all([
-    getPublishedDatasetFacetsResult(),
-    getPublishedDatasetsResult({
-      query,
-      category: category || null,
-      organizationId: organizationId || null,
-      sort,
-      year,
-      format,
-      limit: pageSize,
-      page,
-    }),
+    getPublishedDatasetFacetsResult(sessionCookie),
+    getPublishedDatasetsResult(
+      {
+        query,
+        category: category || null,
+        organizationId: organizationId || null,
+        sort,
+        year,
+        format,
+        limit: pageSize,
+        page,
+      },
+      sessionCookie,
+    ),
   ]);
   // A rendered fallback is still a successful route render from Next's perspective.
   // Avoid storing transient catalog/facet failures in the route cache.

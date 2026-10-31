@@ -474,6 +474,11 @@ export async function GET(request, { params }) {
   const sessionCookie = getCkanSessionCookieFromRequest(request);
   try {
     const params = buildActionParams(action, new URL(request.url).searchParams);
+    // Include private datasets only for a browser carrying the CKAN session.
+    // CKAN still authorizes every returned record for that exact user; the
+    // anonymous public facade never receives this flag.
+    if (action === "package_search" && sessionCookie)
+      params.include_private = true;
     if (
       [
         "package_show",
@@ -495,7 +500,28 @@ export async function GET(request, { params }) {
     }
     let result;
     if (action === "package_search") {
-      result = sanitizePublicSearchResult(await ckanAction(action, params));
+      // A private dataset is visible only when CKAN itself accepts this exact
+      // signed browser session. Forward the cookie alongside include_private;
+      // setting include_private without the cookie silently behaves like an
+      // anonymous search and is the cause of private datasets disappearing.
+      const searchResult = await ckanAction(action, params, {
+        revalidate: 0,
+        sessionCookie,
+      });
+      const searchRows = Array.isArray(searchResult?.results)
+        ? searchResult.results
+        : [];
+      const authorizedRows = sessionCookie
+        ? await Promise.all(
+            searchRows.map((pkg) =>
+              resolveAuthorizedPackageResources(pkg, sessionCookie),
+            ),
+          )
+        : searchRows;
+      result = sanitizePublicSearchResult(
+        { ...searchResult, results: authorizedRows },
+        { includePrivateResources: Boolean(sessionCookie) },
+      );
     } else if (action === "package_show") {
       const pkg = await requireViewerPackage(params.id, sessionCookie);
       const visiblePkg = await resolveAuthorizedPackageResources(

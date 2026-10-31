@@ -359,8 +359,18 @@ const checks = [
   ],
   [
     "src/lib/ckan/client.js",
-    /sanitizePublicSearchResult[\s\S]*return sanitizePublicSearchResult\(await ckanAction\("package_search", params\)\)/,
-    "Semua listing dataset frontend harus memakai hasil pencarian CKAN yang telah menyaring resource privat/nonaktif.",
+    /sanitizePublicSearchResult[\s\S]*includePrivateResources[\s\S]*sessionCookie[\s\S]*ckanAction\("package_search", params, sessionCookie \? \{ revalidate: 0, sessionCookie \} : \{\}\)/,
+    "Search CKAN harus memakai session admin dan hanya mempertahankan kandidat resource privat pada jalur autentikasi.",
+  ],
+  [
+    "src/lib/data/public.js",
+    /includePrivateResources: Boolean\(sessionCookie\)[\s\S]*searchRows\.map\(\(pkg\) => resolveAuthorizedPackageResources\(pkg, sessionCookie\)\)/,
+    "Listing dataset admin harus memeriksa setiap resource privat melalui resource_show sebelum dirender.",
+  ],
+  [
+    "src/app/(public)/organisasi/[slug]/page.jsx",
+    /CKAN_SESSION_COOKIE_NAME[\s\S]*getPublishedDatasetsResult\([\s\S]*sessionCookie[\s\S]*\)/,
+    "Daftar dataset pada profil organisasi harus mengikuti sesi CKAN dan izin privat pengguna.",
   ],
   [
     "src/app/api/3/action/[...action]/route.js",

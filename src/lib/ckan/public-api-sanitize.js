@@ -19,10 +19,18 @@ export function sanitizePublicPackage(
   };
 }
 
-export function sanitizePublicSearchResult(result) {
+export function sanitizePublicSearchResult(
+  result,
+  { includePrivateResources = false } = {},
+) {
   if (!result || typeof result !== "object" || !Array.isArray(result.results))
     return result;
-  return { ...result, results: result.results.map(sanitizePublicPackage) };
+  return {
+    ...result,
+    results: result.results.map((pkg) =>
+      sanitizePublicPackage(pkg, { includePrivateResources }),
+    ),
+  };
 }
 
 export function sanitizePublicActivity(result) {

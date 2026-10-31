@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Building2, Database } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
@@ -13,6 +14,10 @@ import {
   getSocialMetadata,
   siteConfig,
 } from "@/lib/site-config";
+import {
+  CKAN_SESSION_COOKIE_NAME,
+  normalizeCkanSessionCookieValue,
+} from "@/lib/ckan/session";
 
 function formatCount(value) {
   return new Intl.NumberFormat("id-ID").format(Number(value) || 0);
@@ -94,10 +99,14 @@ export default async function OrganizationDetailPage({ params }) {
   const org = organizationResult.data;
   if (!org) notFound();
 
-  const datasetsResult = await getPublishedDatasetsResult({
-    organizationId: org.name,
-    limit: 9,
-  });
+  const cookieStore = await cookies();
+  const sessionCookie = normalizeCkanSessionCookieValue(
+    cookieStore.get(CKAN_SESSION_COOKIE_NAME)?.value || null,
+  );
+  const datasetsResult = await getPublishedDatasetsResult(
+    { organizationId: org.name, limit: 9 },
+    sessionCookie,
+  );
   if (datasetsResult.unavailable) await connection();
   const datasets = datasetsResult.data;
   const catalogHref = `/dataset?organisasi=${encodeURIComponent(org.name)}`;

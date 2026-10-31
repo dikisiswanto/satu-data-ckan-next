@@ -95,6 +95,8 @@ export async function searchPackages({
   sort = "metadata_modified desc",
   fq = [],
   facets = false,
+  sessionCookie = null,
+  includePrivateResources = false,
 } = {}) {
   const params = {
     q: String(q || "*:*"),
@@ -104,7 +106,9 @@ export async function searchPackages({
     ),
     start: Math.min(Math.max(Number(start) || 0, 0), 1_000_000),
     sort,
-    include_private: false,
+    // CKAN applies the current user's package authorization when private
+    // records are requested. Anonymous searches remain strictly public.
+    include_private: Boolean(sessionCookie),
   };
   if (fq.length) params.fq = fq;
   if (facets) {
@@ -117,7 +121,18 @@ export async function searchPackages({
     params["facet.limit"] = 1000;
     params["facet.mincount"] = 1;
   }
-  return sanitizePublicSearchResult(await ckanAction("package_search", params));
+  return sanitizePublicSearchResult(
+    await ckanAction(
+      "package_search",
+      params,
+      sessionCookie ? { revalidate: 0, sessionCookie } : {},
+    ),
+    {
+      includePrivateResources: Boolean(
+        includePrivateResources && sessionCookie,
+      ),
+    },
+  );
 }
 
 export function ckanPackageCategory(pkg = {}) {
