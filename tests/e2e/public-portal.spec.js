@@ -302,6 +302,62 @@ test("CKAN infographic dataset and public image resource appear on the infograph
   ).toBeVisible();
 });
 
+test("dataset image previews open in a zoomable lightbox", async ({ page }) => {
+  await page.route("https://images.example.test/**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "image/png",
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/pVQAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    }),
+  );
+  await page.goto("/dataset/data-sekolah-wajo");
+
+  const trigger = page.getByRole("button", {
+    name: "Perbesar gambar: Denah titik sekolah Kabupaten Wajo",
+  });
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+
+  const dialog = page.getByRole("dialog", { name: /Pratinjau gambar/ });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText("100%");
+  await dialog.getByRole("button", { name: "Perbesar gambar" }).click();
+  await expect(dialog).toContainText("150%");
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+});
+
+test("infographic previews open in a zoomable lightbox", async ({ page }) => {
+  await page.route("https://images.example.test/**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "image/png",
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/pVQAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    }),
+  );
+  await page.goto("/infografik/infografik-stunting-wajo");
+
+  const trigger = page.getByRole("button", {
+    name: "Perbesar gambar: Infografik utama stunting",
+  });
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+
+  const dialog = page.getByRole("dialog", { name: /Pratinjau gambar/ });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText("100%");
+  await dialog.getByRole("button", { name: "Perbesar gambar" }).click();
+  await expect(dialog).toContainText("150%");
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+});
+
 test("CKAN publication package drives its listing, revision metadata, and PDF resource", async ({
   page,
 }) => {

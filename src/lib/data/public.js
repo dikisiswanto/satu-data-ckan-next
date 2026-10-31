@@ -4,6 +4,7 @@ import { ckanAction, searchPackages } from "@/lib/ckan/client";
 import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
 import { normalizeCkanSessionCookieValue } from "@/lib/ckan/session";
 import { resolveAuthorizedPackageResources } from "@/lib/ckan/viewer-package";
+import { buildDatasetCatalogExclusionFilters } from "@/lib/data/portal-content-types";
 
 const safeLimit = (value, fallback = 24) =>
   Math.min(Math.max(Number(value) || fallback, 1), 100);
@@ -126,7 +127,10 @@ async function queryPublishedDatasets(options = {}, sessionCookie = null) {
     rows: perPage,
     start: (page - 1) * perPage,
     sort: order,
-    fq: buildCkanFilters({ organizationId, category, year, format }),
+    fq: [
+      ...buildDatasetCatalogExclusionFilters(),
+      ...buildCkanFilters({ organizationId, category, year, format }),
+    ],
     sessionCookie,
     // Retain private resource candidates only for an authenticated search;
     // each is verified with resource_show below before reaching the page.
@@ -173,6 +177,7 @@ export async function getPublishedDatasetFacetsResult(rawSessionCookie = null) {
     const result = await searchPackages({
       rows: 0,
       facets: true,
+      fq: buildDatasetCatalogExclusionFilters(),
       sessionCookie,
     });
     const facets = result.search_facets || {};
@@ -294,6 +299,7 @@ export async function getPublicPortalStatsResult() {
       ckanAction("package_search", {
         q: "*:*",
         rows: 0,
+        fq: buildDatasetCatalogExclusionFilters(),
         include_private: false,
       }),
       ckanAction("organization_list", {

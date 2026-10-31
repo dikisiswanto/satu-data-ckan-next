@@ -23,6 +23,7 @@ run_check node scripts/check-geojson-component.mjs
 run_check node scripts/check-public-media.mjs
 run_check node scripts/check-editorial-media.mjs
 run_check node scripts/check-markdown-render.mjs
+run_check node scripts/check-image-lightbox.mjs
 run_check node scripts/check-public-download-route.mjs
 run_check python3 scripts/check-id-translations.py
 run_check python3 scripts/check-auth-middleware.py

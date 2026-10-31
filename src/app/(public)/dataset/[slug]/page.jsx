@@ -1,8 +1,8 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowLeft,
   Download,
@@ -43,6 +43,7 @@ import {
 } from "@/lib/site-config";
 import { serializeJsonLd } from "@/lib/seo/json-ld";
 import { DatasetResourcePreview } from "@/components/dataset-resource-preview";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { GeoJSONResourcePreview } from "@/components/geojson-resource-preview";
 import { DatasetApiAccess } from "@/components/dataset-api-access";
 
@@ -763,18 +764,28 @@ export default async function DatasetDetailPage({ params }) {
                           key={resource.id}
                           className="overflow-hidden rounded-xl bg-slate-50"
                         >
-                          <Image
+                          <ImageLightbox
                             src={publicResourceUrl(resource.url)}
                             alt={
                               resource.description ||
                               resource.name ||
                               dataset.title
                             }
-                            width={1200}
-                            height={900}
-                            unoptimized
-                            className="h-auto max-h-[500px] w-full object-contain"
-                          />
+                            className="bg-slate-50"
+                          >
+                            <Image
+                              src={publicResourceUrl(resource.url)}
+                              alt={
+                                resource.description ||
+                                resource.name ||
+                                dataset.title
+                              }
+                              width={1600}
+                              height={1200}
+                              unoptimized
+                              className="h-auto max-h-[500px] w-full object-contain"
+                            />
+                          </ImageLightbox>
                           <figcaption className="p-3 text-sm text-muted">
                             {ckanResourceName(resource)}
                           </figcaption>

@@ -6,6 +6,7 @@ import { getPublishedPublicationsResult } from "@/lib/data/public-publications";
 import { publicCmsImageUrl } from "@/lib/cms/pages";
 import { getPublicSiteOrigin } from "@/lib/site-config";
 import { MarkdownContent } from "@/components/cms/markdown-content";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 
 function text(value, max = 1000) {
   return typeof value === "string" || typeof value === "number"
@@ -218,14 +219,20 @@ async function ContentBlock({ block, index }) {
         key={index}
         className="my-8 overflow-hidden rounded-2xl border border-line bg-white p-3 sm:p-4"
       >
-        <Image
+        <ImageLightbox
           src={src}
           alt={text(block.alt, 180) || "Ilustrasi konten"}
-          width={1440}
-          height={960}
-          unoptimized
-          className="mx-auto h-auto max-h-[42rem] w-auto max-w-full rounded-xl object-contain"
-        />
+          className="rounded-xl bg-slate-50"
+        >
+          <Image
+            src={src}
+            alt={text(block.alt, 180) || "Ilustrasi konten"}
+            width={1800}
+            height={1200}
+            unoptimized
+            className="mx-auto h-auto max-h-[42rem] w-auto max-w-full rounded-xl object-contain"
+          />
+        </ImageLightbox>
         {text(block.caption, 300) ? (
           <figcaption className="px-2 pt-3 text-sm leading-6 text-muted">
             {text(block.caption, 300)}
@@ -319,14 +326,20 @@ async function ContentBlock({ block, index }) {
               key={itemIndex}
               className="rounded-xl border border-line bg-white p-2"
             >
-              <Image
+              <ImageLightbox
                 src={item.src}
                 alt={text(item.alt, 160) || "Dokumentasi"}
-                width={960}
-                height={640}
-                unoptimized
-                className="h-auto max-h-80 w-full rounded-lg object-cover"
-              />
+                className="rounded-lg bg-slate-50"
+              >
+                <Image
+                  src={item.src}
+                  alt={text(item.alt, 160) || "Dokumentasi"}
+                  width={1200}
+                  height={800}
+                  unoptimized
+                  className="h-auto max-h-80 w-full rounded-lg object-cover"
+                />
+              </ImageLightbox>
               {text(item.caption, 220) ? (
                 <figcaption className="px-2 py-2 text-xs text-muted">
                   {text(item.caption, 220)}

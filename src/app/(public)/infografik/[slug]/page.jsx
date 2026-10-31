@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -109,16 +110,22 @@ export default async function InfographicDetailPage({ params }) {
                 key={resource.id}
                 className="overflow-hidden rounded-2xl border border-line bg-white p-3 sm:p-5"
               >
-                <div className="relative aspect-[4/3] w-full bg-slate-50">
-                  <Image
-                    src={publicResourceUrl(resource.url)}
-                    alt={resource.description || resource.name || item.title}
-                    fill
-                    unoptimized
-                    sizes="(min-width: 1280px) 65vw, 100vw"
-                    className="object-contain"
-                  />
-                </div>
+                <ImageLightbox
+                  src={publicResourceUrl(resource.url)}
+                  alt={resource.description || resource.name || item.title}
+                  className="rounded-xl bg-slate-50"
+                >
+                  <div className="relative aspect-[4/3] w-full">
+                    <Image
+                      src={publicResourceUrl(resource.url)}
+                      alt={resource.description || resource.name || item.title}
+                      fill
+                      unoptimized
+                      sizes="(min-width: 1280px) 65vw, 100vw"
+                      className="object-contain"
+                    />
+                  </div>
+                </ImageLightbox>
                 <figcaption className="mt-3 text-sm text-muted">
                   {resource.name || item.title}
                 </figcaption>

@@ -47,6 +47,18 @@ const packages = [
         datastore_active: false,
       },
       {
+        id: "resource-sekolah-image",
+        package_id: "package-sekolah",
+        name: "Denah Sekolah PNG",
+        description: "Denah titik sekolah Kabupaten Wajo",
+        format: "PNG",
+        mimetype: "image/png",
+        url: "https://images.example.test/denah-sekolah.png",
+        state: "active",
+        private: false,
+        datastore_active: false,
+      },
+      {
         id: "resource-private-on-public-package",
         package_id: "package-sekolah",
         name: "Lampiran internal",

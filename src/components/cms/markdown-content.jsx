@@ -4,6 +4,7 @@ import { parseMarkdown } from "@/lib/markdown/parse-markdown";
 import { publicCmsImageUrl } from "@/lib/cms/pages";
 import { publicResourceUrl } from "@/lib/ckan/public-resource-url";
 import { getPublicSiteOrigin } from "@/lib/site-config";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 
 export function normalizeMarkdownHref(value) {
   let candidate = String(value || "").trim();
@@ -81,16 +82,22 @@ function renderInline(tokens, keyPrefix) {
     if (token.type === "image") {
       const src = publicCmsImageUrl(token.href, getPublicSiteOrigin());
       return src ? (
-        <Image
+        <ImageLightbox
           key={key}
           src={src}
           alt={token.label || "Ilustrasi konten"}
-          title={token.title || undefined}
-          width={1200}
-          height={800}
-          unoptimized
-          className="cms-markdown__image"
-        />
+          className="cms-markdown__image-trigger"
+        >
+          <Image
+            src={src}
+            alt={token.label || "Ilustrasi konten"}
+            title={token.title || undefined}
+            width={1600}
+            height={1100}
+            unoptimized
+            className="cms-markdown__image"
+          />
+        </ImageLightbox>
       ) : (
         token.label
       );

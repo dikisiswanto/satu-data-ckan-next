@@ -157,6 +157,15 @@
   background: #f8fafc;
   object-fit: contain;
 }
+.cms-markdown__image-trigger {
+  width: max-content;
+  max-width: 100%;
+  margin: 1.25rem auto;
+  border-radius: 0.85rem;
+}
+.cms-markdown__image-trigger .cms-markdown__image {
+  margin: 0;
+}
 .cms-markdown__quote {
   margin: 1.25rem 0;
   padding: 0.75rem 1.15rem;

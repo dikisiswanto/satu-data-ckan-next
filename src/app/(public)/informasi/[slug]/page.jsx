@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
 import { CmsPageBody } from "@/components/cms/content-blocks";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import {
   getCmsPageDescription,
   getPublicCmsPageBySlugResult,
@@ -128,14 +129,24 @@ export default async function InformasiDetailPage({ params }) {
       </p>
       <figure className="public-cms-cover relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#e7eff0,#eaf1f8)]">
         {image ? (
-          <Image
-            src={image}
-            alt={page.title}
-            fill
-            unoptimized
-            sizes="100vw"
-            className="object-cover"
-          />
+          <div className="absolute inset-0">
+            <ImageLightbox
+              src={image}
+              alt={page.title}
+              className="h-full w-full"
+            >
+              <div className="relative h-full w-full">
+                <Image
+                  src={image}
+                  alt={page.title}
+                  fill
+                  unoptimized
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              </div>
+            </ImageLightbox>
+          </div>
         ) : (
           <div
             className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgb(255_255_255_/_70%),transparent_40%),linear-gradient(135deg,#e7eff0,#eaf1f8)]"

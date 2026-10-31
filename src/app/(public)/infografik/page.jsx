@@ -3,6 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { ArrowUpRight, Images, Info } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { publicPageCopy } from "@/lib/public-copy";
 import { getPublishedInfographicsResult } from "@/lib/data/public-infographics";
 import {
@@ -63,12 +64,13 @@ export default async function InfografikPage({ searchParams }) {
                 key={item.name}
                 className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
-                <Link
-                  href={`/infografik/${encodeURIComponent(item.name)}`}
-                  className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-                >
-                  <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-slate-50">
-                    {imageUrl ? (
+                {imageUrl ? (
+                  <ImageLightbox
+                    src={imageUrl}
+                    alt={item.title}
+                    className="aspect-[4/3] bg-slate-50"
+                  >
+                    <div className="relative h-full w-full">
                       <Image
                         src={imageUrl}
                         alt={item.title}
@@ -77,32 +79,42 @@ export default async function InfografikPage({ searchParams }) {
                         unoptimized
                         className="object-contain"
                       />
-                    ) : (
-                      <div className="flex flex-col items-center gap-3 p-8 text-center text-muted">
-                        <Images size={38} aria-hidden="true" />
-                        <span className="text-sm">
-                          Pratinjau visual belum tersedia
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-muted">
-                      <span>{item.category}</span>
-                      {item.period ? <span>{item.period}</span> : null}
                     </div>
-                    <h2 className="mt-3 text-lg font-semibold leading-6 text-ink">
-                      {item.title}
-                    </h2>
-                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">
-                      {item.notes || "Deskripsi infografik belum tersedia."}
-                    </p>
-                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
-                      Buka infografik{" "}
-                      <ArrowUpRight size={15} aria-hidden="true" />
-                    </span>
+                  </ImageLightbox>
+                ) : (
+                  <div className="flex aspect-[4/3] items-center justify-center bg-slate-50 text-muted">
+                    <div className="flex flex-col items-center gap-3 p-8 text-center">
+                      <Images size={38} aria-hidden="true" />
+                      <span className="text-sm">
+                        Pratinjau visual belum tersedia
+                      </span>
+                    </div>
                   </div>
-                </Link>
+                )}
+                <div className="p-5">
+                  <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-muted">
+                    <span>{item.category}</span>
+                    {item.period ? <span>{item.period}</span> : null}
+                  </div>
+                  <h2 className="mt-3 text-lg font-semibold leading-6 text-ink">
+                    <Link
+                      href={`/infografik/${encodeURIComponent(item.name)}`}
+                      className="rounded-sm hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                    >
+                      {item.title}
+                    </Link>
+                  </h2>
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">
+                    {item.notes || "Deskripsi infografik belum tersedia."}
+                  </p>
+                  <Link
+                    href={`/infografik/${encodeURIComponent(item.name)}`}
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary"
+                  >
+                    Buka infografik{" "}
+                    <ArrowUpRight size={15} aria-hidden="true" />
+                  </Link>
+                </div>
               </article>
             );
           })}

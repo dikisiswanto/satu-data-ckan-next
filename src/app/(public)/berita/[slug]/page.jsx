@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
 import { CmsPageBody } from "@/components/cms/content-blocks";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import {
   getAbsoluteCmsImageUrl,
   getCmsMarkdownImage,
@@ -136,14 +137,24 @@ export default async function BeritaDetailPage({ params }) {
       </p>
       {image ? (
         <figure className="public-cms-cover relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-slate-100">
-          <Image
-            src={image}
-            alt={page.title}
-            fill
-            unoptimized
-            sizes="100vw"
-            className="object-cover"
-          />
+          <div className="absolute inset-0">
+            <ImageLightbox
+              src={image}
+              alt={page.title}
+              className="h-full w-full"
+            >
+              <div className="relative h-full w-full">
+                <Image
+                  src={image}
+                  alt={page.title}
+                  fill
+                  unoptimized
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              </div>
+            </ImageLightbox>
+          </div>
         </figure>
       ) : null}
       <article className="cms-document mt-8 rounded-2xl border border-line bg-white p-5 sm:p-8 lg:p-10">

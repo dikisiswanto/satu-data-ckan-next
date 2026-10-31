@@ -37,6 +37,7 @@ import {
   getPublicPortalStatsResult,
   getPublishedDatasetFacetsResult,
 } from "@/lib/data/public";
+import { buildDatasetCatalogExclusionFilters } from "@/lib/data/portal-content-types";
 import { normalizePublicCategoryFacets } from "@/lib/public-categories";
 
 const indicatorPackage = {
@@ -389,6 +390,19 @@ describe("CKAN field helpers", () => {
   });
 });
 
+describe("separate public product catalogues", () => {
+  it("excludes indicator, infographic and publication records from the general dataset catalogue", () => {
+    expect(buildDatasetCatalogExclusionFilters()).toEqual([
+      "-tags:portal-indikator",
+      "-tags:portal-infografik",
+      "-tags:portal-publikasi",
+      "-extras_portal_type:indikator",
+      "-extras_portal_type:infografik",
+      "-extras_portal_type:publikasi",
+    ]);
+  });
+});
+
 describe("flexible public CKAN search", () => {
   it("maps multiple meaningful terms with OR semantics across CKAN searchable fields", () => {
     const query = buildPublicCatalogQuery("data puskesmas dan sekolah");
@@ -443,6 +457,19 @@ describe("public portal summary sourced from CKAN", () => {
           .includes("tags:portal-indikator"),
       ),
     ).toBe(true);
+    const datasetSearch = fetchSpy.mock.calls
+      .map(([input]) => new URL(String(input)))
+      .find(
+        (url) =>
+          url.pathname.endsWith("/package_search") &&
+          !url.searchParams.getAll("fq").includes("tags:portal-indikator"),
+      );
+    expect(datasetSearch?.searchParams.getAll("fq")).toContain(
+      "-tags:portal-infografik",
+    );
+    expect(datasetSearch?.searchParams.getAll("fq")).toContain(
+      "-extras_portal_type:publikasi",
+    );
   });
 });
 

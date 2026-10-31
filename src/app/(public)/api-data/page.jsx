@@ -662,9 +662,26 @@ export default function ApiDocsPage() {
               id="publikasi"
               number="05"
               title="Panduan publikasi konten"
-              description="Data yang tampil pada halaman khusus portal dikelola melalui Portal Pengelola. Portal menggunakan satu sumber data agar informasi tetap konsisten."
+              description="Kelola dataset, indikator, infografik, dan publikasi dari satu sumber metadata CKAN, tetapi tampilkan pada katalog yang sesuai agar pengunjung tidak menemukan entri ganda atau salah kategori."
             >
               <div className="space-y-4">
+                <Card
+                  as="aside"
+                  className="rounded-xl border-line bg-surface p-4 text-sm leading-6 text-ink"
+                >
+                  <p className="font-semibold">
+                    Pemisahan katalog, bukan duplikasi penyimpanan
+                  </p>
+                  <p className="mt-1">
+                    Secara internal CKAN, ketiganya tetap memakai record
+                    Package/Dataset dan Resource. Portal membaca tipe{" "}
+                    <code>portal_type</code> serta tag khusus untuk
+                    menempatkannya pada laman Statistik, Infografik, atau
+                    Publikasi. Katalog Dataset umum tidak menampilkan ulang
+                    ketiga tipe tersebut. Izin, file, organisasi, lisensi, dan
+                    riwayat tetap dikelola CKAN.
+                  </p>
+                </Card>
                 <Card
                   as="section"
                   id="indikator"
@@ -672,8 +689,9 @@ export default function ApiDocsPage() {
                 >
                   <h3 className="font-semibold">Indikator statistik</h3>
                   <p className="mt-2 text-sm leading-6 text-muted">
-                    Terbitkan dataset publik, pilih tipe{" "}
-                    <strong>Indikator statistik</strong>, tambahkan tag{" "}
+                    Terbitkan record CKAN bertipe{" "}
+                    <strong>Indikator statistik</strong> (ditampilkan pada laman
+                    Statistik, bukan katalog Dataset umum), tambahkan tag{" "}
                     <code>portal-indikator</code>, lalu aktifkan DataStore untuk
                     resource tabular dengan kolom <code>period</code> dan{" "}
                     <code>value</code>. Kolom <code>region</code>,{" "}
@@ -692,7 +710,8 @@ export default function ApiDocsPage() {
                 >
                   <h3 className="font-semibold">Infografik</h3>
                   <p className="mt-2 text-sm leading-6 text-muted">
-                    Pilih tipe <strong>Infografik</strong>, tambahkan tag{" "}
+                    Pilih tipe <strong>Infografik</strong> (produk visual
+                    terpisah dari katalog Dataset umum), tambahkan tag{" "}
                     <code>portal-infografik</code>, unggah resource gambar atau
                     PDF, dan lengkapi metadata seperti{" "}
                     <code>portal_category</code>, <code>portal_period</code>,{" "}
@@ -707,7 +726,8 @@ export default function ApiDocsPage() {
                 >
                   <h3 className="font-semibold">Publikasi & laporan</h3>
                   <p className="mt-2 text-sm leading-6 text-muted">
-                    Pilih tipe <strong>Publikasi/laporan</strong>, tambahkan tag{" "}
+                    Pilih tipe <strong>Publikasi/laporan</strong> (dokumen rilis
+                    terpisah dari katalog Dataset umum), tambahkan tag{" "}
                     <code>portal-publikasi</code>, unggah dokumen publik, dan
                     isi metadata yang relevan:{" "}
                     <code>portal_reference_period</code>,{" "}
