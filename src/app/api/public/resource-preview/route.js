@@ -1,5 +1,9 @@
 import { ckanAction } from "@/lib/ckan/client";
 import { parseDelimitedPreview } from "@/lib/ckan/delimited-preview";
+import {
+  buildCkanSessionCookieHeader,
+  getCkanSessionCookieFromRequest,
+} from "@/lib/ckan/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -105,21 +109,25 @@ export async function GET(request) {
   }
   const limit = Math.min(Math.max(Number(limitRaw), 1), 25);
 
+  const sessionCookie = getCkanSessionCookieFromRequest(request);
+  const ckanOptions = { revalidate: 0, sessionCookie };
   try {
     const resource = await ckanAction(
       "resource_show",
       { id: resourceId },
-      { revalidate: 0 },
+      ckanOptions,
     );
     if (
       !resource ||
-      resource.private === true ||
+      (!sessionCookie && resource.private === true) ||
       (resource.state && resource.state !== "active")
     ) {
       return json(
         {
           success: false,
-          error: { message: "Resource tidak tersedia untuk publik." },
+          error: {
+            message: "Resource tidak tersedia atau tidak dapat diakses.",
+          },
         },
         404,
       );
@@ -136,9 +144,13 @@ export async function GET(request) {
     const pkg = await ckanAction(
       "package_show",
       { id: packageId },
-      { revalidate: 0 },
+      ckanOptions,
     );
-    if (!pkg || pkg.private === true || (pkg.state && pkg.state !== "active")) {
+    if (
+      !pkg ||
+      (!sessionCookie && pkg.private === true) ||
+      (pkg.state && pkg.state !== "active")
+    ) {
       return json(
         {
           success: false,
@@ -179,6 +191,9 @@ export async function GET(request) {
         Accept:
           "text/csv,text/tab-separated-values,application/octet-stream;q=0.9,*/*;q=0.1",
         Range: `bytes=0-${MAX_BYTES - 1}`,
+        ...(buildCkanSessionCookieHeader(sessionCookie)
+          ? { Cookie: buildCkanSessionCookieHeader(sessionCookie) }
+          : {}),
       },
       signal: AbortSignal.timeout(10_000),
     });
@@ -224,7 +239,9 @@ export async function GET(request) {
       return json(
         {
           success: false,
-          error: { message: "Resource tidak tersedia untuk publik." },
+          error: {
+            message: "Resource tidak tersedia atau tidak dapat diakses.",
+          },
         },
         404,
       );

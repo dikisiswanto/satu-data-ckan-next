@@ -21,3 +21,6 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# Local deployment/installer backups
+.backup/

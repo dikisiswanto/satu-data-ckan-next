@@ -241,6 +241,41 @@ describe("public CKAN resource download", () => {
     expect(response.status).toBe(404);
   });
 
+  it("allows an authorized CKAN session to download the same private resource URL without shared caching", async () => {
+    fixtures({ privateDataset: true, privateResource: true });
+    const upstreamFetch = vi.fn(async (_url, options) => {
+      expect(options.headers.get("cookie")).toBe(
+        "wajo_ckan_session=signed-admin-session",
+      );
+      return new Response("private-xlsx", {
+        status: 200,
+        headers: {
+          "content-type":
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        },
+      });
+    });
+    vi.stubGlobal("fetch", upstreamFetch);
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`, {
+        headers: {
+          Cookie: "analytics=ignore; wajo_ckan_session=signed-admin-session",
+        },
+      }),
+      {
+        params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+      },
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(await response.text()).toBe("private-xlsx");
+    expect(
+      ckanAction.mock.calls.every(
+        ([, , options]) => options.sessionCookie === "signed-admin-session",
+      ),
+    ).toBe(true);
+  });
+
   it.each(["resource_show", "package_show"])(
     "normalizes CKAN %s permission-denied for an unpublished dataset to a quiet 404",
     async (deniedAction) => {

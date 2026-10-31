@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
   getAbsoluteCmsImageUrl,
+  getCmsMarkdownImage,
   getCmsPageDescription,
   isCmsRecordPublished,
   normalizeCmsSlug,
@@ -156,6 +157,31 @@ describe("CKAN Pages CMS normalization", () => {
     expect(
       publicCmsImageUrl("/api/editorial-media/not-a-file-id", origin),
     ).toBe("");
+  });
+
+  it("uses the first safe Markdown image as an article cover", () => {
+    process.env.CKAN_ADMIN_URL = "https://ckan.example.go.id";
+    const page = {
+      title: "Berita Wajo",
+      content:
+        "Teks pembuka\n\n![Kegiatan Wajo](https://ckan.example.go.id/uploads/page_images/kegiatan.webp)",
+    };
+    expect(getCmsMarkdownImage(page, "https://data.example.go.id")).toEqual({
+      src: "/api/cms/media/kegiatan.webp",
+      alt: "Kegiatan Wajo",
+    });
+    expect(
+      getCmsMarkdownImage(
+        { title: "Tanpa foto", content: "Artikel tanpa gambar." },
+        "https://data.example.go.id",
+      ),
+    ).toBeNull();
+    expect(
+      getCmsMarkdownImage(
+        { title: "URL berbahaya", content: "![x](javascript:alert(1))" },
+        "https://data.example.go.id",
+      ),
+    ).toBeNull();
   });
 
   it("provides only absolute HTTPS image URLs to JSON-LD", () => {

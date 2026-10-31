@@ -1953,13 +1953,6 @@ body:has(.wajo-login-frame) {
   background-color: var(--wajo-color-primary-hover, #164b85);
   color: #fff;
 }
-.wajo-admin-workspace .format-label[data-format="geojson" i],
-.wajo-admin-workspace .format-label[title="geojson" i],
-.wajo-admin-workspace .format-label--geojson {
-  border: 1px solid #d8c9ff !important;
-  background: #eee8ff !important;
-  color: #45218a !important;
-}
 
 /* Parent-aware navigation: create actions sit directly under their destination. */
 .wajo-admin-sidebar__inner {
@@ -2877,4 +2870,27 @@ body:has(.wajo-login-frame) {
   * {
   color: #14532d !important;
   -webkit-text-fill-color: #14532d !important;
+}
+
+/* GeoJSON format badge icon: do not rely on a Font Awesome alias that may not
+   exist in the CKAN 2.12 bundle. A tiny inline SVG keeps the map glyph stable. */
+.wajo-admin-workspace
+  .resource-item
+  .format-label[data-format="geojson" i]::before,
+.wajo-admin-workspace .resource-item .format-label[title="geojson" i]::before,
+.wajo-admin-workspace
+  .resource-item
+  .format-label.format-label--geojson::before,
+.wajo-admin-workspace .format-label--geojson::before {
+  content: "";
+  display: inline-block;
+  width: 0.82rem;
+  height: 0.82rem;
+  flex: 0 0 0.82rem;
+  margin-inline-end: 0.32rem;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 6.5 6-3.5 6 3.5 6-3.5v14.5L15 21l-6-3.5L3 21z'/%3E%3Cpath d='M9 3v14.5M15 6.5V21'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 6.5 6-3.5 6 3.5 6-3.5v14.5L15 21l-6-3.5L3 21z'/%3E%3Cpath d='M9 3v14.5M15 6.5V21'/%3E%3C/svg%3E")
+    center / contain no-repeat;
 }

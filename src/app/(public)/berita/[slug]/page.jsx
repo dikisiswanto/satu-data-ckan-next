@@ -7,6 +7,7 @@ import { PageHeading } from "@/components/page-heading";
 import { CmsPageBody } from "@/components/cms/content-blocks";
 import {
   getAbsoluteCmsImageUrl,
+  getCmsMarkdownImage,
   getCmsPageDescription,
   getPublicCmsBlogPostBySlugResult,
   publicCmsImageUrl,
@@ -33,10 +34,10 @@ export async function generateMetadata({ params }) {
   const description =
     getCmsPageDescription(page) ||
     `Berita dan artikel resmi ${siteConfig.regionName}.`;
-  const image = publicCmsImageUrl(
-    page.ogImage || page.image,
-    getPublicSiteOrigin(),
-  );
+  const image =
+    publicCmsImageUrl(page.ogImage || page.image, getPublicSiteOrigin()) ||
+    getCmsMarkdownImage(page, getPublicSiteOrigin())?.src ||
+    "";
   const social = getSocialMetadata({
     path: `/berita/${page.name}`,
     title: `${title} | ${siteConfig.shortName}`,
@@ -89,8 +90,10 @@ export default async function BeritaDetailPage({ params }) {
     page.ogImage || page.image,
     getPublicSiteOrigin(),
   );
+  const socialImage =
+    image || getCmsMarkdownImage(page, getPublicSiteOrigin())?.src || "";
   const absoluteImage = getAbsoluteCmsImageUrl(
-    page.ogImage || page.image,
+    socialImage,
     getPublicSiteOrigin(),
   );
   const canonical = getPublicSiteOrigin()

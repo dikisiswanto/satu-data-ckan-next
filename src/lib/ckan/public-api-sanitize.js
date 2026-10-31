@@ -2,7 +2,10 @@
  * Keep CKAN-native public responses useful without exposing separately private
  * resources or staff identifiers that are not needed by public consumers.
  */
-export function sanitizePublicPackage(pkg) {
+export function sanitizePublicPackage(
+  pkg,
+  { includePrivateResources = false } = {},
+) {
   if (!pkg || typeof pkg !== "object" || Array.isArray(pkg)) return pkg;
   if (!Array.isArray(pkg.resources)) return pkg;
   return {
@@ -10,7 +13,7 @@ export function sanitizePublicPackage(pkg) {
     resources: pkg.resources.filter(
       (resource) =>
         resource &&
-        resource.private !== true &&
+        (includePrivateResources || resource.private !== true) &&
         (!resource.state || resource.state === "active"),
     ),
   };

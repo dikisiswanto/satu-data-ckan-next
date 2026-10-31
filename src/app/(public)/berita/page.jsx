@@ -4,13 +4,13 @@ import { ArrowUpRight, Newspaper } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
 import { CmsContentCard } from "@/components/cms/content-card";
 import {
+  getCmsMarkdownImage,
   getPublicCmsBlogPostsResult,
-  publicCmsImageUrl,
 } from "@/lib/cms/pages";
-import { getPublicSiteOrigin } from "@/lib/site-config";
 import { publicPageCopy } from "@/lib/public-copy";
 import {
   getCanonicalMetadata,
+  getPublicSiteOrigin,
   getSocialMetadata,
   siteConfig,
 } from "@/lib/site-config";
@@ -31,6 +31,9 @@ export default async function BeritaPage() {
   const result = await getPublicCmsBlogPostsResult();
   const posts = result.data || [];
   const featured = posts.find((post) => post.featured) || posts[0] || null;
+  const featuredImage = featured
+    ? getCmsMarkdownImage(featured, getPublicSiteOrigin())
+    : null;
   const remaining = featured
     ? posts.filter((post) => post.name !== featured.name)
     : posts;
@@ -58,17 +61,11 @@ export default async function BeritaPage() {
                 Baca artikel <ArrowUpRight size={16} aria-hidden="true" />
               </Link>
             </div>
-            {publicCmsImageUrl(
-              featured.ogImage || featured.image,
-              getPublicSiteOrigin(),
-            ) ? (
+            {featuredImage ? (
               <div className="public-news-feature-media relative min-h-56 bg-slate-100">
                 <Image
-                  src={publicCmsImageUrl(
-                    featured.ogImage || featured.image,
-                    getPublicSiteOrigin(),
-                  )}
-                  alt={featured.title}
+                  src={featuredImage.src}
+                  alt={featuredImage.alt}
                   fill
                   unoptimized
                   sizes="(max-width: 1024px) 100vw, 40vw"
@@ -77,9 +74,13 @@ export default async function BeritaPage() {
               </div>
             ) : (
               <div
-                className="public-news-feature-media min-h-56 bg-gradient-to-br from-emerald-100 via-slate-100 to-blue-100"
+                className="public-news-feature-media flex min-h-56 items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50"
                 aria-hidden="true"
-              />
+              >
+                <span className="flex size-20 items-center justify-center rounded-3xl border border-white/80 bg-white/85 text-primary shadow-sm">
+                  <Newspaper size={46} strokeWidth={1.35} />
+                </span>
+              </div>
             )}
           </>
         ) : (

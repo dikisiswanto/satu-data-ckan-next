@@ -65,4 +65,76 @@ describe("public dataset detail visibility", () => {
       unavailable: false,
     });
   });
+
+  it("returns a private dataset only when CKAN authorizes its package and private resources", async () => {
+    ckanAction.mockImplementation(async (action, params, options) => {
+      expect(options.sessionCookie).toBe("signed-member-session");
+      if (action === "package_show")
+        return {
+          id: "private-id",
+          name: "dataset-private",
+          private: true,
+          state: "active",
+          resources: [
+            { id: "private-resource", private: true, state: "active" },
+          ],
+        };
+      if (action === "resource_show")
+        return {
+          id: "private-resource",
+          package_id: "private-id",
+          private: true,
+          state: "active",
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    const result = await getPublishedDatasetBySlugResult(
+      "dataset-private",
+      "signed-member-session",
+    );
+    expect(result.data.private).toBe(true);
+    expect(result.data.resources).toHaveLength(1);
+    expect(ckanAction).toHaveBeenCalledWith(
+      "package_show",
+      { id: "dataset-private" },
+      {
+        revalidate: 0,
+        sessionCookie: "signed-member-session",
+      },
+    );
+    expect(ckanAction).toHaveBeenCalledWith(
+      "resource_show",
+      { id: "private-resource" },
+      {
+        revalidate: 0,
+        sessionCookie: "signed-member-session",
+      },
+    );
+  });
+
+  it("omits private resources the current session cannot read from a public dataset", async () => {
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "package_show")
+        return {
+          id: "public-id",
+          name: "dataset-public",
+          private: false,
+          state: "active",
+          resources: [
+            { id: "public-resource", private: false, state: "active" },
+            { id: "private-resource", private: true, state: "active" },
+          ],
+        };
+      if (action === "resource_show")
+        throw Object.assign(new Error("Not authorized"), { status: 403 });
+      throw new Error(`unexpected action ${action}`);
+    });
+    const result = await getPublishedDatasetBySlugResult(
+      "dataset-public",
+      "forged-session-cookie",
+    );
+    expect(result.data.resources.map((resource) => resource.id)).toEqual([
+      "public-resource",
+    ]);
+  });
 });

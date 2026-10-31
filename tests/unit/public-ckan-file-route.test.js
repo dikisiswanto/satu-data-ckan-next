@@ -102,6 +102,37 @@ describe("public CKAN File API proxy", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
+  it("allows the same FileStore URL for a CKAN-authorized user and disables shared caching", async () => {
+    fixtures({ privateDataset: true, privateResource: true });
+    const fetcher = vi.fn(async (_url, options) => {
+      expect(options.headers.get("cookie")).toBe(
+        "wajo_ckan_session=signed-editor-session",
+      );
+      return new Response("private-file", {
+        status: 200,
+        headers: {
+          "content-type":
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        },
+      });
+    });
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+      }),
+      params,
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(await response.text()).toBe("private-file");
+    expect(
+      ckanAction.mock.calls.every(
+        ([, , options]) => options.sessionCookie === "signed-editor-session",
+      ),
+    ).toBe(true);
+  });
+
   it("rejects non-public CKAN ownership types and unsupported active content", async () => {
     ckanAction.mockResolvedValue({
       id: fileId,

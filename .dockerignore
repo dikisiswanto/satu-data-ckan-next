@@ -11,3 +11,11 @@ deploy/ckan/upstream
 tests
 *.log
 .DS_Store
+deploy/ckan/upstream-base
+deploy/ckan/.ckan-base-source.lock
+deploy/ckan/.ckan-base-image.lock
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+**/dist
+**/build

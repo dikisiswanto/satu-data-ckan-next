@@ -344,6 +344,11 @@ values["CKAN__HARVEST__MQ__REDIS_DB"] = "1"
 values["CKAN__HARVEST__LOG_SCOPE"] = "1"
 values["CKAN__HARVEST__TIMEOUT"] = "1440"
 values["CKAN__VIEWS__DEFAULT_VIEWS"] = "datatables_view image_view text_view geojson_view geo_view wmts_view shp_view"
+# ckanext-geoview Leaflet viewers otherwise have no configured basemap; old
+# Stamen defaults were retired. This uses an attributable XYZ OSM tile layer.
+values["CKANEXT__SPATIAL__COMMON_MAP__TYPE"] = "custom"
+values["CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL"] = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+values["CKANEXT__SPATIAL__COMMON_MAP__ATTRIBUTION"] = "© OpenStreetMap contributors"
 
 # Append missing keys and replace existing keys without destroying comments/order.
 written = set()

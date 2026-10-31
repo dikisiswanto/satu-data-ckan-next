@@ -1,5 +1,6 @@
 import "server-only";
 import { sanitizePublicSearchResult } from "@/lib/ckan/public-api-sanitize";
+import { buildCkanSessionCookieHeader } from "@/lib/ckan/session";
 
 /**
  * CKAN 2.12 Action API client.
@@ -13,11 +14,22 @@ const TIMEOUT_MS = Math.min(
   Math.max(Number(process.env.CKAN_API_TIMEOUT_MS || 8000), 1000),
   30000,
 );
+// CKAN search/detail/preview actions can expose metadata that changes visibility
+// when a dataset or resource is unpublished. Never retain those responses in
+// Next.js's shared Data Cache, even when a caller uses the default revalidate.
+const NEVER_CACHE_ACTIONS = new Set([
+  "package_search",
+  "package_show",
+  "package_activity_list",
+  "resource_show",
+  "file_show",
+  "datastore_search",
+]);
 
 export async function ckanAction(
   action,
   params = {},
-  { revalidate = 60 } = {},
+  { revalidate = 60, sessionCookie = null } = {},
 ) {
   if (!/^[a-z][a-z0-9_]*$/.test(action))
     throw new TypeError("invalid_ckan_action");
@@ -33,13 +45,24 @@ export async function ckanAction(
     }
   }
 
+  const headers = new Headers({ Accept: "application/json" });
+  const forwardedSession = buildCkanSessionCookieHeader(sessionCookie);
+  if (forwardedSession) headers.set("Cookie", forwardedSession);
+  // Authenticated CKAN data must never enter Next's shared Data Cache, even
+  // when a caller forgets to override the normal public revalidation period.
+  const effectiveRevalidate =
+    forwardedSession || NEVER_CACHE_ACTIONS.has(action) ? 0 : revalidate;
+
   const response = await fetch(url, {
-    headers: { Accept: "application/json" },
+    headers,
     next:
-      revalidate > 0
-        ? { revalidate, tags: ["ckan-public", `ckan-action:${action}`] }
+      effectiveRevalidate > 0
+        ? {
+            revalidate: effectiveRevalidate,
+            tags: ["ckan-public", `ckan-action:${action}`],
+          }
         : undefined,
-    cache: revalidate > 0 ? undefined : "no-store",
+    cache: effectiveRevalidate > 0 ? undefined : "no-store",
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   if (!response.ok) {

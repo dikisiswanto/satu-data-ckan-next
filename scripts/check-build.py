@@ -186,6 +186,15 @@ def main() -> None:
         theme_dir = ROOT / "deploy/ckan/theme"
         with tempfile.TemporaryDirectory(prefix="portal-wajo-theme-wheel-") as wheel_tmp:
             wheel_root = Path(wheel_tmp)
+            # Build from an isolated source copy. setuptools otherwise leaves
+            # build/, dist/ and *.egg-info in the checked-out theme directory,
+            # which pollutes local runs and can leak stale metadata into Docker.
+            build_source = wheel_root / "source"
+            shutil.copytree(
+                theme_dir,
+                build_source,
+                ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.egg-info", "build", "dist"),
+            )
             subprocess.run(
                 [
                     "python3", "setup.py", "bdist_wheel",
@@ -193,7 +202,7 @@ def main() -> None:
                     "--bdist-dir", str(wheel_root / "bdist"),
                     "build", "--build-base", str(wheel_root / "build"),
                 ],
-                cwd=theme_dir,
+                cwd=build_source,
                 check=True,
                 capture_output=True,
                 text=True,

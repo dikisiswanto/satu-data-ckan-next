@@ -357,6 +357,7 @@ require("fa-pen-to-square" in admin_forms_source and "fa-plus" in admin_forms_so
 require('String(parts[1] || "").toLowerCase()' in admin_forms_source, "CKAN editorial route detection must tolerate uppercase path segments.")
 admin_design_source = read(PACKAGE / "assets/css/wajo-admin-design-system.css")
 require('.wajo-admin-workspace .resource-item > a.heading .format-label[data-format="geojson" i]' in admin_design_source, "GeoJSON format badge must override the linked resource heading color with a specific selector.")
+require('.format-label[data-format="geojson" i]::before' in admin_design_source, "GeoJSON format badge must include a visible map glyph.")
 require("-webkit-text-fill-color: #14532d !important" in admin_design_source and "background: #e7f6ec !important" in admin_design_source, "GeoJSON badge must retain readable high-contrast text and background inside CKAN resource links.")
 for token in (".wajo-pages-admin-route .wajo-admin-workspace .pages-form", ".wajo-pages-editor", ".wajo-md-preview", ".blog-item", "module-content > ul:not(.nav):not(.pagination)", "table-backed editorial collections", "wajo-pages-admin-list-route", ".table-responsive > table tbody td", "ul.list-unstyled:not(.nav):not(.pagination)"):
     require(token in admin_design_source, f"Pages/News admin layout must define responsive editorial cards and previews: {token}.")

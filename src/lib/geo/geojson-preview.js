@@ -1,5 +1,5 @@
-const DEFAULT_MAX_FEATURES = 2_000;
-const DEFAULT_MAX_COORDINATES = 20_000;
+const DEFAULT_MAX_FEATURES = 10_000;
+const DEFAULT_MAX_COORDINATES = 300_000;
 const VALID_GEOMETRIES = new Set([
   "Point",
   "MultiPoint",
@@ -156,27 +156,145 @@ export function normalizeGeoJson(
   };
 }
 
+const MAX_MERCATOR_LATITUDE = 85.0511287798066;
+const DEFAULT_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+function mercatorNormalized(coordinate) {
+  const longitude = Math.max(-180, Math.min(180, Number(coordinate[0])));
+  const latitude = Math.max(
+    -MAX_MERCATOR_LATITUDE,
+    Math.min(MAX_MERCATOR_LATITUDE, Number(coordinate[1])),
+  );
+  const sine = Math.sin((latitude * Math.PI) / 180);
+  return [
+    (longitude + 180) / 360,
+    0.5 - Math.log((1 + sine) / (1 - sine)) / (4 * Math.PI),
+  ];
+}
+
+/**
+ * Build a bounded XYZ basemap layout that uses the same Web-Mercator
+ * projection as the GeoJSON overlay. No map SDK is required in the browser;
+ * SVG image tiles remain ordinary image requests and vector features stay
+ * crisp above them. Tile count is capped to avoid unexpectedly large requests.
+ */
+export function createGeoMapLayout(
+  bounds,
+  width = 800,
+  height = 420,
+  padding = 32,
+  {
+    maxTiles = 48,
+    minZoom = 2,
+    maxZoom = 17,
+    tileUrlTemplate = DEFAULT_TILE_URL,
+  } = {},
+) {
+  const northWest = mercatorNormalized([bounds.minLon, bounds.maxLat]);
+  const southEast = mercatorNormalized([bounds.maxLon, bounds.minLat]);
+  let minX = Math.min(northWest[0], southEast[0]);
+  let maxX = Math.max(northWest[0], southEast[0]);
+  let minY = Math.min(northWest[1], southEast[1]);
+  let maxY = Math.max(northWest[1], southEast[1]);
+
+  // A single point or a zero-width/height line still needs a useful map extent.
+  const minimumSpan = 0.00025;
+  if (maxX - minX < minimumSpan) {
+    const center = (minX + maxX) / 2;
+    minX = Math.max(0, center - minimumSpan / 2);
+    maxX = Math.min(1, center + minimumSpan / 2);
+  }
+  if (maxY - minY < minimumSpan) {
+    const center = (minY + maxY) / 2;
+    minY = Math.max(0, center - minimumSpan / 2);
+    maxY = Math.min(1, center + minimumSpan / 2);
+  }
+
+  const spanX = Math.max(maxX - minX, Number.EPSILON);
+  const spanY = Math.max(maxY - minY, Number.EPSILON);
+  const usableWidth = Math.max(1, width - padding * 2);
+  const usableHeight = Math.max(1, height - padding * 2);
+  const scale = Math.min(usableWidth / spanX, usableHeight / spanY);
+  const offsetX = (width - spanX * scale) / 2;
+  const offsetY = (height - spanY * scale) / 2;
+
+  const viewMinX = minX + (0 - offsetX) / scale;
+  const viewMaxX = minX + (width - offsetX) / scale;
+  const viewMinY = minY + (0 - offsetY) / scale;
+  const viewMaxY = minY + (height - offsetY) / scale;
+  let zoom = Math.max(
+    minZoom,
+    Math.min(maxZoom, Math.floor(Math.log2(Math.max(scale, 1) / 256))),
+  );
+  let tiles = [];
+
+  while (zoom >= minZoom) {
+    const worldTiles = 2 ** zoom;
+    const firstX = Math.floor(viewMinX * worldTiles);
+    const lastX = Math.floor(viewMaxX * worldTiles);
+    const firstY = Math.max(0, Math.floor(viewMinY * worldTiles));
+    const lastY = Math.min(worldTiles - 1, Math.floor(viewMaxY * worldTiles));
+    const count =
+      Math.max(0, lastX - firstX + 1) * Math.max(0, lastY - firstY + 1);
+    if (count <= maxTiles || zoom === minZoom) {
+      for (let rawX = firstX; rawX <= lastX; rawX += 1) {
+        const tileX = ((rawX % worldTiles) + worldTiles) % worldTiles;
+        for (let tileY = firstY; tileY <= lastY; tileY += 1) {
+          if (tileY < 0 || tileY >= worldTiles) continue;
+          const x = offsetX + (rawX / worldTiles - minX) * scale;
+          const y = offsetY + (tileY / worldTiles - minY) * scale;
+          tiles.push({
+            key: `${zoom}/${tileX}/${tileY}/${rawX}`,
+            url: tileUrlTemplate
+              .replace("{z}", String(zoom))
+              .replace("{x}", String(tileX))
+              .replace("{y}", String(tileY)),
+            x,
+            y,
+            width: scale / worldTiles,
+            height: scale / worldTiles,
+          });
+        }
+      }
+      break;
+    }
+    zoom -= 1;
+  }
+
+  return {
+    minX,
+    minY,
+    scale,
+    offsetX,
+    offsetY,
+    width,
+    height,
+    zoom,
+    tiles,
+  };
+}
+
+export function projectGeoCoordinate(coordinate, layout) {
+  const [x, y] = mercatorNormalized(coordinate);
+  return [
+    layout.offsetX + (x - layout.minX) * layout.scale,
+    layout.offsetY + (y - layout.minY) * layout.scale,
+  ];
+}
+
+// Backward-compatible helper retained for existing consumers/tests.
 export function projectCoordinate(
   coordinate,
-  bounds,
+  boundsOrLayout,
   width = 800,
   height = 420,
   padding = 28,
 ) {
-  const [lon, lat] = coordinate;
-  const spanX = Math.max(bounds.maxLon - bounds.minLon, 1e-6);
-  const spanY = Math.max(bounds.maxLat - bounds.minLat, 1e-6);
-  const usableWidth = Math.max(1, width - padding * 2);
-  const usableHeight = Math.max(1, height - padding * 2);
-  const scale = Math.min(usableWidth / spanX, usableHeight / spanY);
-  const drawnWidth = spanX * scale;
-  const drawnHeight = spanY * scale;
-  const offsetX = (width - drawnWidth) / 2;
-  const offsetY = (height - drawnHeight) / 2;
-  return [
-    offsetX + (lon - bounds.minLon) * scale,
-    height - offsetY - (lat - bounds.minLat) * scale,
-  ];
+  const layout =
+    boundsOrLayout && Number.isFinite(boundsOrLayout.scale)
+      ? boundsOrLayout
+      : createGeoMapLayout(boundsOrLayout, width, height, padding);
+  return projectGeoCoordinate(coordinate, layout);
 }
 
 function coordinatePath(points, project, close = false) {
@@ -264,7 +382,7 @@ export function geometryToSvgLayers(
 }
 
 export const GEOJSON_PREVIEW_LIMITS = Object.freeze({
-  maxBytes: 5 * 1024 * 1024,
+  maxBytes: 20 * 1024 * 1024,
   maxFeatures: DEFAULT_MAX_FEATURES,
   maxCoordinates: DEFAULT_MAX_COORDINATES,
 });

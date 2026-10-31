@@ -1,109 +1,93 @@
-# Headless CMS — CKAN Pages + Next.js
+# CMS Publik
 
-## Arsitektur
+CKAN Pages adalah sumber konten dan hak akses. Next.js mengambil konten melalui Action API secara server-side dan merender halaman publik. Tidak ada database CMS kedua.
 
-`ckanext-pages` tetap berjalan di CKAN 2.12.1 dan menjadi sumber kebenaran konten serta hak akses. Karena wheel upstream belum menyertakan deklarasi konfigurasi dan berkas migrasi Alembic (issue [#150](https://github.com/ckan/ckanext-pages/issues/150)), `deploy/ckan/install-pages.py` melengkapi metadata package saat build, memverifikasi isi wheel, dan menguji import plugin sebelum image digunakan. Extension lokal `wajo_pages` menambahkan metadata editorial melalui `IPagesSchema`; nilai disimpan sebagai extras CKAN Pages, tanpa tabel CMS kedua. Next.js mengambil konten dari Action API CKAN melalui server component/server utility, kemudian merender seluruh halaman publik dengan komponen portal.
+## Publikasi
 
-Browser tidak memanggil action Pages secara langsung. Token admin CKAN tidak dipakai maupun dikirim ke browser. Action `ckanext_pages_list` dan `ckanext_pages_show` tidak ditambahkan ke facade `/api/3/action` publik. Daftar anonim CKAN Pages hanya menampilkan konten publik; detail halaman tetap melewati pemeriksaan privacy upstream. Permintaan CMS memakai `no-store` agar perubahan visibilitas tidak tertahan di cache permanen.
+1. Buka **Pages** di CKAN Admin.
+2. Gunakan **Page** untuk informasi, profil, kebijakan, dan panduan.
+3. Gunakan **Blog Article** untuk berita dan artikel.
+4. Isi judul, slug, tanggal terbit, kategori, serta konten Markdown.
+5. Atur **Visibility = Public**, simpan, lalu periksa halaman portal.
 
-## Alur editorial
+Konten private dan artikel bertanggal di masa depan tidak ditampilkan pada portal, daftar, atau sitemap. Tanggal kalender mengikuti `NEXT_PUBLIC_TIME_ZONE` (default `Asia/Makassar`).
 
-Kelola konten melalui hostname admin yang ditetapkan pada `CKAN_HOST` (contoh: `https://ckan.silirdev.com` untuk staging atau `https://ckan.wajokab.go.id` untuk produksi):
+## Field tambahan
 
-1. Buka menu **Pages**.
-2. Buat **Page** untuk profil, kebijakan, panduan, FAQ, dan halaman informasi permanen.
-3. Buat **Blog Article** untuk berita, pengumuman, dan artikel analisis.
-4. Pastikan **Visibility = Public** untuk publikasi. Halaman private tidak akan dirender portal.
-5. Isi judul, URL/slug, tanggal publikasi (terutama blog), dan konten Markdown. CKAN Pages dipaksa memakai editor Markdown agar isi yang disimpan konsisten dengan renderer Next.js; HTML mentah tidak diaktifkan.
-6. Lengkapi field editorial Wajo di bawah form konten. Gunakan tombol **Unggah gambar** untuk memasukkan gambar ke Markdown, mengisi gambar Open Graph, atau menambahkan komponen gambar ke JSON. Simpan, lalu buka URL publik untuk memeriksa hasil.
+| Field                          | Fungsi                                                   |
+| ------------------------------ | -------------------------------------------------------- |
+| `excerpt`                      | Ringkasan kartu dan fallback deskripsi SEO               |
+| `category`                     | Kategori konten                                          |
+| `template_type`                | `standard`, `landing`, `policy`, `guide`, `article`      |
+| `featured`                     | Prioritas berita/konten pilihan                          |
+| `show_in_menu`                 | Tampilkan laman pada navigasi CMS dan footer             |
+| `menu_label`, `menu_order`     | Label dan urutan tautan                                  |
+| `seo_title`, `seo_description` | Metadata pencarian dan social sharing                    |
+| `og_image`                     | Gambar Open Graph                                        |
+| `content_blocks`               | Komponen halaman terstruktur (JSON, maks. 16 blok/80 KB) |
 
-Halaman yang memiliki tanggal publikasi di masa depan disembunyikan oleh renderer Next.js sampai tanggal tersebut tiba. Tanggal kalender CKAN dibandingkan menggunakan `NEXT_PUBLIC_TIME_ZONE` (default `Asia/Makassar`), termasuk nilai datetime tengah malam yang dikembalikan Action API. Perubahan di CKAN akan terbaca pada request publik berikutnya.
+## Konten dan gambar
 
-## Field editorial Wajo
+CKAN Pages memakai Markdown. HTML mentah tidak dirender. Renderer mendukung heading, paragraf, format teks, tautan, gambar, daftar bersarang, blockquote, tabel, code, dan pemisah.
 
-| Field             | Fungsi                                                                     |
-| ----------------- | -------------------------------------------------------------------------- |
-| `excerpt`         | Ringkasan untuk kartu, halaman daftar, dan fallback deskripsi SEO          |
-| `category`        | Label kategori konten                                                      |
-| `template_type`   | `standard`, `landing`, `policy`, `guide`, atau `article`                   |
-| `featured`        | Prioritas pada daftar berita/konten pilihan                                |
-| `show_in_menu`    | Memasukkan halaman ke navigasi cepat di pusat Informasi                    |
-| `menu_label`      | Label navigasi; default memakai judul                                      |
-| `menu_order`      | Urutan navigasi (1–99)                                                     |
-| `seo_title`       | Judul SEO (fallback ke judul halaman)                                      |
-| `seo_description` | Deskripsi SEO dan social sharing (fallback ke excerpt)                     |
-| `og_image`        | URL HTTPS atau gambar yang diunggah ke Pustaka Media CKAN untuk Open Graph |
-| `content_blocks`  | JSON array berisi komponen halaman terstruktur                             |
+Untuk menyisipkan foto di artikel, gunakan gambar Markdown:
 
-`template_type=landing` dan `guide` menampilkan blok terstruktur sebelum Markdown. `policy` memakai penanda visual dokumen kebijakan. `article` menonjolkan paragraf pembuka. `standard` memakai Markdown lalu blok tambahan.
+```markdown
+![Kegiatan di Kabupaten Wajo](/uploads/page_images/kegiatan.webp)
+```
 
-## Komponen halaman terstruktur
+Kartu berita mengambil gambar Markdown pertama. Jika artikel tidak memiliki gambar Markdown yang valid, kartu menampilkan ikon artikel bawaan. `og_image` tetap digunakan untuk Open Graph; gambar Markdown menjadi fallback metadata sosial.
 
-Isi `content_blocks` dengan JSON array. CKAN memvalidasi JSON, ukuran maksimal 80 KB, maksimal 16 item, dan tipe komponen yang dikenal sebelum menyimpan. Tipe yang tersedia:
+Gunakan tombol **Unggah gambar** pada editor Markdown. File disimpan sebagai File entity CKAN dengan owner `wajo_media/public-editorial-media`. Hanya PNG, JPEG, GIF, dan WebP hingga 8 MiB yang diterima. SVG/HTML tidak disajikan sebagai gambar.
 
-- `hero`: `eyebrow`, `title`, `description`, `image`, `imageAlt`, `primaryLabel`, `primaryHref`.
-- `rich_text`: `title`, `markdown`.
-- `image`: `src`, `alt`, `caption`.
-- `gallery`: `title`, `items` berisi `src`, `alt`, `caption`.
-- `stats`: `title`, `items` berisi `label`, `value`, `unit`, `source`. Angka di sini adalah nilai editorial yang diisi pengelola, bukan query statistik live.
-- `dataset_links`: `title`, `items` berisi `slug` (nama dataset CKAN) dan `label`. Dataset diverifikasi lagi sebagai dataset publik sebelum ditampilkan.
-- `publication_list`: `title`, `limit` (maksimum 6). Daftar berasal dari paket CKAN bertag publikasi.
-- `cta`: `title`, `description`, `label`, `href`.
-- `divider`: pemisah konten.
+URL gambar harus HTTPS atau path media CKAN yang didukung. Next.js memeriksa referensi konten publik, owner, MIME, signature, dan ukuran sebelum menyajikan media. Jangan membuka seluruh FileStore untuk akses anonim.
 
-Contoh:
+## Content blocks
+
+`content_blocks` menerima array JSON dengan tipe:
+
+- `hero`: judul, deskripsi, gambar, dan CTA.
+- `rich_text`: Markdown tambahan.
+- `image`, `gallery`: gambar dan caption.
+- `stats`: ringkasan editorial; bukan query statistik live.
+- `dataset_links`: dataset yang diverifikasi masih publik.
+- `publication_list`: daftar publikasi CKAN.
+- `cta`, `divider`: ajakan dan pemisah.
+
+Contoh singkat:
 
 ```json
 [
   {
     "type": "hero",
-    "eyebrow": "Satu Data Wajo",
-    "title": "Data untuk keputusan",
-    "description": "Temukan data resmi Kabupaten Wajo.",
-    "primaryLabel": "Jelajahi dataset",
-    "primaryHref": "/dataset"
+    "title": "Satu Data Wajo",
+    "description": "Data resmi Kabupaten Wajo."
   },
   {
     "type": "dataset_links",
     "title": "Dataset pilihan",
-    "items": [{ "slug": "data-sekolah-wajo", "label": "Lihat dataset sekolah" }]
-  },
-  {
-    "type": "cta",
-    "title": "Butuh data lain?",
-    "label": "Buka katalog",
-    "href": "/dataset"
+    "items": [{ "slug": "data-sekolah-wajo" }]
   }
 ]
 ```
 
-HTML bebas dari field Markdown/JSON tidak dieksekusi. Renderer frontend dan pratinjau CKAN mendukung heading, paragraf, tebal/miring/coret, tautan, gambar, daftar berurutan/tidak berurutan/cek, daftar bersarang, blockquote, tabel GFM dengan alignment, code inline/blok, Setext heading, thematic break, dan hard line break. Renderer membatasi panjang konten dan hanya mengizinkan tautan aman (HTTPS, path lokal, mailto/tel sesuai konteks). Ini adalah subset CommonMark/GFM yang dipakai portal, bukan klaim kompatibilitas seluruh ekstensi Markdown pihak ketiga. Nilai statistik di blok `stats` perlu mencantumkan sumber dan periode secara editorial; untuk data hidup gunakan `dataset_links`, halaman statistik, atau indikator CKAN.
+## Halaman publik
 
-## Route publik
+| URL                 | Isi                                       |
+| ------------------- | ----------------------------------------- |
+| `/informasi`        | Daftar laman dan berita pilihan           |
+| `/informasi/[slug]` | Detail laman                              |
+| `/berita`           | Daftar berita dan artikel                 |
+| `/berita/[slug]`    | Detail artikel dan metadata `NewsArticle` |
 
-| Route               | Konten                                                      |
-| ------------------- | ----------------------------------------------------------- |
-| `/informasi`        | Hub informasi, navigasi halaman pilihan, dan sorotan berita |
-| `/informasi/[slug]` | Halaman Page publik                                         |
-| `/berita`           | Arsip Blog Articles                                         |
-| `/berita/[slug]`    | Detail artikel berita                                       |
+Footer menampilkan tautan laman yang ditandai **Tampilkan di menu**, tautan `/informasi`, dan daftar `/berita`.
 
-Route detail membangun canonical URL, title/description, Open Graph/Twitter metadata, dan JSON-LD `WebPage`/`NewsArticle`. Route konten ditambahkan ke `robots.txt` dan sitemap dinamis. Konten private dan artikel terjadwal tidak dimasukkan ke daftar atau sitemap.
+## Deployment
 
-## Gambar dan keamanan media
+`wajo_pages` harus aktif sebelum `pages`; `wajo_theme` dimuat setelah extension yang menyediakan template. Bootstrap mengatur urutan plugin. Jalankan migrasi awal/upgrade Pages melalui:
 
-Form CKAN Pages memiliki tombol **Unggah gambar** dan pratinjau untuk gambar Open Graph. Pada `content_blocks`, tombol **Unggah gambar dan tambahkan komponen** mengunggah gambar lalu menambahkan blok `image` ke akhir array JSON. Tombol upload memvalidasi JSON terlebih dahulu agar berkas tidak terunggah ketika struktur yang ada masih rusak. Pada editor Markdown, tombol **Unggah gambar** memasukkan sintaks `![teks alternatif](URL)` pada posisi kursor dan pratinjau langsung menampilkan hasilnya.
+```bash
+ckan db upgrade -p pages
+```
 
-Unggahan editorial disimpan sebagai File entity CKAN melalui `file_create`, lalu dipindahkan ke owner khusus `wajo_media/public-editorial-media`. Akses publik hanya diberikan untuk owner tersebut melalui `wajo_media_show`; ini tidak membuka file resource atau upload organisasi kepada anonim. Endpoint portal memeriksa owner, ID, MIME, signature raster, dan ukuran sebelum menyajikan gambar. Hanya PNG, JPEG, GIF, serta WebP maksimal 8 MiB yang diterima; SVG tidak diizinkan. FileStore harus persisten dan `ckan.files.owner.cascade_access` harus memuat `wajo_media`.
-
-Logo organisasi dan kategori tetap menggunakan preset Scheming `organization_url_upload` pada field native `image_url`. Semua input file di Wajo Admin memakai kontrol file yang terlihat, label nama file, dan pratinjau lokal untuk gambar yang dipilih. Pratinjau lokal tidak berarti file sudah tersimpan; file baru menjadi permanen setelah form CKAN berhasil disimpan.
-
-Gambar HTTPS eksternal dapat dipakai langsung. Path CKAN Pages `/uploads/page_images/<filename>` dipetakan ke `/api/cms/media/<filename>` di hostname portal. Endpoint media hanya melayani file yang masih direferensikan konten publik terkini, menolak nama file/path traversal, hanya menerima MIME dan signature gambar yang dikenal, membatasi respons 8 MiB, dan mengirim `no-store`/`nosniff`. Tidak ada SVG atau HTML yang disajikan sebagai gambar.
-
-Jika deployment CKAN tidak melayani path `/uploads/page_images/` di origin internal `CKAN_API_INTERNAL_URL`, gambar upload akan gagal dimuat; uji endpoint ini setelah deployment. Gambar HTTPS eksternal tetap dapat digunakan sebagai alternatif. Jangan menyalakan `ckanext.pages.allow_html` untuk konten yang ditulis banyak editor; HTML mentah sengaja tidak dirender Next.js.
-
-## Plugin dan database
-
-`wajo_pages` harus aktif sebelum `pages`, agar schema tambahan diterapkan saat CKAN Pages membangun validator. `wajo_theme` tetap dimuat sesudah plugin yang membawa template agar override form admin Wajo aktif. Bootstrap proyek mengatur urutan ini otomatis. Jalankan migrasi Pages yang sudah disediakan bootstrap/initialize extension (`ckan db upgrade -p pages`) saat deploy awal atau upgrade extension.
-
-Tidak ada database CMS baru. Record, visibility, dan revisi tetap dikelola oleh CKAN Pages. Next.js hanya berfungsi sebagai renderer/headless consumer.
+Simpan `.env.ckan` secara privat. Jangan mengaktifkan `ckanext.pages.allow_html` untuk konten editorial publik.

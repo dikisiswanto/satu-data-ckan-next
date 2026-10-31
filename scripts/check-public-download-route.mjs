@@ -53,6 +53,26 @@ for (const file of caddyFiles) {
   );
   assert.match(
     source,
+    /@ckanResourceView path_regexp[\s\S]*reverse_proxy https:\/\/nginx:443/,
+    `${file}: CKAN ResourceView iframe must bypass Next.js X-Frame-Options`,
+  );
+  assert.match(
+    source,
+    /header_down -X-Frame-Options[\s\S]*frame-ancestors https:\/\/\{\$CKAN_HOST\}/,
+    `${file}: ResourceView must allow only the CKAN admin parent frame`,
+  );
+  assert.match(
+    source,
+    /@ckanViewerAssets path \/webassets\/\* \/base\/\*/,
+    `${file}: CKAN viewer assets must be served by CKAN`,
+  );
+  assert.match(
+    source,
+    /@ckanResourceProxy path \/api\/3\/action\/resource_proxy[\s\S]*reverse_proxy https:\/\/nginx:443/,
+    `${file}: GeoView resource_proxy Action API must reach CKAN`,
+  );
+  assert.match(
+    source,
     /\[a-fA-F0-9-\]\{16,64\}\/download/,
     `${file} must match UUID resources including the reported XLSX URL`,
   );
@@ -163,6 +183,124 @@ const css = await readFile(
 assert.match(css, /wajo-login-frame.*460px/);
 assert.match(css, /input\[type="file"\]::file-selector-button/);
 assert.match(css, /wajo-file-preview/);
-process.stdout.write(
-  "Public resource download, admin Markdown, CSRF and file input design contracts passed.\n",
+
+const sessionHelper = await readFile("src/lib/ckan/session.js", "utf8");
+assert.match(sessionHelper, /CKAN_SESSION_COOKIE_NAME/);
+assert.match(sessionHelper, /getCkanSessionCookieValue/);
+assert.match(sessionHelper, /buildCkanSessionCookieHeader/);
+assert.match(sessionHelper, /normalizeCkanSessionCookieValue/);
+const ckanClient = await readFile("src/lib/ckan/client.js", "utf8");
+assert.match(ckanClient, /buildCkanSessionCookieHeader/);
+assert.match(ckanClient, /NEVER_CACHE_ACTIONS = new Set\(/);
+for (const action of [
+  "package_search",
+  "package_show",
+  "package_activity_list",
+  "resource_show",
+  "file_show",
+  "datastore_search",
+]) {
+  assert.match(ckanClient, new RegExp(`"${action}"`));
+}
+assert.match(
+  ckanClient,
+  /effectiveRevalidate = forwardedSession \|\| NEVER_CACHE_ACTIONS\.has\(action\) \? 0 : revalidate/,
 );
+const datasetPage = await readFile(
+  "src/app/(public)/dataset/[slug]/page.jsx",
+  "utf8",
+);
+assert.match(datasetPage, /from "next\/headers"/);
+assert.match(datasetPage, /CKAN_SESSION_COOKIE_NAME/);
+assert.match(
+  datasetPage,
+  /getPublishedDatasetBySlugResult\(slug, sessionCookie\)/,
+);
+assert.match(datasetPage, /export const dynamic = "force-dynamic"/);
+const publicDatasetLoader = await readFile("src/lib/data/public.js", "utf8");
+assert.match(
+  publicDatasetLoader,
+  /if \(!sessionCookie\) return getCachedPublicDatasetBySlugResult/,
+);
+assert.match(publicDatasetLoader, /revalidate: 0, sessionCookie/);
+const sessionAwarePublicActionRoute = await readFile(
+  "src/app/api/3/action/[...action]/route.js",
+  "utf8",
+);
+assert.match(sessionAwarePublicActionRoute, /getCkanSessionCookieFromRequest/);
+assert.match(sessionAwarePublicActionRoute, /requireViewerPackage/);
+assert.match(sessionAwarePublicActionRoute, /requireViewerResource/);
+assert.match(sessionAwarePublicActionRoute, /private, no-store/);
+const publicSanitizer = await readFile(
+  "src/lib/ckan/public-api-sanitize.js",
+  "utf8",
+);
+assert.match(publicSanitizer, /includePrivateResources = false/);
+const viewerPackage = await readFile("src/lib/ckan/viewer-package.js", "utf8");
+assert.match(viewerPackage, /resource_show/);
+assert.match(viewerPackage, /sessionCookie/);
+assert.match(
+  viewerPackage,
+  /error\?\.status === 403 \|\| error\?\.status === 404/,
+);
+assert.match(publicDatasetLoader, /resolveAuthorizedPackageResources/);
+assert.match(
+  sessionAwarePublicActionRoute,
+  /resolveAuthorizedPackageResources/,
+);
+const previewRoute = await readFile(
+  "src/app/api/public/resource-preview/route.js",
+  "utf8",
+);
+assert.match(previewRoute, /getCkanSessionCookieFromRequest/);
+assert.match(previewRoute, /buildCkanSessionCookieHeader/);
+const clientFileRoute = await readFile(
+  "src/app/api/public/ckan-file/[fileId]/route.js",
+  "utf8",
+);
+assert.match(clientFileRoute, /verifyFileOwner/);
+assert.match(clientFileRoute, /getCkanSessionCookieFromRequest/);
+assert.match(clientFileRoute, /private, no-store/);
+const envSync = await readFile("deploy/ckan/sync-env.py", "utf8");
+assert.match(envSync, /CKAN___SESSION_COOKIE_DOMAIN/);
+assert.match(envSync, /CKAN___SESSION_COOKIE_SECURE/);
+assert.match(envSync, /CKAN_SESSION_COOKIE_NAME.*cookie_name/);
+assert.match(envSync, /wajo_ckan_session/);
+assert.match(envSync, /must share the same parent DNS zone/);
+const envExample = await readFile(".env.ckan.example", "utf8");
+assert.match(envExample, /^CKAN_SESSION_COOKIE_NAME=wajo_ckan_session$/m);
+const composeOverride = await readFile(
+  "deploy/ckan/docker-compose.override.yml",
+  "utf8",
+);
+assert.match(
+  composeOverride,
+  /CKAN_SESSION_COOKIE_NAME: \$\{CKAN_SESSION_COOKIE_NAME\}/,
+);
+
+process.stdout.write(
+  "Public resource download, session-aware CKAN permissions, admin Markdown, CSRF and file input design contracts passed.\n",
+);
+
+const bootstrap = await readFile("deploy/ckan/bootstrap-upstream.sh", "utf8");
+assert.match(bootstrap, /CKANEXT__SPATIAL__COMMON_MAP__TYPE.*custom/);
+assert.match(
+  bootstrap,
+  /CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL.*tile\.openstreetmap\.org/,
+);
+const geoPreview = await readFile(
+  "src/components/geojson-resource-preview.jsx",
+  "utf8",
+);
+assert.match(geoPreview, /createGeoMapLayout/);
+assert.match(geoPreview, /mapLayout\.tiles\.map/);
+assert.match(
+  geoPreview,
+  /credentials: "same-origin"/,
+  "An authorized CKAN session must be sent when the GeoJSON preview loads a private resource",
+);
+const geoCss = await readFile(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "utf8",
+);
+assert.match(geoCss, /format-label\[data-format="geojson" i\]::before/);

@@ -1,4 +1,8 @@
 import { ckanAction } from "@/lib/ckan/client";
+import {
+  buildCkanSessionCookieHeader,
+  getCkanSessionCookieFromRequest,
+} from "@/lib/ckan/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,17 +42,19 @@ async function handle(request, context) {
     return errorResponse(404, "Berkas tidak ditemukan.");
   }
 
+  const sessionCookie = getCkanSessionCookieFromRequest(request);
+  const ckanOptions = { revalidate: 0, sessionCookie };
   try {
     const resource = await ckanAction(
       "resource_show",
       { id: resourceId },
-      { revalidate: 0 },
+      ckanOptions,
     );
     if (
       !resource ||
       resource.id !== resourceId ||
       resource.state !== "active" ||
-      resource.private === true ||
+      (!sessionCookie && resource.private === true) ||
       !resource.package_id
     ) {
       return errorResponse(404, "Berkas tidak ditemukan.");
@@ -57,11 +63,11 @@ async function handle(request, context) {
     const dataset = await ckanAction(
       "package_show",
       { id: resource.package_id },
-      { revalidate: 0 },
+      ckanOptions,
     );
     if (
       !dataset ||
-      dataset.private === true ||
+      (!sessionCookie && dataset.private === true) ||
       dataset.state !== "active" ||
       (dataset.name !== datasetSlug && dataset.id !== datasetSlug)
     ) {
@@ -73,7 +79,7 @@ async function handle(request, context) {
     if (
       !publicResource ||
       publicResource.state !== "active" ||
-      publicResource.private === true
+      (!sessionCookie && publicResource.private === true)
     ) {
       return errorResponse(404, "Berkas tidak tersedia untuk publik.");
     }
@@ -127,7 +133,7 @@ async function handle(request, context) {
       const fileId = genericFileMatch[1];
       let file;
       try {
-        file = await ckanAction("file_show", { id: fileId }, { revalidate: 0 });
+        file = await ckanAction("file_show", { id: fileId }, ckanOptions);
       } catch {
         return errorResponse(
           404,
@@ -137,7 +143,7 @@ async function handle(request, context) {
       if (
         !file ||
         file.id !== fileId ||
-        file.private === true ||
+        (!sessionCookie && file.private === true) ||
         (file.state && file.state !== "active")
       ) {
         return errorResponse(404, "Berkas tidak tersedia untuk publik.");
@@ -193,6 +199,8 @@ async function handle(request, context) {
     const ifRange = request.headers.get("if-range");
     if (range) headers.set("Range", range);
     if (ifRange) headers.set("If-Range", ifRange);
+    const forwardedCookie = buildCkanSessionCookieHeader(sessionCookie);
+    if (forwardedCookie) headers.set("Cookie", forwardedCookie);
 
     const upstream = await fetch(upstreamUrl, {
       method: request.method === "HEAD" ? "HEAD" : "GET",
@@ -240,7 +248,9 @@ async function handle(request, context) {
     const responseHeaders = new Headers({
       "Content-Type": contentType,
       "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
-      "Cache-Control": "public, max-age=300, stale-while-revalidate=1800",
+      "Cache-Control": sessionCookie
+        ? "private, no-store"
+        : "public, max-age=300, stale-while-revalidate=1800",
       "X-Content-Type-Options": "nosniff",
       "X-Robots-Tag": "noindex, nofollow, noarchive",
       "Content-Security-Policy": "default-src 'none'; sandbox",

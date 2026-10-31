@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -27,6 +28,10 @@ import {
   isGeoJSONResource,
 } from "@/lib/ckan/client";
 import {
+  CKAN_SESSION_COOKIE_NAME,
+  normalizeCkanSessionCookieValue,
+} from "@/lib/ckan/session";
+import {
   publicResourceUrl,
   ckanResourceExtra,
 } from "@/lib/ckan/public-resource-url";
@@ -41,8 +46,17 @@ import { DatasetResourcePreview } from "@/components/dataset-resource-preview";
 import { GeoJSONResourcePreview } from "@/components/geojson-resource-preview";
 import { DatasetApiAccess } from "@/components/dataset-api-access";
 
+export const dynamic = "force-dynamic";
+
 function getGeoPortalUrl() {
   return safeHttpUrl(process.env.NEXT_PUBLIC_GEOPORTAL_URL) || null;
+}
+
+async function getViewerCkanSessionCookie() {
+  const cookieStore = await cookies();
+  return normalizeCkanSessionCookieValue(
+    cookieStore.get(CKAN_SESSION_COOKIE_NAME)?.value || null,
+  );
 }
 
 function isTabularResource(resource = {}) {
@@ -102,7 +116,8 @@ function isGeospatialDataset(dataset) {
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const result = await getPublishedDatasetBySlugResult(slug);
+  const sessionCookie = await getViewerCkanSessionCookie();
+  const result = await getPublishedDatasetBySlugResult(slug, sessionCookie);
   if (result.unavailable) {
     return {
       title: "Dataset belum dapat dimuat",
@@ -130,11 +145,18 @@ export async function generateMetadata({ params }) {
       ).slice(0, 160),
       type: "article",
     }),
+    ...(dataset.private === true
+      ? { robots: { index: false, follow: false, noarchive: true } }
+      : {}),
   };
 }
 export default async function DatasetDetailPage({ params }) {
   const { slug } = await params;
-  const datasetResult = await getPublishedDatasetBySlugResult(slug);
+  const sessionCookie = await getViewerCkanSessionCookie();
+  const datasetResult = await getPublishedDatasetBySlugResult(
+    slug,
+    sessionCookie,
+  );
   if (datasetResult.unavailable) {
     // Prevent a temporary upstream failure from being cached as this dataset's page.
     await connection();
@@ -172,13 +194,12 @@ export default async function DatasetDetailPage({ params }) {
   if (!dataset) notFound();
   const siteOrigin = getPublicSiteOrigin();
   const apiOrigin = siteOrigin || "";
+  // getPublishedDatasetBySlugResult has already removed private resources
+  // that CKAN did not authorize for this exact session.
   const resources = (
     Array.isArray(dataset.resources) ? dataset.resources : []
   ).filter(
-    (resource) =>
-      resource &&
-      (!resource.state || resource.state === "active") &&
-      resource.private !== true,
+    (resource) => resource && (!resource.state || resource.state === "active"),
   );
   const publicResources = resources.filter((resource) =>
     publicResourceUrl(resource.url),
@@ -244,7 +265,7 @@ export default async function DatasetDetailPage({ params }) {
     const activityResult = await ckanAction(
       "package_activity_list",
       { id: dataset.name, offset: 0, limit: 8, include_hidden_activity: false },
-      { revalidate: 30 },
+      sessionCookie ? { revalidate: 0, sessionCookie } : { revalidate: 30 },
     );
     activities = Array.isArray(activityResult)
       ? activityResult.slice(0, 8)
@@ -273,7 +294,7 @@ export default async function DatasetDetailPage({ params }) {
       : {}),
     ...(tags.length ? { keywords: tags } : {}),
     ...(temporalCoverage ? { temporalCoverage } : {}),
-    isAccessibleForFree: true,
+    isAccessibleForFree: dataset.private !== true,
     distribution: resources.map((resource) => ({
       "@type": "DataDownload",
       name: ckanResourceName(resource),

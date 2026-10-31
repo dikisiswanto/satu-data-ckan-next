@@ -36,7 +36,20 @@ admin_host = values["CKAN_HOST"].lower()
 # PUBLIC_HOST is expected to be a first-level host (data.example.com); its
 # suffix identifies the zone apex (example.com) without guessing public suffixes.
 zone_apex = ".".join(public_labels[1:]) if len(public_labels) > 1 else values["PUBLIC_HOST"].lower()
+if not admin_host.endswith("." + zone_apex):
+    raise SystemExit(
+        "CKAN_HOST and PUBLIC_HOST must share the same parent DNS zone so the CKAN session can "
+        "authenticate private dataset links on the public host. Use sibling hosts such as "
+        "ckan.silirdev.com and data.silirdev.com."
+    )
 admin_prefix = admin_host[: -(len(zone_apex) + 1)] if admin_host.endswith("." + zone_apex) else ""
+cookie_name = values.get("CKAN_SESSION_COOKIE_NAME", "wajo_ckan_session").strip() or "wajo_ckan_session"
+# Use a dedicated cookie name so browsers do not send both the old host-only
+# `ckan` cookie and the new parent-domain cookie after deployment.
+if cookie_name == "ckan":
+    cookie_name = "wajo_ckan_session"
+if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", cookie_name):
+    raise SystemExit("CKAN_SESSION_COOKIE_NAME must contain 1-64 letters, numbers, underscores or hyphens.")
 if admin_prefix and len(admin_prefix.split(".")) > 1:
     print(
         "Warning: CKAN_HOST is a multi-level hostname and will be preserved. On Cloudflare Full DNS Setup, "
@@ -55,11 +68,27 @@ derived = {
     "CKAN_ADMIN_URL": admin_url,
     "CKAN_SITE_URL": public_url,
     "CKANEXT__WAJO_THEME__ADMIN_HOST": values["CKAN_HOST"].lower(),
+    # Keep Next.js and CKAN on the same dedicated cookie name.
+    "CKAN_SESSION_COOKIE_NAME": cookie_name,
+    # CKAN 2.12 Flask session is shared only between the trusted sibling hosts.
+    # Keep the cookie HttpOnly/Secure and use the same-site Lax policy.
+    # These Flask settings do not start with "ckan.". ckanext-envvars
+    # therefore requires the triple-underscore CKAN___ prefix.
+    "CKAN___SESSION_COOKIE_NAME": cookie_name,
+    "CKAN___SESSION_COOKIE_DOMAIN": "." + zone_apex.lower(),
+    "CKAN___SESSION_COOKIE_HTTPONLY": "true",
+    "CKAN___SESSION_COOKIE_SECURE": "true",
+    "CKAN___SESSION_COOKIE_SAMESITE": "Lax",
 }
 written, output = set(), []
 for line in lines:
     match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)=", line)
     key = match.group(1) if match else None
+    # Remove the earlier, incorrectly double-underscore form. Those names map
+    # to ckan.session_cookie_* (not Flask SESSION_COOKIE_*), which is invalid
+    # for CKAN 2.12 strict configuration parsing.
+    if key and re.fullmatch(r"CKAN__SESSION_COOKIE_(?:NAME|DOMAIN|HTTPONLY|SECURE|SAMESITE)", key):
+        continue
     if key in derived:
         output.append(f"{key}={derived[key]}")
         written.add(key)

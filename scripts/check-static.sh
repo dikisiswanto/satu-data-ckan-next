@@ -3,6 +3,9 @@
 # Invoke with `bash scripts/check-static.sh`; executable mode is not required.
 set -Eeuo pipefail
 
+# Keep validation side-effect free: Python imports must not leave bytecode in the source tree.
+export PYTHONDONTWRITEBYTECODE=1
+
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
@@ -16,12 +19,11 @@ run_check python3 scripts/check-env.py
 run_check python3 scripts/check-base.py
 run_check python3 scripts/check-theme.py
 run_check node scripts/check-admin-forms.mjs
+run_check node scripts/check-geojson-component.mjs
 run_check node scripts/check-public-media.mjs
 run_check node scripts/check-editorial-media.mjs
 run_check node scripts/check-markdown-render.mjs
 run_check node scripts/check-public-download-route.mjs
-run_check bash -n scripts/repair-ckan-resource.sh
-run_check bash -n scripts/test-editorial-media-url.sh
 run_check python3 scripts/check-id-translations.py
 run_check python3 scripts/check-auth-middleware.py
 run_check python3 scripts/check-build.py

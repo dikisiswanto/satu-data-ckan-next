@@ -22,18 +22,18 @@ https://data.wajokab.go.id/api/3/action
 
 Semua action publik tidak memerlukan API key. Gunakan hanya untuk membaca metadata atau data yang memang tersedia bagi publik. Admin CKAN adalah antarmuka terpisah dan harus tetap dilindungi autentikasi.
 
-| Item                                                                                      | Perilaku                                                                                                                                                     |
-| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Transport                                                                                 | HTTPS untuk deployment publik                                                                                                                                |
-| Method                                                                                    | `GET`, `HEAD`, `OPTIONS` untuk action yang diizinkan                                                                                                         |
-| Format                                                                                    | JSON; skema objek `result` mengikuti CKAN native                                                                                                             |
-| Auth                                                                                      | Tidak dibutuhkan untuk facade publik; permission CKAN tetap berlaku                                                                                          |
-| CORS                                                                                      | Default hanya origin `PUBLIC_SITE_ORIGIN`; origin browser tambahan dapat diizinkan eksplisit lewat `PUBLIC_API_CORS_ORIGINS` (daftar origin dipisahkan koma) |
-| Cache respons katalog umum (`status_show`, `package_search`, organisasi, grup/topik, tag) | `s-maxage=5`, `stale-while-revalidate=5`                                                                                                                     |
-| Cache data yang bergantung pada visibilitas                                               | `Cache-Control: no-store` untuk `package_show`, activity, resource, file, dan DataStore                                                                      |
-| Cache error                                                                               | `no-store`                                                                                                                                                   |
-| Indexing                                                                                  | `X-Robots-Tag: noindex, nofollow, noarchive`                                                                                                                 |
-| Keamanan header                                                                           | `X-Content-Type-Options: nosniff`                                                                                                                            |
+| Item                                                             | Perilaku                                                                                                                                                     |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Transport                                                        | HTTPS untuk deployment publik                                                                                                                                |
+| Method                                                           | `GET`, `HEAD`, `OPTIONS` untuk action yang diizinkan                                                                                                         |
+| Format                                                           | JSON; skema objek `result` mengikuti CKAN native                                                                                                             |
+| Auth                                                             | Tidak dibutuhkan untuk facade publik; permission CKAN tetap berlaku                                                                                          |
+| CORS                                                             | Default hanya origin `PUBLIC_SITE_ORIGIN`; origin browser tambahan dapat diizinkan eksplisit lewat `PUBLIC_API_CORS_ORIGINS` (daftar origin dipisahkan koma) |
+| Cache metadata umum (`status_show`, organisasi, grup/topik, tag) | `s-maxage=5`, `stale-while-revalidate=5`                                                                                                                     |
+| Cache hasil pencarian dan data yang bergantung pada visibilitas  | `Cache-Control: no-store` untuk `package_search`, `package_show`, activity, resource, file, dan DataStore                                                    |
+| Cache error                                                      | `no-store`                                                                                                                                                   |
+| Indexing                                                         | `X-Robots-Tag: noindex, nofollow, noarchive`                                                                                                                 |
+| Keamanan header                                                  | `X-Content-Type-Options: nosniff`                                                                                                                            |
 
 `HEAD` menjalankan logika GET tanpa body respons. `OPTIONS` hanya mengembalikan `204` untuk action yang di-allowlist; action yang tidak dikenal menghasilkan `404`. Header CORS hanya diberikan kepada origin pada `PUBLIC_API_CORS_ORIGINS` atau, bila kosong, `PUBLIC_SITE_ORIGIN`. Jangan memakai wildcard untuk kebutuhan admin. Request mutasi (`POST`, `PUT`, `PATCH`, `DELETE`) serta action yang tidak di-allowlist ditolak. Path action harus satu segmen, misalnya `/package_show`, bukan path bertingkat.
 
@@ -78,7 +78,7 @@ Field di dalam `result` bergantung pada action. Contoh objek di atas hanya ilust
 | `409`, `422` | Konflik/validasi upstream yang dikenali dan diteruskan                                               |
 | `502`        | Upstream CKAN tidak dapat diakses atau menghasilkan kegagalan yang tidak dipetakan ke status di atas |
 
-Pada error, respons tidak disimpan di shared cache. Detail dataset, resource/file, riwayat aktivitas, dan baris DataStore juga memakai `Cache-Control: no-store` dan pemeriksaan CKAN tanpa cache Next.js agar perubahan status publik/privat tidak tertahan cache aplikasi. Untuk data tersebut, jangan menambahkan caching di reverse proxy/CDN.
+Pada error, respons tidak disimpan di shared cache. Hasil pencarian dataset, detail dataset, resource/file, riwayat aktivitas, dan baris DataStore memakai `Cache-Control: no-store` serta pemeriksaan CKAN tanpa cache Next.js agar perubahan status publik/privat segera dihormati. Metadata umum seperti status layanan, organisasi, grup/topik, dan tag dapat memakai shared cache singkat. Jangan menambahkan caching di reverse proxy/CDN untuk action yang ditandai no-store.
 
 ## 3. Action yang tersedia
 
@@ -209,7 +209,7 @@ Nama tipe/tag/field harus mengikuti schema CKAN yang dipasang pada deployment. F
 2. Host admin CKAN harus terpisah dari host publik dan dilindungi oleh satu gerbang perimeter (Basic Auth Caddy atau Cloudflare Access) serta autentikasi/otorisasi CKAN. Hindari menambahkan Basic Auth di depan Cloudflare Access bila ingin mengurangi prompt login.
 3. Jangan meneruskan kredensial admin, token API, atau URL internal ke browser publik.
 4. `package_search` tidak dapat memilih dataset privat melalui facade; CKAN tetap menjadi sumber otoritatif hak akses objek.
-5. Respons error tidak dicache. Respons sukses memakai cache bersama singkat untuk menekan beban katalog.
+5. Respons error tidak dicache. Metadata umum dapat memakai cache bersama singkat; hasil pencarian dan seluruh data yang bergantung pada visibilitas tidak dicache agar perubahan status privat/publik segera berlaku.
 6. Endpoint API tidak ditujukan untuk indexing mesin pencari (`X-Robots-Tag: noindex, nofollow, noarchive`).
 
 Referensi protokol umum: [CKAN 2.12 Action API](https://docs.ckan.org/en/2.12/api/index.html). Bila ada perbedaan antara dokumentasi CKAN upstream dan facade ini, batas facade yang dijelaskan dalam dokumen ini yang berlaku untuk API publik portal.

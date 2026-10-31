@@ -1,4 +1,8 @@
 import { ckanAction } from "@/lib/ckan/client";
+import {
+  buildCkanSessionCookieHeader,
+  getCkanSessionCookieFromRequest,
+} from "@/lib/ckan/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,9 +53,14 @@ function errorResponse(status, message = "Berkas publik tidak ditemukan.") {
   });
 }
 
-function isPublicRecord(record) {
-  return Boolean(
-    record && record.state === "active" && record.private !== true,
+function isActiveRecord(record) {
+  return Boolean(record && record.state === "active");
+}
+
+function isVisibleToViewer(record, sessionCookie) {
+  return (
+    isActiveRecord(record) &&
+    (Boolean(sessionCookie) || record.private !== true)
   );
 }
 
@@ -73,11 +82,11 @@ function fileMime(file) {
     .toLowerCase();
 }
 
-async function verifyPublicFileOwner(file, fileId) {
+async function verifyFileOwner(file, fileId, sessionCookie) {
   if (
     !file ||
     file.id !== fileId ||
-    file.private === true ||
+    (!sessionCookie && file.private === true) ||
     (file.state && file.state !== "active")
   )
     return false;
@@ -110,13 +119,14 @@ async function verifyPublicFileOwner(file, fileId) {
   if (resourceId) {
     if (ownerType === "package" && packageId && ownerId !== packageId)
       return false;
+    const ckanOptions = { revalidate: 0, sessionCookie };
     const resource = await ckanAction(
       "resource_show",
       { id: resourceId },
-      { revalidate: 0 },
+      ckanOptions,
     );
     if (
-      !isPublicRecord(resource) ||
+      !isVisibleToViewer(resource, sessionCookie) ||
       resource.id !== resourceId ||
       !resource.package_id
     )
@@ -125,23 +135,32 @@ async function verifyPublicFileOwner(file, fileId) {
     const dataset = await ckanAction(
       "package_show",
       { id: resource.package_id },
-      { revalidate: 0 },
+      ckanOptions,
     );
-    if (!isPublicRecord(dataset) || dataset.id !== resource.package_id)
+    if (
+      !isVisibleToViewer(dataset, sessionCookie) ||
+      dataset.id !== resource.package_id
+    )
       return false;
+    // `resource_show` above is the authoritative per-resource permission check.
+    // package_show may embed summaries for private resources in a public
+    // package, so the embedded summary must only confirm ownership, never grant
+    // access on its own.
     const matchingResource = (
       Array.isArray(dataset.resources) ? dataset.resources : []
     ).find((item) => item?.id === resourceId);
-    return Boolean(matchingResource && isPublicRecord(matchingResource));
+    return Boolean(matchingResource && matchingResource.id === resource.id);
   }
 
   if (packageId) {
     const dataset = await ckanAction(
       "package_show",
       { id: packageId },
-      { revalidate: 0 },
+      { revalidate: 0, sessionCookie },
     );
-    return Boolean(isPublicRecord(dataset) && dataset.id === packageId);
+    return Boolean(
+      isVisibleToViewer(dataset, sessionCookie) && dataset.id === packageId,
+    );
   }
 
   return false;
@@ -194,10 +213,16 @@ async function handle(request, context) {
   const fileId = String(params?.fileId || "");
   if (!FILE_ID.test(fileId)) return errorResponse(404);
 
+  const sessionCookie = getCkanSessionCookieFromRequest(request);
   let file;
   try {
-    file = await ckanAction("file_show", { id: fileId }, { revalidate: 0 });
-    if (!(await verifyPublicFileOwner(file, fileId))) return errorResponse(404);
+    file = await ckanAction(
+      "file_show",
+      { id: fileId },
+      { revalidate: 0, sessionCookie },
+    );
+    if (!(await verifyFileOwner(file, fileId, sessionCookie)))
+      return errorResponse(404);
   } catch (error) {
     return errorResponse(
       [403, 404].includes(Number(error?.status)) ? 404 : 502,
@@ -221,6 +246,8 @@ async function handle(request, context) {
   }
 
   const requestHeaders = new Headers({ Accept: mime });
+  const forwardedCookie = buildCkanSessionCookieHeader(sessionCookie);
+  if (forwardedCookie) requestHeaders.set("Cookie", forwardedCookie);
   for (const name of [
     "range",
     "if-range",
@@ -303,7 +330,9 @@ async function handle(request, context) {
   const headers = new Headers({
     "Content-Type": mime,
     "Content-Disposition": `${disposition}; filename*=UTF-8''${encodeURIComponent(filename)}`,
-    "Cache-Control": "public, max-age=300, stale-while-revalidate=1800",
+    "Cache-Control": sessionCookie
+      ? "private, no-store"
+      : "public, max-age=300, stale-while-revalidate=1800",
     "X-Content-Type-Options": "nosniff",
     "X-Robots-Tag": "noindex, nofollow, noarchive",
     "Cross-Origin-Resource-Policy": "same-site",

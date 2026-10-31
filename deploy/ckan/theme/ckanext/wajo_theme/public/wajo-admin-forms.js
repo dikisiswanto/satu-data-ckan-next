@@ -235,7 +235,7 @@
     control.dataset.wajoManagedPortalTag = next;
   }
 
-  function buildPortalTypeContext(_control) {
+  function buildPortalTypeContext() {
     const wrapper = fieldWrapper("portal_type");
     if (!wrapper || typeof document.createElement !== "function") return null;
     let panel = wrapper.nextElementSibling;
@@ -265,8 +265,8 @@
     return panel;
   }
 
-  function updatePortalTypeContext(control, type) {
-    const panel = buildPortalTypeContext(control);
+  function updatePortalTypeContext(type) {
+    const panel = buildPortalTypeContext();
     if (!panel) return;
     const guidance = PORTAL_TYPE_GUIDANCE[type] || PORTAL_TYPE_GUIDANCE.dataset;
     panel.dataset.type = type;
@@ -348,7 +348,7 @@
         if (existing) tagControl.dataset.wajoManagedPortalTag = existing;
       }
       syncPortalTypeTag(type);
-      updatePortalTypeContext(selector, type);
+      updatePortalTypeContext(type);
       const form = selector.closest("form");
       if (form) form.dataset.wajoPortalType = type;
     };

@@ -155,6 +155,21 @@ assert.match(
 );
 assert.match(
   script,
+  /function buildPortalTypeContext\(\)/,
+  "Portal type context builder must not accept an unused control parameter.",
+);
+assert.match(
+  script,
+  /function updatePortalTypeContext\(type\)/,
+  "Portal type context updater must only accept the type it uses.",
+);
+assert.match(
+  script,
+  /updatePortalTypeContext\(type\)/,
+  "Portal type changes must update context without an unused control argument.",
+);
+assert.match(
+  script,
   /wajo-file-picker-hint/,
   "Upload fields must explain how to select a file.",
 );

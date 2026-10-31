@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { ckanAction } from "@/lib/ckan/client";
+import { findFirstMarkdownImage } from "@/lib/markdown/markdown-images";
 
 const PAGE_SLUG_PATTERN = /^[a-z0-9][a-z0-9_-]{0,98}[a-z0-9]$|^[a-z0-9]$/i;
 const MAX_CONTENT_LENGTH = 240_000;
@@ -336,6 +337,18 @@ export function publicCmsImageUrl(
   } catch {
     return "";
   }
+}
+
+export function getCmsMarkdownImage(
+  page,
+  siteOrigin = process.env.PUBLIC_SITE_ORIGIN,
+) {
+  const markdownImage = findFirstMarkdownImage(page?.content);
+  if (!markdownImage) return null;
+  const src = publicCmsImageUrl(markdownImage.href, siteOrigin);
+  return src
+    ? { src, alt: markdownImage.alt || page?.title || "Ilustrasi artikel" }
+    : null;
 }
 
 export function getCmsPageDescription(page) {

@@ -45,12 +45,17 @@ for (const route of uniqueRoutes) {
 if (!header.includes('from "@/lib/public-navigation"')) {
   errors.push("SiteHeader harus memakai sumber navigasi bersama.");
 }
+if (footer.includes('from "@/lib/public-navigation"')) {
+  errors.push("SiteFooter tidak boleh mengulang seluruh peta navigasi utama.");
+}
 if (
-  footer.includes('from "@/lib/public-navigation"') ||
-  /<nav\b/.test(footer)
+  !footer.includes('aria-label="Tautan laman"') ||
+  !footer.includes("getPublicCmsNavigationResult") ||
+  !footer.includes('href="/informasi"') ||
+  !footer.includes('href="/berita"')
 ) {
   errors.push(
-    "SiteFooter tidak boleh mengulang navigasi utama; tautan halaman sudah tersedia pada header dan breadcrumb.",
+    "Footer harus menyediakan daftar laman CMS yang ringkas serta tautan ke daftar informasi dan berita.",
   );
 }
 const sdiLogo = readFileSync(
@@ -187,5 +192,5 @@ if (errors.length) {
   process.exit(1);
 }
 process.stdout.write(
-  `Public navigation check passed: ${uniqueRoutes.length} configured route(s), one primary header route map, non-duplicated footer, breadcrumbs and API cross-links are present.\n`,
+  `Public navigation check passed: ${uniqueRoutes.length} configured route(s), one primary header route map, compact CMS footer links, breadcrumbs and API cross-links are present.\n`,
 );

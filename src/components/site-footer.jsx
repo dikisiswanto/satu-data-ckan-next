@@ -1,11 +1,16 @@
 import Image from "next/image";
-import { ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, ExternalLink } from "lucide-react";
+import { getPublicCmsNavigationResult } from "@/lib/cms/pages";
 import { siteConfig } from "@/lib/site-config";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const navigationResult = await getPublicCmsNavigationResult();
+  const pageLinks = (navigationResult.data || []).slice(0, 6);
+
   return (
     <footer className="mt-16 border-t border-line bg-white">
-      <div className="page-container grid gap-7 py-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:py-9">
+      <div className="page-container grid gap-8 py-9 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,.8fr)] lg:gap-12 lg:py-11">
         <div className="flex min-w-0 items-start gap-3">
           <Image
             src={siteConfig.logoPath}
@@ -28,28 +33,65 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <a
-          href="https://data.go.id"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex w-fit items-center gap-2 rounded-lg border border-line bg-white px-2.5 py-2 transition hover:border-[#c4d5df] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
-          aria-label="Kunjungi Portal Satu Data Indonesia di data.go.id (tab baru)"
-        >
-          <Image
-            src="/logo-satu-data-indonesia.svg"
-            alt="Logo Satu Data Indonesia"
-            width={184}
-            height={118}
-            className="h-auto w-[9.5rem] max-w-none shrink-0 object-contain sm:w-[10rem]"
-          />
-          <ExternalLink
-            size={13}
-            className="ml-1 shrink-0 text-muted"
-            aria-hidden="true"
-          />
-        </a>
+        <nav aria-label="Tautan laman" className="min-w-0">
+          <h2 className="text-sm font-semibold text-ink">Laman</h2>
+          <ul className="mt-3 grid gap-2">
+            <li>
+              <Link
+                href="/informasi"
+                className="text-sm text-muted transition hover:text-primary"
+              >
+                Semua informasi
+              </Link>
+            </li>
+            {pageLinks.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className="text-sm text-muted transition hover:text-primary"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-        <p className="border-t border-line pt-4 text-xs text-muted sm:col-span-2">
+        <div className="flex flex-col items-start gap-4">
+          <div>
+            <h2 className="text-sm font-semibold text-ink">
+              Berita dan artikel
+            </h2>
+            <Link
+              href="/berita"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted transition hover:text-primary"
+            >
+              Lihat semua berita <ArrowUpRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+          <a
+            href="https://data.go.id"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-fit items-center gap-2 rounded-lg border border-line bg-white px-2.5 py-2 transition hover:border-[#c4d5df] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
+            aria-label="Kunjungi Portal Satu Data Indonesia di data.go.id (tab baru)"
+          >
+            <Image
+              src="/logo-satu-data-indonesia.svg"
+              alt="Logo Satu Data Indonesia"
+              width={184}
+              height={118}
+              className="h-auto w-[9.5rem] max-w-none shrink-0 object-contain sm:w-[10rem]"
+            />
+            <ExternalLink
+              size={13}
+              className="ml-1 shrink-0 text-muted"
+              aria-hidden="true"
+            />
+          </a>
+        </div>
+
+        <p className="border-t border-line pt-4 text-xs text-muted sm:col-span-2 lg:col-span-3">
           © {new Date().getFullYear()} {siteConfig.name}
         </p>
       </div>

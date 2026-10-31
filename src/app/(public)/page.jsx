@@ -48,6 +48,7 @@ import { getPublishedIndicatorsResult } from "@/lib/data/public-indicators";
 import { getPublishedInfographicsResult } from "@/lib/data/public-infographics";
 import { getPublishedPublicationsResult } from "@/lib/data/public-publications";
 import { getPublicCmsBlogPostsResult } from "@/lib/cms/pages";
+import { CmsContentCard } from "@/components/cms/content-card";
 import { normalizePublicCategoryFacets } from "@/lib/public-categories";
 
 export const metadata = {
@@ -1285,32 +1286,12 @@ async function HomeCmsNewsHighlights() {
       {posts.length ? (
         <div className="grid gap-4 md:grid-cols-3">
           {posts.map((post) => (
-            <article
-              data-public-list-item="true"
+            <CmsContentCard
               key={post.name}
-              className="home-news-card rounded-2xl border border-line bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-                {post.category || "Berita"}
-              </p>
-              <h3 className="mt-3 line-clamp-2 text-base font-semibold leading-6">
-                <Link
-                  href={`/berita/${encodeURIComponent(post.name)}`}
-                  className="hover:text-primary hover:underline"
-                >
-                  {post.title}
-                </Link>
-              </h3>
-              <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">
-                {post.excerpt}
-              </p>
-              <Link
-                href={`/berita/${encodeURIComponent(post.name)}`}
-                className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary"
-              >
-                Baca artikel <ArrowUpRight size={15} aria-hidden="true" />
-              </Link>
-            </article>
+              page={post}
+              href={`/berita/${encodeURIComponent(post.name)}`}
+              kind="Berita"
+            />
           ))}
         </div>
       ) : (

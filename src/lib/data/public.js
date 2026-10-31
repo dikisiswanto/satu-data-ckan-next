@@ -2,6 +2,8 @@ import "server-only";
 import { cache } from "react";
 import { ckanAction, searchPackages } from "@/lib/ckan/client";
 import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
+import { normalizeCkanSessionCookieValue } from "@/lib/ckan/session";
+import { resolveAuthorizedPackageResources } from "@/lib/ckan/viewer-package";
 
 const safeLimit = (value, fallback = 24) =>
   Math.min(Math.max(Number(value) || fallback, 1), 100);
@@ -194,24 +196,42 @@ export async function getPublishedDatasetFacetsResult() {
   }
 }
 
-async function queryPublishedDatasetBySlug(name) {
+async function queryPublishedDatasetBySlug(name, sessionCookie = null) {
   if (typeof name !== "string" || !/^[a-z0-9][a-z0-9_-]{0,99}$/i.test(name))
     return null;
   try {
-    const pkg = await ckanAction("package_show", { id: name });
-    return pkg?.private || (pkg?.state && pkg.state !== "active")
-      ? null
-      : sanitizePublicPackage(pkg);
+    const authenticated = Boolean(sessionCookie);
+    const pkg = await ckanAction(
+      "package_show",
+      { id: name },
+      authenticated ? { revalidate: 0, sessionCookie } : {},
+    );
+    // For anonymous requests, private records remain invisible. For a request
+    // carrying a signed CKAN session, successful package_show is the authority:
+    // CKAN has already checked this user's organization/sysadmin permission.
+    if (
+      (!authenticated && pkg?.private === true) ||
+      (pkg?.state && pkg.state !== "active")
+    )
+      return null;
+    // Never expose every private resource merely because a cookie exists.
+    // Each private resource must independently pass CKAN resource_show for
+    // this browser's signed session.
+    const visiblePkg = await resolveAuthorizedPackageResources(
+      pkg,
+      sessionCookie,
+    );
+    return sanitizePublicPackage(visiblePkg, {
+      includePrivateResources: authenticated,
+    });
   } catch (error) {
-    // CKAN may answer 403 instead of returning a package with private=true
-    // when an anonymous client requests an unpublished/private dataset.
-    // On public detail routes that is equivalent to not found, not a 5xx outage.
     if (error?.status === 403 || error?.status === 404) return null;
     throw error;
   }
 }
-export const getPublishedDatasetBySlugResult = cache(
-  async function getPublishedDatasetBySlugResult(name) {
+
+const getCachedPublicDatasetBySlugResult = cache(
+  async function getCachedPublicDatasetBySlugResult(name) {
     try {
       return {
         data: await queryPublishedDatasetBySlug(name),
@@ -225,6 +245,26 @@ export const getPublishedDatasetBySlugResult = cache(
     }
   },
 );
+
+export async function getPublishedDatasetBySlugResult(
+  name,
+  rawSessionCookie = null,
+) {
+  const sessionCookie = normalizeCkanSessionCookieValue(rawSessionCookie);
+  // Never put authenticated/private dataset responses in a shared React cache.
+  if (!sessionCookie) return getCachedPublicDatasetBySlugResult(name);
+  try {
+    return {
+      data: await queryPublishedDatasetBySlug(name, sessionCookie),
+      unavailable: false,
+    };
+  } catch (error) {
+    console.error("ckan_authenticated_dataset_detail_failed", {
+      status: error?.status || null,
+    });
+    return { data: null, unavailable: true };
+  }
+}
 
 export async function getPublicPortalStatsResult() {
   try {

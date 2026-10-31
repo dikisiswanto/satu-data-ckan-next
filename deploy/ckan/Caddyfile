@@ -6,6 +6,59 @@
   encode zstd gzip
   # Public resource downloads are handled by the Next.js route, which checks
   # CKAN visibility and fetches the file over the private Docker network.
+  # CKAN ResourceView pages (GeoJSON/Map Viewer) are HTML served by CKAN,
+  # not by the Next.js portal. The CKAN site_url deliberately stays on the
+  # public host, so these narrow routes must reach CKAN or Next.js will answer
+  # the iframe request with its global X-Frame-Options: DENY.
+  @ckanResourceView path_regexp ckanResourceView ^/dataset/[^/]+/resource/[a-fA-F0-9-]{16,64}/view/[a-fA-F0-9-]{16,64}/?$
+  handle @ckanResourceView {
+    reverse_proxy https://nginx:443 {
+      header_up Host {http.request.host}
+      header_up X-Forwarded-Host {http.request.host}
+      header_up X-Forwarded-Proto https
+      # This route is used only by the CKAN admin ResourceView iframe. Permit
+      # that one trusted parent origin; do not make the entire portal frameable.
+      header_down -X-Frame-Options
+      header_down -Content-Security-Policy
+      header_down Content-Security-Policy "frame-ancestors https://{$CKAN_HOST}"
+      header_down Cache-Control "private, no-store"
+      transport http {
+        tls_insecure_skip_verify
+      }
+    }
+  }
+
+  # CKAN's viewer HTML references WebAssets and CKAN static resources from
+  # root-relative URLs. Keep these asset prefixes on CKAN; Next.js owns all
+  # other public paths.
+  @ckanViewerAssets path /webassets/* /base/* /static/*
+  handle @ckanViewerAssets {
+    reverse_proxy https://nginx:443 {
+      header_up Host {http.request.host}
+      header_up X-Forwarded-Host {http.request.host}
+      header_up X-Forwarded-Proto https
+      transport http {
+        tls_insecure_skip_verify
+      }
+    }
+  }
+
+  # GeoView can fetch off-domain source files through CKAN's resource_proxy
+  # Action API. Forward only that action to CKAN; keep the rest of the public
+  # Next.js API namespace on Next.js.
+  @ckanResourceProxy path /api/3/action/resource_proxy /api/action/resource_proxy
+  handle @ckanResourceProxy {
+    reverse_proxy https://nginx:443 {
+      header_up Host {http.request.host}
+      header_up X-Forwarded-Host {http.request.host}
+      header_up X-Forwarded-Proto https
+      header_down Cache-Control "private, no-store"
+      transport http {
+        tls_insecure_skip_verify
+      }
+    }
+  }
+
   @publicResourceDownload path_regexp publicResourceDownload ^/dataset/[^/]+/resource/[a-fA-F0-9-]{16,64}/download/[^/]+/?$
   handle @publicResourceDownload {
     reverse_proxy nextjs:3000 {

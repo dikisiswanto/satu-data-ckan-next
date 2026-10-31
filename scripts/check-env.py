@@ -20,12 +20,16 @@ bootstrap = (root / "deploy/ckan/bootstrap-upstream.sh").read_text()
 wrapper = root / "deploy/ckan/compose.sh"
 apply_script = (root / "deploy/ckan/apply-datastore-permissions.sh").read_text()
 dockerfile = (root / "Dockerfile").read_text()
+if "ARG NEXT_PUBLIC_MAP_TILE_URL" not in dockerfile or 'NEXT_PUBLIC_MAP_TILE_URL="${NEXT_PUBLIC_MAP_TILE_URL}"' not in dockerfile:
+    errors.append("Dockerfile harus meneruskan NEXT_PUBLIC_MAP_TILE_URL ke build Next.js")
 
 if not env_example.is_file():
     errors.append(".env.ckan.example tidak ditemukan")
 else:
     env_text = env_example.read_text()
     keys = set(re.findall(r"^([A-Za-z_][A-Za-z0-9_]*)=", env_text, re.M))
+    if "NEXT_PUBLIC_MAP_TILE_URL" not in keys:
+        errors.append(".env.ckan.example harus menyediakan NEXT_PUBLIC_MAP_TILE_URL untuk basemap publik yang dapat dikonfigurasi")
     duplicates = [key for key in keys if len(re.findall(rf"^{re.escape(key)}=", env_text, re.M)) > 1]
     if duplicates:
         errors.append("Variabel duplikat di .env.ckan.example: " + ", ".join(sorted(duplicates)))
@@ -52,6 +56,8 @@ else:
         "CKAN__DATASTORE__SQLSEARCH__ENABLED", "CKAN__HARVEST__MQ__TYPE", "CKAN__HARVEST__MQ__HOSTNAME",
         "CKAN__HARVEST__MQ__PORT", "CKAN__HARVEST__MQ__REDIS_DB", "CKAN__HARVEST__LOG_SCOPE",
         "CKAN__HARVEST__TIMEOUT", "CKAN__VIEWS__DEFAULT_VIEWS",
+        "CKAN___SESSION_COOKIE_NAME", "CKAN___SESSION_COOKIE_DOMAIN", "CKAN___SESSION_COOKIE_HTTPONLY",
+        "CKAN___SESSION_COOKIE_SECURE", "CKAN___SESSION_COOKIE_SAMESITE",
     }
     for file in compose_files:
         text = file.read_text()
@@ -99,7 +105,13 @@ if env_example.is_file() and "CKAN_SYSADMIN_PASSWORD=GENERATE_ON_BOOTSTRAP" not 
 else:
     with tempfile.TemporaryDirectory(prefix="portal-env-sync-check-") as tmp:
         test_env = Path(tmp) / ".env.ckan"
-        test_env.write_text("PUBLIC_HOST=portal.example.test\nCKAN_HOST=admin.example.test\nNEXT_PUBLIC_SITE_URL=https://old.example.test\nCKAN_SITE_URL=https://old.example.test\n")
+        test_env.write_text(
+            "PUBLIC_HOST=portal.example.test\nCKAN_HOST=admin.example.test\n"
+            "NEXT_PUBLIC_SITE_URL=https://old.example.test\nCKAN_SITE_URL=https://old.example.test\n"
+            "CKAN__SESSION_COOKIE_NAME=legacy-wrong-name\n"
+            "CKAN__SESSION_COOKIE_DOMAIN=.legacy.example.test\n"
+            "CKAN_SESSION_COOKIE_NAME=ckan\n"
+        )
         result = subprocess.run([sys.executable, str(syncer), str(test_env)], capture_output=True, text=True)
         synced = test_env.read_text()
         expected_urls = (
@@ -112,13 +124,26 @@ else:
         )
         if result.returncode != 0 or any(value not in synced for value in expected_urls):
             errors.append("sync-env.py tidak memisahkan URL publik dan URL admin setelah hostname diubah")
+        if re.search(r"^CKAN__SESSION_COOKIE_", synced, re.M):
+            errors.append("sync-env.py harus menghapus SESSION_COOKIE key lama yang memakai dua underscore")
+        if "CKAN_SESSION_COOKIE_NAME=wajo_ckan_session" not in synced:
+            errors.append("sync-env.py harus memigrasikan nama cookie host-only lama untuk menghindari cookie duplikat")
+        for cookie_setting in (
+            "CKAN___SESSION_COOKIE_NAME=wajo_ckan_session",
+            "CKAN___SESSION_COOKIE_DOMAIN=.example.test",
+            "CKAN___SESSION_COOKIE_HTTPONLY=true",
+            "CKAN___SESSION_COOKIE_SECURE=true",
+            "CKAN___SESSION_COOKIE_SAMESITE=Lax",
+        ):
+            if cookie_setting not in synced:
+                errors.append("sync-env.py harus menurunkan konfigurasi CKAN session lintas subdomain yang aman: " + cookie_setting)
 
         staging_env = Path(tmp) / ".env.silirdev.ckan"
         staging_env.write_text("PUBLIC_HOST=data.silirdev.com\nCKAN_HOST=ckan.silirdev.com\n")
         staging_result = subprocess.run([sys.executable, str(syncer), str(staging_env)], capture_output=True, text=True)
         staging_synced = staging_env.read_text()
-        if staging_result.returncode != 0 or "NEXT_PUBLIC_CKAN_ADMIN_URL=https://ckan.silirdev.com" not in staging_synced or "CKAN_ADMIN_URL=https://ckan.silirdev.com" not in staging_synced or "NEXT_PUBLIC_SITE_URL=https://data.silirdev.com" not in staging_synced:
-            errors.append("Perubahan CKAN_HOST ke ckan.silirdev.com harus otomatis menyelaraskan seluruh tautan admin tanpa mengubah origin portal publik")
+        if staging_result.returncode != 0 or "NEXT_PUBLIC_CKAN_ADMIN_URL=https://ckan.silirdev.com" not in staging_synced or "CKAN_ADMIN_URL=https://ckan.silirdev.com" not in staging_synced or "NEXT_PUBLIC_SITE_URL=https://data.silirdev.com" not in staging_synced or "CKAN___SESSION_COOKIE_DOMAIN=.silirdev.com" not in staging_synced:
+            errors.append("Perubahan CKAN_HOST ke ckan.silirdev.com harus menyelaraskan URL dan cookie session lintas subdomain")
 
         deep_env = Path(tmp) / ".env.deep-host.ckan"
         deep_env.write_text("PUBLIC_HOST=data.silirdev.com\nCKAN_HOST=ckan.data.silirdev.com\n")
@@ -149,6 +174,12 @@ else:
             output = tmp_path / ".env.generated"
             source.write_text(
                 "CKAN__PLUGINS=\"envvars datastore\"\n"
+                "CKAN_SESSION_COOKIE_NAME=wajo_ckan_session\n"
+                "CKAN___SESSION_COOKIE_NAME=wajo_ckan_session\n"
+                "CKAN___SESSION_COOKIE_DOMAIN=.example.test\n"
+                "CKAN___SESSION_COOKIE_HTTPONLY=true\n"
+                "CKAN___SESSION_COOKIE_SECURE=true\n"
+                "CKAN___SESSION_COOKIE_SAMESITE=Lax\n"
                 "CKAN__UPLOADS_ENABLED=true\n"
                 "CKAN__FILES__STORAGE__DEFAULT__TYPE=ckan:fs\n"
                 "CKAN__FILES__STORAGE__DEFAULT__PATH=/var/lib/ckan/default\n"
@@ -177,11 +208,13 @@ else:
                 errors.append("Renderer env CKAN gagal pada smoke test: " + result.stderr.strip())
             else:
                 generated = output.read_text()
-                for secret in ("CLOUDFLARE_TUNNEL_TOKEN", "CKAN_ADMIN_BASIC_AUTH_PASSWORD", "CKAN_ADMIN_BASIC_AUTH_HASH", "NEXT_PUBLIC_SITE_URL", "PUBLIC_SITE_ORIGIN", "CKANEXT__XLOADER__API_TOKEN", "CKANEXT__XLOADER__JOBS_DB__URI", "CKAN_REVALIDATE_SECRET", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL"):
+                for secret in ("CLOUDFLARE_TUNNEL_TOKEN", "CKAN_ADMIN_BASIC_AUTH_PASSWORD", "CKAN_ADMIN_BASIC_AUTH_HASH", "NEXT_PUBLIC_SITE_URL", "PUBLIC_SITE_ORIGIN", "CKANEXT__XLOADER__API_TOKEN", "CKANEXT__XLOADER__JOBS_DB__URI", "CKAN_REVALIDATE_SECRET", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL", "CKAN_SESSION_COOKIE_NAME"):
                     if re.search(rf"^{secret}=", generated, re.M):
                         errors.append(f"Renderer env membocorkan variabel edge {secret} ke service CKAN")
-                if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test" not in generated or output.stat().st_mode & 0o777 != 0o600:
+                if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test" not in generated or "CKAN___SESSION_COOKIE_DOMAIN=.example.test" not in generated or output.stat().st_mode & 0o777 != 0o600:
                     errors.append("Renderer env harus mempertahankan konfigurasi CKAN/admin host dan menulis output dengan permission 600")
+                if re.search(r"^CKAN__SESSION_COOKIE_", generated, re.M):
+                    errors.append("Flask SESSION_COOKIE settings wajib memakai CKAN___ triple underscore, bukan CKAN__")
                 for upload_setting in (
                     "CKAN__UPLOADS_ENABLED=true",
                     "CKAN__FILES__STORAGE__DEFAULT__TYPE=ckan:fs",

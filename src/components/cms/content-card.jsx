@@ -1,15 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, CalendarDays, FileText } from "lucide-react";
-import { publicCmsImageUrl } from "@/lib/cms/pages";
+import { ArrowUpRight, CalendarDays, FileText, Newspaper } from "lucide-react";
+import { getCmsMarkdownImage, publicCmsImageUrl } from "@/lib/cms/pages";
 import { getPublicSiteOrigin } from "@/lib/site-config";
 import { formatDate } from "@/lib/utils";
 
 export function CmsContentCard({ page, href, kind = "Halaman informasi" }) {
-  const imageUrl = publicCmsImageUrl(
-    page.ogImage || page.image,
-    getPublicSiteOrigin(),
-  );
+  const isArticle =
+    page.pageType === "blog" ||
+    kind.toLowerCase() === "berita" ||
+    kind.toLowerCase() === "artikel";
+  const markdownImage = isArticle
+    ? getCmsMarkdownImage(page, getPublicSiteOrigin())
+    : null;
+  const imageUrl = isArticle
+    ? markdownImage?.src || ""
+    : publicCmsImageUrl(page.ogImage || page.image, getPublicSiteOrigin());
+  const FallbackIcon = isArticle ? Newspaper : FileText;
+
   return (
     <article
       data-public-list-item="true"
@@ -23,7 +31,7 @@ export function CmsContentCard({ page, href, kind = "Halaman informasi" }) {
           <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
             <Image
               src={imageUrl}
-              alt={page.title}
+              alt={markdownImage?.alt || page.title}
               fill
               unoptimized
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -31,8 +39,13 @@ export function CmsContentCard({ page, href, kind = "Halaman informasi" }) {
             />
           </div>
         ) : (
-          <div className="flex aspect-[16/9] items-center justify-center bg-gradient-to-br from-emerald-50 to-slate-100 text-primary">
-            <FileText size={38} strokeWidth={1.4} aria-hidden="true" />
+          <div
+            className="flex aspect-[16/9] items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 text-primary"
+            aria-hidden="true"
+          >
+            <span className="flex size-16 items-center justify-center rounded-2xl border border-white/80 bg-white/85 shadow-sm">
+              <FallbackIcon size={36} strokeWidth={1.4} />
+            </span>
           </div>
         )}
         <div className="p-5">

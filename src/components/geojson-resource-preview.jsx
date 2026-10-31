@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, Globe2, LoaderCircle, MapPinned } from "lucide-react";
 import {
   GEOJSON_PREVIEW_LIMITS,
+  createGeoMapLayout,
   geometryToSvgLayers,
   normalizeGeoJson,
-  projectCoordinate,
+  projectGeoCoordinate,
 } from "@/lib/geo/geojson-preview";
 
 const WIDTH = 800;
@@ -18,7 +19,7 @@ async function readBoundedBody(response, limit, signal) {
     const text = await response.text();
     if (new TextEncoder().encode(text).byteLength > limit) {
       throw new Error(
-        "Ukuran berkas melebihi batas pratinjau 5 MB. Unduh berkas untuk mengolah seluruh data.",
+        "Ukuran berkas melebihi batas pratinjau 20 MB. Unduh berkas untuk mengolah seluruh data.",
       );
     }
     return text;
@@ -35,7 +36,7 @@ async function readBoundedBody(response, limit, signal) {
       if (total > limit) {
         await reader.cancel("Batas pratinjau terlampaui.").catch(() => {});
         throw new Error(
-          "Ukuran berkas melebihi batas pratinjau 5 MB. Unduh berkas untuk mengolah seluruh data.",
+          "Ukuran berkas melebihi batas pratinjau 20 MB. Unduh berkas untuk mengolah seluruh data.",
         );
       }
       chunks.push(value);
@@ -68,13 +69,13 @@ export function GeoJSONResourcePreview({ resource, url }) {
     if (!url) return undefined;
     const controller = new AbortController();
     let cancelled = false;
-    const timeout = setTimeout(() => controller.abort(), 12_000);
+    const timeout = setTimeout(() => controller.abort(), 30_000);
 
     async function load() {
       try {
         const response = await fetch(url, {
           signal: controller.signal,
-          credentials: "omit",
+          credentials: "same-origin",
           cache: "no-store",
           headers: { Accept: "application/geo+json, application/json;q=0.9" },
         });
@@ -85,7 +86,7 @@ export function GeoJSONResourcePreview({ resource, url }) {
         );
         if (contentLength > GEOJSON_PREVIEW_LIMITS.maxBytes) {
           throw new Error(
-            "Ukuran berkas melebihi batas pratinjau 5 MB. Unduh berkas untuk mengolah seluruh data.",
+            "Ukuran berkas melebihi batas pratinjau 20 MB. Unduh berkas untuk mengolah seluruh data.",
           );
         }
         const text = await readBoundedBody(
@@ -134,15 +135,43 @@ export function GeoJSONResourcePreview({ resource, url }) {
     };
   }, [url]);
 
+  const mapLayout = useMemo(
+    () =>
+      payload
+        ? createGeoMapLayout(payload.bounds, WIDTH, HEIGHT, 32, {
+            tileUrlTemplate:
+              process.env.NEXT_PUBLIC_MAP_TILE_URL ||
+              "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            maxTiles: 48,
+          })
+        : null,
+    [payload],
+  );
+
   const layers = useMemo(() => {
-    if (!payload) return null;
-    const project = (coordinate) =>
-      projectCoordinate(coordinate, payload.bounds, WIDTH, HEIGHT, 32);
+    if (!payload || !mapLayout) return null;
+    const project = (coordinate) => projectGeoCoordinate(coordinate, mapLayout);
     const result = { points: [], lines: [], polygons: [] };
     for (const feature of payload.features)
       geometryToSvgLayers(feature.geometry, project, result);
     return result;
-  }, [payload]);
+  }, [payload, mapLayout]);
+
+  // Keep tile failures scoped to the URL that produced them. This makes the
+  // visible count reset automatically when the resource changes, without a
+  // synchronous state update inside an effect or late events leaking across URLs.
+  const [tileFailureState, setTileFailureState] = useState({
+    url: null,
+    count: 0,
+  });
+  const failedTileCount =
+    tileFailureState.url === url ? tileFailureState.count : 0;
+  const recordTileFailure = () => {
+    setTileFailureState((current) => ({
+      url,
+      count: current.url === url ? current.count + 1 : 1,
+    }));
+  };
 
   return (
     <section
@@ -212,37 +241,30 @@ export function GeoJSONResourcePreview({ resource, url }) {
               viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
               role="img"
               aria-label={`Peta pratinjau ${payload.geometryTypes.join(", ")}`}
-              className="h-auto max-h-[520px] w-full rounded-xl bg-white"
+              className="h-auto max-h-[520px] w-full rounded-xl bg-[#e8edf0]"
             >
-              <defs>
-                <pattern
-                  id={`geo-grid-${resource?.id || "resource"}`}
-                  width="80"
-                  height="60"
-                  patternUnits="userSpaceOnUse"
-                >
-                  <path
-                    d="M 80 0 L 0 0 0 60"
-                    fill="none"
-                    stroke="#e8edf2"
-                    strokeWidth="1"
-                  />
-                </pattern>
-              </defs>
-              <rect
-                width={WIDTH}
-                height={HEIGHT}
-                fill={`url(#geo-grid-${resource?.id || "resource"})`}
-              />
+              <rect width={WIDTH} height={HEIGHT} fill="#e8edf0" />
+              {mapLayout.tiles.map((tile) => (
+                <image
+                  key={tile.key}
+                  href={tile.url}
+                  x={tile.x}
+                  y={tile.y}
+                  width={tile.width}
+                  height={tile.height}
+                  preserveAspectRatio="none"
+                  onError={recordTileFailure}
+                />
+              ))}
               {layers.polygons.map((path, index) => (
                 <path
                   key={`polygon-${index}`}
                   d={path}
-                  fill="#c7e7df"
-                  fillOpacity="0.76"
+                  fill="#2f927e"
+                  fillOpacity="0.28"
                   fillRule="evenodd"
-                  stroke="#267565"
-                  strokeWidth="1.4"
+                  stroke="#176b5c"
+                  strokeWidth="1.6"
                   strokeLinejoin="round"
                 />
               ))}
@@ -251,8 +273,8 @@ export function GeoJSONResourcePreview({ resource, url }) {
                   key={`line-${index}`}
                   d={path}
                   fill="none"
-                  stroke="#177d73"
-                  strokeWidth="2.2"
+                  stroke="#126f63"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
@@ -262,7 +284,7 @@ export function GeoJSONResourcePreview({ resource, url }) {
                   <circle
                     cx={point.x}
                     cy={point.y}
-                    r="5"
+                    r="5.5"
                     fill="#c44737"
                     stroke="white"
                     strokeWidth="2"
@@ -270,19 +292,32 @@ export function GeoJSONResourcePreview({ resource, url }) {
                   <circle
                     cx={point.x}
                     cy={point.y}
-                    r="9"
+                    r="10"
                     fill="none"
                     stroke="#c44737"
-                    strokeOpacity="0.28"
+                    strokeOpacity="0.32"
                   />
                 </g>
               ))}
             </svg>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-3 text-xs text-muted sm:px-5">
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex flex-wrap items-center gap-1.5">
               <Globe2 size={14} aria-hidden="true" />
-              WGS 84 · koordinat bujur dan lintang
+              WGS 84 · peta dasar{" "}
+              <a
+                className="font-medium text-primary underline-offset-2 hover:underline"
+                href="https://www.openstreetmap.org/copyright"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                © OpenStreetMap
+              </a>
+              {failedTileCount > 0 ? (
+                <span className="text-amber-700">
+                  · {failedTileCount} ubin peta gagal dimuat
+                </span>
+              ) : null}
             </span>
             <span>
               Rentang: {payload.bounds.minLon.toFixed(4)},{" "}

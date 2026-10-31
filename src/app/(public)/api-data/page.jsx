@@ -753,7 +753,7 @@ export default function ApiDocsPage() {
                   />
                   <Field
                     name="Cache"
-                    value="status_show, package_search, daftar/detail organisasi/topik, dan tag dapat memakai shared cache singkat sebagai fallback (s-maxage 5 detik; stale-while-revalidate 5 detik). package_show, package_activity_list, resource_show, file_show, datastore_search, dan semua respons error memakai Cache-Control: no-store."
+                    value="status_show, daftar/detail organisasi/topik, dan tag dapat memakai shared cache singkat (s-maxage 5 detik; stale-while-revalidate 5 detik). package_search, package_show, package_activity_list, resource_show, file_show, datastore_search, dan semua respons error memakai Cache-Control: no-store agar perubahan visibilitas dataset/resource segera dihormati."
                   />
                   <Field
                     name="CORS"

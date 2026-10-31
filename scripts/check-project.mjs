@@ -62,6 +62,7 @@ for (const field of [
 const required = [
   "src/lib/ckan/client.js",
   "src/lib/cms/pages.js",
+  "src/lib/markdown/markdown-images.js",
   "src/components/cms/markdown-content.jsx",
   "src/components/cms/content-blocks.jsx",
   "src/components/cms/content-card.jsx",
@@ -118,6 +119,7 @@ const required = [
   "tests/unit/public-organizations.test.js",
   "tests/unit/ckan-cms.test.js",
   "tests/unit/geojson-preview.test.js",
+  "tests/unit/markdown-images.test.js",
   "tests/e2e/public-portal.spec.js",
   "docs/CMS.md",
   "src/lib/geo/geojson-preview.js",
@@ -214,6 +216,21 @@ const checks = [
     "src/components/dataset-resource-preview.jsx",
     /fallbackPreviewQuery[\s\S]*csv-fallback[\s\S]*DataStore akan menyediakan pencarian dan pagination penuh/,
     "Resource CSV/TSV harus tetap menampilkan pratinjau terbatas sebelum DataStore selesai diindeks.",
+  ],
+  [
+    "src/components/geojson-resource-preview.jsx",
+    /createGeoMapLayout[\s\S]*NEXT_PUBLIC_MAP_TILE_URL[\s\S]*mapLayout\.tiles\.map/,
+    "GeoJSON public preview harus menampilkan raster basemap dan geometri vektor dengan proyeksi yang sama.",
+  ],
+  [
+    "src/lib/geo/geojson-preview.js",
+    /mercatorNormalized[\s\S]*createGeoMapLayout[\s\S]*projectGeoCoordinate/,
+    "GeoJSON preview must use bounded Web Mercator tile layout for raster/vector alignment.",
+  ],
+  [
+    "src/lib/geo/geojson-preview.js",
+    /DEFAULT_MAX_FEATURES = 10_000[\s\S]*DEFAULT_MAX_COORDINATES = 300_000[\s\S]*maxBytes: 20 \* 1024 \* 1024/,
+    "GeoJSON preview must support datasets beyond 2,000 features with bounded memory and coordinate limits.",
   ],
   [
     "src/components/dataset-api-access.jsx",
@@ -508,6 +525,21 @@ const cmsChecks = [
     "Slug dan URL gambar CMS harus dibatasi sebelum masuk ke renderer publik.",
   ],
   [
+    "src/lib/markdown/markdown-images.js",
+    /findFirstMarkdownImage[\s\S]*parseMarkdown/,
+    "CMS article images must be extracted from Markdown image tokens.",
+  ],
+  [
+    "src/components/cms/content-card.jsx",
+    /getCmsMarkdownImage[\s\S]*Newspaper/,
+    "News cards must use Markdown images and a default article icon when no image exists.",
+  ],
+  [
+    "src/components/site-footer.jsx",
+    /(?=[\s\S]*getPublicCmsNavigationResult)(?=[\s\S]*href=\"\/berita\")(?=[\s\S]*href=\"\/informasi\")[\s\S]*/,
+    "Public footer must link to published information pages and the full news list.",
+  ],
+  [
     "src/app/api/3/action/[...action]/route.js",
     /const ACTIONS = new Set\([\s\S]*package_search[\s\S]*datastore_search/,
     "Facade API umum harus tetap memakai allowlist action CKAN yang eksplisit.",
@@ -524,8 +556,8 @@ const cmsChecks = [
   ],
   [
     "src/app/api/public/ckan-file/[fileId]/route.js",
-    /function isPublicRecord[\s\S]*private !== true[\s\S]*verifyPublicFileOwner[\s\S]*resource_show[\s\S]*package_show[\s\S]*file_show[\s\S]*Range[\s\S]*redirect:\s*"manual"/,
-    "File API publik harus memverifikasi resource/dataset aktif dan terbuka sebelum memproxy file.",
+    /buildCkanSessionCookieHeader[\s\S]*function isVisibleToViewer[\s\S]*private !== true[\s\S]*async function verifyFileOwner[\s\S]*resource_show[\s\S]*package_show[\s\S]*file_show[\s\S]*redirect:\s*"manual"[\s\S]*private, no-store/,
+    "File API harus memeriksa izin resource/dataset melalui CKAN, meneruskan sesi browser, dan melarang cache bersama untuk file privat.",
   ],
   [
     "src/components/cms/content-blocks.jsx",
@@ -651,7 +683,8 @@ for (const file of [
 ]) {
   try {
     const source = await readFile(path.join(root, file), "utf8");
-    const adminBlock = source.split("{$CKAN_HOST}")[1] || "";
+    const adminBlock =
+      source.match(/\n(?:http:\/\/)?\{\$CKAN_HOST\}\s*\{([\s\S]*)$/)?.[1] || "";
     if (
       !adminBlock.includes("@adminRobots path /robots.txt") ||
       !adminBlock.includes("@adminSitemap path") ||
@@ -698,7 +731,8 @@ for (const file of [
 ]) {
   try {
     const source = await readFile(path.join(root, file), "utf8");
-    const adminBlock = source.split("{$CKAN_HOST}")[1] || "";
+    const adminBlock =
+      source.match(/\n(?:http:\/\/)?\{\$CKAN_HOST\}\s*\{([\s\S]*)$/)?.[1] || "";
     if (
       !adminBlock.includes(
         'header >X-Robots-Tag "noindex, nofollow, noarchive, nosnippet, noimageindex"',
