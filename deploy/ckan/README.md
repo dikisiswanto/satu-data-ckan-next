@@ -319,7 +319,7 @@ Caddy menangani sertifikat TLS. Jangan jalankan profil manual dan Tunnel bersama
 
 ## 11. Pembaruan dan diagnosa
 
-Sebelum deployment, jalankan `npm run check`, `npm run test`, `npm run build`, `python3 scripts/check-build.py`, dan `bash ./deploy/ckan/compose.sh cloudflare config`. Setelah deploy, periksa `bash ./deploy/ckan/compose.sh cloudflare ps` dan log service. Backup PostgreSQL CKAN, volume filestore, serta indeks Solr; uji pemulihan sebelum upgrade. Jangan menghapus volume ketika membangun ulang image.
+Sebelum deployment, jalankan `npm ci`, `npm run check`, `npm run test`, `npm run build`, dan `bash ./deploy/ckan/compose.sh cloudflare config`. Workflow manual `Extended validation` menyediakan E2E browser, audit dependency, dan smoke-test image extension. Setelah deploy, periksa `bash ./deploy/ckan/compose.sh cloudflare ps` dan log service. Backup PostgreSQL CKAN, volume filestore, serta indeks Solr; uji pemulihan sebelum upgrade. Jangan menghapus volume ketika membangun ulang image.
 
 ## 12. CMS konten publik
 

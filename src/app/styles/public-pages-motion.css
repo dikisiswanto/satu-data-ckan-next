@@ -24,3 +24,52 @@
     will-change: auto;
   }
 }
+
+/* Public interaction transitions: smooth, restrained feedback without moving the page shell. */
+.public-app-shell :where(a, button, [role="button"]) {
+  transition-property:
+    color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 190ms;
+  transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.public-app-shell
+  :where(
+    article,
+    [data-public-list-item="true"],
+    .cms-directory-card,
+    .home-dataset-card,
+    .organization-directory-card
+  ) {
+  transition-property: transform, box-shadow, border-color, background-color;
+  transition-duration: 240ms;
+  transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.public-app-shell
+  :where(
+    article,
+    [data-public-list-item="true"],
+    .cms-directory-card,
+    .home-dataset-card,
+    .organization-directory-card
+  ):where(:hover, :focus-within) {
+  transition-duration: 240ms;
+}
+.public-app-shell :where(a, button, [role="button"]):active {
+  transition-duration: 100ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .public-app-shell
+    :where(
+      a,
+      button,
+      [role="button"],
+      article,
+      [data-public-list-item="true"],
+      .cms-directory-card,
+      .home-dataset-card,
+      .organization-directory-card
+    ) {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}

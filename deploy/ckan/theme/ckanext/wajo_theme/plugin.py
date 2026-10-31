@@ -343,6 +343,11 @@ class WajoThemePlugin(plugins.SingletonPlugin):
             if is_login_asset(path):
                 return None
 
+            came_from = str(getattr(request, "args", {}).get("came_from", "") or "")
+            stale_logout_target = urlsplit(came_from).path.rstrip("/") in {
+                "/user/logout", "/user/logged_out_redirect",
+            }
+
             if current_user.is_authenticated:
                 # CKAN flashes a logout confirmation into the session. A fast
                 # re-login can leave that message queued on the new dashboard;
@@ -358,13 +363,20 @@ class WajoThemePlugin(plugins.SingletonPlugin):
                     if len(retained) != len(flashes):
                         session["_flashes"] = retained
 
-                if path in self._LOGIN_PATHS and request.method in {"GET", "HEAD"}:
+                if (path in self._LOGIN_PATHS and request.method in {"GET", "HEAD"}) or (
+                    path == "/user/logged_out_redirect" and request.method in {"GET", "HEAD"}
+                ):
                     return redirect(url_for("wajo_admin.index"))
                 if path == "/":
                     return redirect(url_for("wajo_admin.index"))
                 return None
 
+            if path == "/user/logged_out_redirect":
+                # Never let CKAN turn its own logout target into came_from again.
+                return redirect(url_for("user.login"))
             if path in self._LOGIN_PATHS:
+                if request.method in {"GET", "HEAD"} and stale_logout_target:
+                    return redirect(url_for("user.login"))
                 return None
 
             if path.startswith("/api/"):
@@ -390,19 +402,30 @@ class WajoThemePlugin(plugins.SingletonPlugin):
                 return response
 
             path = (request.path or "").rstrip("/")
-            if path == "/user/logout":
-                # CKAN's default logout redirect may preserve a came_from value
-                # pointing back to /user/logout. That can replay the logout flash
-                # or a stale cached admin view when the user immediately logs in.
-                # Finish logout with a clean PRG redirect to the login endpoint.
+            if path in {"/user/logout", "/user/logged_out_redirect"}:
+                # CKAN's default logout destination can persist as came_from and
+                # replay its success flash on the next login. Always finish on a
+                # fresh login or dashboard URL, never on the logout confirmation.
                 response.status_code = 303
-                response.headers["Location"] = url_for("user.login")
+                response.headers["Location"] = (
+                    url_for("wajo_admin.index")
+                    if path == "/user/logged_out_redirect" and current_user.is_authenticated
+                    else url_for("user.login")
+                )
                 response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
                 response.headers["Pragma"] = "no-cache"
                 return response
             if path == "/user/login":
                 response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
                 response.headers["Pragma"] = "no-cache"
+                location = response.headers.get("Location", "")
+                target_path = urlsplit(location).path.rstrip("/") if location else ""
+                if target_path in {"/user/logout", "/user/logged_out_redirect"}:
+                    response.status_code = 303
+                    response.headers["Location"] = (
+                        url_for("wajo_admin.index") if current_user.is_authenticated else url_for("user.login")
+                    )
+                    return response
             if request.method in {"POST", "PUT", "PATCH", "DELETE"} and response.status_code < 400:
                 pages_form_write = path == "/pages" or path.startswith("/pages/")
                 pages_api_write = path.startswith("/api/3/action/ckanext_pages_") and any(

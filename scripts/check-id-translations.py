@@ -31,7 +31,7 @@ def placeholders(value: str) -> set[str]:
 def main() -> None:
     try:
         from babel.messages.mofile import read_mo, write_mo
-        from babel.messages.pofile import read_po
+        from babel.messages.pofile import read_po, write_po
     except ImportError as error:
         raise SystemExit("Babel is required for the Indonesian translation checks.") from error
 
@@ -73,6 +73,7 @@ def main() -> None:
         "Dashboard", "Log in", "Log out", "Save", "Cancel", "Delete", "Edit",
         "Search", "Filter", "Apply", "Clear", "Add Dataset", "Organizations",
         "Groups", "Users", "Resource", "Resources", "Preview", "Create",
+        "Username", "Email", "Private", "State", "active", "deleted", "Datasets",
         "Update", "Activity Stream", "Administration", "Site Settings",
         "Harvest Sources", "Harvest Jobs", "Pages", "Add Page", "Data Dictionary",
         "Authorization function not found: %s", "Editor", "Member", "View", "Just now",
@@ -102,12 +103,44 @@ def main() -> None:
         "This is a nice introductory paragraph about CKAN or the site in general. We don't have any copy to go here yet but soon we will",
         "CKAN config options", "Deleted organizations", "There are no organizations to purge",
         "DataStore", "Data Dictionary", "COLUMN FILTER/S", "Double-click to reset filters",
-        "No results found", "No datasets found", "No organizations found", "About CKAN",
+        "No results found", "No datasets found", 'No datasets found for "{query}"',
+        "No groups found", 'No groups found for "{query}"',
+        "No organizations found", 'No organizations found for "{query}"', "About CKAN",
+        "You have not provided a biography.", "This user has no biography.", "Followers",
+        "Open ID", "Member Since", "Last Active", "This information is visible to you and admins",
+        "Frequency", "Frequency filter", "Filter by frequency",
+        "Add information page", "Add news article",
     }
-    message_ids = {message.id if isinstance(message.id, str) else message.id[0] for message in translated}
+    message_ids = {
+        source_id
+        for message in translated
+        for source_id in (message.id if isinstance(message.id, tuple) else (message.id,))
+    }
     absent = sorted(required - message_ids)
     if absent:
         ERRORS.append(f"Required CKAN core admin translation keys are missing: {', '.join(absent)}")
+    required_plural_pairs = {
+        (
+            '{number} dataset found for "{query}"',
+            '{number} datasets found for "{query}"',
+        ),
+        ("{number} dataset found", "{number} datasets found"),
+        (
+            '{number} group found for "{query}"',
+            '{number} groups found for "{query}"',
+        ),
+        (
+            '{number} organization found for "{query}"',
+            '{number} organizations found for "{query}"',
+        ),
+        ("{number} group found", "{number} groups found"),
+        ("{number} organization found", "{number} organizations found"),
+    }
+    actual_plural_pairs = {
+        message.id for message in translated if isinstance(message.id, tuple)
+    }
+    if not required_plural_pairs.issubset(actual_plural_pairs):
+        ERRORS.append("CKAN core must contain every dataset/group/organization gettext plural pair (queried and unfiltered) used by CKAN 2.12.")
 
     expected_translations = {
         "ckan": {
@@ -115,6 +148,28 @@ def main() -> None:
             "Site Title": "Nama portal",
             "Administer CKAN": "Administrasi CKAN",
             "API Endpoint": "Titik akhir API",
+            "No datasets found": "Tidak ada dataset yang ditemukan",
+            'No datasets found for "{query}"': 'Tidak ada dataset yang ditemukan untuk "{query}"',
+            'No groups found for "{query}"': 'Tidak ada grup yang ditemukan untuk "{query}"',
+            'No organizations found for "{query}"': 'Tidak ada organisasi yang ditemukan untuk "{query}"',
+            "You have not provided a biography.": "Anda belum mengisi biografi.",
+            "This user has no biography.": "Pengguna ini belum mengisi biografi.",
+            "Followers": "Pengikut",
+            "Username": "Nama pengguna",
+            "Email": "Email",
+            "Private": "Privat",
+            "State": "Status",
+            "active": "Aktif",
+            "deleted": "Dihapus",
+            "Datasets": "Dataset",
+            "Open ID": "OpenID",
+            "Member Since": "Menjadi anggota sejak",
+            "This information is visible to you and admins": "Informasi ini hanya dapat dilihat oleh Anda dan administrator.",
+            "Frequency": "Frekuensi",
+            "Frequency filter": "Filter frekuensi",
+            "Filter by frequency": "Saring berdasarkan frekuensi",
+            "Add information page": "Tambah halaman informasi",
+            "Add news article": "Tambah artikel berita",
         },
         "ckanext-pages": {
             "Blog": "Berita dan artikel",
@@ -126,7 +181,9 @@ def main() -> None:
         catalog = parsed_catalogs.get(domain)
         for source, expected_value in expected.items():
             message = catalog.get(source) if catalog else None
-            if message is None or message.string != expected_value:
+            expected_values = expected_value if isinstance(expected_value, tuple) else (expected_value,)
+            actual_values = message.string if message is not None and isinstance(message.string, tuple) else ((message.string,) if message is not None else ())
+            if message is None or tuple(actual_values) != tuple(expected_values):
                 actual = message.string if message is not None else "<missing>"
                 ERRORS.append(f"{domain}: expected {source!r} -> {expected_value!r}, got {actual!r}.")
 
@@ -151,7 +208,7 @@ def main() -> None:
 
     extension_required = {
         "ckanext-harvest": {
-            "Harvest Sources", "Add Harvest Source", "Harvest Jobs", "Run", "Reharvest", "Frequency", "Source URL",
+            "Harvest Sources", "Add Harvest Source", "Harvest Jobs", "Run", "Reharvest", "Frequency", "Frequency filter", "Filter by frequency", "Source URL",
             "Group not found", "Unauthorized to read group %s", "Groups", "Tags", "Formats", "Licence",
             "Not authorized to see this page", "Harvesting source successfully cleared",
             "Harvesting source successfully inactivated", "Harvest source not found",
@@ -188,7 +245,7 @@ def main() -> None:
         },
         "ckanext-dcat": {
             "URI", "GUID", "Theme", "Identifier", "Alternate identifier", "Issued", "Modified", "Version notes",
-            "Language", "Frequency", "Conforms to", "Spatial URI", "Start of temporal extent", "End of temporal extent",
+            "Language", "Frequency", "Frequency filter", "Filter by frequency", "Conforms to", "Spatial URI", "Start of temporal extent", "End of temporal extent",
             "Publisher URI", "Publisher name", "Publisher email", "Publisher URL", "Publisher type", "Contact name",
             "Contact email", "Contact URI", "Download URL", "Media type", "Size", "Rights", "Created",
         },
@@ -225,14 +282,162 @@ def main() -> None:
             ERRORS.append("Wajo translation must override an upstream translation for the same msgid.")
         if merged.get("Core-only label").string != "Label inti":
             ERRORS.append("Compiler must preserve upstream Indonesian messages absent from Wajo PO.")
+        import gettext
+        with base_path.open("rb") as handle:
+            runtime_catalog = gettext.GNUTranslations(handle)
+        search_result = runtime_catalog.ngettext(
+            '{number} dataset found for "{query}"',
+            '{number} datasets found for "{query}"',
+            7,
+        ).format(number=7, query="menara")
+        if search_result != '7 dataset ditemukan untuk "menara"':
+            ERRORS.append(
+                "Compiled core gettext plural for queried dataset search must render Indonesian: "
+                f"{search_result!r}."
+            )
+        empty_query_search_result = runtime_catalog.ngettext(
+            "{number} dataset found", "{number} datasets found", 7
+        ).format(number=7)
+        if empty_query_search_result != "7 dataset ditemukan":
+            ERRORS.append(
+                "Compiled core gettext plural for unfiltered dataset search must render Indonesian: "
+                f"{empty_query_search_result!r}."
+            )
+        percent_search_result = runtime_catalog.ngettext(
+            '%(count)s dataset found for "%(query)s".',
+            '%(count)s datasets found for "%(query)s".',
+            7,
+        ) % {"count": 7, "query": "menara"}
+        if percent_search_result != '7 dataset ditemukan untuk "menara".':
+            ERRORS.append(
+                "Compiled core gettext percent-style plural for queried dataset search must render Indonesian: "
+                f"{percent_search_result!r}."
+            )
+        percent_empty_query_result = runtime_catalog.ngettext(
+            "%(count)s dataset found.", "%(count)s datasets found.", 7
+        ) % {"count": 7}
+        if percent_empty_query_result != "7 dataset ditemukan.":
+            ERRORS.append(
+                "Compiled core gettext percent-style plural for unfiltered dataset search must render Indonesian: "
+                f"{percent_empty_query_result!r}."
+            )
+        search_types = (
+            ("dataset", "dataset", "dataset"),
+            ("group", "grup", "grup"),
+            ("organization", "organisasi", "organisasi"),
+        )
+        for source_type, translated_type, query_value in search_types:
+            for has_query in (True, False):
+                suffix = f' for "{{query}}"' if has_query else ""
+                singular = f"{{number}} {source_type} found{suffix}"
+                plural = f"{{number}} {source_type}s found{suffix}"
+                for number in (1, 3):
+                    actual = runtime_catalog.ngettext(singular, plural, number).format(
+                        number=number, query=query_value
+                    )
+                    expected = (
+                        f'{number} {translated_type} ditemukan untuk "{query_value}"'
+                        if has_query else f"{number} {translated_type} ditemukan"
+                    )
+                    if actual != expected:
+                        ERRORS.append(
+                            f"Compiled CKAN {source_type} search count must render {expected!r}, got {actual!r}."
+                        )
+
+        empty_searches = (
+            ('No datasets found', 'Tidak ada dataset yang ditemukan'),
+            ('No datasets found for "{query}"', 'Tidak ada dataset yang ditemukan untuk "menara"'),
+            ('No groups found', 'Grup tidak ditemukan'),
+            ('No groups found for "{query}"', 'Tidak ada grup yang ditemukan untuk "pangan"'),
+            ('No organizations found', 'Organisasi tidak ditemukan'),
+            ('No organizations found for "{query}"', 'Tidak ada organisasi yang ditemukan untuk "dinas"'),
+        )
+        for source, expected in empty_searches:
+            query = "dinas" if "organization" in source else "pangan" if "group" in source else "menara"
+            actual = runtime_catalog.gettext(source).format(query=query)
+            if actual != expected:
+                ERRORS.append(
+                    f"Compiled CKAN empty-search label {source!r} must render {expected!r}, got {actual!r}."
+                )
+        for source, expected in (
+            ("You have not provided a biography.", "Anda belum mengisi biografi."),
+            ("This user has no biography.", "Pengguna ini belum mengisi biografi."),
+            ("Followers", "Pengikut"),
+            ("Username", "Nama pengguna"),
+            ("State", "Status"),
+            ("active", "Aktif"),
+            ("Member Since", "Menjadi anggota sejak"),
+        ):
+            actual = runtime_catalog.gettext(source)
+            if actual != expected:
+                ERRORS.append(f"Compiled CKAN user label {source!r} must render {expected!r}, got {actual!r}.")
+        for source, expected in (
+            ("Frequency", "Frekuensi"),
+            ("Frequency filter", "Filter frekuensi"),
+            ("Filter by frequency", "Saring berdasarkan frekuensi"),
+        ):
+            if runtime_catalog.gettext(source) != expected:
+                ERRORS.append(f"Compiled core gettext label {source!r} must be {expected!r}.")
         extension_output = locale_root / "wajo-theme-i18n"
         compiled_extensions = module.compile_extension_catalogs(PO, extension_output)
         if len(compiled_extensions) != len(EXTENSION_POS):
             ERRORS.append("Compiler must produce every maintained Indonesian extension gettext domain.")
+        # Extension domains must merge, not replace, the upstream extension .mo.
+        upstream_extension_path = locale_root / "upstream-pages/id/LC_MESSAGES/ckanext-pages.mo"
+        upstream_extension_path.parent.mkdir(parents=True, exist_ok=True)
+        upstream_extension = Catalog(locale="id", domain="ckanext-pages")
+        upstream_extension.add("Blog", "Blog upstream")
+        upstream_extension.add("Upstream-only page label", "Label halaman dari upstream")
+        with upstream_extension_path.open("wb") as handle:
+            write_mo(handle, upstream_extension)
+        merged_extension_path = module.compile_extension_catalog(
+            EXTENSION_POS["ckanext-pages"], extension_output, [upstream_extension_path]
+        )
+        with merged_extension_path.open("rb") as handle:
+            merged_extension = read_mo(handle)
+        if merged_extension.get("Blog").string != "Berita dan artikel":
+            ERRORS.append("Wajo extension translation must override upstream translations for the same msgid.")
+        if merged_extension.get("Upstream-only page label").string != "Label halaman dari upstream":
+            ERRORS.append("Extension compiler must preserve upstream Indonesian messages absent from Wajo PO.")
+
+        # An upstream extension may ship a PO instead of a compiled MO.
+        upstream_po_path = locale_root / "upstream-pages-po/id/LC_MESSAGES/ckanext-pages.po"
+        upstream_po_path.parent.mkdir(parents=True, exist_ok=True)
+        upstream_po_catalog = Catalog(locale="id", domain="ckanext-pages")
+        upstream_po_catalog.add("PO-only page label", "Label PO upstream")
+        with upstream_po_path.open("wb") as handle:
+            write_po(handle, upstream_po_catalog)
+        po_extension_output = locale_root / "upstream-po-output"
+        po_merged_path = module.compile_extension_catalog(
+            EXTENSION_POS["ckanext-pages"], po_extension_output, [upstream_po_path]
+        )
+        with po_merged_path.open("rb") as handle:
+            po_merged = read_mo(handle)
+        if po_merged.get("PO-only page label").string != "Label PO upstream":
+            ERRORS.append("Extension compiler must also preserve upstream Indonesian PO catalogs.")
+
+        # A fuzzy Wajo translation must not shadow a valid upstream string.
+        fuzzy_source = locale_root / "fixture-theme/ckanext-pages.po"
+        fuzzy_source.parent.mkdir(parents=True, exist_ok=True)
+        fuzzy_catalog = Catalog(locale="id", domain="ckanext-pages")
+        fuzzy_catalog.add("Upstream-only page label", "Terjemahan fuzzy", flags=["fuzzy"])
+        with fuzzy_source.open("wb") as handle:
+            write_po(handle, fuzzy_catalog)
+        fuzzy_extension_output = locale_root / "fuzzy-output"
+        fuzzy_merged_path = module.compile_extension_catalog(
+            fuzzy_source, fuzzy_extension_output, [upstream_extension_path]
+        )
+        with fuzzy_merged_path.open("rb") as handle:
+            fuzzy_merged = read_mo(handle)
+        if fuzzy_merged.get("Upstream-only page label").string != "Label halaman dari upstream":
+            ERRORS.append("Fuzzy Wajo extension entries must not replace valid upstream Indonesian messages.")
+
         for domain, expected_msgid, expected_msgstr in (
             ("ckanext-harvest", "Harvest Sources", "Sumber pengambilan data"),
+            ("ckanext-harvest", "Frequency filter", "Filter frekuensi"),
             ("ckanext-pages", "Add Page", "Tambah halaman"),
             ("ckanext-dcat", "Publisher name", "Nama penerbit"),
+            ("ckanext-dcat", "Frequency filter", "Filter frekuensi"),
         ):
             path = extension_output / "id/LC_MESSAGES" / f"{domain}.mo"
             if not path.is_file():

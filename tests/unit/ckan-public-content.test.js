@@ -296,6 +296,25 @@ describe("CKAN field helpers", () => {
     ).toBe(
       "https://data.example.go.id/dataset/data-x/resource/res-x/download/data.csv",
     );
+    expect(
+      publicResourceUrl(
+        "https://ckan.example.go.id/file/3c2e4f10-6c61-4a2c-a3db-b96db879889c",
+      ),
+    ).toBe(
+      "https://data.example.go.id/api/public/ckan-file/3c2e4f10-6c61-4a2c-a3db-b96db879889c",
+    );
+    expect(
+      publicResourceUrl(
+        "https://ckan.example.go.id/file/public-download/groups/logo-wajo.png",
+      ),
+    ).toBe(
+      "https://data.example.go.id/file/public-download/groups/logo-wajo.png",
+    );
+    expect(
+      publicResourceUrl(
+        "https://ckan.example.go.id/uploads/group/logo-lama.png",
+      ),
+    ).toBe("https://data.example.go.id/uploads/group/logo-lama.png");
     expect(publicResourceUrl("https://cdn.example.test/file.csv")).toBe(
       "https://cdn.example.test/file.csv",
     );

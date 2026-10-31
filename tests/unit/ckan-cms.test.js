@@ -110,6 +110,27 @@ describe("CKAN Pages CMS normalization", () => {
       ),
     ).toBe("/api/cms/media/wajo-cover.webp");
     expect(
+      publicCmsImageUrl(
+        "https://ckan.example.go.id/file/3c2e4f10-6c61-4a2c-a3db-b96db879889c",
+        origin,
+      ),
+    ).toBe("/api/public/ckan-file/3c2e4f10-6c61-4a2c-a3db-b96db879889c");
+    expect(
+      publicCmsImageUrl("/file/3c2e4f10-6c61-4a2c-a3db-b96db879889c", origin),
+    ).toBe("/api/public/ckan-file/3c2e4f10-6c61-4a2c-a3db-b96db879889c");
+    expect(
+      publicCmsImageUrl(
+        "https://ckan.example.go.id/file/public-download/groups/logo-wajo.png",
+        origin,
+      ),
+    ).toBe("/file/public-download/groups/logo-wajo.png");
+    expect(
+      publicCmsImageUrl(
+        "https://ckan.example.go.id/uploads/group/logo-lama.png",
+        origin,
+      ),
+    ).toBe("/uploads/group/logo-lama.png");
+    expect(
       publicCmsImageUrl("https://cdn.example.test/wajo.webp", origin),
     ).toBe("https://cdn.example.test/wajo.webp");
     expect(publicCmsImageUrl("javascript:alert(1)", origin)).toBe("");

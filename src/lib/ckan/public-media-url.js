@@ -2,6 +2,8 @@ const IMAGE_FILENAME =
   /^[A-Za-z0-9][A-Za-z0-9._-]{0,240}\.(?:png|jpe?g|gif|webp)$/i;
 const GROUP_UPLOAD_PATH =
   /^\/?uploads\/group\/([A-Za-z0-9][A-Za-z0-9._-]{0,240}\.(?:png|jpe?g|gif|webp))$/i;
+const CKAN_PUBLIC_GROUP_PATH =
+  /^\/?file\/public-download\/groups\/([A-Za-z0-9][A-Za-z0-9._-]{0,240}\.(?:png|jpe?g|gif|webp))$/i;
 
 /**
  * Resolve CKAN organization/group logos for the public Next.js portal.
@@ -22,9 +24,20 @@ export function getPublicOrganizationImageUrl(organization = {}) {
     if (typeof candidate !== "string" || !candidate.trim()) continue;
     const value = candidate.trim();
 
+    const publicGroupPath = value.match(CKAN_PUBLIC_GROUP_PATH);
+    if (publicGroupPath)
+      return `/file/public-download/groups/${encodeURIComponent(publicGroupPath[1])}`;
+
     const uploadPath = value.match(GROUP_UPLOAD_PATH);
     if (uploadPath)
       return `/uploads/group/${encodeURIComponent(uploadPath[1])}`;
+
+    if (value.startsWith("/file/public-download/groups/")) {
+      const relativeMatch = value.slice(1).match(CKAN_PUBLIC_GROUP_PATH);
+      if (relativeMatch)
+        return `/file/public-download/groups/${encodeURIComponent(relativeMatch[1])}`;
+      continue;
+    }
 
     if (value.startsWith("/uploads/group/")) {
       const relativeMatch = value.slice(1).match(GROUP_UPLOAD_PATH);
@@ -45,6 +58,9 @@ export function getPublicOrganizationImageUrl(organization = {}) {
         url.password
       )
         continue;
+      const publicGroupMatch = url.pathname.match(CKAN_PUBLIC_GROUP_PATH);
+      if (publicGroupMatch)
+        return `/file/public-download/groups/${encodeURIComponent(publicGroupMatch[1])}`;
       const pathMatch = url.pathname.match(GROUP_UPLOAD_PATH);
       if (pathMatch)
         return `/uploads/group/${encodeURIComponent(pathMatch[1])}`;

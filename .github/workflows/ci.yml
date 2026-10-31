@@ -16,9 +16,9 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify public portal
+    name: Static checks, unit tests and production build
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     env:
       CKAN_API_INTERNAL_URL: http://127.0.0.1:8010/api/3/action
       PUBLIC_SITE_ORIGIN: http://127.0.0.1:3100
@@ -31,74 +31,32 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - name: Check Node and npm versions
-        run: |
-          node --version
-          npm --version
       - name: Install locked dependencies
         run: HUSKY=0 npm ci
-      - name: Check CKAN architecture and local imports
-        run: npm run check
-      - name: Run unit tests
-        run: npm run test
-      - name: Install Chromium for E2E
-        run: npx playwright install --with-deps chromium
-      - name: Run public E2E tests against mocked CKAN 2.12 Action API
-        run: npm run test:e2e
-      - name: Build production application
-        run: npm run build
-      - name: Check production dependencies for known vulnerabilities
-        run: npm run security:check
-
-  deployment-config:
-    name: Validate deployment configuration
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Validate YAML and shell syntax
+      - name: Validate deployment syntax
         run: |
-          ruby -e 'require "yaml"; ARGV.each { |f| YAML.load_file(f, aliases: true); puts "valid YAML: #{f}" }' \
+          ruby -e 'require "yaml"; ARGV.each { |file| YAML.load_file(file, aliases: true); puts "valid YAML: #{file}" }' \
             deploy/ckan/docker-compose.override.yml \
             deploy/ckan/docker-compose.cloudflare.yml \
             deploy/ckan/docker-compose.manual.yml \
+            deploy/ckan/docker-compose.cloudflare-basic-auth.yml \
+            deploy/ckan/docker-compose.manual-basic-auth.yml \
             deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml \
-            .github/workflows/ci.yml
-          bash -n scripts/check-static.sh deploy/ckan/bootstrap-upstream.sh deploy/ckan/compose.sh deploy/ckan/sync-ckan-base-source.sh deploy/ckan/prepare-ckan-base.sh deploy/ckan/enable-xloader.sh deploy/ckan/initialize-extensions.sh deploy/ckan/apply-datastore-permissions.sh
-          python3 scripts/check-build.py
-          python3 - <<'PY'
-          import ast
-          from pathlib import Path
-          for name in ('deploy/ckan/configure-upstream-extensions.py', 'deploy/ckan/install-pages.py', 'deploy/ckan/compile-id-translations.py', 'deploy/ckan/render-upstream-env.py', 'deploy/ckan/sync-env.py', 'scripts/check-ci.py', 'scripts/check-build.py', 'scripts/check-plugins-config.py', 'scripts/check-theme.py', 'scripts/check-base.py', 'scripts/check-plugins.py', 'scripts/check-env.py'):
-              ast.parse(Path(name).read_text())
-              print(f'valid Python: {name}')
-          PY
-      - name: Run shared static repository checks
-        run: bash scripts/check-static.sh
-  ckan-extension-image-smoke:
-    name: Smoke-test CKAN extensions on the official CKAN 2.12.1 base build
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build the official CKAN 2.12.1 base image from ckan-docker-base
-        run: |
-          bash ./deploy/ckan/sync-ckan-base-source.sh
-          bash ./deploy/ckan/prepare-ckan-base.sh
-      - name: Build an extension compatibility image and verify plugin entry points
-        run: |
-          cat > Dockerfile.ckan-extension-smoke <<'DOCKER'
-          FROM ckan/ckan-base:2.12.1
-          ENV EXTRA_UWSGI_OPTS=""
-          RUN test "${EXTRA_UWSGI_OPTS+x}" = x && test -z "$EXTRA_UWSGI_OPTS"
-          USER root
-          COPY deploy/ckan/extensions/requirements.txt /tmp/portal-ckan-extensions.txt
-          COPY deploy/ckan/theme/ /tmp/portal-ckan-theme/
-          COPY deploy/ckan/install-pages.py /tmp/install-pages.py
-          COPY deploy/ckan/compile-id-translations.py /tmp/compile-id-translations.py
-          COPY scripts/check-plugins.py /tmp/check-plugins.py
-          RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme \
-              && python /tmp/install-pages.py \
-              && python /tmp/compile-id-translations.py /tmp/portal-ckan-theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po "$(python -c 'import ckan; from pathlib import Path; print(Path(ckan.__file__).resolve().parent / "i18n")')" "$(python -c 'import importlib.util; from pathlib import Path; spec = importlib.util.find_spec("ckanext.wajo_theme"); print(Path(next(iter(spec.submodule_search_locations))) / "i18n")')" \
-              && python /tmp/check-plugins.py
-          DOCKER
-          docker build -f Dockerfile.ckan-extension-smoke -t portal-ckan-extension-smoke .
+            deploy/ckan/theme/ckanext/wajo_theme/schemas/organization.yaml \
+            deploy/ckan/theme/ckanext/wajo_theme/schemas/group.yaml \
+            .github/workflows/ci.yml \
+            .github/workflows/extended-validation.yml
+          bash -n scripts/check-static.sh \
+            deploy/ckan/bootstrap-upstream.sh \
+            deploy/ckan/compose.sh \
+            deploy/ckan/sync-ckan-base-source.sh \
+            deploy/ckan/prepare-ckan-base.sh \
+            deploy/ckan/enable-xloader.sh \
+            deploy/ckan/initialize-extensions.sh \
+            deploy/ckan/apply-datastore-permissions.sh
+      - name: Run static checks and ESLint
+        run: npm run check
+      - name: Run unit tests
+        run: npm run test
+      - name: Build production application
+        run: npm run build

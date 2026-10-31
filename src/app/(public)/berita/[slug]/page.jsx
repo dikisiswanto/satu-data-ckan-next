@@ -118,10 +118,8 @@ export default async function BeritaDetailPage({ params }) {
       <PageHeading
         className="public-dynamic-heading"
         reserveTitle
-        reserveDescription
         eyebrow={page.category || "Berita dan artikel"}
         title={page.title}
-        description={page.excerpt || "Ringkasan artikel belum tersedia."}
       />
       <p className="public-publish-date mt-3 inline-flex min-h-5 items-center gap-2 text-xs text-muted">
         {page.publishDate ? (
@@ -133,8 +131,8 @@ export default async function BeritaDetailPage({ params }) {
           "Tanggal terbit belum dicantumkan"
         )}
       </p>
-      <figure className="public-cms-cover relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#e7eff0,#eaf1f8)]">
-        {image ? (
+      {image ? (
+        <figure className="public-cms-cover relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-slate-100">
           <Image
             src={image}
             alt={page.title}
@@ -143,13 +141,8 @@ export default async function BeritaDetailPage({ params }) {
             sizes="100vw"
             className="object-cover"
           />
-        ) : (
-          <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgb(255_255_255_/_70%),transparent_40%),linear-gradient(135deg,#e7eff0,#eaf1f8)]"
-            aria-hidden="true"
-          />
-        )}
-      </figure>
+        </figure>
+      ) : null}
       <article className="cms-document mt-8 rounded-2xl border border-line bg-white p-5 sm:p-8 lg:p-10">
         <CmsPageBody page={page} />
       </article>

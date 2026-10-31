@@ -168,7 +168,7 @@ def main() -> None:
         ckan_healthcheck = ckan_service.split("    healthcheck:\n", 1)[1].split("  # XLoader", 1)[0]
         assert "wget" not in ckan_healthcheck, "CKAN healthcheck must not rely on wget being installed in the base image"
 
-        workflow = (ROOT / ".github/workflows/ci.yml").read_text()
+        workflow = "\n".join(path.read_text(encoding="utf-8") for path in (ROOT / ".github/workflows").glob("*.yml"))
         assert "COPY deploy/ckan/install-pages.py /tmp/install-pages.py" in workflow
         assert "COPY deploy/ckan/compile-id-translations.py /tmp/compile-id-translations.py" in workflow
         assert "&& python /tmp/compile-id-translations.py" in workflow

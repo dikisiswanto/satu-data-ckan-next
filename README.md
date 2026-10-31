@@ -154,14 +154,14 @@ Jika CKAN menjadi unhealthy saat `ckanext-scheming` dimuat, periksa referensi sc
 npm ci
 npm run check
 npm run test
-npm run test:e2e
 npm run build
-npm run security:check
 ```
+
+Jalankan validasi tambahan secara manual melalui GitHub Actions **Extended validation** atau secara lokal dengan `npm run test:e2e` dan `npm run security:check`.
 
 `bash scripts/check-static.sh` menjalankan pemeriksaan struktur dan integrasi tanpa bergantung pada permission executable. `npm run check:static` memanggil pemeriksaan yang sama, sedangkan `npm run check` menambahkan ESLint.
 
-E2E publik menggunakan CKAN Action API mock. Smoke test image extension dijalankan melalui GitHub Actions. Pengujian visual CKAN Admin tetap perlu dilakukan pada instance yang berjalan menggunakan akun sysadmin dan akun editor.
+CI wajib menjalankan satu job untuk static checks + ESLint, unit test, dan production build. E2E browser, audit dependency production, dan smoke-test image ekstensi CKAN tersedia pada workflow manual `Extended validation` agar pengujian yang berat atau bergantung layanan eksternal tidak memblokir setiap commit. Pengujian visual CKAN Admin tetap perlu dilakukan pada instance yang berjalan menggunakan akun sysadmin dan akun editor.
 
 ## Konfigurasi dan data produksi
 
@@ -182,5 +182,4 @@ dari CKAN 2.12 dan tidak boleh diaktifkan. Bootstrap membersihkan ID lama dari
 - Tema dan shell Wajo Admin: [`docs/WAJO-ADMIN.md`](docs/WAJO-ADMIN.md)
 - Alur DataStore/XLoader dan preview: [`docs/DATASTORE-PREVIEW-SYNC.md`](docs/DATASTORE-PREVIEW-SYNC.md)
 - Cakupan lokalisasi CKAN: [`docs/CKAN-ADMIN-LOKALISASI.md`](docs/CKAN-ADMIN-LOKALISASI.md)
-- Audit integrasi akhir, media, Markdown, unduhan, autentikasi, dan validasi: [`docs/FINAL-AUDIT-2026-10-31.md`](docs/FINAL-AUDIT-2026-10-31.md)
 - Design tokens, ukuran konten, tipografi, komponen, dan aturan responsif: [`docs/WAJO-ADMIN-DESIGN-SYSTEM.md`](docs/WAJO-ADMIN-DESIGN-SYSTEM.md)

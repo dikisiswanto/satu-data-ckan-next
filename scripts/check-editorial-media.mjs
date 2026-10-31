@@ -53,6 +53,6 @@ assert.match(files.base, /wajo-media-csrf[\s\S]*csrf_input/);
 assert.match(files.forms, /enhanceFileInputs/);
 assert.match(files.forms, /URL\.createObjectURL/);
 
-console.log(
-  "Editorial CKAN media: authenticated upload, dedicated public owner, bounded image proxy, Markdown insertion and previews passed.",
+process.stdout.write(
+  "Editorial CKAN media: authenticated upload, dedicated public owner, bounded image proxy, Markdown insertion and previews passed.\n",
 );

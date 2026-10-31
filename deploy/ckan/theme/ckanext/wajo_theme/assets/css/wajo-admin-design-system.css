@@ -146,11 +146,6 @@ body:has(.wajo-login-frame) {
   max-width: var(--wajo-content-max);
   margin: 0.9rem auto 0.25rem;
 }
-.wajo-admin-footer {
-  width: min(100%, var(--wajo-shell-max));
-  margin-inline: auto;
-  padding-inline: var(--wajo-page-gutter);
-}
 
 /* Brand and navigation */
 .wajo-admin-brand {
@@ -227,18 +222,6 @@ body:has(.wajo-login-frame) {
   color: var(--wajo-color-muted);
   font-size: var(--wajo-text-xs);
 }
-.wajo-admin-sidebar__context {
-  border-bottom-color: var(--wajo-color-border);
-}
-.wajo-admin-sidebar__context strong {
-  color: var(--wajo-color-ink);
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-.wajo-admin-sidebar__context > span:last-child {
-  color: var(--wajo-color-muted);
-  font-size: var(--wajo-text-xs);
-}
 .wajo-admin-nav__label,
 .wajo-admin-sidebar__eyebrow {
   color: var(--wajo-color-subtle);
@@ -272,9 +255,6 @@ body:has(.wajo-login-frame) {
 }
 .wajo-admin-nav__item.is-active > i {
   color: var(--wajo-color-primary);
-}
-.wajo-admin-sidebar__footer {
-  border-top-color: var(--wajo-color-border);
 }
 
 /* Typography and content hierarchy */
@@ -436,8 +416,20 @@ body:has(.wajo-login-frame) {
 .wajo-admin-workspace
   :where(.form-control, .form-select, input, select, textarea):focus {
   border-color: var(--wajo-color-primary);
-  box-shadow: 0 0 0 3px rgb(29 95 167 / 12%);
+  box-shadow: none;
   outline: 0;
+}
+.wajo-admin-workspace
+  :where(.form-control, .form-select, input, select, textarea):focus-visible,
+.wajo-login-frame
+  :where(.form-control, .form-select, input, select, textarea):focus-visible {
+  outline: 3px solid rgb(29 95 167 / 30%);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+.wajo-login-frame .login-main:has(#field-login) .form-control:focus {
+  border-color: var(--wajo-color-primary);
+  box-shadow: none;
 }
 .wajo-admin-workspace :where(.form-label, .control-label, label) {
   color: #3d5360;
@@ -810,7 +802,7 @@ body:has(.wajo-login-frame) {
   box-shadow: var(--wajo-shadow-xs);
 }
 
-/* Contextual help and footer */
+/* Contextual help */
 .wajo-context-help {
   border-color: var(--wajo-color-border);
   border-radius: var(--wajo-radius-control);
@@ -828,22 +820,6 @@ body:has(.wajo-login-frame) {
 .wajo-context-help__icon {
   background: var(--wajo-color-primary-soft);
   color: var(--wajo-color-primary);
-}
-.wajo-admin-footer {
-  min-height: 64px;
-  border-top-color: var(--wajo-color-border);
-  background: var(--wajo-color-surface);
-  color: var(--wajo-color-muted);
-}
-.wajo-admin-footer strong {
-  color: var(--wajo-color-ink);
-  font-size: var(--wajo-text-xs);
-  font-weight: 650;
-}
-.wajo-admin-footer span,
-.wajo-admin-footer > small {
-  color: var(--wajo-color-muted);
-  font-size: 0.6875rem;
 }
 
 /* Focused login uses the same typography and color tokens, but no admin shell. */
@@ -1110,12 +1086,6 @@ body:has(.wajo-login-frame) {
   }
   .wajo-context-help__body {
     padding: 0.75rem;
-  }
-  .wajo-admin-footer {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 0.875rem;
   }
   .wajo-dashboard__welcome {
     min-height: auto;
@@ -1673,6 +1643,7 @@ body:has(.wajo-login-frame) {
   color: var(--wajo-color-ink);
   color-scheme: light;
   font: 0.9rem var(--wajo-font-sans);
+  cursor: pointer;
 }
 .wajo-admin-workspace select:not([multiple]):not([size]) {
   appearance: none;
@@ -1964,4 +1935,898 @@ body:has(.wajo-login-frame) {
 .wajo-admin-nav__item--create:focus-visible {
   outline: 3px solid rgb(29 95 167 / 22%);
   outline-offset: 2px;
+}
+
+/* Contrast guard: primary actions must never inherit a white/transparent fill with white text. */
+.wajo-admin-workspace .btn-primary,
+.wajo-admin-workspace .btn.btn-primary,
+.wajo-login-frame .btn-primary {
+  border-color: var(--wajo-color-primary, #1d5fa7);
+  background-color: var(--wajo-color-primary, #1d5fa7);
+  color: #fff;
+}
+.wajo-admin-workspace .btn-primary:hover,
+.wajo-admin-workspace .btn-primary:focus-visible,
+.wajo-login-frame .btn-primary:hover,
+.wajo-login-frame .btn-primary:focus-visible {
+  border-color: var(--wajo-color-primary-hover, #164b85);
+  background-color: var(--wajo-color-primary-hover, #164b85);
+  color: #fff;
+}
+.wajo-admin-workspace .format-label[data-format="geojson" i],
+.wajo-admin-workspace .format-label[title="geojson" i],
+.wajo-admin-workspace .format-label--geojson {
+  border: 1px solid #d8c9ff !important;
+  background: #eee8ff !important;
+  color: #45218a !important;
+}
+
+/* Parent-aware navigation: create actions sit directly under their destination. */
+.wajo-admin-sidebar__inner {
+  padding-top: 0.85rem;
+}
+.wajo-admin-nav {
+  display: grid;
+  align-content: start;
+  gap: 0.22rem;
+}
+.wajo-admin-nav__branch {
+  display: grid;
+  min-width: 0;
+  gap: 0.06rem;
+}
+.wajo-admin-nav__children {
+  display: grid;
+  gap: 0.04rem;
+  margin: 0.04rem 0 0.28rem 1.1rem;
+  padding-left: 0.7rem;
+  border-left: 1px solid #e2eaf0;
+}
+.wajo-admin-nav__item--create {
+  min-height: 30px;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid transparent;
+  color: #526d80;
+  font-size: 0.75rem;
+  font-weight: 550;
+}
+.wajo-admin-nav__item--create > i {
+  width: 13px;
+  color: #6f8ea6;
+  font-size: 0.68rem;
+}
+.wajo-admin-nav__item--create:hover {
+  border-color: #e2edf5;
+  background: #f5f9fc;
+  color: var(--wajo-color-primary-hover);
+}
+.wajo-admin-nav__label {
+  margin-top: 0.9rem;
+}
+.wajo-admin-nav__label:first-child {
+  margin-top: 0.15rem;
+}
+
+/* Focus feedback is a single border change, never a border plus a Bootstrap ring. */
+.wajo-admin-workspace
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    select,
+    textarea
+  ):focus,
+.wajo-admin-workspace
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    select,
+    textarea
+  ):focus-visible,
+.wajo-login-frame
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea
+  ):focus,
+.wajo-login-frame
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea
+  ):focus-visible {
+  border: 1px solid var(--wajo-color-primary) !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+/* Visible upload affordance for every CKAN file picker. */
+.wajo-admin-workspace input[type="file"].wajo-file-input:not([hidden]) {
+  min-height: 3.4rem;
+  border: 1px dashed #9aafbd;
+  border-radius: var(--wajo-radius-control);
+  background: #f8fbfd;
+  padding: 0.55rem;
+}
+.wajo-admin-workspace input[type="file"].wajo-file-input::file-selector-button {
+  min-height: 2.2rem;
+  margin-inline-end: 0.75rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid #b9ccda;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #1d5fa7;
+  font: 650 0.8125rem var(--wajo-font-sans);
+  cursor: pointer;
+}
+.wajo-admin-workspace input[type="file"].wajo-file-input:hover {
+  border-color: var(--wajo-color-primary);
+  background: #f3f8ff;
+}
+.wajo-file-picker-hint {
+  margin: 0.35rem 0 0.2rem;
+  color: var(--wajo-color-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+.wajo-admin-workspace .wajo-file-preview {
+  margin-top: 0.5rem;
+}
+
+/* Pages and News editorial workspace: clearer form rhythm and calmer list cards. */
+.wajo-pages-admin-route .wajo-admin-workspace .main {
+  padding-top: clamp(1rem, 2vw, 1.75rem);
+}
+.wajo-pages-admin-route .wajo-admin-workspace .page-header {
+  margin-bottom: 1.35rem;
+  padding-bottom: 1rem;
+}
+.wajo-pages-admin-route .wajo-admin-workspace .primary > .module,
+.wajo-pages-admin-route .wajo-admin-workspace .primary > .module:first-child {
+  overflow: hidden;
+  border-color: var(--wajo-color-border);
+  border-radius: 1rem;
+  background: var(--wajo-color-surface);
+  box-shadow: var(--wajo-shadow-sm);
+}
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  > .module
+  > .module-content {
+  padding: clamp(1rem, 2.3vw, 1.75rem);
+}
+.wajo-pages-admin-route .wajo-admin-workspace .pages-form {
+  display: grid;
+  gap: 1.1rem;
+  max-width: 100%;
+}
+.wajo-pages-admin-route .wajo-admin-workspace .pages-form > .control-group,
+.wajo-pages-admin-route .wajo-admin-workspace .pages-form > fieldset {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: 0.85rem;
+  padding: clamp(0.9rem, 1.8vw, 1.25rem);
+  background: var(--wajo-color-surface);
+}
+.wajo-pages-admin-route .wajo-admin-workspace .pages-form .control-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--wajo-color-ink);
+}
+.wajo-pages-admin-route .wajo-admin-workspace .pages-form .controls,
+.wajo-pages-admin-route .wajo-admin-workspace .pages-form .controls > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.wajo-pages-admin-route .wajo-admin-workspace .pages-form .form-actions {
+  position: static;
+  margin: 0.25rem calc(clamp(1rem, 2.3vw, 1.75rem) * -1)
+    calc(clamp(1rem, 2.3vw, 1.75rem) * -1);
+  border-top: 1px solid var(--wajo-color-border);
+  padding: 0.85rem clamp(1rem, 2.3vw, 1.75rem);
+  background: #fff;
+}
+.wajo-pages-admin-route .wajo-pages-editor {
+  margin: 0;
+  border-color: var(--wajo-color-border);
+  border-radius: 0.85rem;
+  padding: clamp(0.9rem, 1.8vw, 1.25rem);
+  background: #fff;
+}
+.wajo-pages-admin-route .wajo-pages-editor + .wajo-pages-editor {
+  margin-top: 0.1rem;
+}
+.wajo-pages-admin-route .wajo-pages-editor legend {
+  padding-inline: 0.4rem;
+  font-size: 0.9rem;
+}
+.wajo-pages-admin-route .wajo-pages-editor .control-group {
+  margin-bottom: 1rem;
+}
+.wajo-pages-admin-route .wajo-md-editor {
+  margin-block: 0.35rem 0.85rem;
+}
+.wajo-pages-admin-route .wajo-md-toolbar {
+  gap: 0.4rem;
+  padding: 0.6rem;
+}
+.wajo-pages-admin-route .wajo-md-preview {
+  min-height: 10rem;
+  margin-top: 0.25rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+}
+.wajo-pages-admin-route .wajo-md-preview > :first-child {
+  margin-top: 0;
+}
+.wajo-pages-admin-route .wajo-md-preview > :last-child {
+  margin-bottom: 0;
+}
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > ul:not(.nav):not(.pagination),
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > ol:not(.pagination),
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .list-unstyled {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > ul:not(.nav):not(.pagination)
+  > li,
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > ol:not(.pagination)
+  > li,
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .list-unstyled
+  > li {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: 0.8rem;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > ul:not(.nav):not(.pagination)
+  > li:hover,
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .list-unstyled
+  > li:hover {
+  border-color: #c3d6e8;
+  background: #fbfdff;
+  box-shadow: var(--wajo-shadow-sm);
+}
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > ul:not(.nav):not(.pagination)
+  > li
+  > a,
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .list-unstyled
+  > li
+  > a {
+  color: var(--wajo-color-primary);
+  font-weight: 650;
+  text-decoration: none;
+}
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > ul:not(.nav):not(.pagination)
+  > li
+  > a:hover,
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .list-unstyled
+  > li
+  > a:hover {
+  color: var(--wajo-color-primary-hover);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  :where(.page-list, .blog-list, .page-item, .blog-item, .article-item) {
+  min-width: 0;
+  border-radius: 0.8rem;
+}
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  :where(.page-item, .blog-item, .article-item) {
+  margin-block: 0.5rem;
+  border: 1px solid var(--wajo-color-border);
+  padding: 0.9rem 1rem;
+  background: #fff;
+}
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  :where(.page-item, .blog-item, .article-item)
+  :where(h2, h3, h4) {
+  margin-top: 0;
+}
+.wajo-pages-admin-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  a
+  .fa-pen-to-square {
+  color: var(--wajo-color-primary);
+}
+@media (max-width: 767.98px) {
+  .wajo-pages-admin-route .wajo-admin-workspace .main {
+    padding-inline: 0.8rem;
+  }
+  .wajo-pages-admin-route
+    .wajo-admin-workspace
+    .primary
+    > .module
+    > .module-content {
+    padding: 0.85rem;
+  }
+  .wajo-pages-admin-route .wajo-admin-workspace .pages-form > .control-group,
+  .wajo-pages-admin-route .wajo-admin-workspace .pages-form > fieldset {
+    padding: 0.85rem;
+  }
+  .wajo-pages-admin-route .wajo-admin-workspace .pages-form .form-actions {
+    position: static;
+    margin: 0.25rem 0 0;
+    padding: 0.85rem 0 0;
+    background: transparent;
+  }
+  .wajo-pages-admin-route .wajo-md-toolbar .btn {
+    flex: 1 1 auto;
+  }
+}
+
+/* CKAN Pages / News: make table-backed editorial collections feel like a clean card list. */
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-responsive,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  table,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-responsive
+  > table,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-wrapper
+  > table {
+  width: 100%;
+  border: 0;
+  border-collapse: separate;
+  border-spacing: 0 0.55rem;
+  background: transparent;
+}
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  table
+  thead
+  th,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-responsive
+  > table
+  thead
+  th,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-wrapper
+  > table
+  thead
+  th {
+  border: 0;
+  padding: 0.55rem 0.85rem;
+  color: var(--wajo-color-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  table
+  tbody
+  td,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-responsive
+  > table
+  tbody
+  td,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-wrapper
+  > table
+  tbody
+  td {
+  border-top: 1px solid var(--wajo-color-border);
+  border-bottom: 1px solid var(--wajo-color-border);
+  padding: 0.9rem 0.85rem;
+  background: #fff;
+  vertical-align: middle;
+}
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  table
+  tbody
+  td:first-child,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-responsive
+  > table
+  tbody
+  td:first-child,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-wrapper
+  > table
+  tbody
+  td:first-child {
+  border-left: 1px solid var(--wajo-color-border);
+  border-radius: 0.75rem 0 0 0.75rem;
+}
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  table
+  tbody
+  td:last-child,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-responsive
+  > table
+  tbody
+  td:last-child,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-wrapper
+  > table
+  tbody
+  td:last-child {
+  border-right: 1px solid var(--wajo-color-border);
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  table
+  tbody
+  tr:hover
+  td,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-responsive
+  > table
+  tbody
+  tr:hover
+  td,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  > .table-wrapper
+  > table
+  tbody
+  tr:hover
+  td {
+  background: #fbfdff;
+}
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  ul.list-unstyled:not(.nav):not(.pagination),
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  ol.list-unstyled:not(.pagination) {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  ul.list-unstyled:not(.nav):not(.pagination)
+  > li,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  ol.list-unstyled:not(.pagination)
+  > li {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: 0.8rem;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  ul.list-unstyled:not(.nav):not(.pagination)
+  > li:hover,
+.wajo-pages-admin-list-route
+  .wajo-admin-workspace
+  .primary
+  .module-content
+  ol.list-unstyled:not(.pagination)
+  > li:hover {
+  border-color: #c3d6e8;
+  background: #fbfdff;
+  box-shadow: var(--wajo-shadow-sm);
+}
+@media (max-width: 767.98px) {
+  .wajo-pages-admin-list-route
+    .wajo-admin-workspace
+    .primary
+    .module-content
+    table
+    thead
+    th,
+  .wajo-pages-admin-list-route
+    .wajo-admin-workspace
+    .primary
+    .module-content
+    > .table-responsive
+    > table
+    thead
+    th,
+  .wajo-pages-admin-list-route
+    .wajo-admin-workspace
+    .primary
+    .module-content
+    > .table-wrapper
+    > table
+    thead
+    th,
+  .wajo-pages-admin-list-route
+    .wajo-admin-workspace
+    .primary
+    .module-content
+    table
+    tbody
+    td,
+  .wajo-pages-admin-list-route
+    .wajo-admin-workspace
+    .primary
+    .module-content
+    > .table-responsive
+    > table
+    tbody
+    td,
+  .wajo-pages-admin-list-route
+    .wajo-admin-workspace
+    .primary
+    .module-content
+    > .table-wrapper
+    > table
+    tbody
+    td {
+    padding: 0.7rem 0.65rem;
+  }
+}
+
+/* Dataset keywords (CKAN's tag_string autocomplete) use the same visual
+   language as the other native metadata controls, including its JS wrapper. */
+.wajo-admin-workspace :is(#field-tags, [name="tag_string"]),
+.wajo-admin-workspace
+  .control-group:has(#field-tags)
+  :is(input[type="text"], .form-control) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--wajo-control-height);
+  border: 1px solid var(--wajo-color-border-strong);
+  border-radius: var(--wajo-radius-control);
+  padding: 0.62rem 0.8rem;
+  background: #fff;
+  color: var(--wajo-color-ink);
+  font: 0.9rem var(--wajo-font-sans);
+  box-shadow: none;
+  transition:
+    border-color var(--wajo-transition-fast),
+    background-color var(--wajo-transition-fast);
+}
+.wajo-admin-workspace :is(#field-tags, [name="tag_string"]):focus,
+.wajo-admin-workspace :is(#field-tags, [name="tag_string"]):focus-visible {
+  border-color: var(--wajo-color-primary);
+  outline: 0;
+  box-shadow: none;
+}
+.wajo-admin-workspace .control-group:has(#field-tags) .select2-container,
+.wajo-admin-workspace .control-group:has(#field-tags) .autocomplete,
+.wajo-admin-workspace .control-group:has(#field-tags) .twitter-typeahead {
+  display: block;
+  width: 100% !important;
+  max-width: 100%;
+}
+.wajo-admin-workspace
+  .control-group:has(#field-tags)
+  .select2-selection--multiple,
+.wajo-admin-workspace .control-group:has(#field-tags) .chosen-choices {
+  display: flex;
+  min-height: var(--wajo-control-height);
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--wajo-color-border-strong) !important;
+  border-radius: var(--wajo-radius-control) !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+.wajo-admin-workspace
+  .control-group:has(#field-tags)
+  .select2-selection__rendered,
+.wajo-admin-workspace .control-group:has(#field-tags) .chosen-choices {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0;
+  margin: 0;
+}
+.wajo-admin-workspace
+  .control-group:has(#field-tags)
+  .select2-selection__choice,
+.wajo-admin-workspace .control-group:has(#field-tags) .search-choice {
+  margin: 0;
+  border: 1px solid #cfe0ef;
+  border-radius: 0.45rem;
+  padding: 0.2rem 0.5rem;
+  background: #eff6fc;
+  color: #28577d;
+  font-size: 0.78rem;
+}
+.wajo-admin-workspace
+  .control-group:has(#field-tags)
+  .select2-search--inline
+  .select2-search__field,
+.wajo-admin-workspace
+  .control-group:has(#field-tags)
+  .chosen-choices
+  .search-field
+  input {
+  min-height: 1.65rem;
+  margin: 0;
+  border: 0;
+  padding: 0.15rem 0.25rem;
+  background: transparent;
+  color: var(--wajo-color-ink);
+  box-shadow: none;
+}
+.wajo-admin-workspace
+  .control-group:has(#field-tags)
+  .select2-selection--multiple:focus-within,
+.wajo-admin-workspace
+  .control-group:has(#field-tags)
+  .chosen-container-active
+  .chosen-choices {
+  border-color: var(--wajo-color-primary) !important;
+  outline: 0;
+  box-shadow: none !important;
+}
+
+/* CKAN's native user profile information card lives in the secondary column.
+   Keep its content padded even though it is rendered outside the Wajo dashboard. */
+.wajo-admin-workspace .secondary #user-info {
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 1rem;
+  overflow: hidden;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: var(--wajo-radius-card);
+  background: var(--wajo-color-surface);
+  box-shadow: var(--wajo-shadow-xs);
+}
+.wajo-admin-workspace .secondary #user-info > .module-content {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.15rem !important;
+}
+.wajo-admin-workspace .secondary #user-info .image {
+  display: grid;
+  place-items: center;
+  margin: 0;
+}
+.wajo-admin-workspace .secondary #user-info .image img {
+  width: 5rem;
+  height: 5rem;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: 1rem;
+  background: var(--wajo-color-surface-soft);
+  object-fit: cover;
+}
+.wajo-admin-workspace .secondary #user-info .heading {
+  margin: 0;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 720;
+  overflow-wrap: anywhere;
+}
+.wajo-admin-workspace .secondary #user-info .empty {
+  margin: 0;
+  border: 1px solid #e2e9ee;
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  background: #f8fafc;
+  color: var(--wajo-color-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+.wajo-admin-workspace .secondary #user-info .nums {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+.wajo-admin-workspace .secondary #user-info .nums dl {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+  margin: 0;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: 0.65rem;
+  padding: 0.6rem 0.65rem;
+  background: var(--wajo-color-surface-soft);
+}
+.wajo-admin-workspace .secondary #user-info .nums dt {
+  color: var(--wajo-color-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.wajo-admin-workspace .secondary #user-info .nums dd {
+  margin: 0;
+  color: var(--wajo-color-ink);
+  font-size: 1.05rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+.wajo-admin-workspace .secondary #user-info .info {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+  margin: 0;
+  border-top: 1px solid var(--wajo-color-border);
+  padding-top: 0.85rem;
+}
+.wajo-admin-workspace .secondary #user-info .info dl {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0 0 0.55rem;
+  border-bottom: 1px solid #edf1f3;
+}
+.wajo-admin-workspace .secondary #user-info .info dl:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.wajo-admin-workspace .secondary #user-info .info dt {
+  color: var(--wajo-color-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.wajo-admin-workspace .secondary #user-info .info dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--wajo-color-ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 767.98px) {
+  .wajo-admin-workspace .secondary #user-info > .module-content {
+    padding: 0.9rem !important;
+  }
+  .wajo-admin-workspace .secondary #user-info .nums {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

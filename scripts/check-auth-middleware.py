@@ -119,6 +119,7 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
         path = "/"
         full_path = "/"
         method = "GET"
+        args = {}
 
     request = Request()
 
@@ -225,11 +226,13 @@ def main() -> None:
         full_path: str | None = None,
         method: str = "GET",
         authenticated: bool = False,
+        args: dict | None = None,
     ) -> None:
         request.host = host
         request.path = path
         request.full_path = full_path if full_path is not None else path
         request.method = method
+        request.args = args or {}
         user.is_authenticated = authenticated
         actual = before()
         if actual != expected:
@@ -239,6 +242,17 @@ def main() -> None:
     run_case("internal Next.js-to-CKAN API is not gated", None, host="ckan:5000", path="/api/3/action/package_search")
     run_case("public hostname is not gated", None, host="data.example.test", path="/dataset/public-data")
     run_case("anonymous visitor may open login", None, path="/user/login")
+    run_case(
+        "stale logout came_from is stripped before rendering login",
+        ("REDIRECT", "/user/login"),
+        path="/user/login",
+        args={"came_from": "/user/logged_out_redirect"},
+    )
+    run_case(
+        "anonymous logout confirmation goes to a clean login URL",
+        ("REDIRECT", "/user/login"),
+        path="/user/logged_out_redirect",
+    )
     run_case("anonymous visitor may load CKAN base assets", None, path="/base/css/main.css")
     run_case("anonymous visitor may load Wajo logo", None, path="/logo-kabupaten-wajo.webp")
     run_case(
@@ -282,6 +296,12 @@ def main() -> None:
         "authenticated login route opens Wajo Admin overview",
         ("REDIRECT", "/admin/"),
         path="/user/login",
+        authenticated=True,
+    )
+    run_case(
+        "authenticated logout confirmation opens the Wajo Admin overview",
+        ("REDIRECT", "/admin/"),
+        path="/user/logged_out_redirect",
         authenticated=True,
     )
 
@@ -345,13 +365,23 @@ def main() -> None:
 
     request.host = "admin.example.test"
     request.path = "/user/logout"
+    user.is_authenticated = False
     logout_response = after(Response())
     if logout_response.status_code != 303 or logout_response.headers.get("Location") != "/user/login":
         raise AssertionError("Logout harus mengarah ke login dengan PRG 303.")
     if logout_response.headers.get("Cache-Control", "").find("no-store") < 0:
         raise AssertionError("Respons logout tidak boleh disimpan di cache.")
     print("PASS logout ends with a clean, uncached login redirect")
+    request.path = "/user/logged_out_redirect"
+    user.is_authenticated = True
+    logged_out_response = after(Response())
+    if logged_out_response.status_code != 303 or logged_out_response.headers.get("Location") != "/admin/":
+        raise AssertionError("Logged-out redirect must never replay the logout confirmation for an authenticated user.")
+    if logged_out_response.headers.get("Cache-Control", "").find("no-store") < 0:
+        raise AssertionError("Logged-out redirect must not be cached.")
+    print("PASS stale logged_out_redirect is replaced by the authenticated dashboard")
     request.path = "/user/login"
+    user.is_authenticated = True
     response = Response("https://data.example.test/user/login?came_from=%2Fdashboard%2Fdatasets")
     after(response)
     expected_location = "https://admin.example.test/user/login?came_from=%2Fdashboard%2Fdatasets"
@@ -370,12 +400,13 @@ def main() -> None:
     if relative.headers.get("Location") != "/dashboard/datasets":
         raise AssertionError("Redirect relatif tidak boleh diubah.")
     print("PASS relative CKAN redirects remain unchanged")
-    print("CKAN admin auth and dashboard smoke test passed (21 cases plus stale flash/logout assertions).")
+    print("CKAN admin auth and dashboard smoke test passed (expanded logout came_from regression assertions).")
 
 
 # Logout must finish with a clean login redirect and prevent cached auth screens.
 plugin_source = (ROOT / "deploy/ckan/theme/ckanext/wajo_theme/plugin.py").read_text()
-assert 'path == "/user/logout"' in plugin_source
+assert 'path in {"/user/logout", "/user/logged_out_redirect"}' in plugin_source
+assert 'stale_logout_target' in plugin_source
 assert 'response.status_code = 303' in plugin_source
 assert 'response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"' in plugin_source
 

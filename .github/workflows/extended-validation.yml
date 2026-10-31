@@ -1,0 +1,89 @@
+name: Extended validation (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-e2e:
+    name: Public portal browser E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CKAN_API_INTERNAL_URL: http://127.0.0.1:8010/api/3/action
+      PUBLIC_SITE_ORIGIN: http://127.0.0.1:3100
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3100
+      NEXT_PUBLIC_CKAN_ADMIN_URL: https://ckan.example.test
+      NEXT_PUBLIC_REGION_NAME: Kabupaten Wajo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install locked dependencies
+        run: HUSKY=0 npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run E2E tests against mocked CKAN Action API
+        run: npm run test:e2e
+      - name: Upload Playwright reports and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-diagnostics-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  ckan-extension-image-smoke:
+    name: CKAN 2.12.1 extension image smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the official CKAN base image
+        run: |
+          bash ./deploy/ckan/sync-ckan-base-source.sh
+          bash ./deploy/ckan/prepare-ckan-base.sh
+      - name: Build extension compatibility image and verify plugins
+        run: |
+          cat > Dockerfile.ckan-extension-smoke <<'DOCKER'
+          FROM ckan/ckan-base:2.12.1
+          ENV EXTRA_UWSGI_OPTS=""
+          RUN test "${EXTRA_UWSGI_OPTS+x}" = x && test -z "$EXTRA_UWSGI_OPTS"
+          USER root
+          COPY deploy/ckan/extensions/requirements.txt /tmp/portal-ckan-extensions.txt
+          COPY deploy/ckan/theme/ /tmp/portal-ckan-theme/
+          COPY deploy/ckan/install-pages.py /tmp/install-pages.py
+          COPY deploy/ckan/compile-id-translations.py /tmp/compile-id-translations.py
+          COPY scripts/check-plugins.py /tmp/check-plugins.py
+          RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme \
+              && python /tmp/install-pages.py \
+              && python /tmp/compile-id-translations.py /tmp/portal-ckan-theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po "$(python -c 'import ckan; from pathlib import Path; print(Path(ckan.__file__).resolve().parent / "i18n")')" "$(python -c 'import importlib.util; from pathlib import Path; spec = importlib.util.find_spec("ckanext.wajo_theme"); print(Path(next(iter(spec.submodule_search_locations))) / "i18n")')" \
+              && python /tmp/check-plugins.py
+          DOCKER
+          docker build -f Dockerfile.ckan-extension-smoke -t portal-ckan-extension-smoke .
+
+  production-security-audit:
+    name: Production dependency security audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install locked dependencies
+        run: HUSKY=0 npm ci
+      - name: Audit production dependencies
+        run: npm run security:check

@@ -40,13 +40,27 @@ export function publicResourceUrl(value) {
     /^\/dataset\/[^/]+\/resource\/[^/]+\/download\/[^/]+\/?$/.test(
       resourceUrl.pathname,
     );
+  const fileMatch = resourceUrl.pathname.match(
+    /^\/file\/(?:download\/)?([a-f0-9-]{32,36})\/?$/i,
+  );
+  const publicGroupMatch = resourceUrl.pathname.match(
+    /^\/file\/public-download\/groups\/([A-Za-z0-9][A-Za-z0-9._-]{0,240}\.(?:png|jpe?g|gif|webp))$/i,
+  );
+  const legacyGroupMatch = resourceUrl.pathname.match(
+    /^\/uploads\/group\/([A-Za-z0-9][A-Za-z0-9._-]{0,240}\.(?:png|jpe?g|gif|webp))$/i,
+  );
 
   // Never publish a service-network/admin URL. Only the CKAN download route is
   // known to be routed safely through the public portal. A different internal
   // path is omitted rather than emitted as a broken or accidentally exposed URL.
   if (isProtectedOrigin) {
-    if (!publicOrigin || !isCkanDownload) return null;
-    return `${publicOrigin}${resourceUrl.pathname}${resourceUrl.search}${resourceUrl.hash}`;
+    if (!publicOrigin) return null;
+    if (isCkanDownload || publicGroupMatch || legacyGroupMatch) {
+      return `${publicOrigin}${resourceUrl.pathname}${resourceUrl.search}${resourceUrl.hash}`;
+    }
+    if (fileMatch)
+      return `${publicOrigin}/api/public/ckan-file/${encodeURIComponent(fileMatch[1])}`;
+    return null;
   }
 
   // URLs that are already public or belong to a trusted external host stay as-is.

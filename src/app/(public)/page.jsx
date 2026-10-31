@@ -256,10 +256,28 @@ function HomeHeroContent({
           role="group"
           aria-label="Akses cepat ke data publik"
         >
-          <div className="home-orbit home-orbit-one" />
-          <div className="home-orbit home-orbit-two" />
-          <div className="home-visual-mark">
-            <Database size={44} strokeWidth={1.3} aria-hidden="true" />
+          <div className="home-orbit home-orbit-one" aria-hidden="true" />
+          <div className="home-orbit home-orbit-two" aria-hidden="true" />
+          <div className="home-scene-grid" aria-hidden="true" />
+          <div
+            className="home-scene-spark home-scene-spark-one"
+            aria-hidden="true"
+          />
+          <div
+            className="home-scene-spark home-scene-spark-two"
+            aria-hidden="true"
+          />
+          <div className="home-visual-mark" aria-hidden="true">
+            <div className="home-scene-cube">
+              <span className="home-scene-cube__face home-scene-cube__front">
+                <Database size={42} strokeWidth={1.35} />
+              </span>
+              <span className="home-scene-cube__face home-scene-cube__back" />
+              <span className="home-scene-cube__face home-scene-cube__right" />
+              <span className="home-scene-cube__face home-scene-cube__left" />
+              <span className="home-scene-cube__face home-scene-cube__top" />
+              <span className="home-scene-cube__face home-scene-cube__bottom" />
+            </div>
           </div>
           <div className="home-visual-caption">
             <span className="home-live-dot" />

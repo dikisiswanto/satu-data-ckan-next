@@ -291,13 +291,151 @@ body:has(.public-home) .home-hero-pattern {
 }
 
 .home-orbit-one {
-  width: min(76%, 20rem);
+  width: min(82%, 21rem);
   border-style: solid;
+  transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-22deg);
+  animation: wajo-orbit-spin 28s linear infinite;
 }
 
 .home-orbit-two {
-  width: min(57%, 15rem);
-  border-color: rgb(207 235 245 / 24%);
+  width: min(62%, 16rem);
+  border-color: rgb(207 235 245 / 30%);
+  border-style: dashed;
+  transform: translate(-50%, -50%) rotateX(68deg) rotateZ(38deg);
+  animation: wajo-orbit-spin-reverse 22s linear infinite;
+}
+
+.home-scene-grid {
+  position: absolute;
+  inset: 7% 8% 12%;
+  border: 1px solid rgb(211 238 250 / 10%);
+  border-radius: 50%;
+  background-image:
+    linear-gradient(rgb(211 238 250 / 8%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(211 238 250 / 8%) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse at center, #000 4%, transparent 68%);
+  transform: perspective(680px) rotateX(64deg) rotateZ(-16deg)
+    translateY(1.5rem);
+  opacity: 0.7;
+}
+
+.home-scene-cube {
+  position: relative;
+  width: 8.5rem;
+  height: 8.5rem;
+  transform-style: preserve-3d;
+  animation: wajo-cube-drift 15s ease-in-out infinite;
+}
+
+.home-scene-cube__face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgb(207 235 245 / 48%);
+  border-radius: 1.15rem;
+  background: linear-gradient(
+    145deg,
+    rgb(225 246 255 / 30%),
+    rgb(82 155 194 / 12%)
+  );
+  box-shadow:
+    inset 0 0 32px rgb(226 247 255 / 10%),
+    0 12px 32px rgb(2 18 34 / 14%);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+  backface-visibility: hidden;
+}
+
+.home-scene-cube__front {
+  color: #ecfaff;
+  transform: translateZ(4.25rem);
+}
+.home-scene-cube__back {
+  transform: rotateY(180deg) translateZ(4.25rem);
+}
+.home-scene-cube__right {
+  transform: rotateY(90deg) translateZ(4.25rem);
+  background: linear-gradient(
+    145deg,
+    rgb(120 205 224 / 24%),
+    rgb(61 125 165 / 12%)
+  );
+}
+.home-scene-cube__left {
+  transform: rotateY(-90deg) translateZ(4.25rem);
+}
+.home-scene-cube__top {
+  transform: rotateX(90deg) translateZ(4.25rem);
+  background: linear-gradient(
+    145deg,
+    rgb(240 251 255 / 36%),
+    rgb(61 125 165 / 12%)
+  );
+}
+.home-scene-cube__bottom {
+  transform: rotateX(-90deg) translateZ(4.25rem);
+}
+
+.home-scene-spark {
+  position: absolute;
+  z-index: 2;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1px solid rgb(227 248 255 / 75%);
+  border-radius: 50%;
+  background: #9de6e2;
+  box-shadow: 0 0 18px 5px rgb(111 215 222 / 30%);
+}
+.home-scene-spark-one {
+  top: 22%;
+  left: 27%;
+  animation: wajo-spark-float 5.5s ease-in-out infinite;
+}
+.home-scene-spark-two {
+  right: 23%;
+  bottom: 27%;
+  width: 0.38rem;
+  height: 0.38rem;
+  animation: wajo-spark-float 6.8s ease-in-out -2s infinite;
+}
+
+@keyframes wajo-orbit-spin {
+  from {
+    transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-22deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotateX(68deg) rotateZ(338deg);
+  }
+}
+@keyframes wajo-orbit-spin-reverse {
+  from {
+    transform: translate(-50%, -50%) rotateX(68deg) rotateZ(38deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-322deg);
+  }
+}
+@keyframes wajo-cube-drift {
+  0%,
+  100% {
+    transform: rotateX(-16deg) rotateY(-24deg) translateY(0);
+  }
+  50% {
+    transform: rotateX(18deg) rotateY(26deg) translateY(-0.55rem);
+  }
+}
+@keyframes wajo-spark-float {
+  0%,
+  100% {
+    translate: 0 0;
+    opacity: 0.65;
+  }
+  50% {
+    translate: 0 -12px;
+    opacity: 1;
+  }
 }
 
 .home-visual-mark {
@@ -305,9 +443,11 @@ body:has(.public-home) .home-hero-pattern {
   top: 43%;
   left: 50%;
   display: grid;
-  width: 7rem;
+  width: 10rem;
   aspect-ratio: 1;
   place-items: center;
+  perspective: 900px;
+  transform-style: preserve-3d;
   border: 0;
   border-radius: 0;
   color: #e8f6ff;
@@ -599,5 +739,23 @@ body:has(.public-home) .home-hero-pattern {
     translate: none !important;
     opacity: 1 !important;
     will-change: auto !important;
+  }
+  .home-hero-visual .home-scene-cube__front {
+    transform: translateZ(4.25rem) !important;
+  }
+  .home-hero-visual .home-scene-cube__back {
+    transform: rotateY(180deg) translateZ(4.25rem) !important;
+  }
+  .home-hero-visual .home-scene-cube__right {
+    transform: rotateY(90deg) translateZ(4.25rem) !important;
+  }
+  .home-hero-visual .home-scene-cube__left {
+    transform: rotateY(-90deg) translateZ(4.25rem) !important;
+  }
+  .home-hero-visual .home-scene-cube__top {
+    transform: rotateX(90deg) translateZ(4.25rem) !important;
+  }
+  .home-hero-visual .home-scene-cube__bottom {
+    transform: rotateX(-90deg) translateZ(4.25rem) !important;
   }
 }

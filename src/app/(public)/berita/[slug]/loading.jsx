@@ -22,10 +22,8 @@ export default function BeritaDetailLoading() {
       <PageHeading
         className="public-dynamic-heading"
         reserveTitle
-        reserveDescription
         eyebrow="Berita dan artikel"
         title="Memuat artikel"
-        description="Menyiapkan informasi artikel."
       />
       <p className="public-publish-date mt-3 inline-flex min-h-5 items-center gap-2 text-xs text-muted">
         <Skeleton className="h-3 w-40" />

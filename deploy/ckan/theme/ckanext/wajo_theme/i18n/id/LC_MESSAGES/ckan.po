@@ -64,6 +64,12 @@ msgstr "Aktif"
 msgid "Activity"
 msgstr "Aktivitas"
 
+msgid "active"
+msgstr "Aktif"
+
+msgid "deleted"
+msgstr "Dihapus"
+
 msgid "Activity Stream"
 msgstr "Riwayat aktivitas"
 
@@ -425,6 +431,15 @@ msgstr "Saring"
 msgid "Filter by"
 msgstr "Saring berdasarkan"
 
+msgid "Frequency"
+msgstr "Frekuensi"
+
+msgid "Frequency filter"
+msgstr "Filter frekuensi"
+
+msgid "Filter by frequency"
+msgstr "Saring berdasarkan frekuensi"
+
 msgid "Forgot your password?"
 msgstr "Lupa kata sandi?"
 
@@ -705,7 +720,10 @@ msgid "No data available"
 msgstr "Tidak ada data tersedia"
 
 msgid "No datasets found"
-msgstr "Dataset tidak ditemukan"
+msgstr "Tidak ada dataset yang ditemukan"
+
+msgid "No datasets found for \"{query}\""
+msgstr "Tidak ada dataset yang ditemukan untuk \"{query}\""
 
 msgid "No edited datasets"
 msgstr "Belum ada dataset yang diubah"
@@ -716,8 +734,14 @@ msgstr "Belum ada grup"
 msgid "No groups found"
 msgstr "Grup tidak ditemukan"
 
+msgid "No groups found for \"{query}\""
+msgstr "Tidak ada grup yang ditemukan untuk \"{query}\""
+
 msgid "No organizations found"
 msgstr "Organisasi tidak ditemukan"
+
+msgid "No organizations found for \"{query}\""
+msgstr "Tidak ada organisasi yang ditemukan untuk \"{query}\""
 
 msgid "No preview available"
 msgstr "Pratinjau tidak tersedia"
@@ -1341,6 +1365,24 @@ msgstr "Pengguna tidak ditemukan."
 msgid "User not found: %s"
 msgstr "Pengguna tidak ditemukan: %s"
 
+msgid "You have not provided a biography."
+msgstr "Anda belum mengisi biografi."
+
+msgid "This user has no biography."
+msgstr "Pengguna ini belum mengisi biografi."
+
+msgid "Followers"
+msgstr "Pengikut"
+
+msgid "Open ID"
+msgstr "OpenID"
+
+msgid "Member Since"
+msgstr "Menjadi anggota sejak"
+
+msgid "This information is visible to you and admins"
+msgstr "Informasi ini hanya dapat dilihat oleh Anda dan administrator."
+
 msgid "Username"
 msgstr "Nama pengguna"
 
@@ -1918,7 +1960,8 @@ msgstr "<p id=\"search-error\"><strong>Terjadi kesalahan saat mencari.</strong> 
 
 #, python-brace-format
 msgid "{number} dataset found for \"{query}\""
-msgstr "{number} dataset ditemukan untuk \"{query}\""
+msgid_plural "{number} datasets found for \"{query}\""
+msgstr[0] "{number} dataset ditemukan untuk \"{query}\""
 
 #, python-brace-format
 msgid "Search datasets with the tag: {name}"
@@ -2053,6 +2096,21 @@ msgstr[0] "{count} anggota"
 msgid "{count} collaborator"
 msgid_plural "{count} collaborators"
 msgstr[0] "{count} kolaborator"
+
+#, python-brace-format
+msgid "{number} group found for \"{query}\""
+msgid_plural "{number} groups found for \"{query}\""
+msgstr[0] "{number} grup ditemukan untuk \"{query}\""
+
+#, python-brace-format
+msgid "{number} organization found for \"{query}\""
+msgid_plural "{number} organizations found for \"{query}\""
+msgstr[0] "{number} organisasi ditemukan untuk \"{query}\""
+
+#, python-brace-format
+msgid "{number} group found"
+msgid_plural "{number} groups found"
+msgstr[0] "{number} grup ditemukan"
 
 #, python-brace-format
 msgid "{number} organization found"
@@ -2649,3 +2707,9 @@ msgstr "Tambah dataset umum"
 
 msgid "Add thematic category"
 msgstr "Tambah kategori tematik"
+
+msgid "Add information page"
+msgstr "Tambah halaman informasi"
+
+msgid "Add news article"
+msgstr "Tambah artikel berita"

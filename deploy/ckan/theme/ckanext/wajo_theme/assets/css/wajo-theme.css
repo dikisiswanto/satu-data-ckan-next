@@ -249,23 +249,6 @@ textarea {
   flex-direction: column;
   padding: 1.25rem 0.9rem 1rem;
 }
-.wajo-admin-sidebar__context {
-  display: grid;
-  gap: 0.25rem;
-  margin: 0.2rem 0.6rem 1.4rem;
-  padding: 0.25rem 0.2rem 1.2rem;
-  border-bottom: 1px solid #edf1ee;
-}
-.wajo-admin-sidebar__context strong {
-  color: var(--wajo-forest-950);
-  font-size: 0.98rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-.wajo-admin-sidebar__context > span:last-child {
-  color: var(--wajo-muted);
-  font-size: 0.74rem;
-}
 .wajo-admin-sidebar__eyebrow,
 .wajo-admin-nav__label {
   color: #84938b;
@@ -332,26 +315,6 @@ textarea {
   font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.04em;
-}
-.wajo-admin-sidebar__footer {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin: auto 0.4rem 0.1rem;
-  border-top: 1px solid #edf1ee;
-  padding: 1.1rem 0.4rem 0.25rem;
-}
-.wajo-admin-sidebar__footer > span:last-child {
-  display: grid;
-  gap: 0.08rem;
-}
-.wajo-admin-sidebar__footer strong {
-  color: #40574a;
-  font-size: 0.74rem;
-}
-.wajo-admin-sidebar__footer small {
-  color: #89978f;
-  font-size: 0.67rem;
 }
 .wajo-admin-status-dot {
   width: 8px;
@@ -1224,9 +1187,6 @@ textarea {
   .wajo-admin-sidebar__inner {
     min-height: 0;
   }
-  .wajo-admin-sidebar__footer {
-    margin-top: 1rem;
-  }
   .wajo-admin-workspace .main {
     min-height: calc(100vh - 76px);
   }
@@ -1474,19 +1434,6 @@ body {
   min-height: calc(100vh - 65px);
   padding: 1.1rem 0.75rem 0.9rem;
 }
-.wajo-admin-sidebar__context {
-  margin: 0.15rem 0.55rem 1rem;
-  padding: 0.2rem 0.15rem 1rem;
-}
-.wajo-admin-sidebar__context strong {
-  color: #26352c;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-.wajo-admin-sidebar__context > span:last-child {
-  color: #7a877f;
-  font-size: 0.7rem;
-}
 .wajo-admin-sidebar__eyebrow,
 .wajo-admin-nav__label {
   color: #89958e;
@@ -1531,19 +1478,6 @@ body {
 .wajo-admin-nav__external {
   background: #f1f4f2;
   color: #78857d;
-}
-.wajo-admin-sidebar__footer {
-  border-color: #edf1ee;
-  padding-top: 0.9rem;
-}
-.wajo-admin-sidebar__footer strong {
-  color: #4d5d53;
-  font-size: 0.7rem;
-  font-weight: 650;
-}
-.wajo-admin-sidebar__footer small {
-  color: #8a958e;
-  font-size: 0.63rem;
 }
 .wajo-admin-status-dot {
   width: 7px;
@@ -2147,46 +2081,6 @@ body {
   text-decoration: underline;
 }
 
-.wajo-admin-footer {
-  display: flex;
-  width: 100%;
-  min-height: 66px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border-top: 1px solid var(--wajo-border);
-  padding: 0.85rem clamp(1rem, 2.3vw, 2rem);
-  background: #fff;
-  color: var(--wajo-muted);
-}
-.wajo-admin-footer__brand {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.65rem;
-}
-.wajo-admin-footer__brand img {
-  display: block;
-  width: 25px;
-  height: 31px;
-  flex: 0 0 25px;
-  object-fit: contain;
-}
-.wajo-admin-footer__brand > span {
-  display: grid;
-  min-width: 0;
-  gap: 0.1rem;
-}
-.wajo-admin-footer strong {
-  color: #34483b;
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-.wajo-admin-footer span,
-.wajo-admin-footer > small {
-  font-size: 0.66rem;
-}
-
 .wajo-login-frame {
   position: relative;
   z-index: 1;
@@ -2396,12 +2290,6 @@ body {
   }
   .wajo-context-help__body {
     padding: 0.7rem 0.75rem;
-  }
-  .wajo-admin-footer {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.3rem;
-    padding: 0.8rem 0.9rem;
   }
   .wajo-login-frame {
     padding-inline: 0.15rem;

@@ -11,6 +11,7 @@ ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-harvest.po
 ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-pages.po
 ckanext/wajo_theme/public/logo-kabupaten-wajo.webp
 ckanext/wajo_theme/public/wajo-admin-forms.js
+ckanext/wajo_theme/public/wajo-markdown-editor.js
 ckanext/wajo_theme/schemas/dataset.yaml
 ckanext/wajo_theme/schemas/group.yaml
 ckanext/wajo_theme/schemas/organization.yaml

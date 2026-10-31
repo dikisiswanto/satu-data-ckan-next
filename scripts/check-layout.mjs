@@ -41,24 +41,45 @@ for (const route of ["berita", "informasi"]) {
   const loading = `src/app/(public)/${route}/[slug]/loading.jsx`;
   requireText(
     page,
-    "reserveTitle reserveDescription",
-    "dynamic title and description must reserve geometry",
+    "reserveTitle",
+    "dynamic CMS title must reserve heading geometry",
   );
   requireText(
     page,
     "public-cms-cover",
-    "CMS details must reserve the cover image frame",
+    "CMS details must identify the optional cover frame",
   );
   requireText(
     loading,
     "public-cms-cover",
-    "CMS detail fallback must reserve the same cover frame",
+    "CMS detail fallback must reserve the cover frame while content loads",
   );
   requireText(
     loading,
     "public-dynamic-heading",
     "CMS detail fallback must reserve the heading geometry",
   );
+  if (route === "informasi")
+    requireText(
+      page,
+      "reserveDescription",
+      "information detail may reserve its configured excerpt",
+    );
+  if (route === "berita") {
+    if (
+      read(page).includes("reserveDescription") ||
+      read(page).includes("description={page.excerpt")
+    ) {
+      failures.push(
+        "berita/[slug]: redundant excerpt must not appear above article content",
+      );
+    }
+    requireText(
+      page,
+      "{image ? <figure",
+      "news cover should render only when a real uploaded image exists",
+    );
+  }
 }
 
 requireText(
@@ -120,6 +141,16 @@ requireText(
   "src/app/styles/public-layout-stability.css",
   "-webkit-line-clamp: 2",
   "dynamic page titles must have a stable maximum line count",
+);
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  ".dataset-api-panel__header",
+  "dataset API access section needs an explicit narrow-screen layout",
+);
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  "grid-template-columns: minmax(0, 1fr)",
+  "dataset API access header must use a single column on small screens",
 );
 requireText(
   "src/app/(public)/dataset/[slug]/page.jsx",

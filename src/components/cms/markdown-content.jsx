@@ -2,10 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { parseMarkdown } from "@/lib/markdown/parse-markdown";
 import { publicCmsImageUrl } from "@/lib/cms/pages";
+import { publicResourceUrl } from "@/lib/ckan/public-resource-url";
 import { getPublicSiteOrigin } from "@/lib/site-config";
 
-function safeHref(value) {
-  const candidate = String(value || "").trim();
+export function normalizeMarkdownHref(value) {
+  let candidate = String(value || "").trim();
   if (
     !candidate ||
     candidate.startsWith("//") ||
@@ -13,8 +14,41 @@ function safeHref(value) {
     /[\u0000-\u001f]/.test(candidate)
   )
     return null;
-  if (candidate.startsWith("/") && !candidate.includes("\\")) return candidate;
+
+  if (candidate.startsWith("/") && !candidate.includes("\\")) {
+    // CMS images, group logos and CKAN File API assets must stay on the public
+    // portal origin instead of resolving against the protected CKAN host.
+    const cmsAsset = publicCmsImageUrl(candidate, getPublicSiteOrigin());
+    if (cmsAsset) return cmsAsset;
+    if (/^\/api\//.test(candidate) || /^\/_next\//.test(candidate)) return null;
+    return candidate;
+  }
+
   try {
+    const original = new URL(candidate);
+    if (original.username || original.password) return null;
+
+    const cmsAsset = publicCmsImageUrl(candidate, getPublicSiteOrigin());
+    if (cmsAsset && cmsAsset !== candidate) return cmsAsset;
+
+    const publicResource = publicResourceUrl(candidate);
+    if (publicResource) candidate = publicResource;
+    else {
+      const configuredAdmin =
+        process.env.CKAN_ADMIN_URL || process.env.NEXT_PUBLIC_CKAN_ADMIN_URL;
+      let adminOrigin = "";
+      try {
+        adminOrigin = configuredAdmin ? new URL(configuredAdmin).origin : "";
+      } catch {
+        adminOrigin = "";
+      }
+      const internalHost = ["ckan", "nginx", "localhost", "127.0.0.1"].includes(
+        original.hostname,
+      );
+      if ((adminOrigin && original.origin === adminOrigin) || internalHost)
+        return null;
+    }
+
     const url = new URL(candidate);
     return ["https:", "mailto:", "tel:"].includes(url.protocol) &&
       !url.username &&
@@ -62,7 +96,7 @@ function renderInline(tokens, keyPrefix) {
       );
     }
     if (token.type === "link") {
-      const href = safeHref(token.href);
+      const href = normalizeMarkdownHref(token.href);
       if (!href)
         return renderInline(
           token.children || [

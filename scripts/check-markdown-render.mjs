@@ -51,6 +51,16 @@ assert.match(
   "Frontend must render Markdown heading levels without offset.",
 );
 assert.match(
+  renderer,
+  /publicCmsImageUrl[\s\S]*publicResourceUrl[\s\S]*normalizeMarkdownHref/,
+  "Markdown images and links must use the public CKAN file/download proxy.",
+);
+assert.match(
+  renderer,
+  /normalizeMarkdownHref\(token\.href\)/,
+  "Markdown links must be normalized through the public CKAN asset routes.",
+);
+assert.match(
   editor,
   /renderMarkdown\(rawItem\.join\("\\n"\), li, depth \+ 1\)/,
   "Admin preview must support nested lists.",
@@ -65,6 +75,26 @@ assert.match(
   /function expandReferenceLinks\(source\)/,
   "Admin preview must resolve Markdown reference-style links.",
 );
+assert.match(
+  editor,
+  /textarea\[name='content'\]/,
+  "CKAN Pages and News Markdown content fields must be enhanced by the admin editor.",
+);
+assert.match(
+  editor,
+  /renderMarkdown\(textarea\.value, fragment\)/,
+  "The preview action must render Markdown into the preview panel rather than show raw source.",
+);
+assert.match(
+  editor,
+  /data-module~="ckedit"/,
+  "The Markdown editor must not conflict with the optional upstream CKEditor.",
+);
+assert.match(
+  pagesForm,
+  /{% block scripts %}\s*{{ super\(\) }}/,
+  "CKAN Pages must preserve the inherited Wajo editor scripts while keeping upstream CKEditor assets.",
+);
 assert.equal(
   editor.split('startsWith("=") ? "h1" : "h2"').length - 1,
   1,
@@ -76,6 +106,6 @@ assert.match(
   /data-wajo-image-upload-to-json="field-content-blocks"/,
 );
 
-console.log(
-  "Markdown renderer checks passed: semantic headings, tables/alignment, tasks, nested lists, Setext, quotes, code, hard breaks, inert HTML, and CMS image upload controls.",
+process.stdout.write(
+  "Markdown renderer checks passed: semantic headings, tables/alignment, tasks, nested lists, Setext, quotes, code, hard breaks, inert HTML, and CMS image upload controls.\n",
 );

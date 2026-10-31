@@ -30,6 +30,32 @@ assert.equal(
   createCkanGroupMediaTarget(["group", "logo.png"], "file:///etc/passwd"),
   null,
 );
+assert.equal(
+  createCkanGroupMediaTarget(
+    [
+      "public-download",
+      "groups",
+      "2026-10-31-012710.133105Komdigi-Logo---Colored---353x256---zonalogo.com.png",
+    ],
+    "http://ckan:5000/api/3/action",
+  )?.href,
+  "http://ckan:5000/file/public-download/groups/2026-10-31-012710.133105Komdigi-Logo---Colored---353x256---zonalogo.com.png",
+  "CKAN 2.12 public-download URLs must be proxied to the native FileStore route.",
+);
+assert.equal(
+  createCkanGroupMediaTarget(
+    ["public-download", "resources", "private.png"],
+    "http://ckan:5000",
+  ),
+  null,
+);
+assert.equal(
+  createCkanGroupMediaTarget(
+    ["public-download", "groups", "../private.png"],
+    "http://ckan:5000",
+  ),
+  null,
+);
 
 assert.equal(
   getPublicOrganizationImageUrl({ image_url: "logo-wajo.webp" }),
@@ -40,6 +66,20 @@ assert.equal(
     image_display_url: "https://data.example.go.id/uploads/group/logo.png",
   }),
   "/uploads/group/logo.png",
+);
+assert.equal(
+  getPublicOrganizationImageUrl({
+    image_display_url:
+      "https://data.silirdev.com/file/public-download/groups/2026-10-31-012710.133105Komdigi-Logo---Colored---353x256---zonalogo.com.png",
+  }),
+  "/file/public-download/groups/2026-10-31-012710.133105Komdigi-Logo---Colored---353x256---zonalogo.com.png",
+  "The production CKAN group public-download URL must become a same-origin proxy path.",
+);
+assert.equal(
+  getPublicOrganizationImageUrl({
+    image_url: "/file/public-download/groups/logo-wajo.webp",
+  }),
+  "/file/public-download/groups/logo-wajo.webp",
 );
 assert.equal(
   getPublicOrganizationImageUrl({ image_url: "/uploads/group/logo.jpg" }),
@@ -82,6 +122,7 @@ const organizationCard = await read(
   "src/components/organization-directory.jsx",
 );
 const mediaRoute = await read("src/app/uploads/[...path]/route.js");
+const nativeFileRoute = await read("src/app/file/[...path]/route.js");
 const errorCss = await read(
   "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
 );
@@ -96,6 +137,14 @@ assert.match(
 );
 assert.match(mediaRoute, /createCkanGroupMediaTarget/);
 assert.match(mediaRoute, /ALLOWED_IMAGE_TYPES/);
+assert.match(nativeFileRoute, /createCkanGroupMediaTarget/);
+assert.match(nativeFileRoute, /public-download\/groups/);
+assert.match(nativeFileRoute, /ALLOWED_IMAGE_TYPES/);
+assert.match(nativeFileRoute, /redirect:\s*"manual"/);
+assert.match(
+  nativeFileRoute,
+  /Never a generic File API proxy|not a generic File API proxy/i,
+);
 assert.match(organizationPage, /getPublicOrganizationImageUrl/);
 assert.match(organizationCard, /getPublicOrganizationImageUrl/);
 assert.match(
@@ -109,6 +158,6 @@ assert.match(
   "Hidden media file pickers must remain hidden; only visible controls get file input styling.",
 );
 
-console.log(
-  "Public CKAN media proxy, logo schema, and readable validation-state checks passed.",
+process.stdout.write(
+  "Public CKAN media proxy, logo schema, and readable validation-state checks passed.\n",
 );

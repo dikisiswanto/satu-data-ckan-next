@@ -135,8 +135,28 @@ for (const plugin of [
 }
 assert.match(
   base,
-  /<script defer src="\/wajo-admin-forms\.js"><\/script>/,
+  /<script defer src="\/wajo-admin-forms\.js(?:\?v=[^"]+)?"><\/script>/,
   "Admin conditional form script must load from CKAN extension public assets.",
+);
+assert.match(
+  script,
+  /publish_date\|publication_date\|portal_publication_date\|portal_data_start\|portal_data_end\|issued_date\|date_published/,
+  "CKAN dataset, page and news publication fields must be upgraded to native date pickers.",
+);
+assert.match(
+  script,
+  /input\.type = "date"/,
+  "Create and edit forms must use a native date picker rather than plain text inputs.",
+);
+assert.match(
+  script,
+  /function enhanceFileInputs\(\)/,
+  "Visible upload fields must be enhanced with an identifiable file picker and upload guidance.",
+);
+assert.match(
+  script,
+  /wajo-file-picker-hint/,
+  "Upload fields must explain how to select a file.",
 );
 
 const sandbox = {
@@ -574,6 +594,6 @@ assert.ok(
   ),
   "Category help links must open the correct dynamic dataset form.",
 );
-console.log(
-  "Admin custom forms passed: content-type query defaults, FE discovery tags, dynamic field visibility, inherited resource roles, and distinct thematic Group behavior verified.",
+process.stdout.write(
+  "Admin custom forms passed: content-type query defaults, FE discovery tags, dynamic field visibility, inherited resource roles, and distinct thematic Group behavior verified.\n",
 );

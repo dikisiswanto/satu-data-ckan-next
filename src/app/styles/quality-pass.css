@@ -32,8 +32,9 @@ html {
     textarea
   ):focus-visible {
   border-color: var(--brand-blue);
-  outline: none;
-  box-shadow: 0 0 0 3px var(--brand-focus-ring);
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 .public-app-shell

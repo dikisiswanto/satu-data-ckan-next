@@ -190,6 +190,12 @@ msgstr "Format"
 msgid "Frequency"
 msgstr "Frekuensi"
 
+msgid "Frequency filter"
+msgstr "Filter frekuensi"
+
+msgid "Filter by frequency"
+msgstr "Saring berdasarkan frekuensi"
+
 msgid "Gathering"
 msgstr "Mengumpulkan"
 

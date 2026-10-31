@@ -55,15 +55,10 @@
     "uuid": "11.1.1"
   },
   "lint-staged": {
-    "{src,tests,scripts}/**/*.{js,jsx,mjs,cjs}": [
+    "**/*.{js,jsx,mjs,cjs}": [
       "prettier --write",
       "eslint --fix"
     ],
-    "*.{js,mjs,cjs}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "{src,tests,scripts,.github}/**/*.{css,json,md,yaml,yml}": "prettier --write",
-    "*.{json,md,yaml,yml}": "prettier --write"
+    "**/*.{css,json,md,yaml,yml}": "prettier --write"
   }
 }

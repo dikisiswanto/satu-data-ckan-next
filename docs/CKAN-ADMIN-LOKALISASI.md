@@ -43,13 +43,15 @@ Katalog `ckan.po` digabung dengan katalog bawaan CKAN yang sudah ada: terjemahan
 - string wajib core, Harvest, Pages, dan DCAT tersedia;
 - placeholder sumber dan terjemahan cocok;
 - merge katalog core tidak menghapus terjemahan upstream;
+- compiler menggabungkan katalog upstream extension `.mo` maupun `.po`, lalu membiarkan terjemahan Wajo meng-override pesan yang sama;
+- entri lokal berstatus `fuzzy` tidak boleh menimpa terjemahan upstream yang valid;
 - compiler menghasilkan file `.mo` untuk domain Harvest, Pages, dan DCAT.
 
 Label sidebar, pintasan pembuatan konten, judul dan helper dasbor Wajo Admin juga menggunakan gettext sehingga tetap konsisten dengan katalog Bahasa Indonesia. Katalog inti dan domain extension dikompilasi di Docker build melalui `deploy/ckan/compile-id-translations.py`. Katalog JavaScript dibangun setelah aktivasi plugin melalui `ckan translation js`. File `.mo`/bundle hasil kompilasi bersifat artefak build dan tidak perlu dikomit.
 
 ## Cakupan yang sudah diuji dan batas yang perlu diperhatikan
 
-Pada source saat ini, `scripts/check-id-translations.py` memeriksa 1.133 entri terjemahan lintas empat domain (`ckan`, `ckanext-harvest`, `ckanext-pages`, dan `ckanext-dcat`), memastikan tidak ada `msgstr` kosong/fuzzy atau teks sumber yang tertinggal tanpa alasan, menjaga placeholder, menguji merge katalog upstream, dan mengompilasi `.mo` setiap domain. Angka tersebut adalah jumlah entri katalog project, bukan persentase seluruh string yang mungkin muncul dari semua paket CKAN dan extension.
+Pada source saat ini, `scripts/check-id-translations.py` memeriksa 1.156 entri terjemahan lintas empat domain (`ckan`, `ckanext-harvest`, `ckanext-pages`, dan `ckanext-dcat`), memastikan tidak ada `msgstr` kosong/fuzzy atau teks sumber yang tertinggal tanpa alasan, menjaga placeholder, menguji merge katalog upstream dalam format `.mo` maupun `.po`, dan mengompilasi `.mo` setiap domain. Angka tersebut adalah jumlah entri katalog project, bukan persentase seluruh string yang mungkin muncul dari semua paket CKAN dan extension.
 
 Cakupan otomatis ini meliputi string gettext yang dimasukkan ke empat katalog di atas. Teks hard-coded oleh extension pihak ketiga, pesan dari extension yang menggunakan domain lain, nama kolom yang didefinisikan dalam konfigurasi skema, serta string JavaScript yang tidak terdaftar pada katalog POT tidak bisa diterjemahkan hanya dengan katalog ini. Saat memperbarui extension, lakukan audit string pada halaman aktual dan tambahkan domain/katalog khusus bila extension tersebut mengimplementasikan `ITranslation`.
 
@@ -62,3 +64,9 @@ Katalog inti mencakup label administrasi, dataset/resource, organisasi/kategori,
 ## Build ulang
 
 Setelah mengganti source di VPS, jalankan bootstrap dan rebuild image CKAN sesuai mode deployment. Langkah build mengompilasi domain `ckan`, `ckanext-harvest`, `ckanext-pages`, dan `ckanext-dcat`; saat inisialisasi setelah plugin aktif, CKAN membangun bundle terjemahan JavaScript. Restart CKAN agar locale default dan katalog yang baru diterapkan.
+
+## Regression contract untuk pencarian dataset dan frekuensi
+
+CKAN 2.12 memakai snippet `snippets/search_result_text.html` untuk tiga tipe pencarian: dataset, group, dan organization. Setiap tipe memakai pasangan plural gettext ber-query dan tanpa query, serta pesan kosong ber-query dan tanpa query. Seluruh pasangan berikut dipelihara sebagai satu entri plural PO: `{number} dataset(s) found`, `{number} group(s) found`, `{number} organization(s) found`, dan varian `for "{query}"`. Pesan `No ... found` dan `No ... found for "{query}"` juga harus tersedia. Check CI mengompilasi katalog dan menjalankan `ngettext` untuk jumlah 1 dan 3, dengan serta tanpa query, lalu memeriksa seluruh empty-state tersebut.
+
+Label `Frequency`, `Frequency filter`, dan `Filter by frequency` tersedia pada katalog inti serta domain Harvest/DCAT agar label filter metadata tidak bergantung pada domain gettext yang kebetulan dipilih template atau ekstensi. Status profil CKAN seperti `active` dan `deleted`, label Followers/Username/State/Member Since, serta notifikasi biografi kosong juga dipastikan tersedia di domain core.

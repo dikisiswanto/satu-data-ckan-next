@@ -699,10 +699,22 @@
 
 @media (max-width: 639px) {
   .dataset-api-panel__header {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 0.55rem;
+  }
+  .dataset-api-panel__header > .dataset-api-panel__icon,
+  .dataset-api-panel__header > .min-w-0,
+  .dataset-api-doc-link {
+    grid-column: 1;
+    grid-row: auto;
+    min-width: 0;
   }
   .dataset-api-doc-link {
-    margin-left: 3.35rem;
+    justify-self: start;
+    margin: 0;
+    white-space: normal;
   }
   .dataset-api-entry,
   .dataset-api-resource > summary {

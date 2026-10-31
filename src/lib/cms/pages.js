@@ -263,11 +263,34 @@ export function publicCmsImageUrl(
   };
   const isEditorialMedia = (pathname) =>
     /^\/api\/editorial-media\/[a-f0-9-]{32,36}$/i.test(pathname);
+  const mapPublicFile = (pathname) => {
+    const match = pathname.match(
+      /^\/file\/(?:download\/)?([a-f0-9-]{32,36})\/?$/i,
+    );
+    return match
+      ? `/api/public/ckan-file/${encodeURIComponent(match[1])}`
+      : null;
+  };
+  const isPublicGroupImage = (pathname) =>
+    /^\/file\/public-download\/groups\/[A-Za-z0-9][A-Za-z0-9._-]{0,240}\.(?:png|jpe?g|gif|webp)$/i.test(
+      pathname,
+    );
+  const mapLegacyGroupImage = (pathname) => {
+    const match = pathname.match(
+      /^\/uploads\/group\/([A-Za-z0-9][A-Za-z0-9._-]{0,240}\.(?:png|jpe?g|gif|webp))$/i,
+    );
+    return match ? `/uploads/group/${encodeURIComponent(match[1])}` : null;
+  };
   if (candidate.startsWith("/")) {
     const pathname = candidate.split(/[?#]/, 1)[0];
     if (isEditorialMedia(pathname)) return candidate;
     if (/^\/(?:api|_next)\//.test(candidate)) return "";
-    return mapPageUpload(pathname) || candidate;
+    return (
+      mapPageUpload(pathname) ||
+      mapPublicFile(pathname) ||
+      mapLegacyGroupImage(pathname) ||
+      (isPublicGroupImage(pathname) ? candidate : candidate)
+    );
   }
   try {
     const url = new URL(candidate);
@@ -282,14 +305,29 @@ export function publicCmsImageUrl(
       }),
     );
     const pageUpload = mapPageUpload(url.pathname);
-    if (
-      pageUpload &&
-      (!expectedOrigins.size || expectedOrigins.has(url.origin))
-    )
+    const publicFile = mapPublicFile(url.pathname);
+    const publicGroupImage = isPublicGroupImage(url.pathname);
+    const legacyGroupImage = mapLegacyGroupImage(url.pathname);
+    const isTrustedCkanOrigin = expectedOrigins.has(url.origin);
+    if (pageUpload && (!expectedOrigins.size || isTrustedCkanOrigin))
       return pageUpload;
+    if (
+      (publicFile || publicGroupImage || legacyGroupImage) &&
+      isTrustedCkanOrigin
+    ) {
+      return (
+        publicFile ||
+        legacyGroupImage ||
+        `${url.pathname}${url.search}${url.hash}`
+      );
+    }
     if (siteOrigin && url.origin === new URL(siteOrigin).origin) {
       if (isEditorialMedia(url.pathname))
         return `${url.pathname}${url.search}${url.hash}`;
+      if (publicFile) return publicFile;
+      if (publicGroupImage) return `${url.pathname}${url.search}${url.hash}`;
+      if (legacyGroupImage)
+        return `${legacyGroupImage}${url.search}${url.hash}`;
       return /^\/(?:api|_next)\//.test(url.pathname)
         ? ""
         : `${url.pathname}${url.search}${url.hash}`;

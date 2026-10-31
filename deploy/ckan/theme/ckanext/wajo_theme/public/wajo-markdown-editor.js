@@ -5,9 +5,14 @@
     "#field-content",
     "#field-notes",
     "#field-description",
+    "#field-body",
+    "#field-text",
     "textarea[name='content']",
     "textarea[name='notes']",
     "textarea[name='description']",
+    "textarea[name='body']",
+    "textarea[name='text']",
+    "textarea[name='markdown']",
     "textarea[name='excerpt']",
     "textarea[name='seo_description']",
     "textarea[name='portal_revision_note']",
@@ -717,10 +722,39 @@
     );
     [...new Set(candidates)]
       .filter((textarea) => textarea instanceof HTMLTextAreaElement)
-      .forEach(attach);
+      // Do not mount the Markdown toolbar inside CKAN's optional CKEditor instance.
+      .filter(
+        (textarea) =>
+          !textarea.matches('[data-module~="ckedit"], #field-content-ck'),
+      )
+      .forEach((textarea) => {
+        try {
+          attach(textarea);
+        } catch (error) {
+          console.error("Wajo Markdown editor could not attach", error);
+        }
+      });
     attachImageUrlUpload();
   }
+
+  function start() {
+    init();
+    // Pages/News extensions can insert their form fields after the first paint.
+    // Observe additions so the preview controls are not silently missed.
+    if (document.body && "MutationObserver" in window) {
+      let queued = false;
+      const observer = new MutationObserver(() => {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false;
+          init();
+        });
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+  }
   if (document.readyState === "loading")
-    document.addEventListener("DOMContentLoaded", init, { once: true });
-  else init();
+    document.addEventListener("DOMContentLoaded", start, { once: true });
+  else start();
 })();

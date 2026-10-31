@@ -280,14 +280,14 @@
   }
 
   function bindConditionalFields(selectorName, fallback, rules, onUpdate) {
-    const control = fieldControl(selectorName);
-    if (!control) return false;
+    const _control = fieldControl(selectorName);
+    if (!_control) return false;
 
-    if (!control.value && fallback && !control.disabled) {
-      const hasFallback = Array.from(control.options || []).some(
+    if (!_control.value && fallback && !_control.disabled) {
+      const hasFallback = Array.from(_control.options || []).some(
         (option) => option.value === fallback,
       );
-      if (hasFallback) control.value = fallback;
+      if (hasFallback) _control.value = fallback;
     }
 
     const update = () => {
@@ -299,10 +299,10 @@
           allowedValues,
         );
       }
-      onUpdate?.(control, value);
+      onUpdate?.(_control, value);
     };
 
-    control.addEventListener("change", update);
+    _control.addEventListener("change", update);
     update();
     return true;
   }
@@ -482,21 +482,33 @@
 
   function enhanceFileInputs() {
     document
-      .querySelectorAll(".wajo-admin-workspace input[type='file']")
+      .querySelectorAll('.wajo-admin-workspace input[type="file"]')
       .forEach((input) => {
-        if (input.dataset.wajoFileReady) return;
+        if (
+          input.dataset.wajoFileReady ||
+          input.hidden ||
+          input.closest("[hidden]")
+        )
+          return;
         input.dataset.wajoFileReady = "1";
         input.classList.add("wajo-file-input");
         const wrapper =
           fieldWrapper(input.id?.replace(/^field-/, "")) || input.parentElement;
         if (!wrapper) return;
+
         const imageUpload =
           /image/i.test(input.accept || "") ||
           /(?:image|logo|og_image)/i.test(
             `${input.name || ""} ${input.id || ""}`,
           );
-        if (!imageUpload) return;
+        const hint = document.createElement("p");
+        hint.className = "wajo-file-picker-hint";
+        hint.textContent = imageUpload
+          ? "Pilih gambar untuk diunggah. Format PNG, JPG, GIF, atau WebP; maksimal 5 MiB."
+          : "Klik tombol pilih berkas untuk melampirkan file pada formulir ini.";
+        input.insertAdjacentElement("afterend", hint);
 
+        if (!imageUpload) return;
         const panel = document.createElement("div");
         panel.className = "wajo-file-preview";
         panel.hidden = true;
@@ -507,11 +519,11 @@
         const details = document.createElement("div");
         details.className = "wajo-file-preview__details";
         const filename = document.createElement("strong");
-        const hint = document.createElement("span");
-        hint.textContent = "Periksa pratinjau sebelum menyimpan formulir.";
-        details.append(filename, hint);
+        const status = document.createElement("span");
+        status.textContent = "Periksa pratinjau sebelum menyimpan formulir.";
+        details.append(filename, status);
         panel.append(preview, details);
-        input.insertAdjacentElement("afterend", panel);
+        hint.insertAdjacentElement("afterend", panel);
 
         let objectUrl = "";
         input.addEventListener("change", () => {
@@ -522,24 +534,25 @@
             panel.hidden = true;
             preview.hidden = true;
             filename.textContent = "";
+            input.setCustomValidity("");
             return;
           }
           filename.textContent = file.name;
           panel.hidden = false;
           preview.hidden = true;
-          const isImage = /^image\/(?:png|jpeg|gif|webp)$/.test(file.type);
+          const validImage = /^image\/(?:png|jpeg|gif|webp)$/.test(file.type);
           const maxBytes = 5 * 1024 * 1024;
-          if (!isImage || file.size > maxBytes) {
-            hint.textContent =
+          if (!validImage || file.size > maxBytes) {
+            status.textContent =
               "Gambar harus PNG, JPEG, GIF, atau WebP dengan ukuran maksimal 5 MiB.";
-            hint.classList.add("is-error");
+            status.classList.add("is-error");
             input.setCustomValidity(
               "Pilih PNG, JPEG, GIF, atau WebP maksimal 5 MiB.",
             );
             return;
           }
-          hint.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MiB · Gambar siap diunggah saat formulir disimpan.`;
-          hint.classList.remove("is-error");
+          status.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MiB · Gambar siap diunggah saat formulir disimpan.`;
+          status.classList.remove("is-error");
           input.setCustomValidity("");
           objectUrl = URL.createObjectURL(file);
           preview.src = objectUrl;
@@ -548,11 +561,165 @@
       });
   }
 
+  function normalizeDateValue(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    const iso = raw.match(/^(\d{4}-\d{2}-\d{2})(?:$|[T ]|\s)/);
+    if (iso) return iso[1];
+    const localized = raw.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
+    if (localized) {
+      const [, day, month, year] = localized;
+      const d = Number(day),
+        m = Number(month),
+        y = Number(year);
+      const candidate = new Date(Date.UTC(y, m - 1, d));
+      if (
+        candidate.getUTCFullYear() === y &&
+        candidate.getUTCMonth() === m - 1 &&
+        candidate.getUTCDate() === d
+      ) {
+        return `${year}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      }
+    }
+    return "";
+  }
+
+  function enhanceDatePickers() {
+    const dateName =
+      /^(?:publish_date|publication_date|portal_publication_date|portal_data_start|portal_data_end|issued_date|date_published)$/i;
+    document
+      .querySelectorAll(
+        '.wajo-admin-workspace input:not([type="date"]), .wajo-admin-workspace input[type="date"]',
+      )
+      .forEach((input) => {
+        if (input.dataset.wajoDateReady) return;
+        const name = String(input.name || input.id || "").replace(
+          /^field-/,
+          "",
+        );
+        if (
+          !dateName.test(name) ||
+          input.type === "hidden" ||
+          input.disabled ||
+          input.readOnly
+        )
+          return;
+        const normalized = normalizeDateValue(input.value);
+        if (input.value && !normalized) return;
+        try {
+          input.type = "date";
+          if (normalized) input.value = normalized;
+          input.dataset.wajoDateReady = "1";
+          input.setAttribute("inputmode", "none");
+          input.setAttribute("autocomplete", "off");
+        } catch {
+          // Keep CKAN's original text control if the browser refuses type=date.
+        }
+      });
+  }
+
+  function isPagesAdminRoute() {
+    const path =
+      String(window.location?.pathname || "").replace(/\/+$/, "") || "/";
+    const segments = path.split("/").filter(Boolean);
+    const isEditorialCollection = (parts) => {
+      if (!parts.length || !/^(?:pages|blog)$/i.test(parts[0])) return false;
+      if (parts.length === 1) return true; // Pages or Blog listing.
+      return (
+        String(parts[1] || "").toLowerCase() === "new" ||
+        String(parts[1] || "").toLowerCase() === "edit" ||
+        String(parts.at(-1) || "").toLowerCase() === "edit"
+      );
+    };
+    if (isEditorialCollection(segments)) return true;
+    return (
+      /^(?:organization|group)$/i.test(segments[0] || "") &&
+      Boolean(segments[1]) &&
+      isEditorialCollection(segments.slice(2))
+    );
+  }
+
+  function isPagesAdminListingRoute() {
+    const path =
+      String(window.location?.pathname || "").replace(/\/+$/, "") || "/";
+    const segments = path.split("/").filter(Boolean);
+    if (segments.length === 1) return /^(?:pages|blog)$/i.test(segments[0]);
+    return (
+      /^(?:organization|group)$/i.test(segments[0] || "") &&
+      Boolean(segments[1]) &&
+      segments.length === 3 &&
+      /^(?:pages|blog)$/i.test(segments[2])
+    );
+  }
+
+  function enhancePagesAdminUi() {
+    if (!isPagesAdminRoute() || !document.body) return false;
+    document.body.classList.add("wajo-pages-admin-route");
+    document.body.classList.toggle(
+      "wajo-pages-admin-list-route",
+      isPagesAdminListingRoute(),
+    );
+
+    document
+      .querySelectorAll(".wajo-admin-workspace a, .wajo-admin-workspace button")
+      .forEach((link) => {
+        const href = String(link.getAttribute("href") || "");
+        const label = [
+          link.textContent,
+          link.getAttribute("aria-label"),
+          link.getAttribute("title"),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .trim()
+          .toLowerCase();
+        const isEditAction =
+          /(?:^|[\/?&#=_-])(?:edit|ubah|sunting)(?:[\/?&#=_-]|$)/i.test(href) ||
+          /\b(?:edit|ubah|sunting)(?:\s+(?:page|article|halaman|artikel))?\b/.test(
+            label,
+          );
+        if (!isEditAction) return;
+        const plusIcon = link.querySelector(
+          "i.fa-plus, i.fa-plus-circle, i.fa-plus-square, i.fa-solid.fa-plus",
+        );
+        if (!plusIcon) return;
+        plusIcon.classList.remove(
+          "fa-plus",
+          "fa-plus-circle",
+          "fa-plus-square",
+        );
+        plusIcon.classList.add("fa-pen-to-square", "fa-solid");
+        plusIcon.setAttribute("aria-hidden", "true");
+      });
+    return true;
+  }
+
+  function observePagesAdminUi() {
+    if (
+      !enhancePagesAdminUi() ||
+      !document.body ||
+      !("MutationObserver" in window)
+    )
+      return;
+    let queued = false;
+    const observer = new MutationObserver(() => {
+      if (queued) return;
+      queued = true;
+      queueMicrotask(() => {
+        queued = false;
+        enhancePagesAdminUi();
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
   function init() {
     bindDatasetForm();
     bindResourceForm();
     enhanceGroupForm();
+    enhanceDatePickers();
     enhanceFileInputs();
+    observePagesAdminUi();
   }
 
   window.WajoAdminFormRules = Object.freeze({

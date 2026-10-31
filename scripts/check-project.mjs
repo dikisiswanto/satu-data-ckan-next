@@ -70,6 +70,9 @@ const required = [
   "src/app/(public)/berita/page.jsx",
   "src/app/(public)/berita/[slug]/page.jsx",
   "src/app/api/cms/media/[filename]/route.js",
+  "src/app/api/public/ckan-file/[fileId]/route.js",
+  "tests/unit/public-ckan-file-route.test.js",
+  "tests/unit/markdown-link-url.test.js",
   "src/lib/data/public.js",
   "src/lib/data/organizations.js",
   "src/lib/public-categories.js",
@@ -474,8 +477,13 @@ const checks = [
   ],
   [
     ".github/workflows/ci.yml",
-    /npm ci[\s\S]*npm run test[\s\S]*npm run test:e2e[\s\S]*npm run build/,
-    "CI harus memvalidasi instalasi, unit test, E2E, dan production build.",
+    /npm ci[\s\S]*npm run check[\s\S]*npm run test[\s\S]*npm run build/,
+    "CI wajib harus memvalidasi instalasi, static+lint, unit test, dan production build dalam satu runner.",
+  ],
+  [
+    ".github/workflows/extended-validation.yml",
+    /workflow_dispatch[\s\S]*npm run test:e2e[\s\S]*docker build -f Dockerfile\.ckan-extension-smoke[\s\S]*npm run security:check/,
+    "E2E browser, smoke-test image CKAN, dan audit dependency harus tetap tersedia lewat workflow manual.",
   ],
 ];
 const cmsChecks = [
@@ -511,8 +519,13 @@ const cmsChecks = [
   ],
   [
     "src/components/cms/markdown-content.jsx",
-    /publicCmsImageUrl[\s\S]*safeHref[\s\S]*export function MarkdownContent/,
-    "Renderer Markdown harus memakai sanitasi URL dan tidak mengeksekusi HTML mentah.",
+    /publicCmsImageUrl[\s\S]*publicResourceUrl[\s\S]*normalizeMarkdownHref[\s\S]*export function MarkdownContent/,
+    "Renderer Markdown harus memproxy aset CKAN publik, menyaring host admin, dan tidak mengeksekusi HTML mentah.",
+  ],
+  [
+    "src/app/api/public/ckan-file/[fileId]/route.js",
+    /function isPublicRecord[\s\S]*private !== true[\s\S]*verifyPublicFileOwner[\s\S]*resource_show[\s\S]*package_show[\s\S]*file_show[\s\S]*Range[\s\S]*redirect:\s*"manual"/,
+    "File API publik harus memverifikasi resource/dataset aktif dan terbuka sebelum memproxy file.",
   ],
   [
     "src/components/cms/content-blocks.jsx",
