@@ -67,11 +67,11 @@
         <span class="wajo-admin-nav__label">{{ _('PAGES & INFORMATION') }}</span>
         <div class="wajo-admin-nav__branch">
           <a class="wajo-admin-nav__item{% if active_path.startswith('/pages') %} is-active{% endif %}" href="/pages">{{ wajo_icon('file-text') }}<span>{{ _('Portal pages') }}</span></a>
-          {% if h.check_access('ckanext_pages_create') %}<div class="wajo-admin-nav__children"><a class="wajo-admin-nav__item wajo-admin-nav__item--create" href="/pages/new">{{ wajo_icon('plus') }}<span>{{ _('Add information page') }}</span></a></div>{% endif %}
+          {% if h.check_access('ckanext_pages_update') %}<div class="wajo-admin-nav__children"><a class="wajo-admin-nav__item wajo-admin-nav__item--create" href="{{ h.url_for('pages.new') }}">{{ wajo_icon('plus') }}<span>{{ _('Add information page') }}</span></a></div>{% endif %}
         </div>
         <div class="wajo-admin-nav__branch">
           <a class="wajo-admin-nav__item{% if active_path.startswith('/blog') %} is-active{% endif %}" href="/blog">{{ wajo_icon('newspaper') }}<span>{{ _('News and articles') }}</span></a>
-          {% if h.check_access('ckanext_pages_create') %}<div class="wajo-admin-nav__children"><a class="wajo-admin-nav__item wajo-admin-nav__item--create" href="/blog/new">{{ wajo_icon('plus') }}<span>{{ _('Add news article') }}</span></a></div>{% endif %}
+          {% if h.check_access('ckanext_pages_update') %}<div class="wajo-admin-nav__children"><a class="wajo-admin-nav__item wajo-admin-nav__item--create" href="{{ h.url_for('pages.blog_new') }}">{{ wajo_icon('plus') }}<span>{{ _('Add news article') }}</span></a></div>{% endif %}
         </div>
       {% endif %}
 

@@ -10,7 +10,11 @@ const resourceId = "3c2e4f10-6c61-4a2c-a3db-b96db879889c";
 const filename = "menara-telekomunikasi-di-kabupaten-wajo-tahun-2025.xlsx";
 const downloadPath = `/dataset/${datasetId}/resource/${resourceId}/download/${filename}`;
 
-function fixtures({ privateDataset = false, privateResource = false } = {}) {
+function fixtures({
+  privateDataset = false,
+  privateResource = false,
+  resourceUrl = `https://data.silirdev.com${downloadPath}`,
+} = {}) {
   ckanAction.mockImplementation(async (action) => {
     if (action === "resource_show")
       return {
@@ -19,9 +23,16 @@ function fixtures({ privateDataset = false, privateResource = false } = {}) {
         name: filename,
         state: "active",
         private: privateResource,
-        url: `https://data.silirdev.com${downloadPath}`,
+        url: resourceUrl,
         mimetype:
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      };
+    if (action === "file_show")
+      return {
+        id: "c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+        name: filename,
+        state: "active",
+        owner_info: { owner_type: "resource", owner_id: resourceId },
       };
     if (action === "package_show")
       return {
@@ -71,6 +82,87 @@ describe("public CKAN resource download", () => {
     );
     expect(await response.text()).toBe("xlsx-binary");
     expect(ckanAction).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    "/file/c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+    "/file/download/c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+  ])(
+    "resolves FileStore-backed resource URLs through CKAN 2.12 file.download (%s)",
+    async (filePath) => {
+      fixtures({ resourceUrl: `https://ckan.example.test${filePath}` });
+      const upstreamFetch = vi.fn(async (url) => {
+        expect(String(url)).toBe(
+          "http://ckan:5000/file/download/c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+        );
+        return new Response("xlsx-binary", {
+          status: 200,
+          headers: {
+            "content-type":
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+        });
+      });
+      vi.stubGlobal("fetch", upstreamFetch);
+      const response = await GET(
+        new Request(`https://data.silirdev.com${downloadPath}`),
+        {
+          params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+        },
+      );
+      expect(response.status).toBe(200);
+      expect(await response.text()).toBe("xlsx-binary");
+      expect(ckanAction.mock.calls.map(([action]) => action)).toEqual([
+        "resource_show",
+        "package_show",
+        "file_show",
+      ]);
+    },
+  );
+
+  it("rejects a FileStore ID whose owner does not match the requested resource", async () => {
+    fixtures({
+      resourceUrl:
+        "https://ckan.example.test/file/c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+    });
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: datasetId,
+          name: filename,
+          state: "active",
+          url: "https://ckan.example.test/file/c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+          mimetype:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        };
+      if (action === "package_show")
+        return {
+          id: datasetId,
+          name: "data-menara-telekomunikasi",
+          state: "active",
+          resources: [{ id: resourceId, state: "active" }],
+        };
+      if (action === "file_show")
+        return {
+          id: "c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+          owner_info: {
+            owner_type: "resource",
+            owner_id: "another-resource-id",
+          },
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`),
+      {
+        params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+      },
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
   });
 
   it("allows legitimate JSON and plain-text resources", async () => {

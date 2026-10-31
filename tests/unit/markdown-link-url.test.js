@@ -15,6 +15,9 @@ describe("public markdown link normalization", () => {
     expect(normalizeMarkdownHref(`/file/${fileId}`)).toBe(
       `/api/public/ckan-file/${fileId}`,
     );
+    expect(normalizeMarkdownHref(`/file/download/${fileId}`)).toBe(
+      `/api/public/ckan-file/${fileId}`,
+    );
     expect(
       normalizeMarkdownHref(`https://ckan.example.go.id/file/${fileId}`),
     ).toBe(`/api/public/ckan-file/${fileId}`);

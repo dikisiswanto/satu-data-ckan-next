@@ -60,8 +60,46 @@ assert.match(genericFileProxy, /resource_show/);
 assert.match(genericFileProxy, /package_show/);
 assert.match(genericFileProxy, /ownerType === "wajo_media"/);
 assert.match(genericFileProxy, /private !== true/);
+assert.match(
+  genericFileProxy,
+  /new URL\(\`\/file\/download\/\$\{encodeURIComponent\(fileId\)\}\`, internalOrigin\)/,
+  "Generic CKAN file proxy must use CKAN 2.12 /file/download/<id>.",
+);
+assert.doesNotMatch(
+  genericFileProxy,
+  /new URL\(\`\/file\/\$\{encodeURIComponent\(fileId\)\}/,
+  "Legacy /file/<id> route must not be used.",
+);
 assert.match(genericFileProxy, /redirect:\s*"manual"/);
 assert.match(genericFileProxy, /Range/);
+assert.match(route, /genericFileMatch/);
+assert.match(route, /file_show/);
+assert.match(route, /file\/download/);
+const editorialProxy = await readFile(
+  "src/app/api/editorial-media/[fileId]/route.js",
+  "utf8",
+);
+assert.match(editorialProxy, /file\/download/);
+assert.doesNotMatch(
+  editorialProxy,
+  /new URL\(\`\/file\/\$\{encodeURIComponent\(fileId\)\}/,
+);
+const sidebar = await readFile(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/sidebar.html",
+  "utf8",
+);
+assert.doesNotMatch(
+  sidebar,
+  /ckanext_pages_create/,
+  "The unregistered ckanext_pages_create action must not be called.",
+);
+assert.match(
+  sidebar,
+  /check_access\('ckanext_pages_update'\)/,
+  "Pages create links must use the registered Pages update authorization function.",
+);
+assert.match(sidebar, /h\.url_for\('pages\.new'\)/);
+assert.match(sidebar, /h\.url_for\('pages\.blog_new'\)/);
 assert.match(genericFileProxy, /imageSignatureMatches/);
 assert.match(genericFileProxy, /image\/svg\+xml/);
 const publicResourceUrls = await readFile(

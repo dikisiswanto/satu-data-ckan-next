@@ -26,13 +26,13 @@ describe("public editorial media proxy", () => {
     });
     vi.stubGlobal(
       "fetch",
-      vi.fn(
-        async () =>
-          new Response(png, {
-            status: 200,
-            headers: { "content-type": "image/png" },
-          }),
-      ),
+      vi.fn(async (url) => {
+        expect(String(url)).toBe(`http://ckan:5000/file/download/${fileId}`);
+        return new Response(png, {
+          status: 200,
+          headers: { "content-type": "image/png" },
+        });
+      }),
     );
     const response = await GET(
       new Request(`https://data.example.test/api/editorial-media/${fileId}`),

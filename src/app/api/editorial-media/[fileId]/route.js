@@ -119,7 +119,7 @@ async function handle(request, context) {
   let upstream;
   try {
     upstream = await fetch(
-      new URL(`/file/${encodeURIComponent(fileId)}`, internalOrigin),
+      new URL(`/file/download/${encodeURIComponent(fileId)}`, internalOrigin),
       {
         method: "GET",
         cache: "no-store",

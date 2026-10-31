@@ -141,6 +141,10 @@ require(re.search(r"field_name:\s*image_url[\s\S]{0,160}preset:\s*organization_u
 require(re.search(r"field_name:\s*image_url[\s\S]{0,160}preset:\s*organization_url_upload", group_schema_source), "Gambar kategori harus memakai field image_url CKAN dan preset upload.")
 require("ckan_storage" in read(ROOT / "deploy/ckan/docker-compose.override.yml") or "ckan_storage" in read(ROOT / "deploy/ckan/bootstrap-upstream.sh"), "FileStore harus tetap berada pada volume persisten ckan_storage.")
 require("{% ckan_extends %}" in page_source, "page.html harus mewarisi shell CKAN agar block admin upstream tetap utuh.")
+sidebar_source = read(SIDEBAR)
+require("ckanext_pages_create" not in sidebar_source, "Sidebar tidak boleh memanggil auth action ckanext_pages_create yang tidak didaftarkan ckanext-pages.")
+require("h.check_access('ckanext_pages_update')" in sidebar_source, "Aksi tambah halaman/blog harus memakai authorization function ckanext_pages_update.")
+require("h.url_for('pages.new')" in sidebar_source and "h.url_for('pages.blog_new')" in sidebar_source, "Link tambah halaman/blog harus memakai endpoint blueprint ckanext-pages yang valid.")
 require("wajo-admin-shell" in page_source and 'wajo_theme/sidebar.html' in page_source and "{{ super() }}" in page_source, "Page shell harus menambahkan sidebar secara aditif tanpa mengganti konten core CKAN.")
 require(re.search(r"{%-?\s*block\s+footer\s*-?%}\s*{%-?\s*endblock\s*-?%}", page_source) is not None, "Footer admin harus dihilangkan dari shell CKAN.")
 

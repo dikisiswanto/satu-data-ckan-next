@@ -94,24 +94,100 @@ async function handle(request, context) {
       `^/dataset/(?:${datasetPathIds})/resource/${resourceId}/download/([^/]+)/?$`,
     );
     const pathMatch = source.pathname.match(expectedPath);
-    if (!pathMatch) return errorResponse(404, "Alamat berkas tidak valid.");
-    let sourceFilename = "";
-    try {
-      sourceFilename = decodeURIComponent(pathMatch[1]);
-    } catch {
-      return errorResponse(404, "Nama berkas tidak valid.");
-    }
+    const genericFileMatch = source.pathname.match(
+      /^\/file\/(?:download\/)?([a-f0-9-]{32,36})\/?$/i,
+    );
     const requestedFilename = String(params?.filename || "");
-    if (!sourceFilename || sourceFilename !== requestedFilename) {
-      return errorResponse(
-        404,
-        "Nama berkas tidak sesuai dengan resource CKAN.",
-      );
+    let upstreamPath = "";
+
+    if (pathMatch) {
+      let sourceFilename = "";
+      try {
+        sourceFilename = decodeURIComponent(pathMatch[1]);
+      } catch {
+        return errorResponse(404, "Nama berkas tidak valid.");
+      }
+      if (!sourceFilename || sourceFilename !== requestedFilename) {
+        return errorResponse(
+          404,
+          "Nama berkas tidak sesuai dengan resource CKAN.",
+        );
+      }
+      upstreamPath = source.pathname;
+    } else if (genericFileMatch) {
+      if (resource.name && requestedFilename !== String(resource.name)) {
+        return errorResponse(
+          404,
+          "Nama berkas tidak sesuai dengan metadata resource CKAN.",
+        );
+      }
+      // Some CKAN resources expose their FileStore record URL instead of the
+      // dataset/resource download URL. file_show is metadata only; verify the
+      // owner chain before using CKAN 2.12's /file/download/<id> endpoint.
+      const fileId = genericFileMatch[1];
+      let file;
+      try {
+        file = await ckanAction("file_show", { id: fileId }, { revalidate: 0 });
+      } catch {
+        return errorResponse(
+          404,
+          "Berkas tidak ditemukan pada metadata FileStore CKAN.",
+        );
+      }
+      if (
+        !file ||
+        file.id !== fileId ||
+        file.private === true ||
+        (file.state && file.state !== "active")
+      ) {
+        return errorResponse(404, "Berkas tidak tersedia untuk publik.");
+      }
+      const owner =
+        file.owner_info && typeof file.owner_info === "object"
+          ? file.owner_info
+          : {};
+      const ownerType = String(
+        owner.owner_type || file.owner_type || "",
+      ).toLowerCase();
+      const ownerId = String(owner.owner_id || file.owner_id || "");
+      const fileResourceId =
+        ownerType === "resource" ? ownerId : String(file.resource_id || "");
+      const filePackageId =
+        ownerType === "package" ? ownerId : String(file.package_id || "");
+      if (
+        ownerType === "wajo_media" ||
+        ownerType === "group" ||
+        ownerType === "user" ||
+        ownerType === "organization"
+      ) {
+        return errorResponse(
+          404,
+          "Berkas bukan milik resource dataset publik.",
+        );
+      }
+      if (fileResourceId && fileResourceId !== resourceId) {
+        return errorResponse(404, "Berkas bukan milik resource yang diminta.");
+      }
+      if (filePackageId && filePackageId !== dataset.id) {
+        return errorResponse(404, "Berkas bukan milik dataset yang diminta.");
+      }
+      if (!fileResourceId && !filePackageId) {
+        return errorResponse(
+          404,
+          "Kepemilikan berkas tidak dapat diverifikasi.",
+        );
+      }
+      // A package-owned file must belong to the same dataset. A resource-owned
+      // file must refer to this exact resource. The resource_show/package_show
+      // checks above establish that the requested resource is public.
+      upstreamPath = `/file/download/${encodeURIComponent(fileId)}`;
+    } else {
+      return errorResponse(404, "Alamat berkas tidak valid.");
     }
 
     // Fetch only the validated CKAN path against the private service origin.
     // Never fetch the public hostname here: that would loop through Caddy/Next.
-    const upstreamUrl = new URL(source.pathname, apiBase.origin);
+    const upstreamUrl = new URL(upstreamPath, apiBase.origin);
     const headers = new Headers();
     const range = request.headers.get("range");
     const ifRange = request.headers.get("if-range");

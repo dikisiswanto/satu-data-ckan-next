@@ -120,6 +120,12 @@ describe("CKAN Pages CMS normalization", () => {
     ).toBe("/api/public/ckan-file/3c2e4f10-6c61-4a2c-a3db-b96db879889c");
     expect(
       publicCmsImageUrl(
+        "/file/download/3c2e4f10-6c61-4a2c-a3db-b96db879889c",
+        origin,
+      ),
+    ).toBe("/api/public/ckan-file/3c2e4f10-6c61-4a2c-a3db-b96db879889c");
+    expect(
+      publicCmsImageUrl(
         "https://ckan.example.go.id/file/public-download/groups/logo-wajo.png",
         origin,
       ),

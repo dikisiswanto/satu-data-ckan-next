@@ -54,7 +54,7 @@ describe("public CKAN File API proxy", () => {
   it("streams a file only after its resource and parent dataset are verified as public", async () => {
     fixtures();
     const upstreamFetch = vi.fn(async (url, options) => {
-      expect(String(url)).toBe(`http://ckan:5000/file/${fileId}`);
+      expect(String(url)).toBe(`http://ckan:5000/file/download/${fileId}`);
       expect(options.redirect).toBe("manual");
       return new Response("xlsx-content", {
         status: 200,
