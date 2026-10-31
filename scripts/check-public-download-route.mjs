@@ -24,6 +24,12 @@ assert.match(
   "Download filename must match the CKAN resource path.",
 );
 assert.match(route, /CKAN_API_INTERNAL_URL/);
+assert.match(
+  route,
+  /upstreamStatus === 403 \|\| upstreamStatus === 404/,
+  "Private/unpublished dataset metadata must become a quiet public 404, not a 502 stream failure.",
+);
+assert.match(route, /Dataset atau resource tidak tersedia untuk publik/);
 assert.match(route, /text\/html/);
 const exampleDownloadPath =
   "/dataset/9c70ae22-cd50-4e14-8887-d7574abfface/resource/3c2e4f10-6c61-4a2c-a3db-b96db879889c/download/menara-telekomunikasi-di-kabupaten-wajo-tahun-2025.xlsx";
@@ -51,6 +57,22 @@ for (const file of caddyFiles) {
     `${file} must match UUID resources including the reported XLSX URL`,
   );
 }
+const publicData = await readFile("src/lib/data/public.js", "utf8");
+assert.match(
+  publicData,
+  /error\?\.status === 403 \|\| error\?\.status === 404/,
+  "An unpublished/private package must be treated as not found on public dataset detail pages.",
+);
+const publicActionRoute = await readFile(
+  "src/app/api/3/action/[...action]/route.js",
+  "utf8",
+);
+assert.match(publicActionRoute, /async function getPublicRecord/);
+assert.match(
+  publicActionRoute,
+  /error\?\.status === 403 \|\| error\?\.status === 404/,
+  "The public CKAN Action facade must normalize private record permission errors to 404.",
+);
 const genericFileProxy = await readFile(
   "src/app/api/public/ckan-file/[fileId]/route.js",
   "utf8",

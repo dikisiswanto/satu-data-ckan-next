@@ -256,24 +256,27 @@ function isPublicPackage(pkg) {
   );
 }
 
+async function getPublicRecord(action, params) {
+  try {
+    return await ckanAction(action, params, { revalidate: 0 });
+  } catch (error) {
+    // CKAN can express private/unpublished records as HTTP 403. The public
+    // facade deliberately normalizes both 403 and 404 to the same response.
+    if (error?.status === 403 || error?.status === 404) throw notPublicRecord();
+    throw error;
+  }
+}
+
 async function requirePublicPackage(identifier) {
   if (!identifier) throw notPublicRecord();
-  const pkg = await ckanAction(
-    "package_show",
-    { id: identifier },
-    { revalidate: 0 },
-  );
+  const pkg = await getPublicRecord("package_show", { id: identifier });
   if (!isPublicPackage(pkg)) throw notPublicRecord();
   return pkg;
 }
 
 async function requirePublicResource(identifier) {
   if (!identifier) throw notPublicRecord();
-  const resource = await ckanAction(
-    "resource_show",
-    { id: identifier },
-    { revalidate: 0 },
-  );
+  const resource = await getPublicRecord("resource_show", { id: identifier });
   if (
     !resource ||
     resource.private === true ||
@@ -471,7 +474,7 @@ export async function GET(request, { params }) {
       const resource = await requirePublicResource(params.id);
       result = resource;
     } else if (action === "file_show") {
-      result = await ckanAction(action, params, { revalidate: 0 });
+      result = await getPublicRecord(action, params);
       if (
         !result ||
         result.private === true ||

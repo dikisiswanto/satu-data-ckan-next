@@ -240,4 +240,43 @@ describe("public CKAN resource download", () => {
     );
     expect(response.status).toBe(404);
   });
+
+  it.each(["resource_show", "package_show"])(
+    "normalizes CKAN %s permission-denied for an unpublished dataset to a quiet 404",
+    async (deniedAction) => {
+      ckanAction.mockImplementation(async (action) => {
+        if (action === deniedAction) {
+          throw Object.assign(
+            new Error("Not authorized to read this dataset"),
+            { status: 403 },
+          );
+        }
+        if (action === "resource_show")
+          return {
+            id: resourceId,
+            package_id: datasetId,
+            name: filename,
+            state: "active",
+            private: false,
+            url: `https://data.silirdev.com${downloadPath}`,
+          };
+        throw new Error(`unexpected action ${action}`);
+      });
+      const upstreamFetch = vi.fn();
+      vi.stubGlobal("fetch", upstreamFetch);
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const response = await GET(
+        new Request(`https://data.silirdev.com${downloadPath}`),
+        {
+          params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+        },
+      );
+      expect(response.status).toBe(404);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(upstreamFetch).not.toHaveBeenCalled();
+      expect(consoleError).not.toHaveBeenCalled();
+    },
+  );
 });

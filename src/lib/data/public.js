@@ -203,7 +203,10 @@ async function queryPublishedDatasetBySlug(name) {
       ? null
       : sanitizePublicPackage(pkg);
   } catch (error) {
-    if (error?.status === 404) return null;
+    // CKAN may answer 403 instead of returning a package with private=true
+    // when an anonymous client requests an unpublished/private dataset.
+    // On public detail routes that is equivalent to not found, not a 5xx outage.
+    if (error?.status === 403 || error?.status === 404) return null;
     throw error;
   }
 }

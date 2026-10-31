@@ -265,12 +265,23 @@ async function handle(request, context) {
       },
     );
   } catch (error) {
+    const upstreamStatus = Number(error?.status || 0);
+    // CKAN intentionally denies package/resource metadata for private or
+    // unpublished records. On a public route this is an expected visibility
+    // result, not an infrastructure failure. Return 404 to avoid disclosing
+    // whether a private dataset/resource exists and do not attempt a file stream.
+    if (upstreamStatus === 403 || upstreamStatus === 404) {
+      return errorResponse(
+        404,
+        "Dataset atau resource tidak tersedia untuk publik.",
+      );
+    }
     console.error("public_resource_download_failed", {
       resourceId,
-      status: error?.status || null,
+      status: upstreamStatus || null,
     });
     return errorResponse(
-      error?.status === 404 ? 404 : 502,
+      502,
       "Unduhan belum dapat disiapkan. Silakan coba kembali.",
     );
   }
