@@ -130,6 +130,7 @@ class WajoThemePlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IMiddleware)
     plugins.implements(plugins.IBlueprint)
+    plugins.implements(plugins.IAuthFunctions)
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.IResourceController, inherit=True)
     plugins.implements(plugins.IOrganizationController, inherit=True)
@@ -291,6 +292,19 @@ class WajoThemePlugin(plugins.SingletonPlugin):
         toolkit.add_public_directory(config, "public")
         toolkit.add_resource("assets", "wajo_theme")
 
+    def get_auth_functions(self):
+        """Expose only the editorial-media owner used for public CMS images.
+
+        Files are uploaded by an authenticated CKAN sysadmin endpoint, then
+        transferred to this single owner. This does not make user, resource,
+        group, or organization uploads public beyond CKAN's normal policies.
+        """
+        def wajo_media_show(context, data_dict):
+            allowed = str(data_dict.get("id", "")) == "public-editorial-media"
+            return {"success": allowed, "msg": "Akses media editorial ditolak."}
+
+        return {"wajo_media_show": wajo_media_show}
+
     def make_middleware(self, app, config):
         """Gate every browser/API route on CKAN_HOST while leaving internal CKAN API use intact.
 
@@ -302,7 +316,7 @@ class WajoThemePlugin(plugins.SingletonPlugin):
         if not hasattr(app, "before_request") or not hasattr(app, "after_request"):
             return app
 
-        from flask import jsonify, redirect, request, url_for
+        from flask import jsonify, redirect, request, session, url_for
         from flask_login import current_user
 
         admin_host = str(config.get("ckanext.wajo_theme.admin_host", "")).strip().lower()
@@ -329,14 +343,28 @@ class WajoThemePlugin(plugins.SingletonPlugin):
             if is_login_asset(path):
                 return None
 
-            if path in self._LOGIN_PATHS:
-                if current_user.is_authenticated and request.method in {"GET", "HEAD"}:
+            if current_user.is_authenticated:
+                # CKAN flashes a logout confirmation into the session. A fast
+                # re-login can leave that message queued on the new dashboard;
+                # remove only stale logout notices, not other success/error flashes.
+                flashes = session.get("_flashes", [])
+                if flashes:
+                    retained = []
+                    for item in flashes:
+                        message = str(item[1] if isinstance(item, (tuple, list)) and len(item) > 1 else item).lower()
+                        if any(marker in message for marker in ("logged out", "logout", "telah keluar", "sudah keluar", "berhasil keluar")):
+                            continue
+                        retained.append(item)
+                    if len(retained) != len(flashes):
+                        session["_flashes"] = retained
+
+                if path in self._LOGIN_PATHS and request.method in {"GET", "HEAD"}:
+                    return redirect(url_for("wajo_admin.index"))
+                if path == "/":
                     return redirect(url_for("wajo_admin.index"))
                 return None
 
-            if current_user.is_authenticated:
-                if path == "/":
-                    return redirect(url_for("wajo_admin.index"))
+            if path in self._LOGIN_PATHS:
                 return None
 
             if path.startswith("/api/"):
@@ -362,6 +390,19 @@ class WajoThemePlugin(plugins.SingletonPlugin):
                 return response
 
             path = (request.path or "").rstrip("/")
+            if path == "/user/logout":
+                # CKAN's default logout redirect may preserve a came_from value
+                # pointing back to /user/logout. That can replay the logout flash
+                # or a stale cached admin view when the user immediately logs in.
+                # Finish logout with a clean PRG redirect to the login endpoint.
+                response.status_code = 303
+                response.headers["Location"] = url_for("user.login")
+                response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+                response.headers["Pragma"] = "no-cache"
+                return response
+            if path == "/user/login":
+                response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+                response.headers["Pragma"] = "no-cache"
             if request.method in {"POST", "PUT", "PATCH", "DELETE"} and response.status_code < 400:
                 pages_form_write = path == "/pages" or path.startswith("/pages/")
                 pages_api_write = path.startswith("/api/3/action/ckanext_pages_") and any(
@@ -384,12 +425,93 @@ class WajoThemePlugin(plugins.SingletonPlugin):
         return app
 
     def get_blueprint(self):
-        """Register the Wajo Admin overview without replacing CKAN's core routes."""
-        from flask import Blueprint, request
+        """Register Wajo Admin pages and a permission-scoped editorial media upload."""
+        from flask import Blueprint, jsonify, redirect, request, url_for
         from flask_login import current_user
+        from werkzeug.utils import secure_filename
+        from io import BytesIO
         from ckan.lib import base
 
         blueprint = Blueprint("wajo_admin", __name__, url_prefix="/admin")
+
+        @blueprint.post("/media/upload")
+        def upload_editorial_media():
+            """Upload a verified raster image to CKAN FileStore for CMS Markdown.
+
+            Uploads are restricted to sysadmins, bounded in size, checked by
+            magic bytes, and assigned a dedicated public-read owner. The
+            browser receives only a same-origin portal URL, never a storage path.
+            """
+            from flask import abort
+
+            if not current_user.is_authenticated:
+                return jsonify({"success": False, "message": "Sesi login telah berakhir."}), 401
+            if not bool(getattr(current_user, "sysadmin", False)):
+                abort(403)
+            if request.content_length and request.content_length > 8 * 1024 * 1024 + 128 * 1024:
+                return jsonify({"success": False, "message": "Ukuran gambar maksimal 8 MiB."}), 413
+            upload = request.files.get("upload")
+            if upload is None or not upload.filename:
+                return jsonify({"success": False, "message": "Pilih gambar terlebih dahulu."}), 400
+
+            content = upload.stream.read(8 * 1024 * 1024 + 1)
+            if not content or len(content) > 8 * 1024 * 1024:
+                return jsonify({"success": False, "message": "Ukuran gambar maksimal 8 MiB."}), 413
+
+            if content.startswith(b"\x89PNG\r\n\x1a\n"):
+                extension, mime = "png", "image/png"
+            elif content.startswith(b"\xff\xd8\xff"):
+                extension, mime = "jpg", "image/jpeg"
+            elif content[:6] in (b"GIF87a", b"GIF89a"):
+                extension, mime = "gif", "image/gif"
+            elif content[:4] == b"RIFF" and content[8:12] == b"WEBP":
+                extension, mime = "webp", "image/webp"
+            else:
+                return jsonify({"success": False, "message": "Format gambar tidak didukung. Gunakan PNG, JPEG, GIF, atau WebP."}), 415
+
+            # Never trust the submitted filename or extension as the MIME source.
+            original_name = secure_filename(upload.filename or "gambar")[:100] or "gambar"
+            stored_name = "%s.%s" % (uuid.uuid4().hex, extension)
+            upload.stream = BytesIO(content)
+            context = {"user": current_user.name, "auth_user_obj": current_user, "ignore_auth": True}
+            created = None
+            try:
+                created = toolkit.get_action("file_create")(
+                    dict(context),
+                    {"storage": "default", "name": stored_name, "upload": upload},
+                )
+                file_id = str(created.get("id", ""))
+                if not file_id:
+                    raise RuntimeError("CKAN tidak mengembalikan ID file.")
+                toolkit.get_action("file_ownership_transfer")(
+                    dict(context),
+                    {
+                        "id": file_id,
+                        "owner_type": "wajo_media",
+                        "owner_id": "public-editorial-media",
+                        "pin": True,
+                    },
+                )
+                public_origin = str(toolkit.config.get("ckan.site_url", "")).rstrip("/")
+                if not public_origin.startswith("https://"):
+                    raise RuntimeError("CKAN site_url harus menggunakan HTTPS untuk media publik.")
+                return jsonify({
+                    "success": True,
+                    "id": file_id,
+                    "name": original_name,
+                    "mime_type": mime,
+                    "url": "%s/api/editorial-media/%s" % (public_origin, file_id),
+                })
+            except Exception:
+                LOG.exception("Wajo editorial media upload failed")
+                if created and created.get("id"):
+                    try:
+                        toolkit.get_action("file_delete")(
+                            dict(context), {"id": created["id"]},
+                        )
+                    except Exception:
+                        LOG.warning("Unable to clean up failed editorial media upload", exc_info=True)
+                return jsonify({"success": False, "message": "Gambar gagal disimpan ke FileStore CKAN."}), 502
 
         @blueprint.get("/")
         def index():

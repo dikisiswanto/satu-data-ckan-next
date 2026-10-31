@@ -261,9 +261,13 @@ export function publicCmsImageUrl(
     );
     return match ? `/api/cms/media/${encodeURIComponent(match[1])}` : null;
   };
+  const isEditorialMedia = (pathname) =>
+    /^\/api\/editorial-media\/[a-f0-9-]{32,36}$/i.test(pathname);
   if (candidate.startsWith("/")) {
+    const pathname = candidate.split(/[?#]/, 1)[0];
+    if (isEditorialMedia(pathname)) return candidate;
     if (/^\/(?:api|_next)\//.test(candidate)) return "";
-    return mapPageUpload(candidate.split(/[?#]/, 1)[0]) || candidate;
+    return mapPageUpload(pathname) || candidate;
   }
   try {
     const url = new URL(candidate);
@@ -283,8 +287,13 @@ export function publicCmsImageUrl(
       (!expectedOrigins.size || expectedOrigins.has(url.origin))
     )
       return pageUpload;
-    if (siteOrigin && url.origin === new URL(siteOrigin).origin)
-      return `${url.pathname}${url.search}${url.hash}`;
+    if (siteOrigin && url.origin === new URL(siteOrigin).origin) {
+      if (isEditorialMedia(url.pathname))
+        return `${url.pathname}${url.search}${url.hash}`;
+      return /^\/(?:api|_next)\//.test(url.pathname)
+        ? ""
+        : `${url.pathname}${url.search}${url.hash}`;
+    }
     return url.toString();
   } catch {
     return "";

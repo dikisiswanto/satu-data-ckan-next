@@ -136,7 +136,9 @@ Image CKAN Wajo mendefinisikan `EXTRA_UWSGI_OPTS` sebagai string kosong secara d
 
 ## FileStore dan logo organisasi
 
-Upload logo organisasi/grup menggunakan FileStore native CKAN 2.12. Bootstrap mengaktifkan `ckan.uploads_enabled` dan storage `ckan.files.storage.default` pada `/var/lib/ckan/default`. Compose upstream memasang volume persisten `ckan_storage` pada `/var/lib/ckan`, sehingga logo tetap tersedia setelah container CKAN dibangun ulang. Storage turunan `groups` menangani logo organisasi/grup; batas ukuran gambar adalah 5 MiB dan MIME type yang diizinkan adalah PNG, JPEG, GIF, serta WebP. SVG sengaja tidak diizinkan karena dapat membawa konten aktif.
+Upload logo organisasi/kategori menggunakan FileStore native CKAN 2.12. Field upload harus memakai `image_url` (bukan field homepage `url`) bersama preset Scheming `organization_url_upload`, agar nilai yang disimpan dikenali CKAN sebagai logo dan `image_display_url` dibentuk dengan benar. Bootstrap mengaktifkan `ckan.uploads_enabled` dan storage `ckan.files.storage.default` pada `/var/lib/ckan/default`. Compose upstream memasang volume persisten `ckan_storage` pada `/var/lib/ckan`, sehingga gambar tetap tersedia setelah container CKAN dibangun ulang. Storage turunan `groups` menangani logo organisasi/grup; batas ukuran gambar adalah 5 MiB dan MIME type yang diizinkan adalah PNG, JPEG, GIF, serta WebP. SVG sengaja tidak diizinkan karena dapat membawa konten aktif.
+
+Karena `CKAN_SITE_URL` sengaja menunjuk ke domain portal publik (Next.js), sementara CKAN administrasi berada pada hostname terpisah, URL legacy `/uploads/group/<file>` pada domain publik diteruskan oleh route Next.js `src/app/uploads/[...path]/route.js` ke service CKAN internal. Proxy ini hanya menerima file gambar organisasi/kategori dengan ekstensi dan MIME allow-list, tidak meneruskan redirect ke host lain, dan tidak membuka endpoint FileStore privat. Katalog publik menggunakan `image_url`/`image_display_url` dan me-normalisasi URL upload menjadi path same-origin. Nilai logo lama yang sebelumnya tersimpan pada field `url` tetap dicoba sebagai fallback apabila memang merupakan URL/path gambar CKAN.
 
 Setelah memperbarui konfigurasi, jalankan bootstrap dan recreate CKAN agar env baru diterapkan:
 
@@ -326,3 +328,19 @@ CKAN Pages digunakan sebagai headless CMS untuk Next.js. Pengelolaan konten, fie
 ## Healthcheck CKAN
 
 Healthcheck CKAN memakai Python standard library untuk meminta `http://127.0.0.1:5000/api/action/status_show` dan memastikan payload memiliki `success: true`. Pemeriksaan tidak bergantung pada `wget`. `start_period: 90s`, interval 30 detik, timeout 10 detik, dan lima retry memberi waktu untuk proses upgrade/migrasi sebelum service lain bergantung pada status `healthy`.
+
+### Unduhan resource publik (Next.js)
+
+Route unduhan resource publik diproses oleh Next.js pada pola `/dataset/{dataset}/resource/{resource}/download/{filename}`. Caddy tidak lagi meneruskan path unduhan tersebut langsung ke CKAN; Next.js memeriksa visibilitas dataset/resource lewat Action API internal, lalu mengambil file dari origin CKAN internal. Ini menghindari redirect ke hostname admin dan mencegah browser menerima halaman login CKAN sebagai pengganti file. Pastikan `CKAN_API_INTERNAL_URL` menunjuk ke service CKAN internal (`http://ckan:5000/api/3/action` pada Compose standar).
+
+## Media editorial dan Markdown
+
+Konten Pages/Blog menggunakan Markdown dan `content_blocks`. Editor CKAN menyediakan toolbar, pratinjau, dan tombol unggah gambar. Gambar editorial tidak dibuat sebagai resource dataset; gambar disimpan melalui CKAN File API (`file_create`) pada FileStore persisten, lalu dipindah ke owner khusus `wajo_media/public-editorial-media`.
+
+Konfigurasi `CKAN__FILES__OWNER__CASCADE_ACCESS` harus mencakup `wajo_media`. Plugin Wajo mengizinkan pembacaan hanya untuk ID owner `public-editorial-media`; endpoint Next.js memeriksa `file_show`, owner, MIME, signature, serta batas 8 MiB sebelum menyajikan file secara inline. Endpoint upload `/admin/media/upload` hanya menerima sesi sysadmin dan memerlukan token CSRF CKAN. Jangan membuka FileStore generik atau mengaktifkan cascade untuk owner umum seperti `user`.
+
+Form Open Graph memiliki tombol upload dan pratinjau. Form `content_blocks` juga dapat mengunggah gambar dan otomatis menambahkan objek `{ "type": "image", "src": "...", "alt": "..." }` ke JSON array. Jika JSON tidak valid, upload dibatalkan supaya tidak membuat file yatim. Editor Markdown menyisipkan sintaks gambar di posisi kursor. Native file inputs lainnya di Wajo Admin mendapatkan style, filename, dan preview lokal untuk image MIME yang diizinkan.
+
+Frontend dan admin preview dibuat sejalan untuk subset Markdown portal: heading ATX/Setext, paragraf, emphasis, strikethrough, links, images, fenced/indented code, tables (GFM), task lists, nested lists, blockquotes, thematic breaks, dan hard breaks. Raw HTML tetap inert, dan tautan/gambar diperiksa terhadap protocol yang diizinkan. Ini tidak mengklaim kompatibilitas ekstensi Markdown yang tidak dipakai portal seperti math/footnote.
+
+Sesudah menerapkan perubahan, uji unggah melalui Pages/Blog sebagai sysadmin, lihat preview Open Graph dan blok gambar, kemudian buka halaman publik. Jangan menghapus volume `ckan_storage`.

@@ -122,8 +122,15 @@
     <div class="control-group form-group">
       <label class="control-label" for="field-og-image">{{ _('URL gambar Open Graph') }}</label>
       <div class="controls">
-        <input id="field-og-image" name="og_image" class="form-control" type="text" value="{{ data.og_image or '' }}" placeholder="https://... atau /uploads/..." />
-        <p class="wajo-pages-editor__help">{{ _('Gunakan URL HTTPS atau path publik portal. Gambar akan dipakai untuk pratinjau berbagi tautan.') }}</p>
+        <input id="field-og-image" name="og_image" class="form-control" type="text" value="{{ data.og_image or '' }}" placeholder="URL gambar akan terisi setelah diunggah" />
+        <div class="wajo-image-control">
+          <button type="button" class="btn btn-secondary" data-wajo-image-upload-for="field-og-image">{{ _('Unggah gambar') }}</button>
+          <div class="wajo-file-preview" data-wajo-image-preview-panel {% if not data.og_image %}hidden{% endif %}>
+            <img data-wajo-image-preview alt="{{ _('Pratinjau gambar Open Graph') }}" hidden />
+            <div class="wajo-file-preview__details"><strong>{{ _('Gambar pratinjau sosial') }}</strong><span data-wajo-image-status role="status">{{ _('Pratinjau gambar saat ini') if data.og_image else '' }}</span></div>
+          </div>
+        </div>
+        <p class="wajo-pages-editor__help">{{ _('Unggah PNG, JPEG, GIF, atau WebP maksimal 8 MiB. URL akan disimpan pada metadata halaman.') }}</p>
       </div>
     </div>
   </fieldset>
@@ -134,7 +141,11 @@
       <label class="control-label" for="field-content-blocks">{{ _('Content blocks JSON') }}</label>
       <div class="controls">
         <textarea id="field-content-blocks" name="content_blocks" class="form-control wajo-pages-editor__json" rows="14" spellcheck="false" placeholder='[{"type":"hero","title":"Judul bagian","description":"Ringkasan"}]'>{{ data.content_blocks or '' }}</textarea>
-        <p class="wajo-pages-editor__help">{{ _('Opsional. Gunakan JSON array. Tipe yang didukung: hero, rich_text, image, gallery, stats, dataset_links, publication_list, cta, divider. HTML bebas tidak dijalankan.') }}</p>
+        <div class="wajo-image-control">
+          <button type="button" class="btn btn-secondary" data-wajo-image-upload-to-json="field-content-blocks">{{ _('Unggah gambar dan tambahkan komponen') }}</button>
+          <p class="wajo-md-status" data-wajo-json-image-status role="status"></p>
+        </div>
+        <p class="wajo-pages-editor__help">{{ _('Opsional. Gunakan JSON array. Tipe yang didukung: hero, rich_text, image, gallery, stats, dataset_links, publication_list, cta, divider. Tombol unggah menambahkan komponen image baru di akhir daftar. HTML bebas tidak dijalankan.') }}</p>
         {% if errors.content_blocks %}<p class="error-block" role="alert">{% for error in errors.content_blocks %}{{ error }}{% if not loop.last %}; {% endif %}{% endfor %}</p>{% endif %}
         <details class="wajo-pages-editor__example">
           <summary>{{ _('Lihat contoh komponen') }}</summary>

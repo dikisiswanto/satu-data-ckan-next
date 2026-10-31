@@ -3,7 +3,6 @@ import { PublicScrollManager } from "@/components/public-scroll-manager";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PublicBreadcrumbs } from "@/components/public-breadcrumbs";
-import { PublicContextGuide } from "@/components/public-context-guide";
 
 export function PublicLayout({ children }) {
   return (
@@ -13,7 +12,6 @@ export function PublicLayout({ children }) {
       </Suspense>
       <SiteHeader />
       <PublicBreadcrumbs />
-      <PublicContextGuide />
       <div id="konten-utama" tabIndex={-1} className="public-page-content">
         {children}
       </div>

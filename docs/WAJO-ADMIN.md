@@ -121,7 +121,7 @@ Jangan membuat ulang form CRUD hanya untuk mengejar visual. Styling generik lebi
 
 ## Bahasa
 
-CKAN memakai locale `id` sebagai default, `en` tetap tersedia sebagai pilihan. Lokalisasi yang dipelihara di project mencakup empat domain: `ckan` (core dan shell), `ckanext-harvest`, `ckanext-pages`, dan `ckanext-dcat`. Katalog core digabung dengan katalog upstream agar terjemahan bawaan yang sudah ada tidak hilang; domain extension didaftarkan melalui `ITranslation` dan dikompilasi saat Docker build. Cakupan string, placeholder, file `.mo`, serta merge upstream diuji oleh `scripts/check-id-translations.py`.
+CKAN memakai locale `id` sebagai default, `en` tetap tersedia sebagai pilihan. Lokalisasi yang dipelihara di project mencakup empat domain: `ckan` (core dan shell), `ckanext-harvest`, `ckanext-pages`, dan `ckanext-dcat`. Katalog core digabung dengan katalog upstream agar terjemahan bawaan yang sudah ada tidak hilang; domain extension didaftarkan melalui `ITranslation` dan dikompilasi saat Docker build. Katalog JavaScript dibangun ulang setelah plugin aktif agar komponen browser menggunakan locale Indonesia. Teks promosi/placeholder bawaan CKAN pada beranda diganti dengan informasi portal. Cakupan string, placeholder, file `.mo`, string identik yang tidak diizinkan, serta merge upstream diuji oleh `scripts/check-id-translations.py`.
 
 Katalog project menjamin semua entri yang dipelihara terisi, tetapi bukan klaim bahwa setiap string dari semua extension pihak ketiga sudah diterjemahkan. Teks hard-coded, domain extension lain, nama kolom schema, dan konten yang dimasukkan administrator perlu diaudit pada halaman runtime dan ditambahkan ke domain yang sesuai.
 

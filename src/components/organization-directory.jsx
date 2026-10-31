@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { getPublicOrganizationImageUrl } from "@/lib/ckan/public-media-url";
 import { scrollToPublicList } from "@/lib/public-scroll";
 import {
   filterAndSortPublicOrganizations,
@@ -23,6 +24,27 @@ function formatCount(value) {
 }
 
 const PAGE_SIZE = 12;
+
+function OrganizationMark({ organization }) {
+  const [failed, setFailed] = useState(false);
+  const imageUrl = getPublicOrganizationImageUrl(organization);
+  return (
+    <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-[#d7e7f2] bg-[#edf5fb] text-[#245e83]">
+      {imageUrl && !failed ? (
+        <img
+          src={imageUrl}
+          alt={`Logo ${organization.title || organization.name || "perangkat daerah"}`}
+          loading="lazy"
+          decoding="async"
+          className="size-full object-contain p-1"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <Building2 size={21} aria-hidden="true" />
+      )}
+    </span>
+  );
+}
 
 export function OrganizationDirectory({ organizations = [] }) {
   const [query, setQuery] = useState("");
@@ -280,9 +302,7 @@ export function OrganizationDirectory({ organizations = [] }) {
                   className="organization-directory-card group flex min-w-0 flex-col rounded-2xl border border-line bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-[#b9cfdd] hover:shadow-[0_12px_28px_rgb(23_55_78_/_0.08)] motion-reduce:transform-none motion-reduce:transition-none"
                 >
                   <div className="organization-directory-card-top flex items-center justify-between gap-3">
-                    <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-[#d7e7f2] bg-[#edf5fb] text-[#245e83]">
-                      <Building2 size={21} aria-hidden="true" />
-                    </span>
+                    <OrganizationMark organization={organization} />
                     <span
                       className={`organization-directory-count inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${datasetCount ? "has-datasets" : "no-datasets"}`}
                     >

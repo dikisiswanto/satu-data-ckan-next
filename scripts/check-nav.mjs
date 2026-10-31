@@ -75,6 +75,14 @@ if (
     "Layout publik harus menyediakan breadcrumb dan target konten utama.",
   );
 }
+if (
+  layout.includes("PublicContextGuide") ||
+  layout.includes("public-context-guide")
+) {
+  errors.push(
+    "Panduan halaman kontekstual tidak boleh tampil pada bagian atas frontend publik.",
+  );
+}
 for (const route of [
   "dataset",
   "organisasi",

@@ -80,7 +80,6 @@ const required = [
   "src/lib/ckan/public-resource-url.js",
   "src/lib/ckan/delimited-preview.js",
   "src/components/dataset-api-access.jsx",
-  "src/components/public-context-guide.jsx",
   "src/app/api/public/resource-preview/route.js",
   "tests/unit/delimited-preview.test.js",
   "deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml",
@@ -224,14 +223,9 @@ const checks = [
     "Fallback preview harus membatasi ukuran unduhan, memverifikasi akses publik, dan hanya mengambil path unduhan CKAN internal.",
   ],
   [
-    "src/components/public-context-guide.jsx",
-    /GUIDES[\s\S]*GUIDES\.default[\s\S]*Panduan halaman/,
-    "Setiap halaman publik non-home/non-bantuan harus mendapatkan panduan penggunaan kontekstual.",
-  ],
-  [
     "src/app/styles/public-layout-stability.css",
-    /dataset-detail-title[\s\S]*min-block-size: 0[\s\S]*dataset-detail-description[\s\S]*min-block-size: 0[\s\S]*dataset-api-panel[\s\S]*public-context-guide/,
-    "Detail dataset harus memiliki jarak judul-deskripsi alami, panel API, dan panduan halaman yang responsif.",
+    /dataset-detail-title[\s\S]*min-block-size: 0[\s\S]*dataset-detail-description[\s\S]*min-block-size: 0[\s\S]*dataset-api-panel/,
+    "Detail dataset harus memiliki jarak judul-deskripsi alami dan panel API yang responsif.",
   ],
   [
     "src/components/site-footer.jsx",

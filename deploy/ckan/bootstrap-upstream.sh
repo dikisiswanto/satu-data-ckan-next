@@ -318,6 +318,8 @@ values["CKAN__UPLOADS_ENABLED"] = "true"
 values["CKAN__FILES__STORAGE__DEFAULT__TYPE"] = "ckan:fs"
 values["CKAN__FILES__STORAGE__DEFAULT__PATH"] = "/var/lib/ckan/default"
 values["CKAN__FILES__STORAGE__DEFAULT__INITIALIZE"] = "true"
+# Editorial media is public only through the custom wajo_media owner auth function.
+values["CKAN__FILES__OWNER__CASCADE_ACCESS"] = "package resource group organization wajo_media"
 values["CKAN__MAX_IMAGE_SIZE"] = "5"
 values["CKAN__UPLOAD__GROUP__TYPES"] = "image"
 values["CKAN__UPLOAD__GROUP__MIMETYPES"] = '"image/png image/jpeg image/gif image/webp"'

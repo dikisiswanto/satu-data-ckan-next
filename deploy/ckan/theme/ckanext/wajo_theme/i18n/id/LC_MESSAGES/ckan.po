@@ -2409,3 +2409,243 @@ msgstr "Tentang CKAN"
 msgid "CKAN is the world’s leading open-source data portal platform."
 msgstr "CKAN adalah perangkat lunak sumber terbuka untuk membangun portal data."
 
+
+
+# Wajo Admin navigation, content creation and dashboard interface.
+msgid "WORKSPACE"
+msgstr "RUANG KERJA"
+
+msgid "SUMMARY"
+msgstr "RINGKASAN"
+
+msgid "DATA CATALOG"
+msgstr "KATALOG DATA"
+
+msgid "DATA PUBLICATIONS"
+msgstr "PUBLIKASI DATA"
+
+msgid "PAGES & INFORMATION"
+msgstr "HALAMAN & INFORMASI"
+
+msgid "DATA INTEGRATION"
+msgstr "INTEGRASI DATA"
+
+msgid "MY ACCOUNT"
+msgstr "AKUN SAYA"
+
+msgid "SYSTEM SETTINGS"
+msgstr "PENGATURAN SISTEM"
+
+msgid "All datasets"
+msgstr "Semua dataset"
+
+msgid "Data categories"
+msgstr "Kategori data"
+
+msgid "Infographics"
+msgstr "Infografik"
+
+msgid "Add indicator"
+msgstr "Tambah indikator"
+
+msgid "Add infographic"
+msgstr "Tambah infografik"
+
+msgid "Add publication"
+msgstr "Tambah publikasi"
+
+msgid "Portal pages"
+msgstr "Halaman portal"
+
+msgid "News and articles"
+msgstr "Berita dan artikel"
+
+msgid "Data harvesting"
+msgstr "Pengambilan data"
+
+msgid "DataStore & preview"
+msgstr "DataStore & pratinjau"
+
+msgid "My datasets"
+msgstr "Dataset saya"
+
+msgid "My organizations"
+msgstr "Organisasi saya"
+
+msgid "My categories"
+msgstr "Kategori saya"
+
+msgid "CKAN settings"
+msgstr "Pengaturan CKAN"
+
+msgid "OFFICIAL DATA PORTAL OF WAJO REGENCY GOVERNMENT"
+msgstr "PORTAL DATA RESMI PEMERINTAH KABUPATEN WAJO"
+
+msgid "Monitor the catalog, manage publications, and continue managing Wajo Regency data."
+msgstr "Pantau katalog, kelola publikasi, dan lanjutkan pekerjaan pengelolaan data Kabupaten Wajo."
+
+msgid "CATALOG OVERVIEW"
+msgstr "GAMBARAN KATALOG"
+
+msgid "Data overview"
+msgstr "Ringkasan data"
+
+msgid "CATALOG UPDATES"
+msgstr "PEMBARUAN KATALOG"
+
+msgid "Recent datasets"
+msgstr "Dataset terbaru"
+
+msgid "Dataset name"
+msgstr "Nama dataset"
+
+msgid "No datasets to display yet"
+msgstr "Belum ada dataset untuk ditampilkan"
+
+msgid "Datasets you can access will appear here."
+msgstr "Dataset yang dapat Anda akses akan muncul di sini."
+
+msgid "QUICK ACCESS"
+msgstr "AKSES CEPAT"
+
+msgid "Start working"
+msgstr "Mulai pekerjaan"
+
+msgid "General dataset"
+msgstr "Dataset umum"
+
+msgid "Data and tables"
+msgstr "Data dan tabel"
+
+msgid "Indicator"
+msgstr "Indikator"
+
+msgid "Definitions and statistics"
+msgstr "Definisi dan statistik"
+
+msgid "Infographic"
+msgstr "Infografik"
+
+msgid "Public data visuals"
+msgstr "Visual data publik"
+
+msgid "Publication"
+msgstr "Publikasi"
+
+msgid "Reports and documents"
+msgstr "Laporan dan dokumen"
+
+msgid "Geospatial data"
+msgstr "Data geospasial"
+
+msgid "Maps and boundaries"
+msgstr "Peta dan wilayah"
+
+msgid "Add dataset"
+msgstr "Tambah dataset"
+
+msgid "Register a new dataset"
+msgstr "Daftarkan dataset baru"
+
+msgid "Manage government agencies"
+msgstr "Kelola perangkat daerah"
+
+msgid "Create thematic category"
+msgstr "Buat kategori tematik"
+
+msgid "Group datasets by topic"
+msgstr "Kelompokkan dataset berdasarkan topik"
+
+msgid "Manage portal pages"
+msgstr "Kelola halaman"
+
+msgid "Profiles, policies, and evergreen information"
+msgstr "Profil, kebijakan, dan informasi tetap"
+
+msgid "Write a news article"
+msgstr "Tulis berita"
+
+msgid "News, announcements, and articles"
+msgstr "Berita, pengumuman, dan artikel"
+
+msgid "Publications & reports"
+msgstr "Publikasi & laporan"
+
+msgid "Manage publication-type datasets"
+msgstr "Kelola dataset bertipe publikasi"
+
+msgid "Indicators & statistics"
+msgstr "Indikator & statistik"
+
+msgid "Manage dataset-based indicators"
+msgstr "Kelola indikator berbasis dataset"
+
+msgid "Refresh external data sources"
+msgstr "Perbarui sumber data eksternal"
+
+msgid "Publishing reminder"
+msgstr "Pengingat publikasi"
+
+msgid "Check the title, description, owning organization, license, and resources before publishing a dataset."
+msgstr "Pastikan judul, deskripsi, organisasi pemilik, lisensi, dan sumber daya telah lengkap sebelum dataset dipublikasikan."
+
+msgid "Open public portal"
+msgstr "Buka portal publik"
+
+msgid "Accessible datasets"
+msgstr "Dataset yang dapat diakses"
+
+msgid "View dataset catalog"
+msgstr "Lihat katalog dataset"
+
+msgid "View organizations"
+msgstr "Lihat organisasi"
+
+msgid "View categories"
+msgstr "Lihat kategori"
+
+msgid "Manage your datasets"
+msgstr "Kelola dataset sendiri"
+
+
+msgid "Wajo Data Portal"
+msgstr "Portal Data Wajo"
+
+msgid "Wajo Regency"
+msgstr "Kabupaten Wajo"
+
+msgid "Administrative navigation"
+msgstr "Navigasi administrasi"
+
+msgid "Catalog and data engine"
+msgstr "Mesin katalog dan data"
+
+msgid "Create a dataset for each content type"
+msgstr "Buat dataset sesuai jenis konten"
+
+msgid "The selected content type controls the metadata fields and public discovery tag."
+msgstr "Jenis konten menentukan isian metadata dan tag penemuan di portal publik."
+
+msgid "Thematic categories group datasets; they are not dataset content types."
+msgstr "Kategori tematik mengelompokkan dataset; kategori bukan jenis konten dataset."
+
+msgid "Create content"
+msgstr "Buat konten"
+
+msgid "Create a thematic category"
+msgstr "Buat kategori tematik"
+
+msgid "Choose the content type before adding metadata."
+msgstr "Pilih jenis konten sebelum mengisi metadata."
+
+msgid "Add geospatial data"
+msgstr "Tambah data geospasial"
+
+msgid "Create content by type"
+msgstr "Buat konten berdasarkan jenis"
+
+msgid "Add general dataset"
+msgstr "Tambah dataset umum"
+
+msgid "Add thematic category"
+msgstr "Tambah kategori tematik"

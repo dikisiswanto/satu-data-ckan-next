@@ -1,234 +1,237 @@
 import Image from "next/image";
 import Link from "next/link";
+import { parseMarkdown } from "@/lib/markdown/parse-markdown";
 import { publicCmsImageUrl } from "@/lib/cms/pages";
 import { getPublicSiteOrigin } from "@/lib/site-config";
 
 function safeHref(value) {
   const candidate = String(value || "").trim();
-  if (!candidate || candidate.startsWith("//") || candidate.startsWith("\\"))
+  if (
+    !candidate ||
+    candidate.startsWith("//") ||
+    candidate.startsWith("\\") ||
+    /[\u0000-\u001f]/.test(candidate)
+  )
     return null;
   if (candidate.startsWith("/") && !candidate.includes("\\")) return candidate;
   try {
     const url = new URL(candidate);
-    return url.protocol === "https:" ? url.toString() : null;
+    return ["https:", "mailto:", "tel:"].includes(url.protocol) &&
+      !url.username &&
+      !url.password
+      ? url.toString()
+      : null;
   } catch {
     return null;
   }
 }
 
-function renderInline(source, keyPrefix) {
-  const tokens =
-    /(!\[[^\]]*\]\([^)]+\)|\[[^\]]+\]\([^)]+\)|`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_)/g;
-  const output = [];
-  let cursor = 0;
-  let tokenIndex = 0;
-  for (const match of source.matchAll(tokens)) {
-    const index = match.index ?? 0;
-    if (index > cursor) output.push(source.slice(cursor, index));
-    const token = match[0];
-    const key = `${keyPrefix}-${tokenIndex++}`;
-    const image = token.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
-    const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-    if (image) {
-      const src = publicCmsImageUrl(image[2], getPublicSiteOrigin());
-      output.push(
-        src ? (
-          <Image
-            key={key}
-            src={src}
-            alt={image[1] || "Ilustrasi konten"}
-            width={960}
-            height={640}
-            unoptimized
-            className="my-3 h-auto max-h-[34rem] w-auto max-w-full rounded-xl border border-line object-contain"
-          />
-        ) : (
-          image[1]
-        ),
+function renderInline(tokens, keyPrefix) {
+  return tokens.map((token, index) => {
+    const key = `${keyPrefix}-${index}`;
+    if (token.type === "text") return token.value;
+    if (token.type === "softbreak") return "\n";
+    if (token.type === "break") return <br key={key} />;
+    if (token.type === "code")
+      return (
+        <code key={key} className="cms-markdown__inline-code">
+          {token.value}
+        </code>
       );
-    } else if (link) {
-      const href = safeHref(link[2]);
-      output.push(
-        href ? (
-          href.startsWith("/") ? (
-            <Link
-              key={key}
-              href={href}
-              className="font-semibold text-primary underline underline-offset-4"
-            >
-              {link[1]}
-            </Link>
-          ) : (
-            <a
-              key={key}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-primary underline underline-offset-4"
-            >
-              {link[1]}
-            </a>
-          )
-        ) : (
-          link[1]
-        ),
-      );
-    } else if (token.startsWith("`")) {
-      output.push(
-        <code
+    if (token.type === "strong")
+      return <strong key={key}>{renderInline(token.children, key)}</strong>;
+    if (token.type === "emphasis")
+      return <em key={key}>{renderInline(token.children, key)}</em>;
+    if (token.type === "delete")
+      return <del key={key}>{renderInline(token.children, key)}</del>;
+    if (token.type === "image") {
+      const src = publicCmsImageUrl(token.href, getPublicSiteOrigin());
+      return src ? (
+        <Image
           key={key}
-          className="rounded bg-slate-100 px-1.5 py-0.5 text-[0.9em]"
-        >
-          {token.slice(1, -1)}
-        </code>,
+          src={src}
+          alt={token.label || "Ilustrasi konten"}
+          title={token.title || undefined}
+          width={1200}
+          height={800}
+          unoptimized
+          className="cms-markdown__image"
+        />
+      ) : (
+        token.label
       );
-    } else if (token.startsWith("**") || token.startsWith("__")) {
-      output.push(<strong key={key}>{token.slice(2, -2)}</strong>);
-    } else {
-      output.push(<em key={key}>{token.slice(1, -1)}</em>);
     }
-    cursor = index + token.length;
-  }
-  if (cursor < source.length) output.push(source.slice(cursor));
-  return output;
+    if (token.type === "link") {
+      const href = safeHref(token.href);
+      if (!href)
+        return renderInline(
+          token.children || [
+            { type: "text", value: token.label || token.href },
+          ],
+          key,
+        );
+      const children = renderInline(
+        token.children || [{ type: "text", value: token.label || token.href }],
+        key,
+      );
+      return href.startsWith("/") ? (
+        <Link
+          key={key}
+          href={href}
+          title={token.title || undefined}
+          className="cms-markdown__link"
+        >
+          {children}
+        </Link>
+      ) : (
+        <a
+          key={key}
+          href={href}
+          title={token.title || undefined}
+          target={href.startsWith("https:") ? "_blank" : undefined}
+          rel={
+            href.startsWith("https:")
+              ? "noopener noreferrer nofollow"
+              : undefined
+          }
+          className="cms-markdown__link"
+        >
+          {children}
+        </a>
+      );
+    }
+    return null;
+  });
 }
 
-function isBlockStart(lines, index) {
-  const line = lines[index] || "";
-  return /^\s*(#{1,4}\s|[-*+]\s|\d+\.\s|>\s?|```|---+\s*$)/.test(line);
-}
-
-export function MarkdownContent({ content }) {
-  const source = String(content || "")
-    .replace(/\r\n?/g, "\n")
-    .slice(0, 240_000);
-  const lines = source.split("\n");
-  const blocks = [];
-  let index = 0;
-  let blockIndex = 0;
-
-  while (index < lines.length) {
-    const line = lines[index];
-    if (!line.trim()) {
-      index += 1;
-      continue;
-    }
-
-    if (line.trim().startsWith("```")) {
-      const language = line.trim().slice(3).trim().slice(0, 32);
-      index += 1;
-      const code = [];
-      while (index < lines.length && !lines[index].trim().startsWith("```"))
-        code.push(lines[index++]);
-      if (index < lines.length) index += 1;
-      blocks.push(
-        <pre
-          key={`code-${blockIndex++}`}
-          className="my-5 overflow-x-auto rounded-xl bg-slate-950 p-4 text-sm leading-6 text-slate-100"
-        >
-          <code data-language={language || undefined}>{code.join("\n")}</code>
-        </pre>,
-      );
-      continue;
-    }
-
-    const heading = line.match(/^(#{1,4})\s+(.+)$/);
-    if (heading) {
-      const level = Math.min(heading[1].length + 1, 5);
-      const Heading = `h${level}`;
-      blocks.push(
+function renderBlocks(blocks, keyPrefix = "md") {
+  return blocks.map((block, index) => {
+    const key = `${keyPrefix}-${index}`;
+    if (block.type === "heading") {
+      const Heading = `h${Math.max(1, Math.min(6, block.level))}`;
+      return (
         <Heading
-          key={`heading-${blockIndex++}`}
-          className="mb-3 mt-8 font-semibold tracking-tight text-ink first:mt-0"
+          key={key}
+          className={`cms-markdown__heading cms-markdown__heading--${block.level}`}
         >
-          {renderInline(heading[2], `h-${index}`)}
-        </Heading>,
+          {renderInline(block.children, key)}
+        </Heading>
       );
-      index += 1;
-      continue;
     }
-
-    if (/^\s*---+\s*$/.test(line)) {
-      blocks.push(
-        <hr key={`rule-${blockIndex++}`} className="my-7 border-line" />,
+    if (block.type === "paragraph")
+      return (
+        <p key={key} className="cms-markdown__paragraph">
+          {renderInline(block.children, key)}
+        </p>
       );
-      index += 1;
-      continue;
-    }
-
-    if (/^>\s?/.test(line)) {
-      const quote = [];
-      while (index < lines.length && /^>\s?/.test(lines[index]))
-        quote.push(lines[index++].replace(/^>\s?/, ""));
-      blocks.push(
-        <blockquote
-          key={`quote-${blockIndex++}`}
-          className="my-5 border-l-4 border-primary/30 pl-4 text-muted"
+    if (block.type === "hr")
+      return <hr key={key} className="cms-markdown__rule" />;
+    if (block.type === "code")
+      return (
+        <pre key={key} className="cms-markdown__code">
+          <code data-language={block.language || undefined}>{block.value}</code>
+        </pre>
+      );
+    if (block.type === "blockquote")
+      return (
+        <blockquote key={key} className="cms-markdown__quote">
+          {renderBlocks(block.blocks, key)}
+        </blockquote>
+      );
+    if (block.type === "table") {
+      return (
+        <div
+          key={key}
+          className="cms-markdown__table-wrap"
+          role="region"
+          aria-label="Tabel data"
+          tabIndex={0}
         >
-          {quote.map((item, itemIndex) => (
-            <p key={itemIndex}>{renderInline(item, `q-${itemIndex}`)}</p>
+          <table className="cms-markdown__table">
+            <thead>
+              <tr>
+                {block.headers.map((cell, cellIndex) => (
+                  <th
+                    key={cellIndex}
+                    scope="col"
+                    style={{ textAlign: block.alignments[cellIndex] || "left" }}
+                  >
+                    {renderInline(
+                      parseMarkdown(cell).flatMap(
+                        (item) => item.children || [],
+                      ),
+                      `${key}-head-${cellIndex}`,
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {block.headers.map((_, cellIndex) => (
+                    <td
+                      key={cellIndex}
+                      style={{
+                        textAlign: block.alignments[cellIndex] || "left",
+                      }}
+                    >
+                      {renderInline(
+                        parseMarkdown(row[cellIndex] || "").flatMap(
+                          (item) => item.children || [],
+                        ),
+                        `${key}-${rowIndex}-${cellIndex}`,
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+    if (block.type === "list") {
+      const List = block.ordered ? "ol" : "ul";
+      return (
+        <List
+          key={key}
+          start={block.ordered && block.start > 1 ? block.start : undefined}
+          className={`cms-markdown__list ${block.ordered ? "cms-markdown__list--ordered" : "cms-markdown__list--unordered"}`}
+        >
+          {block.items.map((item, itemIndex) => (
+            <li
+              key={itemIndex}
+              className={
+                item.checked !== null ? "cms-markdown__task" : undefined
+              }
+            >
+              {item.checked !== null ? (
+                <input
+                  type="checkbox"
+                  checked={item.checked}
+                  readOnly
+                  tabIndex={-1}
+                  aria-label={
+                    item.checked ? "Tugas selesai" : "Tugas belum selesai"
+                  }
+                />
+              ) : null}
+              <div>{renderBlocks(item.blocks, `${key}-item-${itemIndex}`)}</div>
+            </li>
           ))}
-        </blockquote>,
+        </List>
       );
-      continue;
     }
+    return null;
+  });
+}
 
-    if (/^\s*[-*+]\s+/.test(line)) {
-      const items = [];
-      while (index < lines.length && /^\s*[-*+]\s+/.test(lines[index]))
-        items.push(lines[index++].replace(/^\s*[-*+]\s+/, ""));
-      blocks.push(
-        <ul
-          key={`list-${blockIndex++}`}
-          className="my-4 list-disc space-y-2 pl-6"
-        >
-          {items.map((item, itemIndex) => (
-            <li key={itemIndex}>{renderInline(item, `ul-${itemIndex}`)}</li>
-          ))}
-        </ul>,
-      );
-      continue;
-    }
-
-    if (/^\s*\d+\.\s+/.test(line)) {
-      const items = [];
-      while (index < lines.length && /^\s*\d+\.\s+/.test(lines[index]))
-        items.push(lines[index++].replace(/^\s*\d+\.\s+/, ""));
-      blocks.push(
-        <ol
-          key={`list-${blockIndex++}`}
-          className="my-4 list-decimal space-y-2 pl-6"
-        >
-          {items.map((item, itemIndex) => (
-            <li key={itemIndex}>{renderInline(item, `ol-${itemIndex}`)}</li>
-          ))}
-        </ol>,
-      );
-      continue;
-    }
-
-    const paragraph = [line];
-    index += 1;
-    while (
-      index < lines.length &&
-      lines[index].trim() &&
-      !isBlockStart(lines, index)
-    )
-      paragraph.push(lines[index++]);
-    blocks.push(
-      <p
-        key={`paragraph-${blockIndex++}`}
-        className="my-4 whitespace-pre-line leading-8 text-slate-700"
-      >
-        {paragraph.map((part, partIndex) => (
-          <span key={partIndex}>
-            {partIndex ? "\n" : ""}
-            {renderInline(part, `p-${blockIndex}-${partIndex}`)}
-          </span>
-        ))}
-      </p>,
-    );
-  }
-
-  return <div className="cms-markdown">{blocks}</div>;
+export function MarkdownContent({ content, className = "" }) {
+  const blocks = parseMarkdown(content);
+  return (
+    <div className={`cms-markdown ${className}`.trim()}>
+      {renderBlocks(blocks)}
+    </div>
+  );
 }

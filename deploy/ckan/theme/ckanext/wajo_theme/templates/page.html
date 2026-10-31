@@ -9,7 +9,7 @@
 
 {% block content %}
   {% if c.userobj %}
-    <div class="wajo-admin-shell">
+    <div class="wajo-admin-shell"{% if c.pkg_dict %} data-wajo-package-portal-type="{{ c.pkg_dict.get('portal_type', '') }}"{% endif %}>
       {% include "wajo_theme/sidebar.html" %}
       <div class="wajo-admin-workspace">
         {% include "wajo_theme/context_help.html" %}

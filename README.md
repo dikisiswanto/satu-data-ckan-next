@@ -62,7 +62,7 @@ bash ./deploy/ckan/enable-xloader.sh cloudflare
 ```
 
 Ganti argumen `cloudflare` menjadi `manual` jika memakai ingress langsung. Perintah operasional lainnya tersedia di [`deploy/ckan/README.md`](deploy/ckan/README.md).
-Jika CKAN tidak sehat saat start, lihat [diagnosis startup Scheming dan design-system](docs/CKAN-STARTUP-AND-DESIGN-SYSTEM-FIX.md) sebelum menjalankan perintah DataStore/XLoader.
+Jika CKAN tidak sehat saat start, ikuti bagian **Diagnostik CKAN tidak sehat** di [`deploy/ckan/README.md`](deploy/ckan/README.md#diagnostik-ckan-tidak-sehat) sebelum menjalankan perintah DataStore/XLoader.
 
 ## Akun sysadmin awal
 
@@ -117,7 +117,7 @@ Route publik CMS:
 
 Panduan field, template, komponen, media, keamanan, dan alur publikasi tersedia di [`docs/CMS.md`](docs/CMS.md).
 
-Halaman detail dataset publik menyediakan endpoint API per dataset (`package_show`), per resource (`resource_show`), dan isi tabel DataStore (`datastore_search`). Untuk CSV/TSV lokal yang belum selesai diindeks XLoader, tersedia pratinjau sementara dengan batas ukuran/baris; pratinjau penuh tetap memakai DataStore. Halaman katalog, organisasi, statistik, publikasi, infografik, informasi, berita, API, dan route publik lain menyediakan panduan kontekstual yang relevan.
+Halaman detail dataset publik menyediakan endpoint API per dataset (`package_show`), per resource (`resource_show`), dan isi tabel DataStore (`datastore_search`). Untuk CSV/TSV lokal yang belum selesai diindeks XLoader, tersedia pratinjau sementara dengan batas ukuran/baris; pratinjau penuh tetap memakai DataStore. Frontend publik menggunakan header dan breadcrumb sebagai navigasi tanpa banner/panduan halaman di atas konten. Panduan kontekstual tetap tersedia di Wajo Admin CKAN, dekat dengan alur kerja pengelola.
 
 ## Wajo Admin — antarmuka administrasi CKAN
 
@@ -146,7 +146,7 @@ Jangan mengedit core CKAN atau folder hasil bootstrap `deploy/ckan/upstream`. Pe
 
 ## Diagnosis startup CKAN dan design-system guard
 
-Jika CKAN menjadi unhealthy saat `ckanext-scheming` dimuat, periksa referensi schema `module:file` di `.env.ckan` dan `deploy/ckan/upstream/.env.generated`. Renderer environment sekarang menolak path filesystem lama sebelum container dimulai. Panduan diagnosis dan urutan pemulihan tersedia di [`docs/CKAN-STARTUP-AND-DESIGN-SYSTEM-FIX.md`](docs/CKAN-STARTUP-AND-DESIGN-SYSTEM-FIX.md) dan laporan terbaru [`docs/AUDIT-CI-SCHEMING-STARTUP-FIX-2026-10-30.md`](docs/AUDIT-CI-SCHEMING-STARTUP-FIX-2026-10-30.md).
+Jika CKAN menjadi unhealthy saat `ckanext-scheming` dimuat, periksa referensi schema `module:file` di `.env.ckan` dan `deploy/ckan/upstream/.env.generated`. Renderer environment sekarang menolak path filesystem lama sebelum container dimulai. Panduan diagnosis dan urutan pemulihan tersedia di bagian **Diagnostik CKAN tidak sehat** pada [`deploy/ckan/README.md`](deploy/ckan/README.md#diagnostik-ckan-tidak-sehat).
 
 ## Pemeriksaan kualitas
 
@@ -182,5 +182,5 @@ dari CKAN 2.12 dan tidak boleh diaktifkan. Bootstrap membersihkan ID lama dari
 - Tema dan shell Wajo Admin: [`docs/WAJO-ADMIN.md`](docs/WAJO-ADMIN.md)
 - Alur DataStore/XLoader dan preview: [`docs/DATASTORE-PREVIEW-SYNC.md`](docs/DATASTORE-PREVIEW-SYNC.md)
 - Cakupan lokalisasi CKAN: [`docs/CKAN-ADMIN-LOKALISASI.md`](docs/CKAN-ADMIN-LOKALISASI.md)
-- Audit mendalam lokalisasi CKAN 2.12.1: [`docs/AUDIT-LOKALISASI-DEEP-DIVE-2026-10-30.md`](docs/AUDIT-LOKALISASI-DEEP-DIVE-2026-10-30.md)
+- Audit integrasi akhir, media, Markdown, unduhan, autentikasi, dan validasi: [`docs/FINAL-AUDIT-2026-10-31.md`](docs/FINAL-AUDIT-2026-10-31.md)
 - Design tokens, ukuran konten, tipografi, komponen, dan aturan responsif: [`docs/WAJO-ADMIN-DESIGN-SYSTEM.md`](docs/WAJO-ADMIN-DESIGN-SYSTEM.md)

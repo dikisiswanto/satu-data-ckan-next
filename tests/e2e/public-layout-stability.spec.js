@@ -61,6 +61,7 @@ async function installLayoutShiftObserver(page) {
 async function measureRoute(page, route, viewportName) {
   await page.goto(route, { waitUntil: "domcontentloaded" });
   await page.locator("main").first().waitFor({ state: "visible" });
+  await expect(page.locator(".public-context-guide")).toHaveCount(0);
   await page.waitForLoadState("networkidle");
   await page.evaluate(async () => {
     if (document.fonts?.ready) await document.fonts.ready;

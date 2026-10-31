@@ -113,7 +113,7 @@ valid_free_solid_glyphs = {
     "right-from-bracket", "chart-bar", "angle-right", "plus", "lightbulb",
     "newspaper", "book", "chart-line", "image", "table", "server",
     "cloud-arrow-down", "shield", "check", "circle-check", "circle-exclamation",
-    "triangle-exclamation", "circle-info",
+    "triangle-exclamation", "circle-info", "map",
 }
 require(icon_calls.issubset(icon_map), f"Semua pemanggilan wajo_icon harus memiliki pemetaan: {sorted(icon_calls - icon_map.keys())}.")
 require(set(icon_map.values()).issubset(valid_free_solid_glyphs), f"Glyph harus tersedia pada Font Awesome Free Solid CKAN: {sorted(set(icon_map.values()) - valid_free_solid_glyphs)}.")
@@ -135,6 +135,11 @@ for upload_setting in (
 ):
     require(upload_setting in env_source, f"Konfigurasi upload instansi belum lengkap: {upload_setting}.")
     require(upload_setting.split("=", 1)[0] in bootstrap_source, f"Bootstrap tidak menegakkan konfigurasi upload: {upload_setting}.")
+organization_schema_source = read(PACKAGE / "schemas/organization.yaml")
+group_schema_source = read(PACKAGE / "schemas/group.yaml")
+require(re.search(r"field_name:\s*image_url[\s\S]{0,160}preset:\s*organization_url_upload", organization_schema_source), "Logo organisasi harus memakai field image_url CKAN agar image_display_url terisi.")
+require(re.search(r"field_name:\s*image_url[\s\S]{0,160}preset:\s*organization_url_upload", group_schema_source), "Gambar kategori harus memakai field image_url CKAN dan preset upload.")
+require("ckan_storage" in read(ROOT / "deploy/ckan/docker-compose.override.yml") or "ckan_storage" in read(ROOT / "deploy/ckan/bootstrap-upstream.sh"), "FileStore harus tetap berada pada volume persisten ckan_storage.")
 require("{% ckan_extends %}" in page_source, "page.html harus mewarisi shell CKAN agar block admin upstream tetap utuh.")
 require("wajo-admin-shell" in page_source and 'wajo_theme/sidebar.html' in page_source and "{{ super() }}" in page_source, "Page shell harus menambahkan sidebar secara aditif tanpa mengganti konten core CKAN.")
 require('class="wajo-admin-footer__brand"' in page_source and 'src="/logo-kabupaten-wajo.webp"' in page_source, "Footer admin harus memakai identitas dan logo yang sama dengan header.")
@@ -259,8 +264,39 @@ require("h.url_for(dataset_type ~ '.read', id=item.name)" in dashboard_source, "
 require("request.path" in sidebar_source and "h.url_for('wajo_admin.index')" in sidebar_source, "Sidebar harus mendeteksi route aktif dan memakai route ringkasan Wajo Admin.")
 require("h.url_for('dashboard.datasets')" in sidebar_source and "h.url_for('dashboard.organizations')" in sidebar_source and "h.url_for('dashboard.groups')" in sidebar_source, "Sidebar harus mempertahankan route dashboard native pengguna.")
 require("/pages" in sidebar_source and "/blog" in sidebar_source and "/harvest" in sidebar_source, "Sidebar harus menyediakan tautan ke Pages, Blog, dan Harvest.")
-for required_nav in ("Semua dataset", "Organisasi", "Kategori data", "Publikasi & laporan", "Indikator & statistik", "Infografik", "Halaman portal", "Berita dan artikel", "Pengambilan data", "DataStore & pratinjau"):
-    require(required_nav in sidebar_source, f"Sidebar admin belum menyediakan menu {required_nav}.")
+required_nav_translations = {
+    "All datasets": "Semua dataset",
+    "Organizations": "Organisasi",
+    "Data categories": "Kategori data",
+    "Publications & reports": "Publikasi & laporan",
+    "Indicators & statistics": "Indikator & statistik",
+    "Infographics": "Infografik",
+    "Portal pages": "Halaman portal",
+    "News and articles": "Berita dan artikel",
+    "Data harvesting": "Pengambilan data",
+    "DataStore & preview": "DataStore & pratinjau",
+    "Add thematic category": "Tambah kategori tematik",
+}
+for msgid, translation in required_nav_translations.items():
+    require(f"_('{msgid}')" in sidebar_source, f"Sidebar admin harus memakai gettext untuk {msgid}.")
+    require(f'msgid "{msgid}"\nmsgstr "{translation}"' in read(INDONESIAN_PO), f"Label sidebar {msgid} harus tersedia dalam Bahasa Indonesia.")
+required_dashboard_translations = {
+    "Create content by type": "Buat konten berdasarkan jenis",
+    "General dataset": "Dataset umum",
+    "Indicator": "Indikator",
+    "Infographic": "Infografik",
+    "Publication": "Publikasi",
+    "Geospatial data": "Data geospasial",
+    "Create a thematic category": "Buat kategori tematik",
+    "Add general dataset": "Tambah dataset umum",
+    "Add geospatial data": "Tambah data geospasial",
+}
+for msgid, translation in required_dashboard_translations.items():
+    require(f"_('{msgid}')" in dashboard_source or f"_('{msgid}')" in sidebar_source, f"Dashboard/admin navigation harus memakai gettext untuk {msgid}.")
+    require(f'msgid "{msgid}"\nmsgstr "{translation}"' in read(INDONESIAN_PO), f"Label dasbor {msgid} harus tersedia dalam Bahasa Indonesia.")
+require("portal_type='indikator'" in dashboard_source and "portal_type='infografik'" in dashboard_source and "portal_type='publikasi'" in dashboard_source and "portal_type='geospasial'" in dashboard_source, "Dashboard harus menyediakan pintasan tambah konten dengan tipe portal yang telah dipilih.")
+require("h.default_group_type('group') ~ '.new'" in dashboard_source, "Pembuatan kategori tematik harus tetap memakai entitas Group CKAN yang terpisah dari tipe dataset.")
+require("data-wajo-package-portal-type" in page_source, "Form resource harus menerima konteks tipe portal dari dataset induk.")
 # Replace CKAN's stock English marketing/placeholder copy on the public home page.
 ABOUT_SNIPPET = read(PACKAGE / "templates/home/snippets/about_text.html")
 PROMOTED_SNIPPET = read(PACKAGE / "templates/home/snippets/promoted.html")

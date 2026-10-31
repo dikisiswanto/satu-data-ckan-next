@@ -84,7 +84,7 @@ dataset_fields:
         label: Publikasi/laporan
       - value: geospasial
         label: Data geospasial
-    help_text: Pilih tipe lalu tambahkan tag portal-indikator, portal-infografik, atau portal-publikasi agar mudah ditemukan di halaman publik.
+    help_text: Pilih jenis konten. Tag portal untuk halaman Statistik, Infografik, atau Publikasi akan ditambahkan otomatis; tipe internal CKAN tetap dataset.
 
   - field_name: portal_reference_period
     label: Periode acuan

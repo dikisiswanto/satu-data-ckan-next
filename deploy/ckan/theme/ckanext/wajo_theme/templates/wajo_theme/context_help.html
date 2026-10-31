@@ -23,17 +23,17 @@
 {% elif path.startswith('/dataset') and ('portal-publikasi' in current_dataset_tags or 'portal-publikasi' in search_query) %}
   {% set guide_title = 'Mengelola publikasi dan laporan' %}
   {% set guide_body = 'Konten ini merupakan dataset bertag portal-publikasi. Lengkapi tipe konten Publikasi/laporan, tanggal rilis, penerbit, periode, ringkasan, lisensi, dan sumber daya PDF atau data pendukung. Pastikan berkas dapat diunduh dan metadata tampil benar.' %}
-  {% set guide_action = '/dataset/new' %}
-  {% set guide_action_label = 'Tambah publikasi sebagai dataset' %}
+  {% set guide_action = '/dataset/new?portal_type=publikasi' %}
+  {% set guide_action_label = 'Tambah publikasi' %}
 {% elif path.startswith('/dataset') and ('portal-indikator' in current_dataset_tags or 'portal-indikator' in search_query) %}
   {% set guide_title = 'Mengelola indikator dan statistik' %}
   {% set guide_body = 'Dataset indikator perlu memiliki tag portal-indikator. Lengkapi definisi indikator, satuan, rumus/metodologi, sumber, cakupan wilayah, periode acuan, dan frekuensi pemutakhiran. Nilai numerik harus tersedia pada sumber daya tabular agar dapat dipakai untuk statistik dan grafik.' %}
-  {% set guide_action = '/dataset/new' %}
-  {% set guide_action_label = 'Tambah dataset indikator' %}
+  {% set guide_action = '/dataset/new?portal_type=indikator' %}
+  {% set guide_action_label = 'Tambah indikator' %}
 {% elif path.startswith('/dataset') and ('portal-infografik' in current_dataset_tags or 'portal-infografik' in search_query) %}
   {% set guide_title = 'Mengelola infografik' %}
   {% set guide_body = 'Infografik menggunakan tag portal-infografik. Isi judul, ringkasan, kategori, periode, atribusi/penerbit, dan tambahkan gambar utama sebagai sumber daya dengan peran Infografik utama. Sertakan dataset sumber agar angka dapat ditelusuri.' %}
-  {% set guide_action = '/dataset/new' %}
+  {% set guide_action = '/dataset/new?portal_type=infografik' %}
   {% set guide_action_label = 'Tambah infografik' %}
 {% elif path.startswith('/dataset/new') or (path.startswith('/dataset') and path.endswith('/new')) %}
   {% set guide_title = 'Membuat dataset yang mudah digunakan' %}
@@ -53,11 +53,13 @@
 {% elif path.startswith('/organization') %}
   {% set guide_title = 'Mengelola perangkat daerah' %}
   {% set guide_body = 'Gunakan satu organisasi untuk satu perangkat daerah pemilik data. Lengkapi nama, deskripsi, identitas, serta anggota. Tetapkan peran berdasarkan tugas dan berikan hak minimum yang diperlukan.' %}
-  {% set guide_action = '/dataset/new' %}
+  {% set guide_action = '/dataset/new?portal_type=dataset' %}
   {% set guide_action_label = 'Daftarkan dataset milik organisasi' %}
 {% elif path.startswith('/group') %}
-  {% set guide_title = 'Mengelola kategori data' %}
-  {% set guide_body = 'Kategori membantu masyarakat menelusuri dataset berdasarkan topik. Gunakan nama singkat dan deskripsi yang membedakan kategori. Hindari membuat kategori duplikat atau terlalu luas.' %}
+  {% set guide_title = 'Mengelola kategori tematik' %}
+  {% set guide_body = 'Kategori tematik adalah kelompok CKAN untuk mengelompokkan dataset berdasarkan topik, wilayah, atau program. Ini berbeda dari tipe konten portal. Untuk membuat Dataset, Indikator, Infografik, Publikasi, atau Geospasial, gunakan akses cepat pada dasbor agar tipe dan tag publik terpilih otomatis.' %}
+  {% set guide_action = '/dataset/new?portal_type=dataset' %}
+  {% set guide_action_label = 'Buat dataset dalam kategori' %}
 {% elif path.startswith('/harvest') %}
   {% set guide_title = 'Mengelola sumber pengambilan data' %}
   {% set guide_body = 'Periksa alamat katalog sumber, jenis pengambil data, organisasi pemilik, jadwal, serta log pengumpulan dan pengambilan. Jalankan pekerjaan manual terlebih dahulu, periksa laporan, lalu aktifkan jadwal berkala. Jangan hapus sumber sebelum memastikan dampaknya terhadap dataset hasil.' %}

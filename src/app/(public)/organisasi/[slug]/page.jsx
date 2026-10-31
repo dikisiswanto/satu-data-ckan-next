@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Building2, Database } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
 import { DatasetCard } from "@/components/dataset-card";
 import { getPublicOrganizationBySlugResult } from "@/lib/data/organizations";
+import { getPublicOrganizationImageUrl } from "@/lib/ckan/public-media-url";
 import { getPublishedDatasetsResult } from "@/lib/data/public";
 import { SectionReveal } from "@/components/section-reveal";
 import {
@@ -100,6 +101,7 @@ export default async function OrganizationDetailPage({ params }) {
   if (datasetsResult.unavailable) await connection();
   const datasets = datasetsResult.data;
   const catalogHref = `/dataset?organisasi=${encodeURIComponent(org.name)}`;
+  const organizationImageUrl = getPublicOrganizationImageUrl(org);
 
   return (
     <main className="organization-detail-page public-interior-page">
@@ -111,17 +113,36 @@ export default async function OrganizationDetailPage({ params }) {
           >
             <ArrowLeft size={16} aria-hidden="true" /> Daftar perangkat daerah
           </Link>
-          <PageHeading
-            className="public-dynamic-heading mb-4 sm:mb-4"
-            reserveTitle
-            reserveDescription
-            eyebrow="Profil perangkat daerah"
-            title={org.title || org.name}
-            description={
-              org.description ||
-              "Profil perangkat daerah belum dilengkapi. Dataset di bawah ini merupakan data yang telah dipublikasikan dan dapat diakses umum."
-            }
-          />
+          <div className="flex items-start gap-4">
+            {organizationImageUrl ? (
+              <img
+                src={organizationImageUrl}
+                alt={`Logo ${org.title || org.name}`}
+                width="88"
+                height="88"
+                loading="eager"
+                decoding="async"
+                className="size-[4.5rem] shrink-0 rounded-2xl border border-line bg-white p-2 object-contain shadow-sm sm:size-20"
+              />
+            ) : (
+              <span className="grid size-[4.5rem] shrink-0 place-items-center rounded-2xl border border-line bg-white text-primary sm:size-20">
+                <Building2 size={30} aria-hidden="true" />
+              </span>
+            )}
+            <div className="min-w-0 flex-1">
+              <PageHeading
+                className="public-dynamic-heading mb-4 sm:mb-4"
+                reserveTitle
+                reserveDescription
+                eyebrow="Profil perangkat daerah"
+                title={org.title || org.name}
+                description={
+                  org.description ||
+                  "Profil perangkat daerah belum dilengkapi. Dataset di bawah ini merupakan data yang telah dipublikasikan dan dapat diakses umum."
+                }
+              />
+            </div>
+          </div>
           <div className="organization-detail-meta">
             <span>
               <Building2 size={16} aria-hidden="true" /> Kode perangkat daerah:{" "}

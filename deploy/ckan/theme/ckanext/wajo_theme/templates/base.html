@@ -10,5 +10,7 @@
 
 {% block scripts %}
   {{ super() }}
+  <form id="wajo-media-csrf" hidden aria-hidden="true">{{ h.csrf_input() }}</form>
   <script defer src="/wajo-admin-forms.js"></script>
+  <script defer src="/wajo-markdown-editor.js"></script>
 {% endblock %}

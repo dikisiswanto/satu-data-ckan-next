@@ -25,13 +25,25 @@ Format lain tetap dapat diunduh sebagai resource biasa, tetapi tidak dijanjikan 
 Setelah source baru dipasang:
 
 ```bash
+# 1. Sinkronkan konfigurasi, Scheming package path, dan Docker overlay
 bash ./deploy/ckan/bootstrap-upstream.sh
-bash ./deploy/ckan/compose.sh cloudflare up -d --build --force-recreate ckan nextjs xloader-worker
+
+# 2. Build dan mulai CKAN terlebih dahulu
+bash ./deploy/ckan/compose.sh cloudflare up -d --build ckan
+
+# 3. Periksa status; lanjut hanya setelah ckan berstatus healthy
+bash ./deploy/ckan/compose.sh cloudflare ps
+bash ./deploy/ckan/compose.sh cloudflare logs --tail=120 ckan
+
+# 4. Setelah CKAN sehat, siapkan DataStore dan XLoader
 bash ./deploy/ckan/apply-datastore-permissions.sh
 bash ./deploy/ckan/enable-xloader.sh cloudflare
+
+# 5. Mulai Next.js setelah backend dan worker siap
+bash ./deploy/ckan/compose.sh cloudflare up -d nextjs
 ```
 
-`enable-xloader.sh` membuat token internal XLoader bila belum ada, menyimpannya privat di `.env.ckan`, lalu merecreate CKAN dan worker. Worker harus berstatus berjalan sebelum mengharapkan preview otomatis.
+`enable-xloader.sh` membuat token internal XLoader bila belum ada, menyimpannya privat di `.env.ckan`, lalu merecreate CKAN dan worker. Kedua skrip DataStore/XLoader menolak berjalan saat CKAN belum `healthy`, sehingga error sekunder tidak menutupi akar startup. Worker harus berstatus berjalan sebelum mengharapkan preview otomatis.
 
 ## Backfill resource lama
 
@@ -87,7 +99,7 @@ bash ./deploy/ckan/compose.sh cloudflare logs --tail=200 ckan xloader-worker nex
 bash ./deploy/ckan/compose.sh cloudflare exec -T ckan ckan -c /srv/app/ckan.ini xloader status
 ```
 
-Jika detail dataset tetap HTTP 500, periksa nilai aktif `scheming.dataset_schemas` dan pastikan `dataset.yaml` terpasang pada `/srv/app/ckanext-schemas/dataset.yaml`. Jika preview tetap belum aktif, periksa format resource, akses unduh dari worker, token XLoader, worker Redis/RQ, permission DataStore, dan log job XLoader.
+Jika detail dataset tetap HTTP 500, periksa nilai aktif `scheming.dataset_schemas` dan pastikan `dataset.yaml` ikut terpasang sebagai package data di `ckanext.wajo_theme:schemas/dataset.yaml` dan nilai `scheming.dataset_schemas` memakai format `module:file`. Jika preview tetap belum aktif, periksa format resource, akses unduh dari worker, token XLoader, worker Redis/RQ, permission DataStore, dan log job XLoader.
 
 ## Panduan admin melalui Wajo Admin
 

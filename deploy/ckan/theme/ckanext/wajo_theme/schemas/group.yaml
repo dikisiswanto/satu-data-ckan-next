@@ -22,10 +22,17 @@ fields:
     form_snippet: markdown.html
     form_placeholder: Jelaskan ruang lingkup dan jenis data yang termasuk dalam kategori ini.
 
-  - field_name: url
-    label: URL gambar kategori
-    validators: ignore_missing unicode_safe
+  - field_name: image_url
+    label: Gambar kategori tematik
+    preset: organization_url_upload
     form_placeholder: https://.../kategori.png
+    help_text: Unggah PNG, JPEG, GIF, atau WebP. Kategori tematik mengelompokkan dataset; kategori ini bukan tipe konten Dataset, Indikator, Infografik, atau Publikasi.
+
+  - field_name: url
+    label: Tautan informasi kategori
+    validators: ignore_missing unicode_safe
+    form_placeholder: https://...
+    display_snippet: link.html
 
   - field_name: portal_group_category
     label: Kelompok tematik

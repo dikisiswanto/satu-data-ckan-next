@@ -4,7 +4,17 @@
 
 {$PUBLIC_HOST} {
   encode zstd gzip
-  @ckanPublic path_regexp ckanPublic ^/(?:catalog\.(?:rdf|ttl|jsonld|xml|n3)|dataset/[^/]+\.(?:rdf|ttl|jsonld|n3)|dataset/[^/]+/resource/[^/]+/download/[^/]+)$
+  # Public resource downloads are handled by the Next.js route, which checks
+  # CKAN visibility and fetches the file over the private Docker network.
+  @publicResourceDownload path_regexp publicResourceDownload ^/dataset/[^/]+/resource/[a-fA-F0-9-]{16,64}/download/[^/]+/?$
+  handle @publicResourceDownload {
+    reverse_proxy nextjs:3000 {
+      header_up Host {http.request.host}
+      header_up X-Forwarded-Host {http.request.host}
+      header_up X-Forwarded-Proto {http.request.scheme}
+    }
+  }
+  @ckanPublic path_regexp ckanPublic ^/(?:catalog\.(?:rdf|ttl|jsonld|xml|n3)|dataset/[^/]+\.(?:rdf|ttl|jsonld|n3))$
   handle @ckanPublic {
     reverse_proxy https://nginx:443 {
       header_up Host {http.request.host}

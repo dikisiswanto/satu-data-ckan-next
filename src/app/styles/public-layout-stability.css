@@ -501,100 +501,6 @@
   max-inline-size: 42rem;
 }
 
-/* Public contextual guidance: useful but visually subordinate to page content. */
-.public-context-guide-wrap {
-  position: relative;
-  z-index: 2;
-  margin-block: 0.5rem 0;
-}
-.public-context-guide {
-  overflow: hidden;
-  border: 1px solid var(--color-line, #e2e8f0);
-  border-radius: 0.9rem;
-  background: rgb(255 255 255 / 88%);
-  box-shadow: 0 2px 8px rgb(15 45 34 / 3%);
-}
-.public-context-guide > summary {
-  display: flex;
-  min-height: 3.35rem;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.7rem 0.9rem;
-  color: var(--color-ink, #24352d);
-  cursor: pointer;
-  list-style: none;
-}
-.public-context-guide > summary::-webkit-details-marker {
-  display: none;
-}
-.public-context-guide__icon {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 2rem;
-  place-items: center;
-  border-radius: 0.65rem;
-  background: var(--color-accent, #eaf4ed);
-  color: var(--color-primary, #24694d);
-}
-.public-context-guide__copy {
-  display: grid;
-  min-width: 0;
-  gap: 0.1rem;
-}
-.public-context-guide__copy strong {
-  font-size: 0.78rem;
-  font-weight: 750;
-}
-.public-context-guide__copy small {
-  overflow: hidden;
-  color: var(--color-muted, #64748b);
-  font-size: 0.72rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.public-context-guide__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-left: auto;
-  color: var(--color-muted, #64748b);
-  font-size: 0.72rem;
-  font-weight: 650;
-  white-space: nowrap;
-}
-.public-context-guide__chevron {
-  flex: 0 0 auto;
-  color: var(--color-muted, #64748b);
-  transition: transform 140ms ease;
-}
-.public-context-guide[open] .public-context-guide__chevron {
-  transform: rotate(180deg);
-}
-.public-context-guide__body {
-  border-top: 1px solid var(--color-line, #e2e8f0);
-  padding: 0.9rem 1rem 1rem 3.7rem;
-}
-.public-context-guide__body p {
-  max-width: 78rem;
-  color: var(--color-muted, #64748b);
-  font-size: 0.82rem;
-  line-height: 1.7;
-}
-.public-context-guide__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  margin-top: 0.7rem;
-}
-.public-context-guide__links a {
-  color: var(--color-primary, #24694d);
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 0.18em;
-}
-
 /* Dataset detail hierarchy: natural content height, no large reserved blank blocks. */
 .dataset-detail-title,
 .dataset-detail-title-skeleton {
@@ -792,12 +698,6 @@
 }
 
 @media (max-width: 639px) {
-  .public-context-guide__toggle {
-    display: none;
-  }
-  .public-context-guide__body {
-    padding: 0.8rem 0.9rem 0.9rem;
-  }
   .dataset-api-panel__header {
     flex-wrap: wrap;
   }

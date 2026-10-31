@@ -22,10 +22,17 @@ fields:
     form_snippet: markdown.html
     form_placeholder: Jelaskan tugas, fungsi, dan ruang lingkup data yang dikelola perangkat daerah.
 
-  - field_name: url
-    label: Logo organisasi
+  - field_name: image_url
+    label: Logo perangkat daerah
     preset: organization_url_upload
     form_placeholder: https://.../logo.png
+    help_text: Unggah PNG, JPEG, GIF, atau WebP. Logo disimpan pada FileStore CKAN dan ditampilkan pada profil perangkat daerah.
+
+  - field_name: url
+    label: Situs resmi perangkat daerah
+    validators: ignore_missing unicode_safe
+    form_placeholder: https://wajokab.go.id
+    display_snippet: link.html
 
   - field_name: organization_code
     label: Kode perangkat daerah
@@ -56,7 +63,7 @@ fields:
         label: Lainnya
 
   - field_name: organization_website
-    label: Situs resmi
+    label: Halaman informasi data perangkat daerah
     validators: ignore_missing unicode_safe
     form_placeholder: https://wajokab.go.id
 

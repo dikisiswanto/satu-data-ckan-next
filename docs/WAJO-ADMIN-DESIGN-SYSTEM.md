@@ -38,7 +38,7 @@ Warna status hanya digunakan secara semantik. Status juga harus memiliki teks at
 
 ## 2. Font dan tipografi
 
-Font utama adalah **Inter**, mengikuti portal publik Next.js. Next.js membundel Inter melalui `next/font`; CKAN memakai urutan `Inter → ui-sans-serif → system-ui → Segoe UI → Roboto → Arial` agar tidak membutuhkan Google Fonts/CDN saat runtime. Jika Inter tidak tersedia pada sistem klien, browser memilih font UI lokal yang sesuai.
+Font utama adalah **Inter** dari Google Fonts, mengikuti portal publik Next.js. Template CKAN memuat preconnect ke `fonts.googleapis.com` dan `fonts.gstatic.com`, lalu memuat bobot variabel 400–900. CSS tetap memakai fallback `ui-sans-serif → system-ui → Segoe UI → Roboto → Arial` ketika Google Fonts tidak dapat dijangkau.
 
 | Peran               |                     Ukuran |   Bobot | Penggunaan                                                   |
 | ------------------- | -------------------------: | ------: | ------------------------------------------------------------ |
@@ -60,16 +60,16 @@ Heading menggunakan line-height rapat dan `letter-spacing` sedikit negatif; body
 
 ## 3. Grid, lebar konten, dan spacing
 
-| Area                                    | Lebar maksimum | Alasan                                                    |
-| --------------------------------------- | -------------: | --------------------------------------------------------- |
-| Application shell                       |       `1800px` | Menampung sidebar dan workspace pada monitor lebar        |
-| Sidebar desktop                         |        `264px` | Label navigasi panjang tetap terbaca                      |
-| Sidebar layar menengah                  |        `248px` | Memberi ruang pada konten utama                           |
-| Workspace admin                         |       `1480px` | Cukup untuk tabel dan toolbar tanpa baris terlalu panjang |
-| Workspace pada viewport di bawah 1200px |       `1280px` | Menyesuaikan ruang efektif                                |
-| Dashboard                               |       `1320px` | Kartu metrik dan panel tetap terkelompok                  |
-| Form panjang                            |        `960px` | Menghindari field dan label terlalu melebar               |
-| Login card                              |        `448px` | Fokus pada satu tugas autentikasi                         |
+| Area                                    |                 Lebar maksimum | Alasan                                                      |
+| --------------------------------------- | -----------------------------: | ----------------------------------------------------------- |
+| Application shell                       |                       `1800px` | Menampung sidebar dan workspace pada monitor lebar          |
+| Sidebar desktop                         |                        `264px` | Label navigasi panjang tetap terbaca                        |
+| Sidebar layar menengah                  |                        `248px` | Memberi ruang pada konten utama                             |
+| Workspace admin                         |                       `1480px` | Cukup untuk tabel dan toolbar tanpa baris terlalu panjang   |
+| Workspace pada viewport di bawah 1200px |                       `1280px` | Menyesuaikan ruang efektif                                  |
+| Dashboard                               | `1480px` (mengikuti workspace) | Dashboard memakai lebar yang sama dengan halaman admin lain |
+| Form panjang                            |                        `960px` | Menghindari field dan label terlalu melebar                 |
+| Login card                              |                        `448px` | Fokus pada satu tugas autentikasi                           |
 
 Gutter halaman memakai `clamp(1rem, 2.1vw, 2rem)`. Spacing mengikuti ritme 4px (`4, 8, 12, 16, 20, 24, 32px`). Tabel lebar harus memakai `.table-responsive`, bukan memperlebar viewport.
 
@@ -99,9 +99,34 @@ Breakpoints:
 
 Primary button dipakai untuk satu aksi utama dalam satu area. Secondary untuk aksi pendamping, ghost/link untuk aksi ringan, dan danger hanya untuk tindakan destruktif. Komponen interaktif memakai state hover, focus, disabled, loading, dan invalid yang dapat dibedakan.
 
+## 4A. Bahasa visual kontrol formulir
+
+Kontrol dibedakan berdasarkan tugasnya, bukan hanya diseragamkan menjadi kotak putih:
+
+| Jenis kontrol                            | Ciri visual/interaksi                                               | Penggunaan                              |
+| ---------------------------------------- | ------------------------------------------------------------------- | --------------------------------------- |
+| Input teks/email/URL/angka               | Permukaan putih, kursor teks, border netral dan focus ring biru     | Mengetik nilai satu baris               |
+| Select satu pilihan                      | Latar biru sangat muda, chevron di kanan, kursor pointer            | Memilih satu nilai dari opsi            |
+| Select banyak pilihan / Select2 / Chosen | Permukaan pilihan, chip/daftar, dropdown berbayang lembut           | Tag, anggota, dan pilihan jamak         |
+| Textarea/Markdown                        | Area lebih tinggi, resize vertikal, preview/editor terpisah         | Deskripsi dan konten panjang            |
+| Tanggal/waktu                            | Kontrol native dengan tinggi konsisten dan color-scheme terang      | Periode dan tanggal rilis               |
+| Checkbox/radio                           | Accent color primary dan label satu baris yang dapat diklik         | Boolean atau pilihan eksklusif          |
+| Upload berkas                            | Panel dashed dengan latar biru lembut dan tombol file selector      | Resource dataset, dokumen, gambar, logo |
+| Upload gambar                            | Panel upload + pratinjau thumbnail, nama file, ukuran, batas format | Logo, sampul, gambar editorial          |
+
+Jangan menyamarkan select sebagai input teks biasa. Jangan menampilkan upload sebagai tautan teks tanpa affordance file. Input file internal yang tersembunyi untuk tombol editor tidak boleh tampil sebagai kontrol kedua. Semua field error harus mempertahankan label normal, border invalid yang jelas, dan pesan dengan teks gelap di atas latar error lembut.
+
+## 4B. Form berbasis konteks
+
+- `portal_type` mengendalikan kelompok metadata yang relevan dan status helper panel.
+- `portal_resource_role` mengendalikan metadata resource serta rekomendasi format/ekstensi file.
+- Schema organisasi dan Group/kategori tematik terpisah; Group tidak mempunyai selector tipe konten dataset.
+- Link quick-create membawa query `portal_type` supaya form langsung terpilih. Tag penemuan statistik/infografik/publikasi harus identik dengan tag yang dipakai modul query frontend publik.
+- Field yang disembunyikan tidak dihapus dari record; perubahan tipe tidak boleh menjadi operasi penghapusan metadata.
+
 ## 5. Penerapan pada halaman
 
-- **Dasbor:** max-width 1320px; angka metrik besar, judul ringkas, panel aktivitas dan quick actions memiliki pola sama.
+- **Dasbor:** mengikuti lebar workspace hingga 1480px; angka metrik besar, judul ringkas, panel aktivitas dan quick actions memiliki pola sama.
 - **Daftar dataset/organisasi/resource:** toolbar pencarian dan filter berada sebelum tabel; header tabel muted; pagination konsisten; tabel tidak memaksa horizontal overflow halaman.
 - **Form dataset dan CMS:** form panjang max-width 960px; label jelas; helper di dekat field; validasi/error dekat kontrol terkait; action utama di akhir form.
 - **Pages, Blog, Publikasi, Indikator, Infografik:** memakai shell, heading, card, form controls, alert, dan table yang sama sambil mempertahankan schema/extension native.
@@ -110,7 +135,7 @@ Primary button dipakai untuk satu aksi utama dalam satu area. Secondary untuk ak
 
 ## 6. Ikon
 
-Sidebar/topbar memakai satu macro `wajo_icon` dan Font Awesome yang sudah menjadi bagian dari CKAN. Gunakan nama ikon yang tersedia pada versi aset CKAN; jangan membuat inline SVG, mencampur icon font, atau memanggil nama ikon dari versi lain.
+Sidebar/topbar memakai satu macro `wajo_icon` dan paket Font Awesome Free bawaan CKAN 2.12.1. Macro memetakan nama semantik ke glyph modern (`building`, `image`, `file-lines`, `newspaper`, `folder`, `chart-line`, dan seterusnya) serta memakai kelas `fa-solid`; hindari alias lama seperti `building-o`, `file-text-o`, `picture-o`, dan `newspaper-o`.
 
 ## 7. Batas perubahan
 

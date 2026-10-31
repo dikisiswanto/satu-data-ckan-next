@@ -120,6 +120,15 @@ describe("CKAN Pages CMS normalization", () => {
     expect(
       publicCmsImageUrl("/api/3/action/package_show?id=secret", origin),
     ).toBe("");
+    expect(
+      publicCmsImageUrl(
+        "/api/editorial-media/226056e2-6f83-47c5-8bd2-102e2b82ab9a",
+        origin,
+      ),
+    ).toBe("/api/editorial-media/226056e2-6f83-47c5-8bd2-102e2b82ab9a");
+    expect(
+      publicCmsImageUrl("/api/editorial-media/not-a-file-id", origin),
+    ).toBe("");
   });
 
   it("provides only absolute HTTPS image URLs to JSON-LD", () => {

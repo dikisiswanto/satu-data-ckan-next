@@ -33,6 +33,9 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     class IBlueprint:
         pass
 
+    class IAuthFunctions:
+        pass
+
     class ITranslation:
         pass
 
@@ -53,6 +56,7 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     plugins.IPackageController = IPackageController
     plugins.IMiddleware = IMiddleware
     plugins.IBlueprint = IBlueprint
+    plugins.IAuthFunctions = IAuthFunctions
     plugins.ITranslation = ITranslation
     plugins.IResourceController = IResourceController
     plugins.IOrganizationController = IOrganizationController
@@ -144,6 +148,7 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     flask = types.ModuleType("flask")
     flask.Blueprint = FakeBlueprint
     flask.request = request
+    flask.session = {}
     flask.jsonify = lambda payload: ("JSON", payload)
     flask.redirect = lambda target: ("REDIRECT", target)
 
@@ -151,6 +156,8 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
         if endpoint == "user.login":
             came_from = kwargs.get("came_from")
             return "/user/login" + (f"?came_from={came_from}" if came_from is not None else "")
+        if endpoint == "user.logout":
+            return "/user/logout"
         if endpoint == "dashboard.datasets":
             return "/dashboard/datasets"
         if endpoint == "wajo_admin.index":
@@ -161,6 +168,12 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     flask_login = types.ModuleType("flask_login")
     flask_login.current_user = user
     sys.modules.update({"flask": flask, "flask_login": flask_login})
+    werkzeug = types.ModuleType("werkzeug")
+    werkzeug.__path__ = []
+    werkzeug_utils = types.ModuleType("werkzeug.utils")
+    werkzeug_utils.secure_filename = lambda value: str(value).replace("/", "_").replace("\\", "_")
+    werkzeug.utils = werkzeug_utils
+    sys.modules.update({"werkzeug": werkzeug, "werkzeug.utils": werkzeug_utils})
     return request, user, flask
 
 
@@ -188,6 +201,12 @@ def main() -> None:
 
     app = FakeApp()
     plugin = module.WajoThemePlugin()
+    media_auth = plugin.get_auth_functions().get("wajo_media_show")
+    if not callable(media_auth) or media_auth({}, {"id": "public-editorial-media"}).get("success") is not True:
+        raise AssertionError("Owner media editorial harus dapat dibaca melalui auth function khusus.")
+    if media_auth({}, {"id": "arbitrary-owner"}).get("success") is not False:
+        raise AssertionError("Owner media tidak boleh membuka owner lain.")
+    print("PASS custom CKAN File API owner is narrowly scoped to public editorial media")
     plugin.make_middleware(app, {
         "ckanext.wajo_theme.admin_host": "admin.example.test",
         "ckan.site_url": "https://data.example.test",
@@ -296,6 +315,8 @@ def main() -> None:
     blueprint = module.WajoThemePlugin().get_blueprint()
     if blueprint.name != "wajo_admin" or blueprint.url_prefix != "/admin" or "/" not in blueprint.routes:
         raise AssertionError("Blueprint Wajo Admin harus mendaftarkan route /admin/.")
+    if "/media/upload" not in blueprint.routes:
+        raise AssertionError("Blueprint Wajo Admin harus mendaftarkan endpoint upload media editorial.")
     dashboard_response = blueprint.routes["/"]()
     if dashboard_response != "RENDERED" or dashboard_render.get("template") != "wajo_theme/dashboard.html":
         raise AssertionError("Route Wajo Admin tidak merender dashboard custom.")
@@ -318,10 +339,19 @@ def main() -> None:
     print("PASS tabular resource creation queues XLoader with internal CKAN context")
 
     class Response:
-        def __init__(self, location: str) -> None:
-            self.headers = {"Location": location}
+        def __init__(self, location: str = "") -> None:
+            self.headers = {"Location": location} if location else {}
+            self.status_code = 200
 
     request.host = "admin.example.test"
+    request.path = "/user/logout"
+    logout_response = after(Response())
+    if logout_response.status_code != 303 or logout_response.headers.get("Location") != "/user/login":
+        raise AssertionError("Logout harus mengarah ke login dengan PRG 303.")
+    if logout_response.headers.get("Cache-Control", "").find("no-store") < 0:
+        raise AssertionError("Respons logout tidak boleh disimpan di cache.")
+    print("PASS logout ends with a clean, uncached login redirect")
+    request.path = "/user/login"
     response = Response("https://data.example.test/user/login?came_from=%2Fdashboard%2Fdatasets")
     after(response)
     expected_location = "https://admin.example.test/user/login?came_from=%2Fdashboard%2Fdatasets"
@@ -340,8 +370,14 @@ def main() -> None:
     if relative.headers.get("Location") != "/dashboard/datasets":
         raise AssertionError("Redirect relatif tidak boleh diubah.")
     print("PASS relative CKAN redirects remain unchanged")
-    print("CKAN admin auth and dashboard smoke test passed (19 cases).")
+    print("CKAN admin auth and dashboard smoke test passed (21 cases plus stale flash/logout assertions).")
 
+
+# Logout must finish with a clean login redirect and prevent cached auth screens.
+plugin_source = (ROOT / "deploy/ckan/theme/ckanext/wajo_theme/plugin.py").read_text()
+assert 'path == "/user/logout"' in plugin_source
+assert 'response.status_code = 303' in plugin_source
+assert 'response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"' in plugin_source
 
 if __name__ == "__main__":
     main()
