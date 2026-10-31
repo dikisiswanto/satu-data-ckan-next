@@ -24,6 +24,7 @@ import {
   ckanResourceFormat,
   ckanResourceName,
   isGeospatialServiceResource,
+  isGeoJSONResource,
 } from "@/lib/ckan/client";
 import {
   publicResourceUrl,
@@ -71,24 +72,6 @@ function isTabularResource(resource = {}) {
   return (
     candidates.some((value) => supportedFormats.has(value)) ||
     extensions.some((value) => /\.(csv|tsv|xls|xlsx|ods)$/i.test(value))
-  );
-}
-
-function isGeoJSONResource(resource = {}) {
-  const format = String(resource.format || "")
-    .toLowerCase()
-    .replace(/[^a-z]/g, "");
-  const mime = String(
-    resource.mimetype || resource.mimetype_inner || "",
-  ).toLowerCase();
-  const url = String(resource.url || resource.name || "")
-    .toLowerCase()
-    .split(/[?#]/, 1)[0];
-  return (
-    format === "geojson" ||
-    mime === "application/geo+json" ||
-    mime === "application/vnd.geo+json" ||
-    url.endsWith(".geojson")
   );
 }
 
@@ -616,7 +599,8 @@ export default async function DatasetDetailPage({ params }) {
                       className="surface-panel flex items-center gap-4 p-4"
                     >
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
-                        {isGeospatialServiceResource(resource) ? (
+                        {isGeoJSONResource(resource) ||
+                        isGeospatialServiceResource(resource) ? (
                           <MapPinned size={20} aria-hidden="true" />
                         ) : (
                           <FileSpreadsheet size={20} aria-hidden="true" />

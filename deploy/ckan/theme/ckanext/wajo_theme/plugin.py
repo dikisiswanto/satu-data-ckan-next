@@ -131,6 +131,9 @@ class WajoThemePlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IMiddleware)
     plugins.implements(plugins.IBlueprint)
     plugins.implements(plugins.IAuthFunctions)
+    # CKAN consults IFiles before its configurable owner-cascade policy. This
+    # is required for the dedicated public editorial-media owner.
+    plugins.implements(plugins.IFiles, inherit=True)
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.IResourceController, inherit=True)
     plugins.implements(plugins.IOrganizationController, inherit=True)
@@ -291,6 +294,35 @@ class WajoThemePlugin(plugins.SingletonPlugin):
         toolkit.add_template_directory(config, "templates")
         toolkit.add_public_directory(config, "public")
         toolkit.add_resource("assets", "wajo_theme")
+
+    def files_file_allows(self, context, file, operation):
+        """Allow public reads for the one dedicated editorial-media owner.
+
+        CKAN's permission_download_file delegates to permission_read_file, which
+        consults this IFiles hook before the configured owner cascade. Returning
+        None for other owner types preserves CKAN's normal resource/group/
+        organization permissions. The hook never grants edit/delete access.
+        """
+        # CKAN exposes the owner as both ``file.owner`` on the ORM model and
+        # ``file.owner_info`` in its file-facing interfaces/API serializers.
+        # Prefer owner_info, but tolerate either representation.
+        owner = (
+            self._record_value(file, "owner_info")
+            or self._record_value(file, "owner")
+        )
+        owner_type = (
+            self._record_value(owner, "owner_type")
+            or self._record_value(file, "owner_type")
+        )
+        if owner_type != "wajo_media":
+            return None
+
+        owner_id = (
+            self._record_value(owner, "owner_id")
+            or self._record_value(owner, "id")
+            or self._record_value(file, "owner_id")
+        )
+        return operation == "show" and owner_id == "public-editorial-media"
 
     def get_auth_functions(self):
         """Expose only the editorial-media owner used for public CMS images.

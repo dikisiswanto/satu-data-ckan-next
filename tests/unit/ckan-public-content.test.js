@@ -21,6 +21,7 @@ import {
   ckanPackageCategory,
   ckanResourceFormat,
   isGeospatialServiceResource,
+  isGeoJSONResource,
 } from "@/lib/ckan/client";
 import {
   ckanResourceExtra,
@@ -278,6 +279,20 @@ describe("CKAN field helpers", () => {
         url: "https://api.example.test/features",
       }),
     ).toBe(true);
+    expect(isGeoJSONResource({ format: "GeoJSON" })).toBe(true);
+    expect(
+      isGeoJSONResource({ mimetype: "application/geo+json; charset=utf-8" }),
+    ).toBe(true);
+    expect(
+      isGeoJSONResource({ mimetype_inner: "application/vnd.geo+json" }),
+    ).toBe(true);
+    expect(isGeoJSONResource({ name: "batas-kecamatan.geojson" })).toBe(true);
+    expect(
+      isGeoJSONResource({
+        url: "https://data.example.test/file.geojson?download=1",
+      }),
+    ).toBe(true);
+    expect(isGeoJSONResource({ format: "CSV", name: "data.csv" })).toBe(false);
     expect(
       ckanResourceExtra(
         { extras: [{ key: "portal_resource_period", value: "2025" }] },

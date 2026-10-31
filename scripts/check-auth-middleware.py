@@ -36,6 +36,9 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     class IAuthFunctions:
         pass
 
+    class IFiles:
+        pass
+
     class ITranslation:
         pass
 
@@ -57,6 +60,7 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     plugins.IMiddleware = IMiddleware
     plugins.IBlueprint = IBlueprint
     plugins.IAuthFunctions = IAuthFunctions
+    plugins.IFiles = IFiles
     plugins.ITranslation = ITranslation
     plugins.IResourceController = IResourceController
     plugins.IOrganizationController = IOrganizationController
@@ -208,6 +212,36 @@ def main() -> None:
     if media_auth({}, {"id": "arbitrary-owner"}).get("success") is not False:
         raise AssertionError("Owner media tidak boleh membuka owner lain.")
     print("PASS custom CKAN File API owner is narrowly scoped to public editorial media")
+
+    # Verify CKAN's IFiles hook grants read/download only to the explicitly
+    # transferred editorial owner and leaves all other owners to CKAN defaults.
+    from types import SimpleNamespace
+    allow_media = SimpleNamespace(owner_info=SimpleNamespace(
+        owner_type="wajo_media", id="public-editorial-media"
+    ))
+    allow_media_orm = SimpleNamespace(owner=SimpleNamespace(
+        owner_type="wajo_media", owner_id="public-editorial-media"
+    ))
+    reject_other_media = SimpleNamespace(owner=SimpleNamespace(
+        owner_type="wajo_media", owner_id="another-owner"
+    ))
+    preserve_resource_permissions = SimpleNamespace(owner=SimpleNamespace(
+        owner_type="resource", owner_id="resource-123"
+    ))
+    if plugin.files_file_allows({}, allow_media, "show") is not True:
+        raise AssertionError("Download media editorial publik harus diizinkan melalui IFiles.")
+    if plugin.files_file_allows({}, allow_media_orm, "show") is not True:
+        raise AssertionError("Representasi owner ORM CKAN juga harus didukung.")
+    if plugin.files_file_allows({}, allow_media, "edit") is not False:
+        raise AssertionError("IFiles tidak boleh memberi izin edit untuk media editorial.")
+    if plugin.files_file_allows({}, allow_media, "delete") is not False:
+        raise AssertionError("IFiles tidak boleh memberi izin delete untuk media editorial.")
+    if plugin.files_file_allows({}, reject_other_media, "show") is not False:
+        raise AssertionError("IFiles tidak boleh membuka owner media selain public-editorial-media.")
+    if plugin.files_file_allows({}, preserve_resource_permissions, "show") is not None:
+        raise AssertionError("Izin resource biasa harus tetap mengikuti aturan bawaan CKAN.")
+    print("PASS CKAN IFiles grants public editorial-media reads only; other owner policies remain unchanged")
+
     plugin.make_middleware(app, {
         "ckanext.wajo_theme.admin_host": "admin.example.test",
         "ckan.site_url": "https://data.example.test",

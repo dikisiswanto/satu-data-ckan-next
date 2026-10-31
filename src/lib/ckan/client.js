@@ -112,6 +112,29 @@ export function ckanResourceFormat(resource = {}) {
   return String(raw).toLowerCase().replace(/^.*\//, "");
 }
 
+/** True for GeoJSON files, independent of service endpoint detection. */
+export function isGeoJSONResource(resource = {}) {
+  const formats = [resource.format, resource.mimetype, resource.mimetype_inner]
+    .filter(Boolean)
+    .map((value) => String(value).split(";", 1)[0].trim().toLowerCase());
+  if (
+    formats.some((value) => {
+      const normalized = value.replace(/[^a-z0-9]/g, "");
+      return (
+        normalized === "geojson" ||
+        value === "application/geo+json" ||
+        value === "application/vnd.geo+json"
+      );
+    })
+  )
+    return true;
+
+  const fileCandidates = [resource.name, resource.url]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase().split(/[?#]/, 1)[0]);
+  return fileCandidates.some((value) => /\.geojson$/i.test(value));
+}
+
 /** True for service endpoints, which should be opened as services rather than labeled as file downloads. */
 export function isGeospatialServiceResource(resource = {}) {
   const format = String(resource.format || resource.mimetype || "")

@@ -2830,3 +2830,51 @@ body:has(.wajo-login-frame) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* GeoJSON format badge: it sits inside CKAN's linked resource heading, so use
+   a more specific selector than the parent link and force readable text fill. */
+.wajo-admin-workspace
+  .resource-item
+  > a.heading
+  .format-label[data-format="geojson" i],
+.wajo-admin-workspace
+  .resource-item
+  > a.heading
+  .format-label[title="geojson" i],
+.wajo-admin-workspace
+  .resource-item
+  > a.heading
+  .format-label.format-label--geojson,
+.wajo-admin-workspace .resource-item .format-label[data-format="geojson" i],
+.wajo-admin-workspace .format-label--geojson {
+  display: inline-flex !important;
+  align-items: center;
+  border: 1px solid #a7d8b8 !important;
+  border-radius: 999px;
+  background: #e7f6ec !important;
+  color: #14532d !important;
+  -webkit-text-fill-color: #14532d !important;
+  font-weight: 750 !important;
+  line-height: 1.35;
+  opacity: 1 !important;
+  text-decoration: none !important;
+  vertical-align: middle;
+}
+.wajo-admin-workspace
+  .resource-item
+  > a.heading
+  .format-label[data-format="geojson" i]
+  *,
+.wajo-admin-workspace
+  .resource-item
+  > a.heading
+  .format-label[title="geojson" i]
+  *,
+.wajo-admin-workspace
+  .resource-item
+  > a.heading
+  .format-label.format-label--geojson
+  * {
+  color: #14532d !important;
+  -webkit-text-fill-color: #14532d !important;
+}

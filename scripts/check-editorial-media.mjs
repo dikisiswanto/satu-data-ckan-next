@@ -28,6 +28,15 @@ const files = {
 };
 
 assert.match(files.plugin, /IAuthFunctions/);
+assert.match(
+  files.plugin,
+  /plugins\.implements\(plugins\.IFiles, inherit=True\)/,
+);
+assert.match(
+  files.plugin,
+  /def files_file_allows\(self, context, file, operation\)/,
+);
+assert.match(files.plugin, /owner_id == "public-editorial-media"/);
 assert.match(files.plugin, /wajo_media_show/);
 assert.match(files.plugin, /file_create/);
 assert.match(files.plugin, /file_ownership_transfer/);
