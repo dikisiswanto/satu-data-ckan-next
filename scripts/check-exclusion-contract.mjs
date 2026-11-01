@@ -45,11 +45,6 @@ assert.match(
   "CKAN list-valued search parameters must be repeated as query keys instead of sent as a JSON POST.",
 );
 assert.match(
-  publicData,
-  /query: "url:"/,
-  "resource_search must use an actual CKAN Resource column rather than the unsupported id field.",
-);
-assert.match(
   compactPublicData,
   /fq: buildDatasetCatalogExclusionFilters\(\)\.join\(" AND "\)/,
   "Public statistics must apply the same dataset exclusions through one scalar fq expression.",
@@ -91,14 +86,14 @@ assert.match(
   /Promise\.allSettled\(/,
   "Homepage counters must fail independently instead of blanking all metrics.",
 );
-assert.match(
+assert.doesNotMatch(
   publicData,
-  /ckanAction\(\"resource_search\"/,
-  "Resource totals must be counted from CKAN's public resource_search endpoint.",
+  /ckanAction\("resource_search"/,
+  "Homepage category metrics must not trigger an unused resource_search scan.",
 );
 
 process.stdout.write(
-  "CKAN exclusion contract passed: all package_search filters normalize to a single scalar fq; resource_search uses the CKAN url field.\n",
+  "CKAN exclusion contract passed: package_search filters normalize to one scalar fq; homepage metrics avoid unused resource scans.\n",
 );
 
 // Execute the filter builders as well as checking their source contract. This

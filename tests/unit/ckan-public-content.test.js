@@ -683,7 +683,7 @@ describe("public portal summary sourced from CKAN", () => {
     expect(params.get("fq_list")).toBeNull();
   });
 
-  it("counts datasets, resources and legacy portal_type indicators without coupling failures", async () => {
+  it("counts general datasets, organizations and legacy portal_type indicators without coupling failures", async () => {
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
       .mockImplementation(async (input, init) => {
@@ -693,15 +693,6 @@ describe("public portal summary sourced from CKAN", () => {
         let result;
         if (action === "organization_list") {
           result = ["bappeda-wajo"];
-        } else if (action === "resource_search") {
-          result = {
-            count: 3,
-            results: [
-              { id: "resource-public-a", state: "active" },
-              { id: "resource-private-marker", state: "active", private: true },
-              { id: "resource-deleted", state: "deleted" },
-            ],
-          };
         } else if (
           filter.includes(buildPortalContentDiscoveryFilter("indicator"))
         ) {
@@ -717,11 +708,11 @@ describe("public portal summary sourced from CKAN", () => {
 
     const response = await getPublicPortalStatsResult();
     expect(response).toMatchObject({
-      data: { datasets: 37, organizations: 1, indicators: 2, resources: 1 },
+      data: { datasets: 37, organizations: 1, indicators: 2 },
       unavailable: false,
       partial: false,
     });
-    expect(fetchSpy).toHaveBeenCalledTimes(4);
+    expect(fetchSpy).toHaveBeenCalledTimes(3);
     const actionCalls = fetchSpy.mock.calls.map(decodeActionCall);
     const organizationList = actionCalls.find(({ url }) =>
       url.pathname.endsWith("/organization_list"),
@@ -748,12 +739,6 @@ describe("public portal summary sourced from CKAN", () => {
     expect(datasetSearch?.params.get("fq")).toContain("*:* AND -tags:");
     expect(datasetSearch.init.method).toBe("GET");
     expect(datasetSearch.init.body).toBeUndefined();
-
-    const resourceSearch = actionCalls.find(({ url }) =>
-      url.pathname.endsWith("/resource_search"),
-    );
-    expect(resourceSearch?.params.get("query")).toBe("url:");
-    expect(resourceSearch?.params.get("limit")).toBe("500");
   });
 
   it("keeps healthy public counts when one CKAN counter fails", async () => {
@@ -764,11 +749,6 @@ describe("public portal summary sourced from CKAN", () => {
         return Response.json({
           success: true,
           result: ["bappeda"],
-        });
-      if (action === "resource_search")
-        return Response.json({
-          success: true,
-          result: { count: 0, results: [] },
         });
       if (
         params
@@ -788,7 +768,7 @@ describe("public portal summary sourced from CKAN", () => {
 
     const response = await getPublicPortalStatsResult();
     expect(response).toMatchObject({
-      data: { datasets: 12, organizations: 1, indicators: null, resources: 0 },
+      data: { datasets: 12, organizations: 1, indicators: null },
       unavailable: false,
       partial: true,
     });

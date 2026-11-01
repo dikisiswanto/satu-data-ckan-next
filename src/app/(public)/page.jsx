@@ -344,8 +344,9 @@ function HomeHeroContent({
               </span>
             </Link>
             <Link
-              href="/dataset"
+              href="/kategori"
               className="home-visual-chip home-visual-chip-bottom home-visual-chip-bottom-left"
+              aria-label={`${displayStat(facetsUnavailable ? null : normalizedCategories.length)} kategori data; lihat daftar kategori`}
             >
               <FolderOpen size={17} aria-hidden="true" />
               <span>
@@ -356,10 +357,12 @@ function HomeHeroContent({
                       aria-hidden="true"
                     />
                   ) : (
-                    displayStat(stats?.resources)
+                    displayStat(
+                      facetsUnavailable ? null : normalizedCategories.length,
+                    )
                   )}
                 </strong>
-                <small>Berkas publik aktif</small>
+                <small>Kategori</small>
               </span>
             </Link>
             <Link
@@ -405,26 +408,7 @@ function HomeHeroContent({
             </span>
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
-          <Link href="/dataset" className="home-stat home-stat-blue">
-            <span className="home-stat-icon">
-              <FolderOpen size={22} aria-hidden="true" />
-            </span>
-            <span className="home-stat-copy">
-              <strong className="home-metric-value">
-                {loading ? (
-                  <span
-                    className="loading-skeleton home-metric-skeleton"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  displayStat(stats?.resources)
-                )}
-              </strong>
-              <small>Berkas publik aktif</small>
-            </span>
-            <ArrowRight size={17} aria-hidden="true" />
-          </Link>
-          <Link href="/dataset" className="home-stat home-stat-violet">
+          <Link href="/kategori" className="home-stat home-stat-violet">
             <span className="home-stat-icon">
               <FileText size={22} aria-hidden="true" />
             </span>
@@ -441,7 +425,7 @@ function HomeHeroContent({
                   )
                 )}
               </strong>
-              <small>Kategori data</small>
+              <small>Kategori</small>
             </span>
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
@@ -485,10 +469,8 @@ function HomeHeroContent({
           </Link>
         </section>
         <p className="home-stats-note">
-          Dataset umum, indikator, dan kategori dihitung terpisah sesuai katalog
-          publik masing-masing. Berkas publik aktif menghitung resource aktif
-          yang dapat diakses dari seluruh konten publik; angka ini bukan jumlah
-          dataset.
+          Kategori dihitung dari kelompok CKAN yang memiliki dataset umum
+          publik. Buka metrik Kategori untuk menelusuri seluruh daftar.
         </p>
       </div>
     </section>
@@ -712,7 +694,11 @@ function getCategoryVisual(category) {
 function HomeCategoryCards({ categories = [], unavailable = false }) {
   const normalizedCategories = normalizePublicCategoryFacets(categories);
   return (
-    <SectionReveal as="section" className="home-section home-topic-section">
+    <SectionReveal
+      as="section"
+      id="kategori-data"
+      className="home-section home-topic-section"
+    >
       <div className="home-section-heading">
         <div>
           <p className="eyebrow">JELAJAHI KATALOG</p>
@@ -722,8 +708,8 @@ function HomeCategoryCards({ categories = [], unavailable = false }) {
             daerah.
           </p>
         </div>
-        <Link href="/dataset" className="home-section-link">
-          Semua dataset <ArrowRight size={16} aria-hidden="true" />
+        <Link href="/kategori" className="home-section-link">
+          Semua kategori <ArrowRight size={16} aria-hidden="true" />
         </Link>
       </div>
       {normalizedCategories.length ? (
@@ -764,8 +750,8 @@ function HomeCategoryCards({ categories = [], unavailable = false }) {
       )}
       {normalizedCategories.length > 10 ? (
         <p className="home-topic-note">
-          Menampilkan 10 kategori dengan dataset terbanyak. Seluruh kategori
-          tersedia melalui filter katalog.
+          Menampilkan 10 kategori dengan dataset terbanyak. Daftar lengkap dapat
+          ditelusuri melalui halaman kategori.
         </p>
       ) : null}
     </SectionReveal>

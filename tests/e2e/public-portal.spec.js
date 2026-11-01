@@ -20,19 +20,57 @@ test("homepage exposes CKAN-driven category cards with exact public dataset coun
   ).toHaveCount(0);
 });
 
-test("homepage shows accurate public dataset, resource and indicator totals", async ({
+test("homepage shows accurate public dataset, category, indicator and organization totals", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   const metrics = page.locator(".home-stats .home-stat");
-  await expect(metrics).toHaveCount(5);
+  await expect(metrics).toHaveCount(4);
   await expect(metrics.nth(0)).toContainText("1");
   await expect(metrics.nth(0)).toContainText("Dataset terbuka");
-  await expect(metrics.nth(1)).toContainText("7");
-  await expect(metrics.nth(1)).toContainText("Berkas publik aktif");
-  await expect(metrics.nth(3)).toContainText("1");
-  await expect(metrics.nth(3)).toContainText("Indikator statistik");
+  await expect(metrics.nth(1)).toContainText("1");
+  await expect(metrics.nth(1)).toContainText("Kategori");
+  await expect(metrics.nth(1)).toHaveAttribute("href", "/kategori");
+  await expect(metrics.nth(2)).toContainText("1");
+  await expect(metrics.nth(2)).toContainText("Indikator statistik");
+  await expect(metrics.nth(3)).toContainText("Perangkat daerah");
+});
+
+test("homepage category metric opens a searchable category directory without adding a header menu", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const categoryMetric = page.locator(".home-stats .home-stat-violet");
+  await expect(categoryMetric).toHaveAttribute("href", "/kategori");
+  await categoryMetric.click();
+  await expect(page).toHaveURL(/\/kategori$/);
+  await expect(
+    page.getByRole("heading", { name: "Kategori Data" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("searchbox", { name: "Cari kategori" }),
+  ).toBeVisible();
+  await expect(
+    page.locator("header nav[aria-label='Navigasi utama'] a[href='/kategori']"),
+  ).toHaveCount(0);
+
+  const education = page.getByRole("link", {
+    name: /Pendidikan.*1 dataset umum/,
+  });
+  await expect(education).toHaveAttribute(
+    "href",
+    "/dataset?kategori=pendidikan",
+  );
+  await page
+    .getByRole("searchbox", { name: "Cari kategori" })
+    .fill("pendidikan");
+  await page.getByRole("button", { name: "Cari" }).click();
+  await expect(page).toHaveURL(/\/kategori\?q=pendidikan/);
+  await expect(page.locator("[data-public-list-item='true']")).toHaveCount(1);
+  await expect(
+    page.getByRole("link", { name: /Pendidikan.*1 dataset umum/ }),
+  ).toBeVisible();
 });
 
 test("homepage category cards are unique and use semantically matched icons", async ({

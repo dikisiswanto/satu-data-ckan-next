@@ -17,32 +17,94 @@ const homepage = await source("src/app/(public)/page.jsx");
 const normalizedHomepage = homepage
   .replace(/\s+/g, " ")
   .toLocaleLowerCase("id");
-const resourceMetricLabels =
-  normalizedHomepage.match(/berkas publik aktif/g) || [];
-const resourceMetricValues =
-  normalizedHomepage.match(/displaystat\(stats\?\.resources\)/g) || [];
-if (
-  resourceMetricLabels.length < 1 ||
-  resourceMetricValues.length < 1 ||
-  !/resource aktif/.test(normalizedHomepage) ||
-  !/bukan jumlah dataset/.test(normalizedHomepage)
-) {
+requireMatch(
+  normalizedHomepage,
+  /displaystat\(facetsunavailable \? null : normalizedcategories\.length\)[\s\S]*<small>kategori<\/small>/,
+  "Metrik beranda harus menghitung kategori dari facet kategori publik, bukan resource/file.",
+);
+requireMatch(
+  homepage,
+  /href="\/kategori"[\s\S]*displayStat\(facetsUnavailable \? null : normalizedCategories\.length\)/,
+  "Kartu jumlah kategori harus membuka direktori kategori khusus.",
+);
+requireMatch(
+  homepage,
+  /href="\/kategori"[\s\S]*Semua kategori/,
+  "Bagian kategori beranda harus memiliki tautan menuju direktori kategori lengkap.",
+);
+
+const categoryPage = await source("src/app/(public)/kategori/page.jsx");
+requireMatch(
+  categoryPage,
+  /getPublishedDatasetFacetsResult[\s\S]*normalizePublicCategoryFacets/,
+  "Direktori kategori harus memakai facet dataset publik, pencarian, dan pagination.",
+);
+requireMatch(
+  categoryPage,
+  /normalizePageNumber[\s\S]*PublicPagination/,
+  "Direktori kategori harus menormalisasi halaman dan memakai pagination publik bersama.",
+);
+requireMatch(
+  categoryPage,
+  /href=\{categoryHref\(category\)\}[\s\S]*dataset umum/,
+  "Setiap kategori harus membuka katalog dataset dengan ID group yang tepat dan menampilkan unit dataset umum.",
+);
+requireMatch(
+  categoryPage,
+  /robots:[\s\S]*index: false/,
+  "Hasil pencarian/pengurutan/pagination kategori harus noindex.",
+);
+const publicNavigation = await source("src/lib/public-navigation.js");
+if (/href:\s*["']\/kategori["']/.test(publicNavigation)) {
   errors.push(
-    "Metrik beranda harus melabeli resource sebagai berkas publik aktif dan menjelaskan bahwa angka tersebut bukan jumlah dataset.",
+    "Direktori kategori tidak boleh ditambahkan sebagai menu header utama.",
   );
 }
+const publicData = await source("src/lib/data/public.js");
+requireMatch(
+  publicData,
+  /getPublicPortalStatsResult[\s\S]*organizations:[\s\S]*indicators:/,
+  "Ringkasan beranda hanya boleh menghitung metrik yang benar-benar ditampilkan.",
+);
+if (/countActivePublicResources|resource_search/.test(publicData)) {
+  errors.push(
+    "Ringkasan beranda tidak boleh menjalankan hitungan resource yang tidak ditampilkan sebagai metrik kategori.",
+  );
+}
+
+const sitemap = await source("src/app/sitemap.js");
+requireMatch(
+  sitemap,
+  /"\/kategori"/,
+  "Halaman kategori harus masuk sitemap publik.",
+);
+const robots = await source("src/app/robots.js");
+requireMatch(
+  robots,
+  /"\/kategori"/,
+  "Crawler harus diizinkan mengindeks direktori kategori.",
+);
+
 const ckanClient = await source("src/lib/ckan/client.js");
 requireMatch(
   ckanClient,
   /if \(key === "facet\.field" && items\.length === 1\)[\s\S]*url\.searchParams\.append\(key, String\(items\[0\]\)\)/,
   "Singleton facet.field harus dikirim sebagai query key berulang agar CKAN 2.12 menerima list, bukan scalar.",
 );
-const publicData = await source("src/lib/data/public.js");
-requireMatch(
-  publicData,
-  /async function countActivePublicResources[\s\S]*resource_search[\s\S]*query: "url:"[\s\S]*resource\.state === "active"[\s\S]*isPrivateMarker\(resource\.private\)/,
-  "Count berkas publik harus berasal dari resource_search dan hanya menghitung resource aktif yang tidak privat.",
+
+const adminDashboard = await source(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html",
 );
+requireMatch(
+  adminDashboard,
+  /h\.url_for\(dataset_type ~ '\.search', q=wajo_admin_general_dataset_fq\)[\s\S]*q=wajo_admin_portal_fqs\.indicators[\s\S]*q=wajo_admin_portal_fqs\.infographics[\s\S]*q=wajo_admin_portal_fqs\.publications/,
+  "Tautan kartu dashboard CKAN harus meneruskan ekspresi Solr melalui q, bukan fq yang akan dianggap sebagai nama field pencarian.",
+);
+if (/\.search',\s*fq=/.test(adminDashboard)) {
+  errors.push(
+    "Dashboard CKAN tidak boleh membangun tautan dataset.search dengan parameter fq.",
+  );
+}
 
 const organizations = await source("src/lib/data/organizations.js");
 requireMatch(

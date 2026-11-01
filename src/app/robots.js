@@ -11,6 +11,7 @@ export default function robots() {
         allow: [
           "/",
           "/dataset",
+          "/kategori",
           "/statistik",
           "/infografik",
           "/publikasi",

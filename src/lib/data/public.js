@@ -231,36 +231,6 @@ export async function getPublishedDatasetBySlugResult(
   }
 }
 
-async function countActivePublicResources() {
-  const pageSize = 500;
-  let offset = 0;
-  let total = 0;
-  let visibleCount = 0;
-
-  do {
-    const result = await ckanAction("resource_search", {
-      // CKAN 2.12.1 resource_search does not expose `id` in
-      // Resource.get_columns(). `url` is a required, non-nullable resource
-      // column, so an empty substring matches every active public resource.
-      query: "url:",
-      limit: pageSize,
-      offset,
-    });
-    const resources = Array.isArray(result?.results) ? result.results : [];
-    total = Math.max(0, Number(result?.count || 0));
-    visibleCount += resources.filter(
-      (resource) =>
-        resource &&
-        (!resource.state || resource.state === "active") &&
-        !isPrivateMarker(resource.private),
-    ).length;
-    if (!resources.length) break;
-    offset += resources.length;
-  } while (offset < total);
-
-  return visibleCount;
-}
-
 export async function getPublicPortalStatsResult() {
   const requests = await Promise.allSettled([
     ckanAction("package_search", {
@@ -281,10 +251,9 @@ export async function getPublicPortalStatsResult() {
       fq: buildPortalContentDiscoveryFilter("indicator"),
       include_private: false,
     }),
-    countActivePublicResources(),
   ]);
 
-  const [packages, organizations, indicators, resources] = requests;
+  const [packages, organizations, indicators] = requests;
   const failed = requests.filter((result) => result.status === "rejected");
   const valueOrNull = (result, read) =>
     result.status === "fulfilled" ? read(result.value) : null;
@@ -293,7 +262,6 @@ export async function getPublicPortalStatsResult() {
     ["datasets", packages],
     ["organizations", organizations],
     ["indicators", indicators],
-    ["resources", resources],
   ]) {
     if (result.status === "rejected") {
       console.error(`ckan_public_${name}_count_failed`, {
@@ -312,7 +280,6 @@ export async function getPublicPortalStatsResult() {
       indicators: valueOrNull(indicators, (result) =>
         Number(result.count || 0),
       ),
-      resources: valueOrNull(resources, (result) => Number(result)),
     },
     // A single failing counter must not blank otherwise healthy homepage metrics.
     unavailable: failed.length === requests.length,

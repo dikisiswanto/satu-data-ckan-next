@@ -342,7 +342,8 @@ for (const token of [
   "Organisasi aktif",
   "Indikator publik",
   "Dataset terbuka",
-  "Dataset umum, indikator, dan kategori dihitung terpisah sesuai katalog publik masing-masing.",
+  "Semua kategori",
+  "Menampilkan 10 kategori dengan dataset terbanyak.",
 ]) {
   const normalizedHomePage = homePage.replace(/\s+/g, " ");
   if (!normalizedHomePage.includes(token))

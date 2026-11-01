@@ -122,6 +122,7 @@ export default async function sitemap() {
   const fixed = [
     "",
     "/dataset",
+    "/kategori",
     "/statistik",
     "/infografik",
     "/publikasi",

@@ -430,7 +430,7 @@ const checks = [
   ],
   [
     "src/app/(public)/organisasi/[slug]/page.jsx",
-    /divide-y divide-line rounded-xl border border-line[\s\S]*resourceCount[\s\S]*text-xs text-muted[\s\S]*Buka dataset/,
+    /<ul className="divide-y divide-line rounded-lg border border-line[\s\S]*resourceCount[\s\S]*py-2[\s\S]*text-\[10px\] tabular-nums/,
     "Daftar dataset pada detail OPD harus berupa baris ringkas, bukan kartu dataset besar yang mengulang metadata.",
   ],
   [
@@ -672,8 +672,8 @@ const cmsChecks = [
   ],
   [
     "src/app/sitemap.js",
-    /getPublicCmsPagesResult[\s\S]*getPublicCmsBlogPostsResult[\s\S]*cmsPageEntries[\s\S]*cmsBlogEntries/,
-    "Sitemap harus memuat hanya halaman/berita CMS publik.",
+    /"\/kategori"[\s\S]*cmsPageEntries[\s\S]*cmsBlogEntries/,
+    "Sitemap harus memuat halaman kategori dan hanya halaman/berita CMS publik.",
   ],
   [
     "src/app/robots.js",
