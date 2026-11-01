@@ -33,7 +33,7 @@ def main() -> None:
         from babel.messages.mofile import read_mo, write_mo
         from babel.messages.pofile import read_po, write_po
     except ImportError as error:
-        raise SystemExit("Babel is required for the Indonesian translation checks.") from error
+        raise SystemExit("Babel is required for the Indonesian translation checks. Run: python -m pip install -r requirements-ci.txt") from error
 
     catalogs = {"ckan": PO, **EXTENSION_POS}
     parsed_catalogs = {}

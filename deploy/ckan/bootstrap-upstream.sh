@@ -334,7 +334,6 @@ values["CKAN___SCHEMING__PRESETS"] = "ckanext.scheming:presets.json"
 values["CKANEXT__PAGES__REVISIONS_LIMIT"] = "5"
 values["CKANEXT__PAGES__REVISIONS_FORCE_LIMIT"] = "true"
 values["CKANEXT__PAGES__ALLOW_HTML"] = "false"
-values["CKANEXT__PAGES__EDITOR"] = "markdown"
 # Keep the legacy SQL search endpoint disabled unless explicitly reviewed and protected.
 values["CKAN__DATASTORE__SQLSEARCH__ENABLED"] = "false"
 values["CKAN__HARVEST__MQ__TYPE"] = "redis"
@@ -362,7 +361,10 @@ for line in lines:
     m = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)=', line)
     # Remove the former flat CUSTOM_URL key; GeoView reads custom.url, which
     # ckanext-envvars represents with the nested CUSTOM__URL environment name.
-    if m and m.group(1) == legacy_map_url_key:
+    if m and m.group(1) in {legacy_map_url_key, "CKANEXT__PAGES__EDITOR"}:
+        # ckanext-pages expects this option to be unset for its Markdown mode.
+        # The literal value "markdown" is truthy and incorrectly selects the
+        # WYSIWYG/HTML branch in the upstream detail templates.
         continue
     if m and m.group(1) in values:
         key = m.group(1)

@@ -106,8 +106,50 @@ assert.match(
   /data-wajo-image-upload-to-json="field-content-blocks"/,
 );
 
-process.stdout.write(
-  "Markdown renderer checks passed: semantic headings, tables/alignment, tasks, nested lists, Setext, quotes, code, hard breaks, inert HTML, and CMS image upload controls.\n",
+const schemingMarkdownDisplay = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/scheming/display_snippets/markdown.html",
+);
+assert.match(
+  schemingMarkdownDisplay,
+  /data\.get\(field\.field_name\)[\s\S]*h\.wajo_render_markdown\(markdown_value\)/,
+  "Scheming Markdown-enabled metadata fields must use the shared allowlisted Wajo renderer on detail pages.",
+);
+for (const schemaPath of [
+  "deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml",
+  "deploy/ckan/theme/ckanext/wajo_theme/schemas/organization.yaml",
+  "deploy/ckan/theme/ckanext/wajo_theme/schemas/group.yaml",
+]) {
+  const schema = await read(schemaPath);
+  assert.match(
+    schema,
+    /form_snippet: markdown\.html[\s\S]{0,80}display_snippet: markdown\.html/,
+    `${schemaPath} must render all Markdown-enabled metadata fields with the Wajo display snippet.`,
+  );
+}
+const adminPluginSource = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
+);
+assert.match(
+  adminPluginSource,
+  /config\["extra_template_paths"\][\s\S]*theme_templates/,
+  "Wajo CMS templates must have deterministic priority over the upstream ckanext-pages templates.",
+);
+const setupSource = await read("deploy/ckan/theme/setup.py");
+assert.match(
+  setupSource,
+  /templates\/scheming\/display_snippets\/\*\.html/,
+  "The custom Markdown display snippet must be included in the installed Wajo theme wheel.",
+);
+const bootstrapSource = await read("deploy/ckan/bootstrap-upstream.sh");
+assert.doesNotMatch(
+  bootstrapSource,
+  /CKANEXT__PAGES__EDITOR.*markdown/,
+  "Do not set the truthy editor=markdown value; CKAN Pages treats it as a WYSIWYG editor on detail views.",
+);
+assert.match(
+  bootstrapSource,
+  /m\.group\(1\) in \{legacy_map_url_key, "CKANEXT__PAGES__EDITOR"\}/,
+  "Bootstrap must remove a stale editor setting from an existing .env.ckan file.",
 );
 
 const pagesDetail = await read(
@@ -220,4 +262,8 @@ assert.doesNotMatch(
   newsDetail,
   /getCmsFeatureImage|ImageLightbox|public-cms-cover|<Image/,
   "News detail must not render a separate featured/cover image before Markdown content.",
+);
+
+process.stdout.write(
+  "Markdown renderer checks passed: Pages/Blog detail and revisions, allowlisted CKAN/Scheming Markdown, CMS previews, and public editorial Markdown.\n",
 );

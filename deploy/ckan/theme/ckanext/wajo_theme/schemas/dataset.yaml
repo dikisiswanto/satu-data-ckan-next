@@ -16,6 +16,7 @@ dataset_fields:
   - field_name: notes
     label: Deskripsi
     form_snippet: markdown.html
+    display_snippet: markdown.html
     form_placeholder: Jelaskan isi, tujuan, cakupan, dan cara menggunakan data.
 
   - field_name: tag_string
@@ -154,16 +155,19 @@ dataset_fields:
   - field_name: portal_revision_note
     label: Catatan perubahan rilis
     form_snippet: markdown.html
+    display_snippet: markdown.html
     form_placeholder: Jelaskan perubahan dari versi sebelumnya, koreksi, atau revisi angka.
 
   - field_name: portal_methodology
     label: Metodologi dan definisi
     form_snippet: markdown.html
+    display_snippet: markdown.html
     form_placeholder: Definisi, rumus, sumber perhitungan, batasan, dan catatan kualitas data.
 
   - field_name: portal_definition
     label: Definisi indikator
     form_snippet: markdown.html
+    display_snippet: markdown.html
     form_placeholder: Jelaskan makna indikator, konsep yang diukur, populasi/cakupan, dan batas interpretasinya.
 
   - field_name: portal_unit
@@ -173,6 +177,7 @@ dataset_fields:
   - field_name: portal_formula
     label: Rumus indikator
     form_snippet: markdown.html
+    display_snippet: markdown.html
     form_placeholder: Tuliskan rumus atau tautan metodologi resmi.
 
   - field_name: portal_source
@@ -207,6 +212,7 @@ resource_fields:
   - field_name: description
     label: Deskripsi resource
     form_snippet: markdown.html
+    display_snippet: markdown.html
     form_placeholder: Cakupan isi, kolom, periode, dan cara penggunaan resource.
 
   - field_name: format

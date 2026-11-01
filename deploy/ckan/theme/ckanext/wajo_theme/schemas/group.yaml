@@ -20,6 +20,7 @@ fields:
   - field_name: notes
     label: Deskripsi kategori
     form_snippet: markdown.html
+    display_snippet: markdown.html
     form_placeholder: Jelaskan ruang lingkup dan jenis data yang termasuk dalam kategori ini.
 
   - field_name: image_url

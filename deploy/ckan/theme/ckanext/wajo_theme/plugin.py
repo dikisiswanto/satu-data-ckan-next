@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import json
 import logging
+from pathlib import Path
 import time
 import uuid
 from urllib.parse import urlsplit, urlunsplit
@@ -326,6 +327,18 @@ class WajoThemePlugin(plugins.SingletonPlugin):
         self._notify_group_or_organization("deleted", entity)
 
     def update_config(self, config):
+        # CKAN's template lookup order depends on plugin registration order.
+        # Put the Wajo template directory in extra_template_paths explicitly so
+        # the CMS detail templates win over ckanext-pages' upstream templates
+        # regardless of other extensions enabled in the deployment.
+        theme_templates = str(Path(__file__).resolve().parent / "templates")
+        configured_paths = [
+            path.strip()
+            for path in str(config.get("extra_template_paths", "")).split(",")
+            if path.strip() and path.strip() != theme_templates
+        ]
+        config["extra_template_paths"] = ",".join([theme_templates, *configured_paths])
+
         toolkit.add_template_directory(config, "templates")
         toolkit.add_public_directory(config, "public")
         toolkit.add_resource("assets", "wajo_theme")

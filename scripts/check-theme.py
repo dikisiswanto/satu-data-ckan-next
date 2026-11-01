@@ -220,6 +220,7 @@ require("class _TaskListTreeprocessor" in markdown_renderer_source and "_Striket
 require('extensions=["extra", "sane_lists", _WajoMarkdownExtension()]' in markdown_renderer_source, "Renderer admin harus mendukung tabel, fenced code, dan nested/sane lists.")
 require("nh3.clean(" in markdown_renderer_source and "_remove_raw_html" in markdown_renderer_source, "Renderer CKAN harus membersihkan output Markdown dan tidak mengaktifkan raw HTML.")
 require("ITemplateHelpers" in plugin_source and '"wajo_render_markdown": render_wajo_markdown' in plugin_source, "Wajo Theme harus mendaftarkan helper Markdown aman pada CKAN.")
+require('config["extra_template_paths"] = ",".join([theme_templates, *configured_paths])' in plugin_source, "Template directory Wajo harus diprioritaskan di atas template bawaan ckanext-pages tanpa bergantung pada urutan plugin.")
 require("wajo-admin-shell" in page_source and 'wajo_theme/sidebar.html' in page_source and "{{ super() }}" in page_source, "Page shell harus menambahkan sidebar secara aditif tanpa mengganti konten core CKAN.")
 require(re.search(r"{%-?\s*block\s+footer\s*-?%}\s*{%-?\s*endblock\s*-?%}", page_source) is not None, "Footer admin harus dihilangkan dari shell CKAN.")
 
@@ -279,6 +280,7 @@ require(
 require('"wajo_harvest_i18n"' in bootstrap_source and '"wajo_pages_i18n"' in bootstrap_source and '"wajo_dcat_i18n"' in bootstrap_source, "Bootstrap harus mengaktifkan domain terjemahan khusus Harvest, Pages, dan DCAT.")
 require(all(name in plugin_order for name in ("harvest", "wajo_harvest_i18n", "pages", "wajo_pages_i18n", "wajo_dcat_i18n")) and plugin_order.index("harvest") < plugin_order.index("wajo_harvest_i18n") and plugin_order.index("pages") < plugin_order.index("wajo_pages_i18n") and "dcat" in plugin_order and plugin_order.index("dcat") < plugin_order.index("wajo_dcat_i18n"), "Translation plugin harus diaktifkan bersama extension yang domain terjemahannya ditangani.")
 require("plugins.append(\"wajo_theme\")" in bootstrap_source, "Plugin theme harus diaktifkan setelah extension yang juga menyediakan template.")
+require('values["CKANEXT__PAGES__EDITOR"]' not in bootstrap_source and "CKANEXT__PAGES__EDITOR=markdown" not in env_source, "CKAN Pages Markdown mode must leave editor unset; the literal markdown value is truthy and triggers the upstream WYSIWYG branch.")
 require('plugins.append("envvars")' in bootstrap_source, "Plugin envvars harus tetap berada terakhir.")
 workflow = "\n".join(path.read_text(encoding="utf-8") for path in (ROOT / ".github/workflows").glob("*.yml"))
 require("COPY deploy/ckan/theme/ /tmp/portal-ckan-theme/" in workflow, "Extended CKAN smoke image harus memasukkan source package wajo_theme.")
@@ -302,7 +304,7 @@ require("CKANEXT__WAJO_THEME__ADMIN_HOST" in read(ROOT / "deploy/ckan/sync-env.p
 
 # Keep the extension intentionally additive: only common shell templates are overridden.
 actual_templates = sorted(path.relative_to(PACKAGE / "templates").as_posix() for path in (PACKAGE / "templates").rglob("*.html"))
-require(actual_templates == ["base.html", "ckanext_pages/base_form.html", "ckanext_pages/blog.html", "ckanext_pages/blog_revisions_preview.html", "ckanext_pages/page.html", "ckanext_pages/page_revisions_preview.html", "header.html", "home/snippets/about_text.html", "home/snippets/promoted.html", "page.html", "wajo_theme/context_help.html", "wajo_theme/dashboard.html", "wajo_theme/data_preview.html", "wajo_theme/icon.html", "wajo_theme/sidebar.html"], "Theme boleh mengganti shell bersama, form dan detail CKAN Pages/Blog, dashboard/sidebar serta snippet beranda; route dan modul CKAN lain tetap native.")
+require(actual_templates == ["base.html", "ckanext_pages/base_form.html", "ckanext_pages/blog.html", "ckanext_pages/blog_revisions_preview.html", "ckanext_pages/page.html", "ckanext_pages/page_revisions_preview.html", "header.html", "home/snippets/about_text.html", "home/snippets/promoted.html", "page.html", "scheming/display_snippets/markdown.html", "wajo_theme/context_help.html", "wajo_theme/dashboard.html", "wajo_theme/data_preview.html", "wajo_theme/icon.html", "wajo_theme/sidebar.html"], "Theme boleh mengganti shell bersama, form dan detail CKAN Pages/Blog, tampilan Markdown Scheming, dashboard/sidebar serta snippet beranda; route dan modul CKAN lain tetap native.")
 CMS_FORM = PACKAGE / "templates/ckanext_pages/base_form.html"
 dashboard_source = read(DASHBOARD)
 data_preview_source = read(DATA_PREVIEW)

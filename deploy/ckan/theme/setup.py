@@ -10,6 +10,7 @@ setup(
         "ckanext.wajo_theme": [
             "templates/*.html",
             "templates/ckanext_pages/*.html",
+            "templates/scheming/display_snippets/*.html",
             "templates/wajo_theme/*.html",
             "assets/webassets.yml",
             "assets/css/*.css",

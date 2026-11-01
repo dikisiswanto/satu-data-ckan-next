@@ -103,19 +103,19 @@ for required in (
 if "node-version-file: .nvmrc" not in ci or "actions/setup-node@v4" not in ci:
     errors.append("ci.yml must use the Node version pinned in .nvmrc")
 if "actions/setup-python@v5" not in ci or "requirements-ci.txt" not in ci:
-    errors.append("ci.yml must install pinned Python dependencies required by Jinja/CSS semantic checkers")
+    errors.append("ci.yml must install pinned Python dependencies required by translation and CSS semantic checkers")
 pip_install_position = ci.find("pip install")
 check_position = ci.find("npm run check")
 if pip_install_position < 0 or check_position < 0 or pip_install_position > check_position:
     errors.append("ci.yml must install requirements-ci.txt before npm run check")
 requirements_path = ROOT / "requirements-ci.txt"
 if not requirements_path.is_file():
-    errors.append("requirements-ci.txt must pin Python static-check dependencies")
+    errors.append("requirements-ci.txt must pin Python static-check and localization dependencies")
 else:
     requirements_text = requirements_path.read_text(encoding="utf-8")
-    for dependency in ("Jinja2==", "tinycss2==", "webencodings=="):
+    for dependency in ("Babel==", "Jinja2==", "tinycss2==", "webencodings=="):
         if dependency not in requirements_text:
-            errors.append(f"requirements-ci.txt must pin {dependency[:-2]}")
+            errors.append(f"requirements-ci.txt must pin {dependency[:-2]} (required by static validation)")
 static_runner = (ROOT / "scripts/check-static.sh").read_text(encoding="utf-8")
 if "python3 scripts/check-theme-css.py" not in static_runner:
     errors.append("check-static.sh must run the semantic CKAN CSS AST checker")

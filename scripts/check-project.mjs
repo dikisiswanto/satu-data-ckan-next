@@ -559,8 +559,8 @@ const cmsChecks = [
   ],
   [
     "deploy/ckan/bootstrap-upstream.sh",
-    /CKANEXT__PAGES__ALLOW_HTML.*false[\s\S]*CKANEXT__PAGES__EDITOR.*markdown/,
-    "CKAN Pages harus konsisten memakai Markdown dan tidak mengaktifkan HTML mentah untuk renderer publik.",
+    /CKANEXT__PAGES__ALLOW_HTML.*false/,
+    "CKAN Pages harus menonaktifkan HTML mentah dan membiarkan opsi editor tidak disetel agar template upstream memilih cabang Markdown.",
   ],
   [
     "src/lib/cms/pages.js",

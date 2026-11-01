@@ -1,0 +1,7 @@
+{# Render every Scheming Markdown field through Wajo's strict allowlist. #}
+{% set markdown_value = data.get(field.field_name) %}
+{% if markdown_value %}
+  <div class="wajo-admin-cms-content wajo-admin-cms-content--metadata">
+    {{ h.wajo_render_markdown(markdown_value) }}
+  </div>
+{% endif %}

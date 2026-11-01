@@ -305,10 +305,13 @@ def main() -> int:
             f"GeoJSON-only badge override must not alter {property_name}.",
         )
 
-    require(has_selector(design_rules, ".wajo-admin-workspace .wajo-admin-cms-page .wajo-cms-actions"), "Pages/Blog detail actions must use a dedicated toolbar.")
-    require(has_decl(design_rules, ".wajo-admin-workspace .wajo-admin-cms-page .wajo-cms-actions", "gap", ".625rem"), "Pages/Blog action toolbar needs a consistent button gap.")
-    require(has_decl(design_rules, ".wajo-admin-workspace .wajo-admin-cms-page .wajo-cms-actions", "margin", "0 0 1.5rem"), "Pages/Blog action toolbar must separate buttons from the detail heading.")
-    require(has_decl(design_rules, ".wajo-admin-workspace .wajo-admin-cms-page .wajo-cms-actions", "padding", ".35rem 0 .45rem"), "Pages/Blog action toolbar must retain breathing room around its controls.")
+    cms_toolbar = ".wajo-admin-workspace .wajo-admin-cms-page .wajo-cms-actions"
+    cms_buttons = ".wajo-admin-workspace .wajo-admin-cms-page .wajo-cms-actions .btn"
+    require(has_selector(design_rules, cms_toolbar), "Pages/Blog detail actions must use a dedicated toolbar.")
+    require(has_decl(design_rules, cms_toolbar, "gap", ".75rem"), "Pages/Blog action toolbar needs a consistent button gap.")
+    require(has_decl(design_rules, cms_toolbar, "margin", "0 0 1.75rem"), "Pages/Blog action toolbar must separate buttons from the detail heading.")
+    require(has_decl(design_rules, cms_toolbar, "padding", ".5rem .75rem .85rem"), "Pages/Blog action toolbar must retain breathing room around its controls.")
+    require(has_decl(design_rules, cms_buttons, "padding", ".6rem .95rem"), "Pages/Blog action buttons must have comfortable internal padding.")
 
     # CKAN shell-wide button contrast must be explicit and survive formatter reflow.
     for selector, value in (
