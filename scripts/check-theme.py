@@ -220,7 +220,9 @@ require("class _TaskListTreeprocessor" in markdown_renderer_source and "_Striket
 require('extensions=["extra", "sane_lists", _WajoMarkdownExtension()]' in markdown_renderer_source, "Renderer admin harus mendukung tabel, fenced code, dan nested/sane lists.")
 require("nh3.clean(" in markdown_renderer_source and "_remove_raw_html" in markdown_renderer_source, "Renderer CKAN harus membersihkan output Markdown dan tidak mengaktifkan raw HTML.")
 require("ITemplateHelpers" in plugin_source and '"wajo_render_markdown": render_wajo_markdown' in plugin_source, "Wajo Theme harus mendaftarkan helper Markdown aman pada CKAN.")
-require('config["extra_template_paths"] = ",".join([theme_templates, *configured_paths])' in plugin_source, "Template directory Wajo harus diprioritaskan di atas template bawaan ckanext-pages tanpa bergantung pada urutan plugin.")
+require('toolkit.add_template_directory(config, "templates")' in plugin_source, "Template Wajo harus didaftarkan melalui plugin_template_paths CKAN.")
+require('config["extra_template_paths"]' not in plugin_source, "Template Wajo tidak boleh didaftarkan ulang melalui extra_template_paths; duplikasi membuat ckan_extends berputar dengan template Midnight Blue.")
+require('plugins.append("wajo_theme")' in bootstrap_source, "Plugin Wajo harus dimuat setelah pages/activity agar override template memperoleh prioritas secara native.")
 require("wajo-admin-shell" in page_source and 'wajo_theme/sidebar.html' in page_source and "{{ super() }}" in page_source, "Page shell harus menambahkan sidebar secara aditif tanpa mengganti konten core CKAN.")
 require(re.search(r"{%-?\s*block\s+footer\s*-?%}\s*{%-?\s*endblock\s*-?%}", page_source) is not None, "Footer admin harus dihilangkan dari shell CKAN.")
 

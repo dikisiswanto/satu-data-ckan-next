@@ -129,10 +129,21 @@ for (const schemaPath of [
 const adminPluginSource = await read(
   "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
 );
+const bootstrapSource = await read("deploy/ckan/bootstrap-upstream.sh");
 assert.match(
   adminPluginSource,
-  /config\["extra_template_paths"\][\s\S]*theme_templates/,
-  "Wajo CMS templates must have deterministic priority over the upstream ckanext-pages templates.",
+  /toolkit\.add_template_directory\(config, ["']templates["']\)/,
+  "Wajo templates must be registered through CKAN's plugin template loader.",
+);
+assert.doesNotMatch(
+  adminPluginSource,
+  /config\s*\[\s*["']extra_template_paths["']\s*\]/,
+  "Do not duplicate the Wajo template directory in CKAN extra-template configuration; it can loop with Midnight Blue during ckan_extends.",
+);
+assert.match(
+  bootstrapSource,
+  /plugins\.append\(["']wajo_theme["']\)/,
+  "Wajo theme must load after upstream template providers so its override path has deterministic priority.",
 );
 const setupSource = await read("deploy/ckan/theme/setup.py");
 assert.match(
@@ -140,7 +151,6 @@ assert.match(
   /templates\/scheming\/display_snippets\/\*\.html/,
   "The custom Markdown display snippet must be included in the installed Wajo theme wheel.",
 );
-const bootstrapSource = await read("deploy/ckan/bootstrap-upstream.sh");
 assert.doesNotMatch(
   bootstrapSource,
   /CKANEXT__PAGES__EDITOR.*markdown/,

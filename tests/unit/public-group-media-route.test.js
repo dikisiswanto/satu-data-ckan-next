@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET, HEAD } from "@/app/file/[...path]/route";
 
@@ -8,8 +8,15 @@ const params = {
   params: Promise.resolve({ path: ["public-download", "groups", filename] }),
 };
 
+beforeEach(() => {
+  // CI uses 127.0.0.1:8010 for integration smoke tests; unit mocks
+  // deliberately target the stable in-network CKAN service origin.
+  vi.stubEnv("CKAN_API_INTERNAL_URL", "http://ckan:5000/api/3/action");
+});
+
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 describe("CKAN public group image proxy", () => {

@@ -477,3 +477,25 @@ const datasetCard = await readFile("src/components/dataset-card.jsx", "utf8");
 assert.match(datasetCard, /isGeoJSONResource/);
 assert.match(datasetCard, /bg-emerald-50[^\n]*text-emerald-900/);
 assert.match(datasetCard, /GeoJSON/);
+
+// These route suites mock the in-network CKAN service. CI also defines an
+// integration-harness origin (127.0.0.1:8010), so tests must pin and restore
+// their own CKAN origin instead of accidentally inheriting the job environment.
+for (const testPath of [
+  "tests/unit/public-resource-download.test.js",
+  "tests/unit/public-ckan-file-route.test.js",
+  "tests/unit/editorial-media.test.js",
+  "tests/unit/public-group-media-route.test.js",
+]) {
+  const source = await readFile(testPath, "utf8");
+  assert.match(
+    source,
+    /vi\.stubEnv\("CKAN_API_INTERNAL_URL", "http:\/\/ckan:5000\/api\/3\/action"\)/,
+    `${testPath} must pin the CKAN internal origin used by its mocked fetch assertions.`,
+  );
+  assert.match(
+    source,
+    /vi\.unstubAllEnvs\(\)/,
+    `${testPath} must restore the inherited CI environment after each test.`,
+  );
+}

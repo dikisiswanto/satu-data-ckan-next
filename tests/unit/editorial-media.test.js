@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { ckanAction } = vi.hoisted(() => ({ ckanAction: vi.fn() }));
 vi.mock("@/lib/ckan/client", () => ({ ckanAction }));
@@ -8,8 +8,15 @@ import { GET, HEAD } from "@/app/api/editorial-media/[fileId]/route";
 const fileId = "226056e2-6f83-47c5-8bd2-102e2b82ab9a";
 const png = Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]);
 
+beforeEach(() => {
+  // CI uses 127.0.0.1:8010 for integration smoke tests; unit mocks
+  // deliberately target the stable in-network CKAN service origin.
+  vi.stubEnv("CKAN_API_INTERNAL_URL", "http://ckan:5000/api/3/action");
+});
+
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
   ckanAction.mockReset();
 });
 

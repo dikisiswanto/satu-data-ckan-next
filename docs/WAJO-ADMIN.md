@@ -80,6 +80,8 @@ Setiap Action API dijalankan menggunakan context identitas pengguna yang sedang 
 | `deploy/ckan/theme/ckanext/wajo_theme/plugin.py`                               | Middleware, blueprint ringkasan, schema Pages                                  |
 | `deploy/ckan/theme/setup.py`                                                   | Metadata package dan daftar package-data                                       |
 
+Direktori template Wajo didaftarkan satu kali melalui `toolkit.add_template_directory()` pada `plugin_template_paths` CKAN. Bootstrap menempatkan `wajo_theme` setelah extension penyedia template seperti `pages` dan `activity`, sehingga override tetap mempunyai prioritas. Jangan menyalin direktori yang sama ke `extra_template_paths`: `ckan_extends` akan melihat duplikasi `page.html` dan dapat berputar antara shell Wajo dengan template Midnight Blue.
+
 ## Routing dan autentikasi
 
 - `CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index` mengarahkan login sukses ke Ringkasan.
