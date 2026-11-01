@@ -445,12 +445,12 @@ const checks = [
   ],
   [
     "src/app/(public)/organisasi/[slug]/page.jsx",
-    /const counts\s*=\s*\{[\s\S]*datasets:\s*datasetsResult\.unavailable\s*\?\s*null\s*:\s*datasetsResult\.meta\?\.total[\s\S]*indicators:\s*indicatorsResult\.unavailable\s*\?\s*null\s*:\s*indicatorsResult\.meta\?\.total[\s\S]*infographics:\s*infographicsResult\.unavailable\s*\?\s*null\s*:\s*infographicsResult\.meta\?\.total[\s\S]*publications:\s*publicationsResult\.unavailable\s*\?\s*null\s*:\s*publicationsResult\.meta\?\.total/,
+    /const counts\s*=\s*\{[\s\S]*datasets:\s*datasetsResult\.unavailable\s*\?\s*null\s*:\s*\(?datasetsResult\.meta\?\.total(?:\s*\?\?\s*null)?\)?[\s\S]*indicators:\s*indicatorsResult\.unavailable\s*\?\s*null\s*:\s*\(?indicatorsResult\.meta\?\.total(?:\s*\?\?\s*null)?\)?[\s\S]*infographics:\s*infographicsResult\.unavailable\s*\?\s*null\s*:\s*\(?infographicsResult\.meta\?\.total(?:\s*\?\?\s*null)?\)?[\s\S]*publications:\s*publicationsResult\.unavailable\s*\?\s*null\s*:\s*\(?publicationsResult\.meta\?\.total(?:\s*\?\?\s*null)?\)?/,
     "Metrik OPD harus memakai total dari masing-masing katalog dan menampilkan null ketika sumber tidak tersedia.",
   ],
   [
     "src/app/(public)/organisasi/[slug]/page.jsx",
-    /datasets\.map\(\s*\(dataset\)\s*=>[\s\S]*resourceCount[\s\S]*<li[\s\S]*py-2[\s\S]*truncate[\s\S]*line-clamp-1[\s\S]*text-\[10px\][\s\S]*tabular-nums/,
+    /datasets\.map\(\s*\(dataset\)\s*=>[\s\S]*resourceCount[\s\S]*<li[\s\S]*className="[^"]*\bpy-3\b[^"]*"[\s\S]*className="block truncate text-sm[\s\S]*line-clamp-1 text-xs[\s\S]*text-\[11px\] tabular-nums[\s\S]*formatCount\(resourceCount\)[\s\S]*formatDate\(updated\)/,
     "Daftar dataset pada detail OPD harus berupa baris ringkas dengan judul terpotong aman, deskripsi satu baris, dan metadata berkas/tanggal.",
   ],
   [
