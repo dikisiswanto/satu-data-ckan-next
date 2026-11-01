@@ -44,6 +44,15 @@ def main() -> None:
         with path.open("r", encoding="utf-8") as handle:
             parsed_catalogs[domain] = read_po(handle, locale="id")
 
+    for domain, path in catalogs.items():
+        if not path.is_file():
+            continue
+        header = path.read_text(encoding="utf-8").split("\n", 18)[:18]
+        metadata = "\n".join(header)
+        for placeholder in ("EMAIL@ADDRESS", "YEAR-MO-DA", "FULL NAME"):
+            if placeholder in metadata:
+                ERRORS.append(f"{domain}: PO header still contains unfinished metadata placeholder {placeholder!r}.")
+
     for domain, catalog in parsed_catalogs.items():
         translated = [message for message in catalog if message.id]
         missing = [message for message in translated if not message.string]
@@ -109,7 +118,8 @@ def main() -> None:
         "You have not provided a biography.", "This user has no biography.", "Followers",
         "Open ID", "Member Since", "Last Active", "This information is visible to you and admins",
         "Frequency", "Frequency filter", "Filter by frequency",
-        "Add information page", "Add news article",
+        "Add information page", "Add news article", "Manage public data visuals",
+        "Page actions", "Revisions",
     }
     message_ids = {
         source_id
@@ -170,11 +180,15 @@ def main() -> None:
             "Filter by frequency": "Saring berdasarkan frekuensi",
             "Add information page": "Tambah halaman informasi",
             "Add news article": "Tambah artikel berita",
+            "Manage public data visuals": "Kelola visualisasi data publik",
+            "Page actions": "Aksi halaman",
+            "Revisions": "Revisi",
         },
         "ckanext-pages": {
             "Blog": "Berita dan artikel",
             "Add Blog Article": "Tambah artikel berita",
             "Edit Blog Article": "Ubah artikel berita",
+            "This page currently has no content": "Halaman ini belum memiliki konten.",
         },
     }
     for domain, expected in expected_translations.items():

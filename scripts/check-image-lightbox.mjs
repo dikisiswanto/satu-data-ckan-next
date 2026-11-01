@@ -206,13 +206,14 @@ assert.match(
 );
 
 const catalog = await read("src/lib/data/public.js");
+const compactCatalog = catalog.replace(/\s+/g, " ");
 assert.match(
-  catalog,
+  compactCatalog,
   /buildDatasetCatalogExclusionFilters\(\)[\s\S]*fq:/,
   "The ordinary dataset catalogue must send dedicated portal-content exclusions as a scalar CKAN fq expression.",
 );
 assert.match(
-  catalog,
+  compactCatalog,
   /facets: true, fq: buildDatasetCatalogExclusionFilters\(\)\.join\(" AND "\)/,
   "Dataset facets must exclude dedicated portal-content types through the same scalar CKAN fq expression.",
 );

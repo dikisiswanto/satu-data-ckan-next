@@ -217,7 +217,7 @@ const checks = [
   ],
   [
     "src/components/dataset-resource-preview.jsx",
-    /fallbackPreviewQuery[\s\S]*csv-fallback[\s\S]*DataStore akan menyediakan pencarian dan pagination penuh/,
+    /fallbackPreviewQuery[\s\S]*csv-fallback[\s\S]*DataStore akan menyediakan pencarian dan\s*pagination penuh/,
     "Resource CSV/TSV harus tetap menampilkan pratinjau terbatas sebelum DataStore selesai diindeks.",
   ],
   [
@@ -382,7 +382,7 @@ const checks = [
   ],
   [
     "src/lib/ckan/client.js",
-    /sanitizePublicSearchResult[\s\S]*sessionCookie[\s\S]*ckanAction\("package_search", params, sessionCookie \? \{ revalidate: 0, sessionCookie \} : \{\}\)/,
+    /sanitizePublicSearchResult[\s\S]*sessionCookie[\s\S]*ckanAction\(\s*"package_search",\s*params,\s*sessionCookie \? \{\s*revalidate: 0,\s*sessionCookie\s*\} : \{\s*\}\s*,?\s*\)/,
     "Search CKAN harus memakai sesi browser untuk meminta dataset privat; CKAN sendiri yang mengotorisasi dataset.",
   ],
   [
@@ -574,7 +574,7 @@ const cmsChecks = [
   ],
   [
     "src/app/(public)/informasi/[slug]/page.jsx",
-    /getCmsFeatureImage[\s\S]*images: absoluteImage \? \[\{ url: absoluteImage[\s\S]*: \[\]/,
+    /getCmsFeatureImage[\s\S]*images:\s*absoluteImage\s*\?\s*\[\{\s*url:\s*absoluteImage[\s\S]*:\s*\[\]/,
     "CMS pages must derive Open Graph/Twitter imagery from actual content and must not inherit a generic default hero image when no cover exists.",
   ],
   [

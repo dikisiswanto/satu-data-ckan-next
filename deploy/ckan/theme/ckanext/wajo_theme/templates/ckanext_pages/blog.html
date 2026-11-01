@@ -1,4 +1,5 @@
 {% extends 'page.html' %}
+{% from "wajo_theme/icon.html" import wajo_icon %}
 {% block bodytag %}{{ super() }} class="blog"{% endblock %}
 {% block subtitle %}{{ g.page.title }}{% endblock %}
 
@@ -8,8 +9,8 @@
       {% if h.check_access('ckanext_pages_update') %}
         {% asset 'pages/main-css' %}
         <div class="wajo-cms-actions" role="group" aria-label="{{ _('Page actions') }}">
-          {% link_for _('Edit'), named_route='pages.blog_edit', page=g.page.name, class_='btn btn-primary', icon='edit' %}
-          {% link_for _('Revisions'), named_route='pages.blog_revisions', page=g.page.name, class_='btn btn-default', icon='eye' %}
+          <a class="btn btn-primary" href="{{ h.url_for('pages.blog_edit', page=g.page.name) }}">{{ wajo_icon('edit') }}<span>{{ _('Edit') }}</span></a>
+          <a class="btn btn-default" href="{{ h.url_for('pages.blog_revisions', page=g.page.name) }}">{{ wajo_icon('eye') }}<span>{{ _('Revisions') }}</span></a>
         </div>
       {% endif %}
     {% endblock %}
@@ -20,12 +21,7 @@
     {% block ckanext_pages_content %}
       {% if g.page.content %}
         <div class="ckanext-pages-content wajo-admin-cms-content">
-          {% set editor = h.pages_get_wysiwyg_editor() %}
-          {% if editor in ['medium', 'ckeditor'] %}
-            {{ g.page.content|safe }}
-          {% else %}
-            {{ h.wajo_render_markdown(g.page.content) }}
-          {% endif %}
+          {{ h.wajo_render_markdown(g.page.content) }}
         </div>
       {% else %}
         <p class="empty">{{ _('This page currently has no content') }}</p>

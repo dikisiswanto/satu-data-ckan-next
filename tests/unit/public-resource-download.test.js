@@ -250,6 +250,67 @@ describe("public CKAN resource download", () => {
     expect(response.status).toBe(404);
   });
 
+  it.each([
+    ["dataset umum", datasetId],
+    ["dataset tematik", "data-menara-telekomunikasi"],
+  ])(
+    "downloads a %s resource when its display name differs from the FileStore filename",
+    async (_label, slug) => {
+      const resourcePath = `/dataset/${slug}/resource/${resourceId}/download/${filename}`;
+      fixtures({
+        resourceName: "Lampiran statistik menara telekomunikasi",
+        resourceUrl: `https://data.silirdev.com${resourcePath}`,
+      });
+      const upstreamFetch = vi.fn(
+        async () =>
+          new Response("xlsx-binary", {
+            status: 200,
+            headers: {
+              "content-type":
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            },
+          }),
+      );
+      vi.stubGlobal("fetch", upstreamFetch);
+      const response = await GET(
+        new Request(`https://data.silirdev.com${resourcePath}`),
+        { params: Promise.resolve({ slug, resourceId, filename }) },
+      );
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-disposition")).toContain(
+        encodeURIComponent(filename),
+      );
+      expect(await response.text()).toBe("xlsx-binary");
+      expect(upstreamFetch).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("allows a FileStore resource label to differ from the requested safe download filename", async () => {
+    const fileId = "c45b4a89-ee8c-4ee0-8a58-3f5af84a708d";
+    fixtures({
+      resourceName: "Dokumen lampiran tematik",
+      resourceUrl: `https://ckan.example.test/file/download/${fileId}`,
+    });
+    const upstreamFetch = vi.fn(
+      async () =>
+        new Response("xlsx-binary", {
+          status: 200,
+          headers: {
+            "content-type":
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+        }),
+    );
+    vi.stubGlobal("fetch", upstreamFetch);
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`),
+      { params: Promise.resolve({ slug: datasetId, resourceId, filename }) },
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("xlsx-binary");
+    expect(upstreamFetch).toHaveBeenCalledOnce();
+  });
+
   it("rejects a CKAN login page returned as a successful HTML download", async () => {
     fixtures();
     vi.stubGlobal(

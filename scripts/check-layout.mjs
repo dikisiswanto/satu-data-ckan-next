@@ -87,11 +87,11 @@ for (const route of ["berita", "informasi"]) {
     );
   }
   if (route === "informasi") {
-    requireText(
-      page,
-      "{featureImage?.src ? <figure",
-      "information cover must be optional and use the shared Markdown image parser",
-    );
+    if (!/\{\s*featureImage\?\.src\s*\?\s*\(\s*<figure/.test(read(page))) {
+      failures.push(
+        `${page}: information cover must be optional and use the shared Markdown image parser`,
+      );
+    }
   }
 }
 
@@ -120,11 +120,15 @@ requireText(
   ".public-loading-grid-md > :nth-child(n + 2)",
   "mobile skeletons must not stack several rows when only the first row is initially visible",
 );
-requireText(
-  "src/app/(public)/berita/page.jsx",
-  "const remaining = featured ? posts.filter",
-  "the news archive must not truncate published articles to fit a skeleton",
-);
+if (
+  !/const remaining = featured\s*\?\s*posts\.filter/.test(
+    read("src/app/(public)/berita/page.jsx"),
+  )
+) {
+  failures.push(
+    "src/app/(public)/berita/page.jsx: the news archive must not truncate published articles to fit a skeleton",
+  );
+}
 requireText(
   "src/app/(public)/informasi/page.jsx",
   "const generalPages = pages.filter",
@@ -340,7 +344,8 @@ for (const token of [
   "Dataset terbuka",
   "Ringkasan dihitung dari dataset dan resource aktif yang tersedia untuk publik.",
 ]) {
-  if (!homePage.includes(token))
+  const normalizedHomePage = homePage.replace(/\s+/g, " ");
+  if (!normalizedHomePage.includes(token))
     failures.push(`homepage hero: reference content missing "${token}"`);
 }
 requireText(
@@ -532,21 +537,33 @@ requireText(
   "--wajo-color-border: #d8e2e4",
   "Admin border must match the public portal token exactly",
 );
-requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  "--wajo-radius-control: .625rem",
-  "Admin controls must share the public control radius",
-);
+if (
+  !/--wajo-radius-control:\s*0?\.625rem/.test(
+    read(
+      "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+    ),
+  )
+) {
+  failures.push(
+    "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css: Admin controls must share the public control radius",
+  );
+}
 requireText(
   "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
   "--wajo-sidebar-width: 264px",
   "Admin desktop sidebar width must be explicit and consistent",
 );
-requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  "--wajo-font-sans: Inter, ui-sans-serif, system-ui",
-  "Admin typography must prefer Inter with a robust local fallback stack",
-);
+if (
+  !/--wajo-font-sans:\s*Inter,\s*ui-sans-serif,\s*system-ui/.test(
+    read(
+      "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+    ),
+  )
+) {
+  failures.push(
+    "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css: Admin typography must prefer Inter with a robust local fallback stack",
+  );
+}
 requireText(
   "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
   "--wajo-control-height: 42px",
@@ -557,16 +574,26 @@ requireText(
   "--wajo-button-height: 40px",
   "Admin buttons must use a consistent desktop height",
 );
-requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  ".wajo-admin-workspace .pagination .page-link { min-width: 44px; min-height: 44px; }",
-  "Mobile pagination must use comfortable touch targets",
-);
-requireText(
-  "src/app/styles/public-home-hero.css",
-  "background-position: center, center, center 47%",
-  "Wajo panorama crop must be deliberate and stable",
-);
+if (
+  !/\.wajo-admin-workspace \.pagination \.page-link\s*\{[^}]*min-width:\s*44px;[^}]*min-height:\s*44px;/s.test(
+    read(
+      "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+    ),
+  )
+) {
+  failures.push(
+    "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css: Mobile pagination must use comfortable touch targets",
+  );
+}
+if (
+  !/background-position:\s*center,\s*center,\s*center 47%/.test(
+    read("src/app/styles/public-home-hero.css"),
+  )
+) {
+  failures.push(
+    "src/app/styles/public-home-hero.css: Wajo panorama crop must be deliberate and stable",
+  );
+}
 requireText(
   "src/app/styles/public-home-hero.css",
   ".home-hero-visual {",
@@ -645,9 +672,11 @@ requireText(
   "indicator loading must reserve the final bounded table frame",
 );
 if (
-  !read("src/app/(public)/statistik/[slug]/loading.jsx").includes(
-    'className="page-container section-space public-interior-page" aria-busy="true"',
-  )
+  !read("src/app/(public)/statistik/[slug]/loading.jsx")
+    .replace(/\s+/g, " ")
+    .includes(
+      'className="page-container section-space public-interior-page" aria-busy="true"',
+    )
 ) {
   failures.push(
     "statistik/[slug]: loading root must use the same top-level spacing as the resolved page",

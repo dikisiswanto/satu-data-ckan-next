@@ -3128,7 +3128,8 @@ body:has(.wajo-login-frame) {
   align-items: center;
   justify-content: flex-end;
   gap: 0.625rem;
-  margin: 0 0 1.35rem;
+  margin: 0 0 1.5rem;
+  padding: 0.35rem 0 0.45rem;
 }
 .wajo-admin-workspace .wajo-admin-cms-page > .page-heading {
   clear: both;
@@ -3261,4 +3262,12 @@ body:has(.wajo-login-frame) {
 .wajo-admin-workspace .wajo-admin-cms-content hr {
   border: 0;
   border-top: 1px solid var(--wajo-color-border-strong);
+}
+
+/* GeoView injects per-resource format styles after the theme bundle. Keep the
+   GeoJSON chip transparent so it does not reintroduce a conflicting color fill. */
+.wajo-admin-shell .wajo-admin-workspace .badge[data-format="geojson"],
+.wajo-admin-shell .badge[data-format="geojson"] {
+  background: transparent !important;
+  background-color: transparent !important;
 }

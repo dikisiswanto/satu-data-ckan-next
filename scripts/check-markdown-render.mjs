@@ -128,6 +128,9 @@ const adminMarkdown = await read(
 const adminPlugin = await read(
   "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
 );
+const promotedIntro = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/home/snippets/promoted.html",
+);
 for (const [name, template] of [
   ["Pages", pagesDetail],
   ["Blog", blogDetail],
@@ -139,10 +142,10 @@ for (const [name, template] of [
     /h\.wajo_render_markdown\(/,
     `${name} detail must render Markdown in CKAN admin.`,
   );
-  assert.match(
+  assert.doesNotMatch(
     template,
-    /editor in \['medium', 'ckeditor'\]/,
-    `${name} must treat only supported WYSIWYG modes as HTML.`,
+    /pages_get_wysiwyg_editor|revision\.content\|safe|g\.page\.content\|safe/,
+    `${name} must always parse stored CKAN Pages/Blog Markdown through the allowlisted renderer.`,
   );
 }
 assert.match(
@@ -174,6 +177,32 @@ assert.match(
   adminMarkdown,
   /nh3\.clean\([\s\S]*_ALLOWED_URL_SCHEMES/,
   "CKAN Markdown output must be sanitized with a constrained tag/attribute/URL allowlist.",
+);
+for (const tag of [
+  "h1",
+  "table",
+  "img",
+  "blockquote",
+  "ul",
+  "ol",
+  "pre",
+  "code",
+]) {
+  assert.match(
+    adminMarkdown,
+    new RegExp(`_ALLOWED_TAGS\\s*=\\s*\\{[\\s\\S]*?[\"]${tag}[\"]`),
+    `CKAN Markdown must retain the allowlisted <${tag}> semantic element.`,
+  );
+}
+assert.match(
+  promotedIntro,
+  /h\.wajo_render_markdown\(intro\)/,
+  "CKAN homepage introduction must use the same allowlisted Markdown renderer as Pages and Blog.",
+);
+assert.doesNotMatch(
+  promotedIntro,
+  /h\.render_markdown\(intro\)/,
+  "CKAN homepage introduction must not bypass the shared Wajo Markdown policy.",
 );
 
 const newsDetail = await read("src/app/(public)/berita/[slug]/page.jsx");

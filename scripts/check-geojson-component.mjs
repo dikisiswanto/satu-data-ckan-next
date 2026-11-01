@@ -6,31 +6,38 @@ const source = await readFile(
   "utf8",
 );
 
-assert.ok(
-  source.includes(
-    "const [tileFailureState, setTileFailureState] = useState({ url: null, count: 0 });",
-  ),
+// Match the behavior, not Prettier's exact whitespace/line wrapping. The
+// component is routinely formatted by Format Document / Prettier, so these
+// contracts intentionally tolerate multiline object literals and trailing
+// commas while still requiring URL-scoped failure state.
+const compact = source.replace(/\s+/g, " ");
+
+assert.match(
+  compact,
+  /const \[tileFailureState,\s*setTileFailureState\] = useState\(\s*\{\s*url:\s*null,\s*count:\s*0,?\s*\}\s*\);/,
   "Tile failures must be stored with their originating resource URL.",
 );
-assert.ok(
-  source.includes(
-    "const failedTileCount = tileFailureState.url === url ? tileFailureState.count : 0;",
-  ),
+assert.match(
+  compact,
+  /const failedTileCount = tileFailureState\.url === url \? tileFailureState\.count : 0;/,
   "Only tile failures for the current resource may be displayed.",
 );
-assert.ok(
-  source.includes("count: current.url === url ? current.count + 1 : 1,"),
+assert.match(
+  compact,
+  /count:\s*current\.url === url \? current\.count \+ 1 : 1,?\s*\}\s*\)\s*;?/,
   "Late tile errors from another resource must not increment the current resource count.",
 );
-assert.ok(
-  source.includes("onError={recordTileFailure}"),
+assert.match(
+  source,
+  /onError\s*=\s*\{\s*recordTileFailure\s*\}/,
   "Map tile errors must use the URL-scoped failure handler.",
 );
-assert.ok(
-  !source.includes("useEffect(() => setFailedTileCount(0), [url]);"),
+assert.doesNotMatch(
+  compact,
+  /useEffect\(\(\) => setFailedTileCount\(0\), \[url\]\);/,
   "Do not synchronously reset React state inside an effect when the resource URL changes.",
 );
 
 process.stdout.write(
-  "GeoJSON component regression checks passed: tile errors are URL-scoped and no synchronous effect reset remains.\n",
+  "GeoJSON component regression checks passed: URL-scoped tile errors tolerate formatted JSX and no synchronous effect reset remains.\n",
 );

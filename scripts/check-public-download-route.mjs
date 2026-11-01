@@ -4,6 +4,7 @@ const route = await readFile(
   "src/app/(public)/dataset/[slug]/resource/[resourceId]/download/[filename]/route.js",
   "utf8",
 );
+const compactRoute = route.replace(/\s+/g, " ");
 const caddyFiles = [
   "deploy/ckan/Caddyfile",
   "deploy/ckan/Caddyfile.basic-auth",
@@ -59,10 +60,20 @@ assert.match(
   /sourceFilename !== requestedFilename/,
   "Download filename must match the CKAN resource path.",
 );
-assert.match(route, /CKAN_API_INTERNAL_URL/);
 assert.match(
   route,
-  /upstreamStatus === 403 \|\| upstreamStatus === 404/,
+  /FILENAME_PATTERN\.test\(requestedFilename\)/,
+  "Download path segments must remain restricted to safe filename characters.",
+);
+assert.doesNotMatch(
+  route,
+  /resource\.name\s*&&\s*requestedFilename\s*!==\s*String\(resource\.name\)/,
+  "CKAN resource display names must not be confused with physical FileStore filenames.",
+);
+assert.match(route, /CKAN_API_INTERNAL_URL/);
+assert.match(
+  compactRoute,
+  /upstreamStatus === 401 \|\| upstreamStatus === 403 \|\| upstreamStatus === 404/,
   "Private/unpublished dataset metadata must become a quiet public 404, not a 502 stream failure.",
 );
 assert.match(route, /Dataset atau resource tidak tersedia untuk publik/);
@@ -246,7 +257,11 @@ const css = await readFile(
   "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
   "utf8",
 );
-assert.match(css, /wajo-login-frame.*460px/);
+const compactCss = css.replace(/\s+/g, " ");
+assert.match(
+  compactCss,
+  /\.wajo-login-frame \{[^}]*width: min\(calc\(100% - 2rem\), 460px\)/,
+);
 assert.match(css, /input\[type="file"\]::file-selector-button/);
 assert.match(css, /wajo-file-preview/);
 
@@ -276,6 +291,7 @@ assert.match(sessionHelper, /getCkanSessionCookieValue/);
 assert.match(sessionHelper, /buildCkanSessionCookieHeader/);
 assert.match(sessionHelper, /normalizeCkanSessionCookieValue/);
 const ckanClient = await readFile("src/lib/ckan/client.js", "utf8");
+const compactCkanClient = ckanClient.replace(/\s+/g, " ");
 assert.match(ckanClient, /buildCkanSessionCookieHeader/);
 assert.match(ckanClient, /NEVER_CACHE_ACTIONS = new Set\(/);
 for (const action of [
@@ -289,7 +305,7 @@ for (const action of [
   assert.match(ckanClient, new RegExp(`"${action}"`));
 }
 assert.match(
-  ckanClient,
+  compactCkanClient,
   /effectiveRevalidate = forwardedSession \|\| NEVER_CACHE_ACTIONS\.has\(action\) \? 0 : revalidate/,
 );
 const datasetPage = await readFile(
@@ -313,6 +329,8 @@ const sessionAwarePublicActionRoute = await readFile(
   "src/app/api/3/action/[...action]/route.js",
   "utf8",
 );
+const compactSessionAwarePublicActionRoute =
+  sessionAwarePublicActionRoute.replace(/\s+/g, " ");
 assert.match(sessionAwarePublicActionRoute, /getCkanSessionCookieFromRequest/);
 assert.match(sessionAwarePublicActionRoute, /requireViewerPackage/);
 assert.match(sessionAwarePublicActionRoute, /requireViewerResource/);
@@ -338,17 +356,17 @@ assert.match(
   /result = sanitizePublicPackage\(pkg\)/,
 );
 assert.match(
-  sessionAwarePublicActionRoute,
+  compactSessionAwarePublicActionRoute,
   /if \(action === "package_search" && sessionCookie\) params\.include_private = true/,
 );
 assert.match(
-  sessionAwarePublicActionRoute,
+  compactSessionAwarePublicActionRoute,
   /ckanAction\(action, params, \{ revalidate: 0, sessionCookie \}\)/,
   "CKAN package_search must receive the exact signed browser session with include_private.",
 );
 assert.match(
-  sessionAwarePublicActionRoute,
-  /getViewerRecord\("package_show", \{ id: identifier \}, sessionCookie\)/,
+  compactSessionAwarePublicActionRoute,
+  /getViewerRecord\(\s*"package_show", \{ id: identifier \}, sessionCookie,?\s*\)/,
   "Private package details must be authorized by CKAN for the exact forwarded user session.",
 );
 const previewRoute = await readFile(
@@ -444,10 +462,15 @@ assert.match(
   /\.dataset-resources a\.label\[data-format\]/,
   "Dataset resource format chips must use the shared neutral format style.",
 );
+assert.match(
+  geoCssRules,
+  /\.badge\[data-format="geojson"\][\s\S]*?background-color:\s*transparent\s*!important/i,
+  "GeoJSON badges must override GeoView's injected background with transparent !important.",
+);
 assert.doesNotMatch(
   geoCssRules,
-  /geojson|#9855e0/i,
-  "GeoJSON must not have a special badge color or font override in the CKAN admin theme.",
+  /#9855e0/i,
+  "GeoJSON must not retain the conflicting purple fill color.",
 );
 
 const datasetCard = await readFile("src/components/dataset-card.jsx", "utf8");

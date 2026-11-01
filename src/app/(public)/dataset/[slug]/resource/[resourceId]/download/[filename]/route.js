@@ -121,6 +121,9 @@ async function handle(request, context) {
       /^\/file\/(?:download\/)?([a-f0-9-]{32,36})\/?$/i,
     );
     const requestedFilename = String(params?.filename || "");
+    if (!FILENAME_PATTERN.test(requestedFilename)) {
+      return errorResponse(404, "Nama berkas tidak valid.");
+    }
     let upstreamPath = "";
 
     if (pathMatch) {
@@ -130,10 +133,14 @@ async function handle(request, context) {
       } catch {
         return errorResponse(404, "Nama berkas tidak valid.");
       }
+      // `resource.name` is the CKAN resource title/label, not necessarily the
+      // physical FileStore filename. Validate the public URL against CKAN's
+      // canonical download pathname; use the requested safe filename only for
+      // the response's Content-Disposition header.
       if (
         !sourceFilename ||
-        sourceFilename !== requestedFilename ||
-        (resource.name && requestedFilename !== String(resource.name))
+        !FILENAME_PATTERN.test(sourceFilename) ||
+        sourceFilename !== requestedFilename
       ) {
         return errorResponse(
           404,
@@ -142,12 +149,6 @@ async function handle(request, context) {
       }
       upstreamPath = source.pathname;
     } else if (genericFileMatch) {
-      if (resource.name && requestedFilename !== String(resource.name)) {
-        return errorResponse(
-          404,
-          "Nama berkas tidak sesuai dengan metadata resource CKAN.",
-        );
-      }
       // Some CKAN resources expose their FileStore record URL instead of the
       // dataset/resource download URL. file_show is metadata only; verify the
       // owner chain before using CKAN 2.12's /file/download/<id> endpoint.

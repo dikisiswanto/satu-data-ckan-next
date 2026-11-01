@@ -14,28 +14,33 @@ const indicatorData = await read("src/lib/data/public-indicators.js");
 const publicationData = await read("src/lib/data/public-publications.js");
 const filters = await read("src/lib/data/portal-content-types.js");
 
+// Source contracts must survive Prettier/Format Write. Collapse formatting
+// whitespace before checking multi-line JavaScript expressions.
+const compactClient = client.replace(/\s+/g, " ");
+const compactPublicData = publicData.replace(/\s+/g, " ");
+
 assert.match(
-  client,
+  compactClient,
   /normalizeCkanActionParams\(action, params\)/,
   "All package_search inputs must pass through the Action API filter normalizer.",
 );
 assert.match(
-  client,
+  compactClient,
   /delete normalized\.fq_list;/,
   "Legacy fq_list inputs must be removed before the CKAN request is sent.",
 );
 assert.match(
-  client,
+  compactClient,
   /normalized\.fq = filters\.length === 1[\s\S]*?join\(" AND "\)/,
   "CKAN filters must be normalized into a single scalar fq expression, never iterated as characters.",
 );
 assert.match(
-  client,
+  compactClient,
   /const useJsonBody = action !== "package_search" && hasStructuredParams/,
   "package_search must stay on a CSRF-safe GET request, including authenticated sessions.",
 );
 assert.match(
-  client,
+  compactClient,
   /requestInit\.method = "GET"[\s\S]*url\.searchParams\.append\(key, String\(item\)\)/,
   "CKAN list-valued search parameters must be repeated as query keys instead of sent as a JSON POST.",
 );
@@ -45,7 +50,7 @@ assert.match(
   "resource_search must use an actual CKAN Resource column rather than the unsupported id field.",
 );
 assert.match(
-  publicData,
+  compactPublicData,
   /fq: buildDatasetCatalogExclusionFilters\(\)\.join\(" AND "\)/,
   "Public statistics must apply the same dataset exclusions through one scalar fq expression.",
 );

@@ -160,7 +160,7 @@ valid_free_solid_glyphs = {
     "right-from-bracket", "chart-bar", "angle-right", "plus", "lightbulb",
     "newspaper", "book", "chart-line", "image", "table", "server",
     "cloud-arrow-down", "shield", "check", "circle-check", "circle-exclamation",
-    "triangle-exclamation", "circle-info", "map", "map-location-dot", "pen-to-square", "pencil",
+    "triangle-exclamation", "circle-info", "map", "map-location-dot", "pen-to-square", "pencil", "eye",
 }
 require(icon_calls.issubset(icon_map), f"Semua pemanggilan wajo_icon harus memiliki pemetaan: {sorted(icon_calls - icon_map.keys())}.")
 require(set(icon_map.values()).issubset(valid_free_solid_glyphs), f"Glyph harus tersedia pada Font Awesome Free Solid CKAN: {sorted(set(icon_map.values()) - valid_free_solid_glyphs)}.")
@@ -204,16 +204,18 @@ for template_path, template_source in (
     (BLOG_REVISIONS, blog_revisions_source),
 ):
     require("h.wajo_render_markdown(" in template_source, f"CKAN Pages/Blog harus merender konten Markdown dengan helper aman: {template_path.relative_to(ROOT)}.")
-    require("editor in ['medium', 'ckeditor']" in template_source, f"Hanya editor WYSIWYG yang boleh mengeluarkan HTML mentah: {template_path.relative_to(ROOT)}.")
+    require("pages_get_wysiwyg_editor" not in template_source and "|safe" not in template_source, f"Konten Pages/Blog harus selalu diparse sebagai Markdown dan tidak boleh dirender sebagai HTML mentah: {template_path.relative_to(ROOT)}.")
 require("{% block secondary_content %}{% endblock %}" in blog_detail_source, "Detail Blog CKAN tidak boleh menampilkan sidebar artikel terbaru yang tidak terkait.")
+require("'eye': 'eye'" in icon_source, "Ikon pratinjau revisi harus terdaftar sebagai Font Awesome eye.")
+require('background-color: transparent !important' in DESIGN_SYSTEM.read_text(encoding="utf-8") and '.badge[data-format="geojson"]' in DESIGN_SYSTEM.read_text(encoding="utf-8"), "Badge GeoJSON harus menimpa stylesheet geoview dengan latar transparan !important.")
 for template_path, template_source, edit_route in (
     (PAGES_DETAIL, pages_detail_source, "pages.edit"),
     (BLOG_DETAIL, blog_detail_source, "pages.blog_edit"),
 ):
     require('class="wajo-cms-actions"' in template_source, f"Pages/Blog detail actions need a spaced toolbar: {template_path.relative_to(ROOT)}.")
-    require(edit_route in template_source and "icon='edit'" in template_source, f"Edit action must use the native edit icon: {template_path.relative_to(ROOT)}.")
-    require("icon='eye'" in template_source, f"Revision action must use the eye icon: {template_path.relative_to(ROOT)}.")
-    require("plus-square" not in template_source, f"Edit action must not use a plus icon: {template_path.relative_to(ROOT)}.")
+    require(edit_route in template_source and "wajo_icon('edit')" in template_source, f"Edit action must use the explicit Wajo edit icon: {template_path.relative_to(ROOT)}.")
+    require("wajo_icon('eye')" in template_source, f"Revision action must use the explicit Wajo eye icon: {template_path.relative_to(ROOT)}.")
+    require("wajo-cms-actions" in template_source and "plus-square" not in template_source, f"CMS actions must use a spaced toolbar and must not use a plus icon for editing: {template_path.relative_to(ROOT)}.")
 require("class _TaskListTreeprocessor" in markdown_renderer_source and "_StrikethroughProcessor" in markdown_renderer_source, "Renderer admin harus mendukung task-list dan strikethrough.")
 require('extensions=["extra", "sane_lists", _WajoMarkdownExtension()]' in markdown_renderer_source, "Renderer admin harus mendukung tabel, fenced code, dan nested/sane lists.")
 require("nh3.clean(" in markdown_renderer_source and "_remove_raw_html" in markdown_renderer_source, "Renderer CKAN harus membersihkan output Markdown dan tidak mengaktifkan raw HTML.")

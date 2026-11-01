@@ -77,8 +77,10 @@ if not preview_route.is_file():
     errors.append("Route preview CSV fallback tidak ditemukan.")
 else:
     fallback = preview_route.read_text()
-    for token in ("safeInternalDownloadUrl", "MAX_BYTES", 'ckanAction("resource_show"', 'ckanAction("package_show"', "parseDelimitedPreview"):
-        if token not in fallback:
+    # Formatting-only line wrapping must not break source contract checks.
+    compact_fallback = re.sub(r"\s+", " ", fallback)
+    for token in ("safeInternalDownloadUrl", "MAX_BYTES", 'ckanAction( "resource_show"', 'ckanAction( "package_show"', "parseDelimitedPreview"):
+        if token not in compact_fallback:
             errors.append(f"CSV fallback tidak membatasi/ memvalidasi proses preview: {token}")
 
 if errors:
