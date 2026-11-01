@@ -271,13 +271,27 @@ function HomeHeroContent({
           <div className="home-visual-mark" aria-hidden="true">
             <div className="home-scene-cube">
               <span className="home-scene-cube__face home-scene-cube__front">
-                <Database size={42} strokeWidth={1.35} />
+                <Database size={42} strokeWidth={1.7} aria-hidden="true" />
               </span>
-              <span className="home-scene-cube__face home-scene-cube__back" />
-              <span className="home-scene-cube__face home-scene-cube__right" />
-              <span className="home-scene-cube__face home-scene-cube__left" />
-              <span className="home-scene-cube__face home-scene-cube__top" />
-              <span className="home-scene-cube__face home-scene-cube__bottom" />
+              <span className="home-scene-cube__face home-scene-cube__back">
+                <BarChart3 size={42} strokeWidth={1.7} aria-hidden="true" />
+              </span>
+              <span className="home-scene-cube__face home-scene-cube__right">
+                <MapPinned size={42} strokeWidth={1.7} aria-hidden="true" />
+              </span>
+              <span className="home-scene-cube__face home-scene-cube__left">
+                <Network size={42} strokeWidth={1.7} aria-hidden="true" />
+              </span>
+              <span className="home-scene-cube__face home-scene-cube__top">
+                <FileText size={42} strokeWidth={1.7} aria-hidden="true" />
+              </span>
+              <span className="home-scene-cube__face home-scene-cube__bottom">
+                <FileChartColumn
+                  size={42}
+                  strokeWidth={1.7}
+                  aria-hidden="true"
+                />
+              </span>
             </div>
           </div>
           <div className="home-visual-caption">

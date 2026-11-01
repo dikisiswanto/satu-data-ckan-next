@@ -123,7 +123,6 @@ const integrations = [
   ["src/components/cms/content-blocks.jsx", "CMS image and gallery blocks"],
   ["src/components/cms/markdown-content.jsx", "Markdown image tokens"],
   ["src/app/(public)/informasi/[slug]/page.jsx", "Information page cover"],
-  ["src/app/(public)/berita/[slug]/page.jsx", "News article cover"],
 ];
 for (const [file, label] of integrations) {
   const source = await read(file);
@@ -133,6 +132,23 @@ for (const [file, label] of integrations) {
     `${label} must use the shared image lightbox.`,
   );
 }
+const newsDetail = await read("src/app/(public)/berita/[slug]/page.jsx");
+assert.match(
+  newsDetail,
+  /<CmsPageBody page=\{page\}\s*\/>/,
+  "News detail must render its source Markdown body without a separate cover.",
+);
+assert.doesNotMatch(
+  newsDetail,
+  /getCmsFeatureImage|ImageLightbox|public-cms-cover|<Image\b/,
+  "News detail must not render a separate featured image or duplicate the Markdown image.",
+);
+const markdownRenderer = await read("src/components/cms/markdown-content.jsx");
+assert.match(
+  markdownRenderer,
+  /token\.type === "image"[\s\S]*<ImageLightbox/,
+  "Original Markdown images in news content must retain the shared lightbox interaction.",
+);
 const organizationDirectory = await read(
   "src/components/organization-directory.jsx",
 );

@@ -33,6 +33,40 @@ describe("CKAN session cookie forwarding", () => {
     ).toBe("valid");
   });
 
+  it("uses a CSRF-safe GET for package_search while forwarding private-dataset sessions", async () => {
+    const fetcher = vi.fn(async (url, options) => {
+      expect(options.method).toBe("GET");
+      expect(options.body).toBeUndefined();
+      expect(url.searchParams.get("include_private")).toBe("true");
+      expect(url.searchParams.get("fq")).toBe("state:active");
+      expect(url.searchParams.getAll("facet.field")).toEqual([
+        "groups",
+        "organization",
+      ]);
+      expect(options.headers.get("cookie")).toBe(
+        "wajo_ckan_session=signed.session",
+      );
+      expect(options.cache).toBe("no-store");
+      return Response.json({
+        success: true,
+        result: { count: 1, results: [{ id: "private-dataset" }] },
+      });
+    });
+    vi.stubGlobal("fetch", fetcher);
+    const { ckanAction } = await import("@/lib/ckan/client");
+    await ckanAction(
+      "package_search",
+      {
+        q: "*:*",
+        include_private: true,
+        fq: "state:active",
+        "facet.field": ["groups", "organization"],
+      },
+      { sessionCookie: "signed.session", revalidate: 0 },
+    );
+    expect(fetcher).toHaveBeenCalledOnce();
+  });
+
   it("forwards the CKAN cookie to CKAN but never forwards arbitrary browser cookies", async () => {
     const fetcher = vi.fn(async (_url, options) => {
       expect(options.headers.get("cookie")).toBe(

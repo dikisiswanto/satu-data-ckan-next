@@ -104,6 +104,7 @@ const required = [
   "scripts/check-admin-forms.mjs",
   "docs/CKAN-CUSTOM-FORMS-CONTEXT-AWARE.md",
   "scripts/check-build.py",
+  "scripts/check-public-hero.py",
   "scripts/check-base.py",
   "deploy/ckan/sync-ckan-base-source.sh",
   "deploy/ckan/prepare-ckan-base.sh",
@@ -627,6 +628,11 @@ const cmsChecks = [
     "Detail berita harus menyediakan JSON-LD NewsArticle dan tanggal terbit.",
   ],
   [
+    "src/app/(public)/berita/[slug]/page.jsx",
+    /getCmsMarkdownImage[\s\S]*CmsPageBody[\s\S]*openGraph:[\s\S]*images:/,
+    "Detail berita hanya boleh menampilkan gambar asli Markdown di body; tidak ada featured-image terpisah.",
+  ],
+  [
     "src/app/sitemap.js",
     /getPublicCmsPagesResult[\s\S]*getPublicCmsBlogPostsResult[\s\S]*cmsPageEntries[\s\S]*cmsBlogEntries/,
     "Sitemap harus memuat hanya halaman/berita CMS publik.",
@@ -640,6 +646,21 @@ const cmsChecks = [
     "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
     /IPagesSchema[\s\S]*class WajoPagesSchemaPlugin[\s\S]*content_blocks[\s\S]*show_in_menu/,
     "CKAN Admin harus menyediakan schema field editorial melalui IPagesSchema.",
+  ],
+  [
+    "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
+    /ITemplateHelpers[\s\S]*wajo_render_markdown/,
+    "CKAN Admin harus menyediakan helper Markdown yang aman melalui ITemplateHelpers.",
+  ],
+  [
+    "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/blog.html",
+    /h\.wajo_render_markdown[\s\S]*block secondary_content %}\s*{% endblock %}/,
+    "Detail Blog CKAN harus merender Markdown dan menghilangkan sidebar artikel yang tidak terkait.",
+  ],
+  [
+    "src/lib/ckan/client.js",
+    /action !== "package_search" && hasStructuredParams[\s\S]*requestInit\.method = "GET"[\s\S]*searchParams\.append/,
+    "package_search harus menggunakan GET dengan query-array berulang agar sesi CKAN tidak ditolak CSRF.",
   ],
   [
     "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/base_form.html",

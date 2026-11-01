@@ -1,14 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
 import { CmsPageBody } from "@/components/cms/content-blocks";
-import { ImageLightbox } from "@/components/ui/image-lightbox";
 import {
   getAbsoluteCmsImageUrl,
-  getCmsFeatureImage,
+  getCmsMarkdownImage,
   getCmsPageDescription,
   getPublicCmsBlogPostBySlugResult,
 } from "@/lib/cms/pages";
@@ -34,8 +32,14 @@ export async function generateMetadata({ params }) {
   const description =
     getCmsPageDescription(page) ||
     `Berita dan artikel resmi ${siteConfig.regionName}.`;
-  const featureImage = getCmsFeatureImage(page, getPublicSiteOrigin());
-  const image = featureImage?.src || "";
+  // News detail intentionally has no separate featured/cover image. The
+  // original Markdown image remains inline in CmsPageBody and may be reused
+  // for social metadata without rendering a duplicate above the article.
+  const markdownImage = getCmsMarkdownImage(page, getPublicSiteOrigin());
+  const image = getAbsoluteCmsImageUrl(
+    markdownImage?.src,
+    getPublicSiteOrigin(),
+  );
   const social = getSocialMetadata({
     path: `/berita/${page.name}`,
     title: `${title} | ${siteConfig.shortName}`,
@@ -47,15 +51,11 @@ export async function generateMetadata({ params }) {
     description,
     ...getCanonicalMetadata(`/berita/${page.name}`),
     ...social,
-    ...(image
-      ? {
-          openGraph: {
-            ...social.openGraph,
-            images: [{ url: image, alt: title }],
-          },
-          twitter: { ...social.twitter, images: [image] },
-        }
-      : {}),
+    openGraph: {
+      ...social.openGraph,
+      images: image ? [{ url: image, alt: markdownImage?.alt || title }] : [],
+    },
+    twitter: { ...social.twitter, images: image ? [image] : [] },
     ...(page.publishDate
       ? { other: { "article:published_time": page.publishDate } }
       : {}),
@@ -84,9 +84,11 @@ export default async function BeritaDetailPage({ params }) {
   }
   if (!result.data) notFound();
   const page = result.data;
-  const featureImage = getCmsFeatureImage(page, getPublicSiteOrigin());
-  const image = featureImage?.src || "";
-  const absoluteImage = getAbsoluteCmsImageUrl(image, getPublicSiteOrigin());
+  const markdownImage = getCmsMarkdownImage(page, getPublicSiteOrigin());
+  const absoluteImage = getAbsoluteCmsImageUrl(
+    markdownImage?.src,
+    getPublicSiteOrigin(),
+  );
   const canonical = getPublicSiteOrigin()
     ? new URL(`/berita/${page.name}`, getPublicSiteOrigin()).toString()
     : undefined;
@@ -125,28 +127,6 @@ export default async function BeritaDetailPage({ params }) {
           "Tanggal terbit belum dicantumkan"
         )}
       </p>
-      {image ? (
-        <figure className="public-cms-cover relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-slate-100">
-          <div className="absolute inset-0">
-            <ImageLightbox
-              src={image}
-              alt={featureImage?.alt || page.title}
-              className="h-full w-full"
-            >
-              <div className="relative h-full w-full">
-                <Image
-                  src={image}
-                  alt={featureImage?.alt || page.title}
-                  fill
-                  unoptimized
-                  sizes="100vw"
-                  className="object-cover"
-                />
-              </div>
-            </ImageLightbox>
-          </div>
-        </figure>
-      ) : null}
       <article className="cms-document mt-8 rounded-2xl border border-line bg-white p-5 sm:p-8 lg:p-10">
         <CmsPageBody page={page} />
       </article>

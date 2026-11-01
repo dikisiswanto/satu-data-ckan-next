@@ -2713,3 +2713,6 @@ msgstr "Tambah halaman informasi"
 
 msgid "Add news article"
 msgstr "Tambah artikel berita"
+
+msgid "Page actions"
+msgstr "Aksi halaman"

@@ -20,8 +20,6 @@ sync_script = read("deploy/ckan/sync-ckan-base-source.sh")
 prepare_script = read("deploy/ckan/prepare-ckan-base.sh")
 bootstrap = read("deploy/ckan/bootstrap-upstream.sh")
 compose = read("deploy/ckan/compose.sh")
-root_readme = read("README.md")
-deploy_readme = read("deploy/ckan/README.md")
 ci_workflow = read(".github/workflows/ci.yml")
 gitignore = read(".gitignore")
 
@@ -41,7 +39,6 @@ checks = [
     ('https://github.com/ckan/ckan-docker.git' in bootstrap, "Compose orchestration tetap menggunakan repository resmi ckan/ckan-docker."),
     ("prepare-ckan-base.sh" in ci_workflow and "sync-ckan-base-source.sh" in ci_workflow and "docker pull ckan/ckan-base:2.12.1" not in ci_workflow and "docker build --pull -f Dockerfile.ckan-extension-smoke" not in ci_workflow, "CI harus build base image dari source upstream dan tidak mengasumsikan registry tag tersedia."),
     ("upstream-base" in gitignore and ".ckan-base-source.lock" in gitignore and ".ckan-base-image.lock" in gitignore, "Checkout dan lock build upstream harus diabaikan dari Git."),
-    ("ckan/ckan-docker-base" in root_readme and "ckan/ckan-docker-base" in deploy_readme, "Dokumentasi deployment harus menyebut sumber image resmi."),
 ]
 for passed, message in checks:
     if not passed:

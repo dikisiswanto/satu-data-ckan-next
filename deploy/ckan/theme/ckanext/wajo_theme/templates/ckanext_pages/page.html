@@ -1,0 +1,34 @@
+{% extends 'page.html' %}
+
+{% block subtitle %}{{ g.page.title }}{% endblock %}
+
+{% block primary %}
+  <section class="module-content wajo-admin-cms-page">
+    {% block ckanext_pages_actions %}
+      {% if h.check_access('ckanext_pages_update') %}
+        {% asset 'pages/main-css' %}
+        <div class="wajo-cms-actions" role="group" aria-label="{{ _('Page actions') }}">
+          {% link_for _('Edit'), named_route='pages.edit', page=g.page.name, class_='btn btn-primary', icon='edit' %}
+          {% link_for _('Revisions'), named_route='pages.pages_revisions', page=g.page.name, class_='btn btn-default', icon='eye' %}
+        </div>
+      {% endif %}
+    {% endblock %}
+    <h1 class="page-heading">{{ g.page.title }}</h1>
+    {% block ckanext_pages_content %}
+      {% if g.page.content %}
+        <div class="ckanext-pages-content wajo-admin-cms-content">
+          {% set editor = h.pages_get_wysiwyg_editor() %}
+          {% if editor in ['medium', 'ckeditor'] %}
+            {{ g.page.content|safe }}
+          {% else %}
+            {{ h.wajo_render_markdown(g.page.content) }}
+          {% endif %}
+        </div>
+      {% else %}
+        <p class="empty">{{ _('This page currently has no content') }}</p>
+      {% endif %}
+    {% endblock %}
+  </section>
+{% endblock %}
+
+{% block secondary %}{% endblock %}

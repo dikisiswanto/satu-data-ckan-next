@@ -75,4 +75,66 @@ try:
 except Exception as exc:
     sys.exit(f"Wajo Admin extension translation runtime check failed: {exc}")
 
-print("CKAN extension entry points, XLoader imports, and Indonesian translation domains verified:", ", ".join(sorted(required)))
+# Exercise the real installed CKAN Markdown renderer inside the pinned CKAN
+# image. This catches dependency, extension-registration, rendering, and
+# sanitizer regressions that source-only checks cannot detect.
+try:
+    from ckanext.wajo_theme.markdown import render_wajo_markdown
+
+    markdown_sample = """## teks aaa
+
+**aku** *asre* ~~*dodo*~~
+
+![Editorial media](https://data.silirdev.com/api/editorial-media/489a796c-7c87-434d-a777-8c0daf1ade97)
+
+[teks](https://fb.com)
+
+- teks
+- teks 2
+
+1. teks satu
+2. teks dua
+
+- [ ] teks
+- [x] test
+
+> teks kutipan
+
+| Kolom 1 | Kolom 2 |
+| --- | --- |
+| Isi | Isi |
+
+```text
+alooo <span>teks</span>
+```
+
+---
+
+<script>alert(1)</script>
+<img src=x onerror=alert(1)>
+"""
+    rendered_markdown = str(render_wajo_markdown(markdown_sample))
+    required_markdown_fragments = (
+        "<h2>teks aaa</h2>",
+        "<strong>aku</strong>",
+        "<em>asre</em>",
+        "<del>",
+        'src="https://data.silirdev.com/api/editorial-media/489a796c-7c87-434d-a777-8c0daf1ade97"',
+        'href="https://fb.com"',
+        "<table>",
+        "<blockquote>",
+        '<input type="checkbox"',
+        "<pre><code",
+        "&lt;span&gt;teks&lt;/span&gt;",
+        "<hr",
+    )
+    missing_markdown_fragments = [item for item in required_markdown_fragments if item not in rendered_markdown]
+    if missing_markdown_fragments:
+        raise RuntimeError("Missing rendered Markdown constructs: " + ", ".join(missing_markdown_fragments))
+    if "<script" in rendered_markdown.lower() or "onerror" in rendered_markdown.lower():
+        raise RuntimeError("Unsafe raw HTML/attributes survived Markdown sanitization")
+except Exception as exc:
+    sys.exit(f"Wajo CKAN Markdown renderer runtime check failed: {exc}")
+
+print("PASS Wajo CKAN Markdown renderer supports editorial GFM constructs and strips unsafe raw HTML")
+print("CKAN extension entry points, XLoader imports, Indonesian translation domains, and Markdown renderer verified:", ", ".join(sorted(required)))

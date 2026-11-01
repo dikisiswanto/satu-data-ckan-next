@@ -1,0 +1,5 @@
+# Pinned Python tooling used by scripts/check-static.sh and GitHub Actions.
+Jinja2==3.1.6
+MarkupSafe==3.0.2
+tinycss2==1.4.0
+webencodings==0.5.1

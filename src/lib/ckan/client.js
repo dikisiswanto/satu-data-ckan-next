@@ -67,20 +67,21 @@ export async function ckanAction(
   if (!/^[a-z][a-z0-9_]*$/.test(action))
     throw new TypeError("invalid_ckan_action");
   const url = new URL(`${BASE}/${action}`);
-  // package_search always uses a JSON POST. This avoids query-string flattening
-  // of structured fields and lets us enforce one scalar fq expression before
-  // CKAN receives it. Other actions use JSON POST whenever a parameter is
-  // structured (arrays/objects), preserving their declared types as well.
+  // package_search is a read-only CKAN Action API endpoint. Keep it on GET,
+  // including when forwarding an authenticated browser session: CKAN's CSRF
+  // middleware protects unsafe requests (POST/PUT/DELETE), and a JSON POST
+  // without CKAN's CSRF token is rejected with HTTP 400. Repeated query keys
+  // preserve CKAN list parameters such as facet.field without coercing arrays
+  // into JSON or comma-separated strings.
   const actionParams = normalizeCkanActionParams(action, params);
   const entries = Object.entries(actionParams).filter(
     ([, value]) => value !== undefined && value !== null && value !== "",
   );
-  const useJsonBody =
-    action === "package_search" ||
-    entries.some(
-      ([, value]) =>
-        Array.isArray(value) || (typeof value === "object" && value !== null),
-    );
+  const hasStructuredParams = entries.some(
+    ([, value]) =>
+      Array.isArray(value) || (typeof value === "object" && value !== null),
+  );
+  const useJsonBody = action !== "package_search" && hasStructuredParams;
   const headers = new Headers({ Accept: "application/json" });
   const requestInit = { signal: AbortSignal.timeout(TIMEOUT_MS) };
   if (useJsonBody) {
@@ -88,8 +89,17 @@ export async function ckanAction(
     requestInit.method = "POST";
     requestInit.body = JSON.stringify(Object.fromEntries(entries));
   } else {
-    for (const [key, value] of entries)
-      url.searchParams.set(key, String(value));
+    requestInit.method = "GET";
+    for (const [key, value] of entries) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (item !== undefined && item !== null)
+            url.searchParams.append(key, String(item));
+        }
+      } else {
+        url.searchParams.set(key, String(value));
+      }
+    }
   }
 
   const forwardedSession = buildCkanSessionCookieHeader(sessionCookie);
@@ -115,14 +125,30 @@ export async function ckanAction(
     // CKAN often returns a structured Action API error body with HTTP 409 for
     // Solr/SearchError. Preserve its short message for server logs so malformed
     // filters can be diagnosed without exposing request headers or cookies.
-    const errorPayload = await response
+    const errorResponse = await response
       .clone()
-      .json()
-      .catch(() => null);
-    const detail =
+      .text()
+      .catch(() => "");
+    let errorPayload = null;
+    try {
+      errorPayload = errorResponse ? JSON.parse(errorResponse) : null;
+    } catch {
+      // CKAN/Flask CSRF failures can return a plain-text or HTML 400 page
+      // instead of an Action API JSON envelope. Keep a sanitized excerpt.
+    }
+    const rawDetail =
       typeof errorPayload?.error?.message === "string"
-        ? errorPayload.error.message.slice(0, 400)
-        : null;
+        ? errorPayload.error.message
+        : errorResponse;
+    const detail =
+      String(rawDetail || "")
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+        .replace(/<[^>]*>/g, " ")
+        .replace(/&(?:nbsp|amp|lt|gt|quot);/gi, " ")
+        .replace(/[\r\n\t]+/g, " ")
+        .replace(/\s{2,}/g, " ")
+        .trim()
+        .slice(0, 400) || null;
     const error = new Error(`ckan_http_${response.status}`);
     error.status = response.status;
     error.detail = detail;

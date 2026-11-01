@@ -441,8 +441,13 @@ assert.doesNotMatch(
 );
 assert.match(
   geoCss,
-  /\.dataset-resources a\.label\[data-format="geojson" i\]/,
-  "GeoJSON styling may remain scoped to the separate dataset search/list chips.",
+  /\.dataset-resources a\.label\[data-format\]/,
+  "Dataset resource format chips must use the shared neutral format style.",
+);
+assert.doesNotMatch(
+  geoCssRules,
+  /geojson|#9855e0/i,
+  "GeoJSON must not have a special badge color or font override in the CKAN admin theme.",
 );
 
 const datasetCard = await readFile("src/components/dataset-card.jsx", "utf8");

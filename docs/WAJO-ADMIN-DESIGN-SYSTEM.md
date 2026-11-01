@@ -140,3 +140,14 @@ Sidebar/topbar memakai satu macro `wajo_icon` dan paket Font Awesome Free bawaan
 ## 7. Batas perubahan
 
 Design system tidak boleh mengganti route/action CKAN, struktur input, CSRF, validator, permission, upload, widget JavaScript, atau alur CRUD. Semua perubahan tampilan harus diuji pada login, dashboard, dataset, resource, organisasi, Pages, Harvest, DataStore, dan konfigurasi sistem.
+
+## 8. UX, interaksi, dan motion
+
+- Susunan halaman: breadcrumb bila relevan, judul/deskripsi, toolbar, konten utama, lalu bantuan kontekstual. Pertahankan pola native CKAN bila sudah memadai.
+- Gunakan satu sumber token untuk warna, permukaan, border, radius, spacing, shadow, dan focus. Jangan menambahkan nilai arbitrer per halaman.
+- Aksi utama memakai satu aksen; aksi pendamping netral; aksi destruktif jelas dan meminta konfirmasi. Status tidak boleh hanya dibedakan dengan warna.
+- Form wajib mempertahankan label, helper, validasi, error summary, CSRF, upload, flash message, dan permission CKAN.
+- CSS harus additive dan ter-scope; route, action, context, name/id, method, validator, dan JavaScript native CKAN tidak diubah demi styling.
+- Hindari transisi route dan entrance animation halaman. Motion publik dibatasi pada item daftar yang secara eksplisit ditandai, durasi 200–240 ms, perpindahan maksimal 6 px, dan menghormati `prefers-reduced-motion`.
+- Admin cukup memakai transisi singkat untuk hover/focus dan perubahan state kecil; tidak ada animasi masuk pada setiap halaman.
+- Acceptance mencakup dashboard, dataset, organisasi, Pages/Blog, Harvest, DataStore, login, desktop/tablet/mobile, keyboard focus, filter, dropdown, modal, upload, dan validasi form.

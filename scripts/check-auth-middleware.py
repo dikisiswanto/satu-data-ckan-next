@@ -42,6 +42,9 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     class ITranslation:
         pass
 
+    class ITemplateHelpers:
+        pass
+
     class IPackageController:
         pass
 
@@ -62,6 +65,7 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     plugins.IAuthFunctions = IAuthFunctions
     plugins.IFiles = IFiles
     plugins.ITranslation = ITranslation
+    plugins.ITemplateHelpers = ITemplateHelpers
     plugins.IResourceController = IResourceController
     plugins.IOrganizationController = IOrganizationController
     plugins.IGroupController = IGroupController
@@ -94,6 +98,12 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
 
     ckanext = types.ModuleType("ckanext")
     ckanext.__path__ = []
+    theme_package = types.ModuleType("ckanext.wajo_theme")
+    theme_package.__path__ = [str(PLUGIN_PATH.parent)]
+    markdown_stub = types.ModuleType("ckanext.wajo_theme.markdown")
+    markdown_stub.render_wajo_markdown = lambda content: content
+    ckanext.wajo_theme = theme_package
+    theme_package.markdown = markdown_stub
     pages = types.ModuleType("ckanext.pages")
     pages.__path__ = []
     interfaces = types.ModuleType("ckanext.pages.interfaces")
@@ -112,6 +122,8 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     xloader_interfaces.IXloader = IXloader
     sys.modules.update({
         "ckanext": ckanext,
+        "ckanext.wajo_theme": theme_package,
+        "ckanext.wajo_theme.markdown": markdown_stub,
         "ckanext.pages": pages,
         "ckanext.pages.interfaces": interfaces,
         "ckanext.xloader": xloader,
@@ -198,10 +210,11 @@ class FakeApp:
 
 def main() -> None:
     request, user, _flask = install_module_stubs()
-    spec = importlib.util.spec_from_file_location("wajo_theme_plugin_under_test", PLUGIN_PATH)
+    spec = importlib.util.spec_from_file_location("ckanext.wajo_theme.plugin", PLUGIN_PATH)
     if spec is None or spec.loader is None:
         raise SystemExit("Tidak dapat memuat plugin Wajo untuk smoke test.")
     module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
 
     app = FakeApp()

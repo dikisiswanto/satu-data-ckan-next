@@ -27,6 +27,13 @@ jobs:
       NEXT_PUBLIC_REGION_NAME: Kabupaten Wajo
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+      - name: Install pinned Python check dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements-ci.txt
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

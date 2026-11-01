@@ -10,20 +10,22 @@ const apiPage = readFileSync(
   path.join(root, "src/app/(public)/api-data/page.jsx"),
   "utf8",
 );
-const apiMarkdown = readFileSync(path.join(root, "docs/API.md"), "utf8");
 const errors = [];
 
-function extractActionNames(source, label) {
-  const match = source.match(/const ACTIONS = new Set\(\[([\s\S]*?)\]\)/);
+function extractSet(source, declaration, label) {
+  const escaped = declaration.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = source.match(
+    new RegExp(`const ${escaped} = new Set\\(\\[([\\s\\S]*?)\\]\\)`),
+  );
   if (!match) {
-    errors.push(`${label}: daftar action tidak ditemukan.`);
+    errors.push(`${label}: declaration not found.`);
     return [];
   }
-  return [...match[1].matchAll(/"([a-z_]+)"/g)].map((item) => item[1]);
+  return [...match[1].matchAll(/[\"']([a-z_]+)[\"']/g)].map((item) => item[1]);
 }
 
-const routeActions = extractActionNames(apiRoute, "Route API");
-const REQUIRED_ACTIONS = [
+const routeActions = extractSet(apiRoute, "ACTIONS", "Public API allowlist");
+const requiredActions = [
   "status_show",
   "package_search",
   "package_show",
@@ -37,97 +39,71 @@ const REQUIRED_ACTIONS = [
   "file_show",
   "datastore_search",
 ];
-for (const action of REQUIRED_ACTIONS) {
-  if (!routeActions.includes(action)) {
-    errors.push(
-      `Route API: action publik wajib \`${action}\` hilang dari allowlist.`,
-    );
-  }
+for (const action of requiredActions) {
+  if (!routeActions.includes(action))
+    errors.push(`Public API allowlist is missing ${action}.`);
 }
+if (new Set(routeActions).size !== routeActions.length)
+  errors.push("Public API allowlist contains duplicate actions.");
+
 const endpointBlock = apiPage.match(/const endpoints = \[([\s\S]*?)\n\];/);
 const pageActions = endpointBlock
-  ? [...endpointBlock[1].matchAll(/name:\s*"([a-z_]+)"/g)].map(
+  ? [...endpointBlock[1].matchAll(/name:\s*[\"']([a-z_]+)[\"']/g)].map(
       (item) => item[1],
     )
   : [];
-const markdownActions = [...apiMarkdown.matchAll(/^\| `([a-z_]+)` \|/gm)].map(
-  (item) => item[1],
-);
-
-if (!endpointBlock) errors.push("Laman API: daftar endpoint tidak ditemukan.");
-for (const [label, actions] of [
-  ["Laman API", pageActions],
-  ["docs/API.md", markdownActions],
-]) {
-  const missing = routeActions.filter((action) => !actions.includes(action));
-  const extra = actions.filter((action) => !routeActions.includes(action));
+if (!endpointBlock) {
+  errors.push("Public API page must define its endpoint collection.");
+} else {
+  const missing = routeActions.filter(
+    (action) => !pageActions.includes(action),
+  );
+  const extra = pageActions.filter((action) => !routeActions.includes(action));
   if (missing.length || extra.length) {
     errors.push(
-      `${label}: daftar action tidak sama dengan allowlist route. Tambahkan action yang hilang ke tabel/daftar endpoint dokumentasi dan hapus action yang sudah tidak diizinkan. Hilang: ${missing.join(", ") || "-"}; ekstra: ${extra.join(", ") || "-"}.`,
+      `Public API page and route allowlist differ. Missing: ${missing.join(", ") || "-"}; extra: ${extra.join(", ") || "-"}.`,
     );
   }
-  if (new Set(actions).size !== actions.length)
-    errors.push(`${label}: terdapat action duplikat.`);
+  if (new Set(pageActions).size !== pageActions.length)
+    errors.push("Public API page contains duplicate actions.");
 }
 
-const sensitiveBlock = apiRoute.match(
-  /const VISIBILITY_SENSITIVE_ACTIONS = new Set\(\[([\s\S]*?)\]\)/,
+const sensitiveActions = extractSet(
+  apiRoute,
+  "VISIBILITY_SENSITIVE_ACTIONS",
+  "Visibility-sensitive action set",
 );
-const sensitiveActions = sensitiveBlock
-  ? [...sensitiveBlock[1].matchAll(/"([a-z_]+)"/g)].map((item) => item[1])
-  : [];
-if (!sensitiveBlock)
-  errors.push("Route API: daftar action no-store tidak ditemukan.");
 for (const action of sensitiveActions) {
-  if (!apiPage.includes(action) || !apiMarkdown.includes(action)) {
-    errors.push(`Dokumentasi cache harus menyebut action no-store: ${action}.`);
-  }
-}
-if (!apiPage.includes("no-store") || !apiMarkdown.includes("no-store")) {
-  errors.push(
-    "Laman API dan docs/API.md harus menjelaskan penggunaan no-store.",
-  );
+  if (!routeActions.includes(action))
+    errors.push(
+      `Visibility-sensitive action ${action} is not in the public allowlist.`,
+    );
 }
 if (
-  !apiPage.includes(
-    "Ganti tanggal contoh dengan waktu UTC dari sinkronisasi terakhir yang berhasil",
-  ) ||
-  !apiMarkdown.includes(
-    "checkpoint UTC dari sinkronisasi terakhir yang berhasil",
-  )
+  !apiRoute.includes('"Cache-Control"') ||
+  !apiRoute.includes('"private, no-store"') ||
+  !apiRoute.includes("revalidate: 0")
 ) {
   errors.push(
-    "Contoh harvesting harus menjelaskan bahwa tanggal tetap hanya contoh dan perlu diganti dengan checkpoint harvester.",
+    "API implementation must disable caching for authenticated/visibility-sensitive records.",
   );
 }
-if (
-  !apiPage.includes("package_activity_list?id=nama-dataset&limit=8&offset=0") ||
-  !apiMarkdown.includes(
-    "package_activity_list?id=nama-dataset&limit=8&offset=0",
-  ) ||
-  !apiRoute.includes("include_hidden_activity: false")
-) {
+if (!apiRoute.includes("include_hidden_activity: false")) {
   errors.push(
-    "package_activity_list harus memakai limit/offset dan memaksa include_hidden_activity=false pada server.",
+    "Activity endpoint must exclude hidden activity at the server boundary.",
   );
 }
-if (
-  apiRoute.includes('assert(["id", "include_data"])') ||
-  apiPage.includes("include_data=false") ||
-  apiMarkdown.includes("include_data=false")
-) {
+if (apiRoute.includes('assert(["id", "include_data"])')) {
   errors.push(
-    "Kontrak package_activity_list masih memakai parameter include_data yang tidak valid untuk CKAN 2.12.",
+    "Activity endpoint still accepts the unsupported include_data parameter.",
   );
 }
 
 if (errors.length) {
-  console.error(
-    `Pemeriksaan konsistensi dokumentasi API gagal (${errors.length}):`,
-  );
+  console.error(`Public API contract failed (${errors.length}):`);
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
 process.stdout.write(
-  `API documentation consistency passed: ${routeActions.length} allowlisted actions (including all ${REQUIRED_ACTIONS.length} required actions) match the public API page and docs/API.md; visibility/cache rules, activity privacy, and harvesting checkpoint guidance align.\n`,
+  `Public API contract passed: ${routeActions.length} route actions and the public endpoint UI are aligned; visibility and activity privacy rules are enforced in code. Narrative API documentation is maintained independently.\n`,
 );

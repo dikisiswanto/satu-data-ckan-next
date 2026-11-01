@@ -1,399 +1,69 @@
-# Deployment CKAN + Cloudflare Tunnel
+# Runbook CKAN dan Cloudflare
 
-Panduan ini untuk Portal Satu Data Kabupaten Wajo: Next.js melayani website publik dan CKAN 2.12.1 mengelola metadata serta data. Bootstrap mengambil source image resmi `ckan/ckan-docker-base` dan menyiapkan stack Compose resmi `ckan/ckan-docker`; kedua checkout generated tidak disertakan di repositori.
+CKAN 2.12.1 adalah backend otoritatif untuk dataset, resource, organisasi, DataStore, autentikasi, dan CMS. Next.js menyajikan portal publik. Source runtime dibangun dari `ckan/ckan-docker-base`; stack service berasal dari `ckan/ckan-docker`.
 
-## Pratinjau dan visualisasi resource
-
-Konfigurasi CKAN 2.12 menggunakan `datatables_view` untuk tabel DataStore dan
-`geo_view`, `geojson_view`, `wmts_view`, serta `shp_view` untuk data geospasial.
-`image_view` dan `text_view` menangani berkas gambar, JSON, XML, dan teks.
-
-CKAN 2.12 sudah menghapus seluruh plugin berbasis Recline (`recline_view`,
-`recline_grid_view`, dan turunannya). Jangan menambahkan plugin tersebut ke
-`CKAN__PLUGINS` atau `CKAN__VIEWS__DEFAULT_VIEWS`. Plugin shapefile dari
-`ckanext-geoview` bernama `shp_view`, bukan `esri_shapefile_view`.
-
-## 1. Siapkan konfigurasi
-
-Dari root repo:
+## Persiapan pertama
 
 ```bash
 cp .env.ckan.example .env.ckan
-```
-
-Edit `.env.ckan` sekurangnya untuk `PUBLIC_HOST`, `CKAN_HOST`, dan `CLOUDFLARE_TUNNEL_TOKEN`. Nilai default hostname adalah `data.wajokab.go.id` dan `ckan.wajokab.go.id`. URL turunan disinkronkan dari dua hostname tersebut. `.env.ckan` harus privat dan tidak boleh dimasukkan ke Git.
-
-Jalankan bootstrap:
-
-```bash
+# Isi PUBLIC_HOST, CKAN_HOST, CLOUDFLARE_TUNNEL_TOKEN, dan secret lain
 bash ./deploy/ckan/bootstrap-upstream.sh
 ```
 
-Deployment memakai dua repository resmi yang tidak saling menggantikan:
+`.env.ckan` adalah satu-satunya konfigurasi lingkungan lokal dan tidak boleh dikomit. Bootstrap menyinkronkan source resmi, memverifikasi CKAN 2.12.1, menyusun environment backend, memasang extension terpin, theme Wajo, dan katalog Bahasa Indonesia. Image dasar dibangun dari source upstream sebelum Compose dijalankan.
 
-| Repository                                                          | Peran                                                                                                                                                                                                                                                                |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`ckan/ckan-docker-base`](https://github.com/ckan/ckan-docker-base) | Source image runtime CKAN (Dockerfile, Python runtime, dependency, entrypoint). Source branch `main`, folder `ckan-2.12`, dan `VERSION.txt` harus tepat `2.12.1`; runtime Python dibaca dinamis dari `PYTHON_VERSION.txt` (saat audit upstream memakai Python 3.14). |
-| [`ckan/ckan-docker`](https://github.com/ckan/ckan-docker)           | Docker Compose stack (CKAN, PostgreSQL, Solr, Redis, Nginx, worker).                                                                                                                                                                                                 |
+## Start dan update
 
-Bootstrap menyinkronkan source image `ckan/ckan-docker-base` dari branch `main`, memverifikasi versi source base 2.12.1 dan merekam commit upstream. Repository orkestrasi `ckan/ckan-docker` diklon pada persiapan pertama dan checkout generated yang sudah ada digunakan kembali. Karena tag Docker Hub `ckan/ckan-base:2.12.1` belum boleh diasumsikan tersedia, proses tidak bergantung pada pull tag tersebut: saat `compose.sh ... up`, script menjalankan `build.sh build 2.12 base` dari checkout resmi `ckan-docker-base`, lalu memverifikasi tag lokal `ckan/ckan-base:2.12.1`, `CKAN_REF=ckan-2.12.1`, dan OCI source label. Baru setelah itu Compose membangun image CKAN Wajo yang memasang extension terpin dan `wajo_theme`.
-
-Bootstrap hanya mengambil dan memvalidasi source serta menghasilkan `.env.generated` terfilter; image build otomatis dilakukan sebelum `compose up`. Checkout base upstream dan lock build bersifat generated dan tidak dimasukkan ke Git.
-
-## 2. Tunnel untuk dua subdomain
-
-Gunakan hostname admin satu tingkat agar sertifikat Cloudflare Universal SSL standar dapat mencakupnya. Contoh konfigurasi staging:
-
-```ini
-PUBLIC_HOST=data.silirdev.com
-CKAN_HOST=ckan.silirdev.com
-```
-
-Untuk staging `silirdev.com`, konfigurasi yang disarankan adalah `PUBLIC_HOST=data.silirdev.com` dan `CKAN_HOST=ckan.silirdev.com`. Saat memindahkan hostname admin dari `ckan.data.silirdev.com`, cukup ubah satu baris `CKAN_HOST` di `.env.ckan`; `sync-env.py` akan menyelaraskan `NEXT_PUBLIC_CKAN_ADMIN_URL` dan `CKAN_ADMIN_URL`. `PUBLIC_HOST`, `NEXT_PUBLIC_SITE_URL`, `PUBLIC_SITE_ORIGIN`, dan `CKAN_SITE_URL` tetap memakai domain portal publik. Jalankan ulang bootstrap dan Compose dengan `--build` agar Caddy serta tautan admin Next.js menggunakan hostname baru. Cloudflare Public Hostname juga harus diperbarui ke hostname baru; pengaturan DNS/Tunnel tersebut tidak dapat diubah dari `.env.ckan`.
-
-Untuk lingkungan resmi, gunakan hostname yang ditetapkan pengelola domain, misalnya `data.wajokab.go.id` dan `ckan.wajokab.go.id`. Keduanya adalah subdomain tingkat pertama dari `wajokab.go.id`.
-
-**Penting untuk TLS:** gunakan hostname admin satu tingkat, misalnya `ckan.silirdev.com`, jika zona memakai Cloudflare Full DNS Setup. Sertifikat Universal SSL standar mencakup domain utama dan subdomain tingkat pertama, sehingga `data.silirdev.com` dan `ckan.silirdev.com` dapat memakai sertifikat gratis selama DNS keduanya berstatus Proxied dan zona aktif. Hostname bertingkat seperti `ckan.data.silirdev.com` tidak tercakup Universal SSL standar. Untuk hostname bertingkat yang tetap menggunakan Cloudflare Tunnel, jangan mengandalkan Total TLS: Cloudflare menyatakan Total TLS tidak menerbitkan sertifikat untuk hostname yang digunakan dengan Cloudflare Tunnel. Gunakan salah satu dari: (1) beralih ke hostname satu tingkat (direkomendasikan), (2) pesan Advanced Certificate secara manual dengan SAN hostname lengkap, (3) unggah custom certificate dengan SAN yang sesuai, atau (4) gunakan CNAME/Partial Setup yang menyediakan Universal SSL per subdomain. Rujukan: [Universal SSL hostname coverage](https://developers.cloudflare.com/ssl/edge-certificates/universal-ssl/limitations/) dan [Total TLS limitations for Cloudflare Tunnel](https://developers.cloudflare.com/ssl/edge-certificates/additional-options/total-tls/).
-
-Untuk hostname bertingkat yang wajib dipertahankan, gunakan Advanced Certificate yang dipesan manual dengan SAN yang tepat, custom certificate, atau ubah zona ke CNAME/Partial Setup yang mendukung Universal SSL per subdomain. Total TLS bukan pilihan untuk hostname yang digunakan dengan Cloudflare Tunnel. Pada semua opsi, record DNS hostname harus **Proxied** (awan oranye) dan route Tunnel tetap menunjuk ke `http://edge-tunnel:80`. Sertifikat browser diterbitkan di sisi Cloudflare; origin HTTP internal `cloudflared` ke Caddy bukan alasan untuk mengganti hostname. Jangan mengaktifkan DNS-only untuk hostname Tunnel.
-
-Setelah sertifikat mencakup hostname, verifikasi:
+Cloudflare Tunnel (profil umum):
 
 ```bash
-openssl s_client -connect ckan.silirdev.com:443 -servername ckan.silirdev.com </dev/null 2>/dev/null \
-  | openssl x509 -noout -subject -issuer -dates -ext subjectAltName
-curl -Iv https://ckan.silirdev.com/
+bash ./deploy/ckan/compose.sh cloudflare config
+bash ./deploy/ckan/compose.sh cloudflare up -d --build
+bash ./deploy/ckan/compose.sh cloudflare ps
 ```
 
-Pastikan SAN mencantumkan `ckan.silirdev.com`, masa berlaku aktif, dan request tidak dialihkan ke hostname lama yang lain. `sync-env.py` akan mempertahankan host yang ada dan hanya memberi peringatan cakupan sertifikat. **Biarkan `CKAN_SITE_URL` mengikuti `PUBLIC_HOST`** agar metadata katalog, ekspor, dan tautan unduhan CKAN tetap menunjuk ke portal publik. `CKAN_ADMIN_URL` dan `NEXT_PUBLIC_CKAN_ADMIN_URL` mengikuti `CKAN_HOST` secara terpisah untuk tombol Portal Pengelola dan normalisasi URL resource admin.
+Ingress manual/Caddy: ganti `cloudflare` dengan `manual`. Profil `cloudflare-basic-auth` dan `manual-basic-auth` tersedia untuk lapisan autentikasi tambahan. Jangan arahkan hostname admin langsung ke container CKAN; semua hostname masuk melalui Caddy sesuai profil.
 
-Gunakan **satu named/remote-managed Cloudflare Tunnel** untuk kedua hostname. `cloudflared` di Docker menghubungkan Tunnel ke Caddy internal pada `edge-tunnel:80`; Caddy memilih aplikasi berdasarkan hostname. Tidak perlu menerbitkan port 80/443 dari VPS pada mode ini.
+Hostname publik dan admin idealnya berada pada domain induk yang sama, misalnya `data.silirdev.com` dan `ckan.silirdev.com`, agar sesi CKAN dapat dibagikan secara aman bila konfigurasi cookie mengizinkan. `PUBLIC_HOST` tetap menjadi origin tautan publik; `CKAN_HOST` khusus login/admin. Perbarui hostname pada Cloudflare Tunnel secara terpisah dari `.env.ckan`.
 
-1. Pada Cloudflare, pastikan zona domain yang dipakai (`silirdev.com` untuk staging atau `wajokab.go.id` untuk produksi) aktif dan record hostname Tunnel berstatus Proxied. Periksa juga Edge Certificates sebelum menguji HTTPS.
-2. Buka **Cloudflare Zero Trust → Networks → Tunnels** lalu buat tunnel bertipe Docker/remote-managed. Salin token tunnel ke `CLOUDFLARE_TUNNEL_TOKEN` pada `.env.ckan`. Jangan masukkan token ke Git, screenshot, atau log.
-3. Pada tunnel tersebut, tambahkan dua **Published application routes / Public Hostnames** berikut. Jika UI memisahkan konfigurasi hostname dan service, isi keduanya sesuai tabel ini:
-
-   | Hostname            | Service origin          | Fungsi                                                                 |
-   | ------------------- | ----------------------- | ---------------------------------------------------------------------- |
-   | `data.silirdev.com` | `http://edge-tunnel:80` | Portal Next.js, API baca, ekspor DCAT, unduhan publik (contoh staging) |
-   | `ckan.silirdev.com` | `http://edge-tunnel:80` | Login dan administrasi CKAN (contoh staging)                           |
-
-   Untuk produksi, gunakan nilai `PUBLIC_HOST` dan `CKAN_HOST` yang telah ditentukan di `.env.ckan.example` atau file `.env.ckan` aktif. Jangan menambahkan route yang berbeda dari hostname pada konfigurasi tersebut.
-
-   Keduanya sengaja menuju origin yang sama. Caddy yang memisahkan route; jangan arahkan `ckan` langsung ke service `ckan`, `nginx`, atau port PostgreSQL.
-
-4. Jalankan validasi lalu start:
-
-   ```bash
-   bash ./deploy/ckan/compose.sh cloudflare config
-   bash ./deploy/ckan/compose.sh cloudflare up -d --build
-   bash ./deploy/ckan/compose.sh cloudflare ps
-   ```
-
-5. Verifikasi route:
-
-   ```bash
-   # Staging
-   curl -sSI https://data.silirdev.com/
-   curl -sSI https://ckan.silirdev.com/
-   curl -sS 'https://data.silirdev.com/api/3/action/status_show'
-
-   # Ganti kedua hostname dengan PUBLIC_HOST dan CKAN_HOST pada .env.ckan bila memakai domain produksi.
-   ```
-
-   Homepage pertama harus berasal dari Next.js. Host admin kedua membuka form `/user/login`; middleware CKAN akan meminta login untuk setiap halaman selain login dan aset statis. Setelah login berhasil, pengguna harus tetap berada di hostname CKAN dan diarahkan ke dashboard dataset (bukan ke hostname publik `data.*` atau layar konfigurasi yang hanya dapat diakses sysadmin). Coba juga buka langsung `/dataset`, `/organization`, `/group`, `/pages`, dan `/harvest`; saat belum login semuanya harus kembali ke form login, sedangkan setelah login seluruh menu/fitur yang diizinkan oleh role pengguna harus tampil dan berfungsi. Kalau `502` muncul, cek status dan log `cloudflared`, `edge-tunnel`, `nextjs`, `ckan`, dan `nginx` dengan `bash ./deploy/ckan/compose.sh cloudflare logs --tail=150 cloudflared edge-tunnel nextjs ckan nginx`.
-
-**DNS:** untuk remote-managed Tunnel, penambahan hostname pada konfigurasi Tunnel biasanya membuat record DNS tunnel otomatis. Pastikan kedua hostname ditampilkan di daftar routes Tunnel, dan DNS masing-masing mengarah ke target `*.cfargotunnel.com` milik Tunnel tersebut. Jangan membuat record A ke IP VPS untuk kedua hostname pada mode Tunnel.
-
-## Diagnostik CKAN tidak sehat
-
-Jika `compose up` melaporkan `ckan is unhealthy`, ambil log aplikasi dan hasil
-healthcheck sebelum mengulang deployment:
+## Rebuild sesuai perubahan
 
 ```bash
-bash ./deploy/ckan/compose.sh cloudflare logs --tail=200 ckan
-
-docker inspect upstream-ckan-1 \
-  --format '{{range .State.Health.Log}}{{println .Output}}{{end}}'
-```
-
-Periksa juga konfigurasi plugin yang sudah dinormalisasi bootstrap:
-
-```bash
-grep '^CKAN__PLUGINS=' .env.ckan
-grep '^CKAN__VIEWS__DEFAULT_VIEWS=' .env.ckan
-```
-
-CKAN 2.12 tidak mendukung plugin Recline. Daftar plugin tidak boleh memuat
-`recline_view` atau `esri_shapefile_view`; gunakan `datatables_view` dan `shp_view`.
-Jalankan ulang bootstrap setelah pembaruan source agar ID lama pada `.env.ckan`
-dibersihkan. Jangan menghapus volume database atau filestore untuk mengatasi
-container yang tidak sehat.
-
-### uWSGI startup environment
-
-Image CKAN Wajo mendefinisikan `EXTRA_UWSGI_OPTS` sebagai string kosong secara default. CKAN 2.12.1 upstream membaca variabel ini saat menyusun argumen uWSGI; tanpa nilai default, shell dengan `nounset` dapat menghentikan startup dengan pesan `EXTRA_UWSGI_OPTS: unbound variable`. Isi variabel hanya bila diperlukan untuk menambahkan opsi uWSGI khusus.
-
-## FileStore dan logo organisasi
-
-Upload logo organisasi/kategori menggunakan FileStore native CKAN 2.12. Field upload harus memakai `image_url` (bukan field homepage `url`) bersama preset Scheming `organization_url_upload`, agar nilai yang disimpan dikenali CKAN sebagai logo dan `image_display_url` dibentuk dengan benar. Bootstrap mengaktifkan `ckan.uploads_enabled` dan storage `ckan.files.storage.default` pada `/var/lib/ckan/default`. Compose upstream memasang volume persisten `ckan_storage` pada `/var/lib/ckan`, sehingga gambar tetap tersedia setelah container CKAN dibangun ulang. Storage turunan `groups` menangani logo organisasi/grup; batas ukuran gambar adalah 5 MiB dan MIME type yang diizinkan adalah PNG, JPEG, GIF, serta WebP. SVG sengaja tidak diizinkan karena dapat membawa konten aktif.
-
-Karena `CKAN_SITE_URL` sengaja menunjuk ke domain portal publik (Next.js), sementara CKAN administrasi berada pada hostname terpisah, URL legacy `/uploads/group/<file>` pada domain publik diteruskan oleh route Next.js `src/app/uploads/[...path]/route.js` ke service CKAN internal. Proxy ini hanya menerima file gambar organisasi/kategori dengan ekstensi dan MIME allow-list, tidak meneruskan redirect ke host lain, dan tidak membuka endpoint FileStore privat. Katalog publik menggunakan `image_url`/`image_display_url` dan me-normalisasi URL upload menjadi path same-origin. Nilai logo lama yang sebelumnya tersimpan pada field `url` tetap dicoba sebagai fallback apabila memang merupakan URL/path gambar CKAN.
-
-Setelah memperbarui konfigurasi, jalankan bootstrap dan recreate CKAN agar env baru diterapkan:
-
-```bash
+# CKAN extension, template, translation, schema, atau CSS admin
 bash ./deploy/ckan/bootstrap-upstream.sh
 bash ./deploy/ckan/compose.sh cloudflare up -d --build --force-recreate ckan
+
+# Next.js saja
+bash ./deploy/ckan/compose.sh cloudflare up -d --build --force-recreate nextjs
 ```
 
-Jangan menghapus volume `ckan_storage`. Jika upload masih gagal, periksa log CKAN dan permission mount:
+Setelah perubahan frontend dan CKAN bersama, rebuild kedua service. Lakukan hard refresh browser untuk memperbarui WebAssets CKAN.
+
+## Pemeriksaan cepat
 
 ```bash
-bash ./deploy/ckan/compose.sh cloudflare logs --tail=150 ckan
-bash ./deploy/ckan/compose.sh cloudflare exec ckan sh -lc 'id; ls -ld /var/lib/ckan /var/lib/ckan/default /var/lib/ckan/default/storage/uploads/group'
+bash ./deploy/ckan/compose.sh cloudflare ps
+bash ./deploy/ckan/compose.sh cloudflare logs --tail=150 ckan nextjs nginx edge-tunnel cloudflared
+curl -sS https://$PUBLIC_HOST/api/3/action/status_show
+curl -sSI https://$CKAN_HOST/user/login
 ```
 
-## 3. Akses admin dan keamanan
+Jika CKAN unhealthy, lihat log CKAN dan health history sebelum restart: `docker inspect <ckan-container> --format '{{json .State.Health}}'`. Untuk 502, periksa status `ckan`, `nginx`, `nextjs`, `edge-tunnel`, dan `cloudflared`. Jangan menghapus volume untuk mengatasi kegagalan aplikasi.
 
-`CKAN_ADMIN_GATE_MODE=none` adalah default: hostname admin langsung membuka form login CKAN tanpa prompt Basic Auth tambahan. Login dan izin CKAN tetap berlaku. Root redirect tidak menjadikan seluruh UI CKAN privat; jika ingin menambah lapisan perimeter, pilih satu mode di `.env.ckan`:
+## DataStore, resource, dan GeoView
 
-- `basic_auth`: Basic Auth pada Caddy di profil `manual` atau `cloudflare`.
-- `cloudflare_access`: pasang aplikasi Access dan allow-list admin dahulu, lalu jalankan profil `cloudflare-access`.
+- Plugin view CKAN 2.12 yang digunakan: `datatables_view`, `geo_view`, `geojson_view`, `wmts_view`, `shp_view`, `image_view`, dan `text_view`. Jangan mengaktifkan plugin Recline atau nama plugin shapefile lama.
+- Bootstrap menyiapkan permission DataStore dan worker XLoader/Harvest sesuai konfigurasi. Backfill resource lama dan sinkronisasi preview mengikuti [`docs/DATASTORE-PREVIEW-SYNC.md`](../../docs/DATASTORE-PREVIEW-SYNC.md).
+- Basemap, batas ukuran GeoJSON, dan ResourceView dikelola konfigurasi aplikasi; periksa resource aktif serta view CKAN saat preview kosong.
 
-Jalankan tepat satu profil ingress (`manual`, `cloudflare`, atau `cloudflare-access`). Header `X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex` di semua respons hostname admin merupakan instruksi crawler, bukan kontrol keamanan. `robots.txt` sengaja tidak memblokir crawling agar crawler dapat membaca header tersebut; sitemap admin merespons 404.
+## CMS dan unduhan privat
 
-Jangan membuka port host PostgreSQL, Solr, Redis, CKAN, Nginx CKAN, atau Next.js. Pada mode Tunnel, hanya koneksi Docker privat dari `cloudflared` ke Caddy yang dibutuhkan. Pada mode manual, hanya Caddy yang menerbitkan TCP 80/443.
+Pages/Blog mendukung Markdown dan media editorial. Upload media harus memakai endpoint bertanda akses; jangan membuka FileStore internal. Dataset private tetap diotorisasi oleh sesi CKAN per pengguna. Host publik/admin yang tidak berbagi registrable domain tidak dapat berbagi cookie browser. Lihat [`docs/CMS.md`](../../docs/CMS.md), [`docs/CKAN-ADMIN-LOKALISASI.md`](../../docs/CKAN-ADMIN-LOKALISASI.md), dan [`docs/PRIVATE-DATASET-DOWNLOAD-AUTH.md`](../../docs/PRIVATE-DATASET-DOWNLOAD-AUTH.md).
 
-## 4. Akun sysadmin awal
+## Keamanan operasional
 
-Pada provisioning pertama, CKAN Docker membuat akun dari `CKAN_SYSADMIN_NAME`, `CKAN_SYSADMIN_PASSWORD`, dan `CKAN_SYSADMIN_EMAIL`. Default username proyek adalah `ckan_admin`. Bootstrap mengganti `GENERATE_ON_BOOTSTRAP` dengan password acak 64 karakter heksadesimal dan menyimpannya di `.env.ckan` (permission `600`).
-
-Tampilkan credential pada terminal server:
-
-```bash
-grep -E '^CKAN_SYSADMIN_(NAME|PASSWORD|EMAIL)=' .env.ckan
-```
-
-Isi `CKAN_SYSADMIN_EMAIL` dengan mailbox terkelola sebelum provisioning pertama. Jika database sudah terinisialisasi, perubahan nilai environment tidak mereset password di database. Reset melalui CLI:
-
-```bash
-bash ./deploy/ckan/compose.sh cloudflare exec ckan ckan user setpass ckan_admin
-```
-
-Jangan membagikan `.env.ckan` atau memasukkan credential ke repository.
-
-## 5. Integrasi SDI dan Harvest
-
-Pada pola integrasi SDI, Sekretariat SDI Pusat membuat harvest source di portal pusat untuk mengambil metadata dari Portal Data Instansi. Portal Wajo tidak harus menjalankan `ckanext-harvest` agar dapat dipanen oleh pusat; katalog CKAN/API Wajo harus tersedia sesuai persyaratan integrasi.
-
-`ckanext-harvest` versi `1.6.3` di instalasi Wajo berfungsi untuk arah sebaliknya, yaitu menarik katalog CKAN/DCAT lain ke CKAN Wajo. Worker `harvest-gather` dan `harvest-fetch` menjalankan antrean proses tersebut. Tidak ada katalog yang diimpor sebelum harvest source dibuat dan diaktifkan. Dokumen kebijakan integrasi menjelaskan proses pada Portal SDI Pusat, tetapi tidak mengidentifikasi package dan versi extension pada server pusat.
-
-Untuk integrasi pusat, gunakan `PUBLIC_HOST` sebagai origin katalog/API publik. `CKAN_HOST` sengaja menjadi hostname administrasi yang mewajibkan login dan tidak boleh dipakai sebagai endpoint harvesting anonim. Public Action API tetap disediakan oleh facade Next.js read-only; ekspor katalog dan unduhan tertentu diteruskan ke CKAN melalui route publik. Jangan menonaktifkan proteksi login pada `CKAN_HOST`.
-
-## 6. Wajo Admin — custom CKAN administration UI
-
-CKAN 2.12.1 tetap menjadi sumber kebenaran untuk data, route, Action API, autentikasi, authorization, form validation, CSRF, upload, DataStore, dan seluruh extension. `ckanext-wajo-theme` menambahkan **Wajo Admin** sebagai pengalaman UI administrasi khusus tanpa memodifikasi source core CKAN.
-
-### Bagian antarmuka
-
-- **Topbar:** logo Kabupaten Wajo, nama Wajo Admin, tautan ke portal publik Next.js, identitas pengguna, akses pengaturan untuk sysadmin, dan tombol logout dengan token CSRF.
-- **Sidebar:** Ringkasan, Dataset, Organisasi, Kategori data, Halaman informasi (Pages), Harvesting, Dataset saya, Organisasi saya, Kategori saya, serta Pengguna/Pengaturan CKAN untuk sysadmin. Menu aktif mengikuti path. Tautan fitur tetap menuju endpoint CKAN/extension asli.
-- **Ringkasan `/admin/`:** kartu jumlah dataset yang dapat diakses pengguna, organisasi, kategori/grup, dan dataset yang dibuat pengguna; tabel dataset terbaru; pintasan tambah dataset/organisasi (hanya jika diizinkan); tautan Pages dan Harvest. Angka diambil saat halaman dibuka melalui Action API CKAN, bukan angka statis. Kegagalan satu action dicatat ke log dan tidak membuat dashboard gagal dirender; metrik yang gagal ditampilkan sebagai `—`.
-- **Halaman pengelolaan:** dataset, resource, preview, organisasi, grup, pengguna, DataStore, Pages, Harvest, Scheming, dan GeoView tetap memakai route serta template/fungsi native modul CKAN. Design system Wajo menata shell, tabel, formulir, navigasi, alert, tombol, tabs, dropdown, breadcrumb, pagination, dan responsivitasnya.
-- **Bahasa:** `id` menjadi locale default dengan `en` sebagai pilihan. Katalog gettext core dan domain Harvest, Pages, serta DCAT dikompilasi ke image; katalog JavaScript dibangun setelah plugin aktif. Theme juga mengganti teks promosi/placeholder bawaan CKAN pada beranda dengan informasi Portal Satu Data Kabupaten Wajo. Terjemahan extension pihak ketiga yang tidak memakai gettext atau domain yang dipelihara tetap perlu diaudit pada halaman aktual.
-
-### Implementasi dan titik pemeliharaan
-
-| File                                                           | Tanggung jawab                                                   |
-| -------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `theme/ckanext/wajo_theme/templates/header.html`               | Topbar, logo, profil, logout                                     |
-| `theme/ckanext/wajo_theme/templates/page.html`                 | Shell yang membungkus halaman admin native                       |
-| `theme/ckanext/wajo_theme/templates/wajo_theme/sidebar.html`   | Navigasi dan status aktif                                        |
-| `theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html` | Ringkasan Wajo Admin                                             |
-| `theme/ckanext/wajo_theme/assets/css/wajo-theme.css`           | Design system dan styling lintas modul                           |
-| `theme/ckanext/wajo_theme/plugin.py`                           | Plugin, middleware host admin, blueprint dashboard, Pages schema |
-
-`page.html` menggunakan `ckan_extends` dan hanya menambahkan shell di sekitar `super()` untuk pengguna yang telah login. Form CRUD tiap modul tidak ditulis ulang. Template tambahan harus tetap aditif dan mengikuti block CKAN 2.12.1; jangan menyalin seluruh template upstream hanya demi styling karena akan membuat maintenance dan upgrade lebih sulit.
-
-Blueprint Wajo Admin terdaftar dengan `url_prefix="/admin"`. Prefix ini penting: route ringkasan harus tetap `/admin/`, bukan `/`, untuk menghindari loop ketika middleware mengarahkan root hostname ke halaman ringkasan. Bootstrap menegakkan `CKAN__AUTH__ROUTE_AFTER_LOGIN=wajo_admin.index`, sehingga login berhasil diarahkan ke dashboard Wajo Admin.
-
-### Pemisahan host publik dan host administrasi
-
-Hostname CKAN adalah antarmuka administrasi privat; Next.js tetap menjadi satu-satunya katalog publik. Caddy meneruskan seluruh path `CKAN_HOST` ke CKAN—tanpa allowlist halaman—agar route core dan extension baru tetap terjangkau. Middleware `wajo_theme` mengunci semua halaman dan Action API di hostname admin:
-
-- Pengunjung anonim hanya dapat memuat `/user/login` dan aset statis yang diperlukan untuk halaman login.
-- Permintaan halaman lain diarahkan ke login dengan `came_from` agar setelah autentikasi pengguna kembali ke path yang diminta.
-- Action API admin tanpa sesi menghasilkan JSON `401`.
-- Pengguna yang sudah login dapat membuka route CKAN core maupun extension; izin CRUD tetap tunduk pada permission/role CKAN.
-- Middleware hanya berlaku pada `CKANEXT__WAJO_THEME__ADMIN_HOST`; request internal dari Next.js ke service CKAN dan request ke `PUBLIC_HOST` tidak dikunci oleh guard ini.
-- Redirect browser dari `CKAN_SITE_URL` dilokalkan kembali ke `CKAN_HOST`. Nilai `CKAN_SITE_URL` tetap menunjuk host publik untuk metadata/ekspor.
-
-Filter `cssrewrite` tidak digunakan pada bundle WebAssets Wajo karena stylesheet tidak menggunakan URL relatif dan filter tersebut pernah gagal memetakan asset ke URL pada halaman login.
-
-### Rebuild setelah perubahan
-
-Bootstrap menyalin source extension ke build context dan menurunkan `CKANEXT__WAJO_THEME__ADMIN_HOST` dari `CKAN_HOST`. Setelah mengubah plugin, template, CSS, atau konfigurasi route-after-login, rebuild CKAN:
-
-```bash
-bash ./deploy/ckan/bootstrap-upstream.sh
-
-# Cloudflare Tunnel
-bash ./deploy/ckan/compose.sh cloudflare up -d --build --force-recreate ckan edge-tunnel
-
-# Manual ingress (gunakan ini sebagai pengganti perintah di atas)
-bash ./deploy/ckan/compose.sh manual up -d --build --force-recreate ckan caddy
-```
-
-Jangan menghapus volume database, Solr, Redis, atau filestore untuk menerapkan perubahan theme. Folder `deploy/ckan/upstream` merupakan hasil bootstrap dan tidak diedit manual.
-
-## 7. Audit theme dan penerimaan UI admin
-
-Static guard `scripts/check-theme.py` mem-parsing template Jinja, memeriksa route `/admin`, locale, kontrak shell, role-aware quick actions, dan scope template. `scripts/check-auth-middleware.py` menguji login guard, redirect, API `401`, dan view dashboard dengan stub Action API. `scripts/check-build.py` membuat wheel `ckanext-wajo-theme` pada direktori sementara lalu memverifikasi bahwa plugin, header/page/sidebar/dashboard, logo, WebAssets/CSS, dan katalog `.po` benar-benar ikut terkemas. `bash scripts/check-static.sh` menjalankan seluruh pemeriksaan tersebut.
-
-Browser acceptance test tetap diperlukan pada container CKAN yang berjalan. Gunakan akun sysadmin dan akun editor/organisasi:
-
-| Area                 | Alur yang harus dicoba                             | Kriteria lulus                                                                                        |
-| -------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Login dan shell      | `/`, `/user/login`, login gagal/berhasil, logout   | Anonim hanya melihat login; logo/CSS tampil; login berhasil menuju `/admin/`; logout kembali ke login |
-| Ringkasan            | `/admin/`                                          | Angka sesuai Action API; kegagalan API tidak merusak dashboard; quick actions mengikuti permission    |
-| Dataset              | pencarian, detail, create/edit, resource, preview  | Filter, pagination, Scheming, validasi, upload, visibility, save/cancel dan unduhan berfungsi         |
-| Resource & DataStore | add/edit/upload resource, table preview, DataStore | Form, progress/error upload, tabel, toolbar, DataStore query dan pesan error berfungsi                |
-| Organisasi & grup    | index, detail, create/edit, anggota                | Navigasi, facet, tabel anggota, action dan hak akses tetap mengikuti CKAN                             |
-| Pengguna & sistem    | daftar/detail pengguna, konfigurasi, revisi        | Khusus sysadmin sesuai permission; tidak ada akses tambahan yang diberikan oleh theme                 |
-| Pages & Harvest      | daftar, form, halaman, harvest source/job/log      | Route extension tetap terbuka setelah login dan worker tidak dipengaruhi oleh CSS/template            |
-| GeoView              | GeoJSON, WMTS, shapefile, peta                     | Viewer tidak tertutup/terpotong oleh shell/sidebar; legenda dan toolbar tetap dapat digunakan         |
-| Responsif/a11y       | lebar 1440, 1024, 768, 390, 320 px; keyboard-only  | Tidak ada overflow horizontal; sidebar dapat dibuka/tutup; focus terlihat; reduced motion dihormati   |
-
-Periksa `https://CKAN_HOST/logo-kabupaten-wajo.webp` mengembalikan `200` dengan `Content-Type: image/webp`, dan stylesheet WebAssets merespons `200`. `bash ./deploy/ckan/diagnose-admin.sh` memeriksa pola status yang diharapkan: login `200/302`, dashboard anonim `302`, API admin anonim `401`.
-
-Status source check tidak menggantikan tes browser. Production build CKAN, visual acceptance, upload, DataStore, dan workflow extension harus dijalankan pada VPS/container target sebelum deployment dinyatakan tuntas.
-
-## 8. Persiapan data dan extension
-
-Extension CKAN dipin dalam source dan dipasang oleh bootstrap:
-
-| Extension            | Fungsi                                                                                                                                                                                                                                                                |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ckanext-scheming`   | Field metadata dataset dan resource, termasuk periode, metodologi, satuan, versi, dan catatan revisi                                                                                                                                                                  |
-| `ckanext-pages`      | Halaman informasi yang dikelola melalui CKAN; dibangun dari commit upstream `28eba99ad85d3b9037f5aaddad1f083300c69041` (PR #149). Build melengkapi metadata wheel agar deklarasi konfigurasi dan migrasi Alembic ikut terpasang; lihat `deploy/ckan/install-pages.py` |
-| `ckanext-dcat`       | Ekspor katalog DCAT/RDF dan harvesting DCAT                                                                                                                                                                                                                           |
-| `ckanext-geoview`    | Viewer resource geospasial pada CKAN Admin                                                                                                                                                                                                                            |
-| `ckanext-harvest`    | Impor katalog CKAN/DCAT dari sumber eksternal ke CKAN Wajo                                                                                                                                                                                                            |
-| `ckanext-xloader`    | Memuat resource tabular ke DataStore menggunakan worker (2.6.0; chardet 7.6.0)                                                                                                                                                                                        |
-| `ckanext-wajo-theme` | Branding dan stylesheet admin Wajo                                                                                                                                                                                                                                    |
-
-**Catatan packaging Pages:** commit upstream yang mendukung CKAN 2.12 masih memiliki masalah wheel yang tidak menyertakan `config_declaration.yaml` dan berkas migrasi Alembic (upstream issue [#150](https://github.com/ckan/ckanext-pages/issues/150)). Saat build, `install-pages.py` melengkapi `pyproject.toml` dan `MANIFEST.in`, membangun wheel, memverifikasi file konfigurasi/migrasi, lalu mengimpor plugin Pages dan Wajo sebelum image dinyatakan siap.
-
-Setelah CKAN dan DB pertama kali sehat, dari root repo jalankan:
-
-```bash
-bash ./deploy/ckan/apply-datastore-permissions.sh
-bash ./deploy/ckan/enable-xloader.sh cloudflare
-```
-
-Buat dataset publik di CKAN Admin. Untuk menampilkan konten khusus portal, gunakan tag yang sesuai: `portal-indikator`, `portal-infografik`, atau `portal-publikasi`. Indikator membutuhkan resource tabular yang telah dimuat ke DataStore; kolom minimum adalah `period`, `region`, dan `value`. Detail format field tersedia pada schema `ckanext.wajo_theme:schemas/dataset.yaml` serta panduan portal di `/api-data`.
-
-## 9. Verifikasi source image CKAN 2.12.1
-
-Bootstrap menyimpan commit source pada `deploy/ckan/.ckan-base-source.lock` dan commit yang sudah dibangun pada `deploy/ckan/.ckan-base-image.lock` (keduanya generated/ignored). Untuk sinkronisasi atau build manual:
-
-```bash
-bash ./deploy/ckan/sync-ckan-base-source.sh
-bash ./deploy/ckan/prepare-ckan-base.sh
-docker image inspect ckan/ckan-base:2.12.1 --format '{{.Id}} {{range .Config.Env}}{{println .}}{{end}}'
-```
-
-Image harus memperlihatkan `CKAN_REF=ckan-2.12.1`. Script `compose.sh ... up` menjalankan pemeriksaan dan build ini otomatis; build dilewati hanya bila commit upstream, image ID CKAN, dan ID runtime Python sama dengan lock yang berhasil diverifikasi. Untuk memaksa rebuild dari source terbaru dan Python base yang baru ditarik, jalankan `CKAN_BASE_FORCE_REBUILD=1 bash ./deploy/ckan/compose.sh cloudflare up -d --build`. Jika upstream `main` belum menyetel `ckan-2.12/VERSION.txt` ke `2.12.1`, deployment berhenti dan tidak diam-diam memakai versi lain.
-
-## 10. DNS manual tanpa Tunnel
-
-Jika VPS menerima inbound HTTPS, arahkan A record kedua hostname ke IP VPS, buka TCP 80/443 pada firewall, lalu jalankan:
-
-```bash
-bash ./deploy/ckan/compose.sh manual config
-bash ./deploy/ckan/compose.sh manual up -d --build
-```
-
-Caddy menangani sertifikat TLS. Jangan jalankan profil manual dan Tunnel bersamaan untuk deployment yang sama. Pastikan hanya service Caddy yang memublikasikan port web.
-
-## 11. Pembaruan dan diagnosa
-
-Sebelum deployment, jalankan `npm ci`, `npm run check`, `npm run test`, `npm run build`, dan `bash ./deploy/ckan/compose.sh cloudflare config`. Workflow manual `Extended validation` menyediakan E2E browser, audit dependency, dan smoke-test image extension. Setelah deploy, periksa `bash ./deploy/ckan/compose.sh cloudflare ps` dan log service. Backup PostgreSQL CKAN, volume filestore, serta indeks Solr; uji pemulihan sebelum upgrade. Jangan menghapus volume ketika membangun ulang image.
-
-## 12. CMS konten publik
-
-CKAN Pages digunakan sebagai headless CMS untuk Next.js. Pengelolaan konten, field editorial, content blocks, SEO, media, privasi, dan alur publikasi dijelaskan pada [`docs/CMS.md`](../../docs/CMS.md).
-
-## Healthcheck CKAN
-
-Healthcheck CKAN memakai Python standard library untuk meminta `http://127.0.0.1:5000/api/action/status_show` dan memastikan payload memiliki `success: true`. Pemeriksaan tidak bergantung pada `wget`. `start_period: 90s`, interval 30 detik, timeout 10 detik, dan lima retry memberi waktu untuk proses upgrade/migrasi sebelum service lain bergantung pada status `healthy`.
-
-### Unduhan resource publik (Next.js)
-
-Route unduhan resource publik diproses oleh Next.js pada pola `/dataset/{dataset}/resource/{resource}/download/{filename}`. Caddy tidak lagi meneruskan path unduhan tersebut langsung ke CKAN; Next.js memeriksa visibilitas dataset/resource lewat Action API internal, lalu mengambil file dari origin CKAN internal. Ini menghindari redirect ke hostname admin dan mencegah browser menerima halaman login CKAN sebagai pengganti file. Pastikan `CKAN_API_INTERNAL_URL` menunjuk ke service CKAN internal (`http://ckan:5000/api/3/action` pada Compose standar).
-
-## Media editorial dan Markdown
-
-Konten Pages/Blog menggunakan Markdown dan `content_blocks`. Editor CKAN menyediakan toolbar, pratinjau, dan tombol unggah gambar. Gambar editorial tidak dibuat sebagai resource dataset; gambar disimpan melalui CKAN File API (`file_create`) pada FileStore persisten, lalu dipindah ke owner khusus `wajo_media/public-editorial-media`.
-
-Konfigurasi `CKAN__FILES__OWNER__CASCADE_ACCESS` harus mencakup `wajo_media`. Plugin Wajo mengizinkan pembacaan hanya untuk ID owner `public-editorial-media`; endpoint Next.js memeriksa `file_show`, owner, MIME, signature, serta batas 8 MiB sebelum menyajikan file secara inline. Endpoint upload `/admin/media/upload` hanya menerima sesi sysadmin dan memerlukan token CSRF CKAN. Jangan membuka FileStore generik atau mengaktifkan cascade untuk owner umum seperti `user`.
-
-Form Open Graph memiliki tombol upload dan pratinjau. Form `content_blocks` juga dapat mengunggah gambar dan otomatis menambahkan objek `{ "type": "image", "src": "...", "alt": "..." }` ke JSON array. Jika JSON tidak valid, upload dibatalkan supaya tidak membuat file yatim. Editor Markdown menyisipkan sintaks gambar di posisi kursor. Native file inputs lainnya di Wajo Admin mendapatkan style, filename, dan preview lokal untuk image MIME yang diizinkan.
-
-Frontend dan admin preview dibuat sejalan untuk subset Markdown portal: heading ATX/Setext, paragraf, emphasis, strikethrough, links, images, fenced/indented code, tables (GFM), task lists, nested lists, blockquotes, thematic breaks, dan hard breaks. Raw HTML tetap inert, dan tautan/gambar diperiksa terhadap protocol yang diizinkan. Ini tidak mengklaim kompatibilitas ekstensi Markdown yang tidak dipakai portal seperti math/footnote.
-
-Sesudah menerapkan perubahan, uji unggah melalui Pages/Blog sebagai sysadmin, lihat preview Open Graph dan blok gambar, kemudian buka halaman publik. Jangan menghapus volume `ckan_storage`.
-
-## 13. Akses dataset private dari URL portal yang sama
-
-CKAN Admin dan portal Next.js dapat memakai URL detail/resource/download yang sama. **CKAN tetap menjadi satu-satunya otoritas izin**; Next.js hanya meneruskan sesi browser dan membatasi URL/file yang boleh diproxy.
-
-- Pengunjung anonim hanya membaca dataset/resource publik. Penolakan CKAN untuk record privat/tidak terbit disamarkan sebagai 404.
-- Untuk dataset privat, browser harus mengirim cookie sesi CKAN yang valid ke `PUBLIC_HOST`. Next.js meneruskan hanya cookie CKAN terkonfigurasi ke Action API internal, lalu `package_search`/`package_show` tetap membuat keputusan izin berdasarkan pengguna yang login. Cookie yang sekadar hadir tidak dianggap sebagai grant.
-- Pada CKAN core 2.12, `resource_show` memeriksa hak `package_show` terhadap dataset induknya. Jadi batas privasi bawaan adalah **dataset-level**, bukan ACL terpisah per resource.
-- Properti `resource.private`/`file.private` bukan ACL per-resource CKAN core. Portal memperlakukan marker tersebut sebagai _fail-closed_: marker `true` disembunyikan/ditolak, termasuk untuk pengguna login. Jangan mengandalkan marker ini untuk melindungi resource; bila kebijakan per-resource diperlukan, implementasikan field dan auth function CKAN khusus (beserta uji integrasi) sebelum mengubah aturan fail-closed.
-- Untuk unduhan FileStore generik (`/file/download/<id>`), portal memvalidasi `file_show`, owner `resource`/`package` yang cocok, dan akses dataset. Konfigurasi `ckan.files.owner.cascade_access` harus memuat `resource package` agar otorisasi FileStore mengikuti izin entitas induk. Next.js kemudian meneruskan cookie yang sama ke endpoint download CKAN. CKAN tetap menjalankan `permission_download_file`; izin melihat metadata `file_show` sendiri bukan izin unduh. Proxy unduhan selalu mengirim `Cache-Control: private, no-store`, termasuk file yang saat ini publik, supaya salinan cache tidak bertahan setelah status dataset berubah menjadi privat.
-- Jalur unduh resource native `/dataset/<dataset>/resource/<resource>/download/<filename>` memverifikasi resource dan dataset melalui Action API CKAN, lalu mengambil hanya path CKAN internal yang cocok. URL eksternal dari metadata tidak pernah di-fetch sebagai host bebas.
-- Seluruh respons byte unduhan memakai `Cache-Control: private, no-store`, baik resource saat ini publik maupun privat. Ini mencegah cache browser/CDN menyajikan salinan lama setelah status dataset diperketat. Penolakan 401/403/404/410 pada jalur download dipetakan menjadi 404 agar tidak membocorkan keberadaan record; kegagalan upstream 5xx tetap menjadi 502.
-
-### Cookie CKAN lintas subdomain
-
-CKAN 2.12 memakai Flask session cookie. Login dan portal boleh memakai **subdomain berbeda** selama keduanya berada pada parent/registrable domain yang sama (mis. `ckan.wajokab.go.id` dan `data.wajokab.go.id`). `sync-env.py` menurunkan `SESSION_COOKIE_DOMAIN` ke parent domain bersama dan mengatur `Secure`, `HttpOnly`, serta `SameSite=Lax`. Jika kedua host berbeda registrable domain (mis. `ckan.wajokab.go.id` dan `data.silirdev.com`), browser tidak dapat membagikan cookie di antara keduanya: atribut `Domain` tidak dapat melintasi dua domain tersebut. Dalam keadaan itu, pindahkan salah satu host agar menjadi sibling subdomain, atau bangun SSO handoff terpisah dengan token sekali-pakai yang ditandatangani, singkat masa berlakunya, diikat ke audience/nonce, dan ditukar server-ke-server; jangan menyalin cookie lewat query string. Setting Flask non-`ckan.*` harus disuplai dengan prefix triple underscore `CKAN___` pada `ckanext-envvars` (mis. `CKAN___SESSION_COOKIE_DOMAIN`), bukan `CKAN__`; lihat [format ckanext-envvars](https://github.com/ckan/ckanext-envvars) dan [catatan migrasi CKAN 2.12](https://docs.ckan.org/en/2.12/changelog.html).
-
-Nama cookie khusus `wajo_ckan_session` menghindari benturan dengan cookie host-only lama bernama `ckan`. `sync-env.py` memigrasikan nilai lama `CKAN_SESSION_COOKIE_NAME=ckan` secara otomatis dan menjaga nama yang sama untuk CKAN serta Next.js. Setelah mengubah hostname, `SESSION_COOKIE_DOMAIN`, atau nama cookie, jalankan bootstrap/recreate CKAN dan Next.js, kemudian logout lalu login kembali ke CKAN Admin agar browser menerima cookie parent-domain baru. Di DevTools → Application → Cookies, pastikan cookie `wajo_ckan_session` memiliki Domain parent (mis. `.silirdev.com` untuk `data.silirdev.com` + `ckan.silirdev.com`), bukan host-only `ckan.silirdev.com`. Pada request publik Next.js, periksa bahwa _nama_ cookie hadir di Request Headers; jangan membagikan nilainya.
-
-**Batas kepercayaan:** cookie parent-domain akan dikirim browser ke seluruh subdomain di zone tersebut. Jangan gunakan pola ini bila ada subdomain yang dikelola pihak ketiga, tidak tepercaya, atau tidak memiliki kontrol keamanan setara. Cookie HttpOnly mencegah pembacaan melalui JavaScript, tetapi tidak mencegah server pada subdomain lain menerima header Cookie. Jangan meneruskan cookie ini ke host eksternal atau mencatat nilainya pada log.
-
-### GeoView / ResourceView routing and basemap
-
-CKAN resource-view pages (`/dataset/{dataset}/resource/{resource}/view/{view}`) are generated by CKAN using `CKAN_SITE_URL`, which intentionally points to `PUBLIC_HOST`. The public Caddy site routes only those exact ResourceView paths, plus CKAN `/webassets/`, `/base/`, and `/static/` assets, to the CKAN upstream. This prevents Next.js' global `X-Frame-Options: DENY` from being applied to CKAN GeoJSON/Map Viewer iframes. ResourceView responses are `private, no-store` and may be framed only by `CKAN_HOST`; CKAN still performs normal session and dataset/resource authorization.
-
-The Leaflet GeoJSON/WMTS/Shapefile viewers use the configured XYZ basemap `https://tile.openstreetmap.org/{z}/{x}/{y}.png` with OpenStreetMap attribution. The Next.js GeoJSON preview uses the same OSM tile source beneath its vector overlay, with a 48-tile cap. Caddy routes ResourceView HTML (`/view/{id}`, `/preview`, `/embed`), its static assets, and `resource_proxy` through CKAN on the public host; the admin host has an explicit ResourceView handler too. The ResourceView frame policy permits only the first-party public/admin origins and keeps responses private/no-store. A private resource preview additionally requires the shared CKAN session cookie to be present on the `PUBLIC_HOST` request; public preview success alone does not prove the cross-subdomain session is being forwarded. For a high-traffic public portal, replace the standard OSM tile endpoint with a managed or self-hosted tile service and retain the provider's required attribution/terms.
-
-### Diagnostik ResourceView GeoJSON di CKAN
-
-ResourceView CKAN berbeda dari pratinjau peta Next.js. Route `/dataset/{dataset}/resource/{resource}/view/{view}`, `/preview`, dan `/embed` pada hostname publik harus diteruskan oleh Caddy ke CKAN; asset `/webassets`, `/base`, `/static`, dan `/fanstatic` serta Action API `resource_proxy` juga harus mencapai CKAN. Route iframe hanya membuka `frame-ancestors` untuk hostname CKAN dan portal, bukan menjadikan seluruh situs dapat di-embed.
-
-`geojson_view` adalah viewer Leaflet GeoJSON dari `ckanext-geoview`; `geo_view` adalah viewer OpenLayers. Keduanya memerlukan plugin aktif, view record pada resource, serta `resource_proxy` untuk sumber yang perlu diproksikan. Basemap dan tile OSM berasal dari browser; bila viewer terbuka tetapi layer peta kosong, periksa Console/Network untuk request `resource_proxy`, asset `/webassets/`, dan tile `tile.openstreetmap.org`. Perubahan konfigurasi Caddy perlu di-reload/recreate; perubahan CKAN plugin/default view perlu rebuild/restart CKAN.
-
-Untuk resource privat, browser admin harus memiliki cookie CKAN dengan Domain parent yang sama. CKAN tetap memeriksa otorisasi user saat halaman ResourceView dan `resource_proxy` diminta; jangan mengubah resource privat menjadi publik hanya untuk membuat preview bekerja.
-
-### Perbaikan akses dataset privat dan preview GeoView
-
-Portal Next.js dan CKAN Admin boleh memakai hostname yang berbeda hanya jika keduanya berada di domain induk yang sama. Contoh yang valid: `data.silirdev.com` + `ckan.silirdev.com` (cookie Domain `.silirdev.com`), atau `data.wajokab.go.id` + `ckan.wajokab.go.id` (cookie Domain `.wajokab.go.id`). Pasangan `data.silirdev.com` + `ckan.wajokab.go.id` tidak dapat berbagi cookie browser. Bila `.env.ckan` memakai pasangan lintas-domain tersebut, pindahkan CKAN Admin menjadi sibling subdomain dari `PUBLIC_HOST` sebelum mengharapkan admin dapat membuka dataset privat di portal. `sync-env.py` menolak konfigurasi lintas zone agar sistem tidak diam-diam menganggap sesi admin tersedia.
-
-Setelah mengubah hostname, jalankan `bash ./deploy/ckan/bootstrap-upstream.sh`, recreate service CKAN dan Next.js, lalu logout/login sekali ke CKAN Admin. Di DevTools → Application → Cookies, cookie `wajo_ckan_session` harus memiliki Domain parent (mis. `.silirdev.com`), bukan host-only. Saat membuka dataset privat melalui portal, request Next.js pada hostname publik harus membawa cookie tersebut. Next.js hanya meneruskannya ke CKAN; `package_show`, `resource_show`, dan `package_search` tetap diperiksa oleh otorisasi CKAN untuk user yang login. Cookie yang sekadar ada tidak dianggap sebagai izin.
-
-Untuk Leaflet GeoJSON, basemap custom harus memakai environment nested key `CKANEXT__SPATIAL__COMMON_MAP__CUSTOM__URL`, yang dipetakan ke `ckanext.spatial.common_map.custom.url`. Bentuk lama `CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL` tidak mengisi properti `custom.url`; bootstrap baru menghapus key lama saat menyinkronkan konfigurasi. Setelah bootstrap, recreate CKAN agar nilai baru dimuat. Plugin GeoView dan `resource_proxy` tetap harus aktif.
-
-`ckan.views.default_views` membuat view untuk resource yang dibuat setelah konfigurasi berlaku; pengaturan ini tidak otomatis menambah view ke resource lama. Karena itu, plugin Wajo menormalkan resource `.geojson` (termasuk upload yang metadata format-nya masih `JSON`) sebelum CKAN membuat default view. Saat resource GeoJSON lama diedit/disimpan, plugin juga menjalankan Action `resource_create_default_resource_views` untuk menambahkan view bawaan yang belum ada. Bila record lama belum juga memiliki tab/view setelah disimpan, buka CKAN Admin → resource → Views → Add view → GeoJSON sebagai langkah pemulihan manual. `CKANEXT__GEOVIEW__GEOJSON__MAX_FILE_SIZE` disetel ke 25 MiB; plugin membutuhkan nilai `resource.size`, sehingga file yang ditautkan dari URL eksternal dapat tidak memenuhi syarat. Untuk itu, pisahkan diagnosis: (1) apakah record ResourceView ada, (2) apakah iframe route `/dataset/.../resource/.../view/...` menjangkau CKAN, (3) apakah `/webassets/` dan `/base/` dimuat, (4) apakah `resource_proxy` berhasil, dan (5) apakah tile OSM berhasil dimuat. Preview Next.js yang berhasil tidak membuktikan semua jalur CKAN ResourceView tersebut sehat.
-
-Periksa konfigurasi efektif dan log tanpa membagikan cookie/token:
-
-```bash
-grep '^CKANEXT__SPATIAL__COMMON_MAP__' .env.ckan
-bash ./deploy/ckan/compose.sh cloudflare logs --tail=150 ckan caddy
-```
-
-Jika viewer masih kosong setelah view record ada, gunakan DevTools → Network pada iframe CKAN dan periksa status request `view`, `webassets`, `resource_proxy`, serta `tile.openstreetmap.org`. Jangan mengubah dataset/resource privat menjadi publik untuk mengatasi preview.
+- Jangan memasukkan `.env.ckan`, token Tunnel, API key, atau cookie sesi ke Git/log.
+- CKAN tetap satu-satunya otoritas permission. Jangan memakai API key sysadmin di browser.
+- Backup PostgreSQL, FileStore, dan Solr sebelum perubahan skema/versi.
+- Hindari `docker compose down -v` dan perintah penghapusan volume pada produksi.
+- Jalankan `bash scripts/check-static.sh`, `npm run lint`, unit test, dan extended CKAN/browser smoke test sebelum rilis.

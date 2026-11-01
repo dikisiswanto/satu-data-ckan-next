@@ -106,9 +106,9 @@ body:has(.public-home) .home-hero {
   background-image:
     linear-gradient(
       90deg,
-      rgb(5 24 43 / 84%) 0%,
-      rgb(8 35 55 / 72%) 50%,
-      rgb(8 35 55 / 38%) 100%
+      rgb(5 24 43 / 92%) 0%,
+      rgb(8 35 55 / 84%) 54%,
+      rgb(8 35 55 / 58%) 100%
     ),
     linear-gradient(0deg, rgb(6 28 46 / 30%), rgb(6 28 46 / 5%)),
     var(--home-hero-image, url("/portal-social.svg"));
@@ -183,13 +183,14 @@ body:has(.public-home) .home-hero-pattern {
 }
 
 .home-hero h1 span {
-  color: #d8ecff;
+  color: #e5f1ff;
 }
 
 .home-hero-description {
   max-width: 38rem;
   margin: 1.15rem 0 0;
-  color: rgb(255 255 255 / 90%);
+  color: rgb(255 255 255 / 95%);
+  text-shadow: 0 1px 1px rgb(0 0 0 / 22%);
   font-size: clamp(0.98rem, 1.18vw, 1.075rem);
   line-height: 1.72;
 }
@@ -321,9 +322,11 @@ body:has(.public-home) .home-hero-pattern {
 }
 
 .home-scene-cube {
+  --cube-size: 8.5rem;
+  --cube-half: 4.25rem;
   position: relative;
-  width: 8.5rem;
-  height: 8.5rem;
+  width: var(--cube-size);
+  height: var(--cube-size);
   transform-style: preserve-3d;
   animation: wajo-cube-drift 15s ease-in-out infinite;
 }
@@ -332,50 +335,54 @@ body:has(.public-home) .home-hero-pattern {
   position: absolute;
   inset: 0;
   display: grid;
+  box-sizing: border-box;
+  width: var(--cube-size);
+  height: var(--cube-size);
   place-items: center;
-  border: 1px solid rgb(207 235 245 / 48%);
-  border-radius: 1.15rem;
-  background: linear-gradient(
-    145deg,
-    rgb(225 246 255 / 30%),
-    rgb(82 155 194 / 12%)
-  );
+  border: 1px solid rgb(27 52 64 / 24%);
+  border-radius: 0;
   box-shadow:
-    inset 0 0 32px rgb(226 247 255 / 10%),
-    0 12px 32px rgb(2 18 34 / 14%);
-  -webkit-backdrop-filter: blur(7px);
-  backdrop-filter: blur(7px);
+    inset 0 0 0 1px rgb(255 255 255 / 28%),
+    0 8px 20px rgb(2 18 34 / 10%);
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.home-scene-cube__face svg {
+  width: 2.65rem;
+  height: 2.65rem;
+  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 28%));
 }
 
 .home-scene-cube__front {
-  color: #ecfaff;
-  transform: translateZ(4.25rem);
+  color: #164b70;
+  background: linear-gradient(145deg, #eaf5ff, #cfe5f7);
+  transform: translateZ(var(--cube-half));
 }
 .home-scene-cube__back {
-  transform: rotateY(180deg) translateZ(4.25rem);
+  color: #4d3d83;
+  background: linear-gradient(145deg, #f1edff, #ddd5fa);
+  transform: rotateY(180deg) translateZ(var(--cube-half));
 }
 .home-scene-cube__right {
-  transform: rotateY(90deg) translateZ(4.25rem);
-  background: linear-gradient(
-    145deg,
-    rgb(120 205 224 / 24%),
-    rgb(61 125 165 / 12%)
-  );
+  color: #17604b;
+  background: linear-gradient(145deg, #e8f8ef, #ccebd9);
+  transform: rotateY(90deg) translateZ(var(--cube-half));
 }
 .home-scene-cube__left {
-  transform: rotateY(-90deg) translateZ(4.25rem);
+  color: #82511b;
+  background: linear-gradient(145deg, #fff5df, #f4dfb4);
+  transform: rotateY(-90deg) translateZ(var(--cube-half));
 }
 .home-scene-cube__top {
-  transform: rotateX(90deg) translateZ(4.25rem);
-  background: linear-gradient(
-    145deg,
-    rgb(240 251 255 / 36%),
-    rgb(61 125 165 / 12%)
-  );
+  color: #285b36;
+  background: linear-gradient(145deg, #edf8e9, #d4ebca);
+  transform: rotateX(90deg) translateZ(var(--cube-half));
 }
 .home-scene-cube__bottom {
-  transform: rotateX(-90deg) translateZ(4.25rem);
+  color: #873b4c;
+  background: linear-gradient(145deg, #fff0f0, #f3d3d8);
+  transform: rotateX(-90deg) translateZ(var(--cube-half));
 }
 
 .home-scene-spark {
@@ -575,12 +582,20 @@ body:has(.public-home) .home-hero-pattern {
   left: 0.1rem;
   --chip-enter-delay: 500ms;
   --chip-float-delay: 1.45s;
+  --chip-bg: #eaf3ff;
+  --chip-border: #bfd5f2;
+  --chip-ink: #19476f;
+  --chip-muted: #49647d;
 }
 .home-visual-chip-top-right {
   top: 1.25rem;
   right: 0.1rem;
   --chip-enter-delay: 590ms;
   --chip-float-delay: 2.05s;
+  --chip-bg: #e9f7ef;
+  --chip-border: #c0e2cf;
+  --chip-ink: #1b5840;
+  --chip-muted: #4a6d5d;
 }
 .home-visual-chip-bottom-left {
   right: auto;
@@ -588,12 +603,34 @@ body:has(.public-home) .home-hero-pattern {
   left: 0.1rem;
   --chip-enter-delay: 680ms;
   --chip-float-delay: 1.75s;
+  --chip-bg: #f0edff;
+  --chip-border: #d4cdf5;
+  --chip-ink: #4d3e82;
+  --chip-muted: #655d83;
 }
 .home-visual-chip-bottom-right {
   right: 0.1rem;
   bottom: 5.4rem;
   --chip-enter-delay: 770ms;
   --chip-float-delay: 2.35s;
+  --chip-bg: #fff4e3;
+  --chip-border: #f0d9b4;
+  --chip-ink: #80531f;
+  --chip-muted: #796247;
+}
+.home-visual-chip {
+  border-color: var(--chip-border, #d5e3ed);
+  color: var(--chip-ink, #173b5b);
+  background: var(--chip-bg, #f3f7fb);
+}
+.home-visual-chip > svg {
+  color: var(--chip-ink, #173b5b);
+}
+.home-visual-chip strong {
+  color: var(--chip-ink, #173b5b);
+}
+.home-visual-chip small {
+  color: var(--chip-muted, #526777);
 }
 @keyframes wajo-metric-float {
   0%,
@@ -745,21 +782,21 @@ body:has(.public-home) .home-hero-pattern {
     will-change: auto !important;
   }
   .home-hero-visual .home-scene-cube__front {
-    transform: translateZ(4.25rem) !important;
+    transform: translateZ(var(--cube-half)) !important;
   }
   .home-hero-visual .home-scene-cube__back {
-    transform: rotateY(180deg) translateZ(4.25rem) !important;
+    transform: rotateY(180deg) translateZ(var(--cube-half)) !important;
   }
   .home-hero-visual .home-scene-cube__right {
-    transform: rotateY(90deg) translateZ(4.25rem) !important;
+    transform: rotateY(90deg) translateZ(var(--cube-half)) !important;
   }
   .home-hero-visual .home-scene-cube__left {
-    transform: rotateY(-90deg) translateZ(4.25rem) !important;
+    transform: rotateY(-90deg) translateZ(var(--cube-half)) !important;
   }
   .home-hero-visual .home-scene-cube__top {
-    transform: rotateX(90deg) translateZ(4.25rem) !important;
+    transform: rotateX(90deg) translateZ(var(--cube-half)) !important;
   }
   .home-hero-visual .home-scene-cube__bottom {
-    transform: rotateX(-90deg) translateZ(4.25rem) !important;
+    transform: rotateX(-90deg) translateZ(var(--cube-half)) !important;
   }
 }

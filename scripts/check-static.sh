@@ -18,6 +18,9 @@ run_check python3 scripts/check-ci.py
 run_check python3 scripts/check-env.py
 run_check python3 scripts/check-base.py
 run_check python3 scripts/check-theme.py
+run_check python3 scripts/check-theme-css.py
+run_check python3 scripts/check-public-hero.py
+run_check python3 scripts/test-theme-css-formatting.py
 run_check node scripts/check-admin-forms.mjs
 run_check node scripts/check-geojson-component.mjs
 run_check node scripts/check-exclusion-contract.mjs

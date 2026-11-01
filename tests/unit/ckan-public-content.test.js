@@ -532,6 +532,23 @@ describe("public portal summary sourced from CKAN", () => {
     });
   });
 
+  it("preserves safe plain-text CSRF diagnostics when CKAN returns a non-JSON 400 page", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("400 Bad Request: The CSRF token is missing.", {
+        status: 400,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      }),
+    );
+
+    await expect(
+      ckanAction("package_search", { q: "*:*" }),
+    ).rejects.toMatchObject({
+      status: 400,
+      detail: "400 Bad Request: The CSRF token is missing.",
+      action: "package_search",
+    });
+  });
+
   it("normalizes legacy fq_list input to one scalar fq before CKAN receives it", async () => {
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
@@ -544,13 +561,13 @@ describe("public portal summary sourced from CKAN", () => {
       fq_list: 'tags:"portal-indikator"',
     });
     const [{ url, init, params }] = fetchSpy.mock.calls.map(decodeActionCall);
-    const body = JSON.parse(init.body);
     expect(url.pathname).toContain("/package_search");
-    expect(init.method).toBe("POST");
-    expect(body.fq).toBe('(state:active) AND (tags:"portal-indikator")');
-    expect(body).not.toHaveProperty("fq_list");
+    expect(init.method).toBe("GET");
+    expect(init.body).toBeUndefined();
+    expect(params.get("fq")).toBe(
+      '(state:active) AND (tags:"portal-indikator")',
+    );
     expect(params.get("fq_list")).toBeNull();
-    expect(params.get("fq")).toBe(body.fq);
   });
 
   it("counts datasets, resources and legacy portal_type indicators without coupling failures", async () => {
@@ -602,11 +619,11 @@ describe("public portal summary sourced from CKAN", () => {
         params.get("fq") === buildPortalContentDiscoveryFilter("indicator"),
     );
     expect(indicatorSearch).toBeDefined();
-    expect(indicatorSearch.init.method).toBe("POST");
-    expect(JSON.parse(indicatorSearch.init.body).fq).toBe(
+    expect(indicatorSearch.init.method).toBe("GET");
+    expect(indicatorSearch.init.body).toBeUndefined();
+    expect(indicatorSearch.params.get("fq")).toBe(
       buildPortalContentDiscoveryFilter("indicator"),
     );
-    expect(JSON.parse(indicatorSearch.init.body)).not.toHaveProperty("fq_list");
 
     const datasetSearch = actionCalls.find(
       ({ url, params }) =>
@@ -614,8 +631,8 @@ describe("public portal summary sourced from CKAN", () => {
         params.get("fq")?.includes("*:* AND -tags:"),
     );
     expect(datasetSearch?.params.get("fq")).toContain("*:* AND -tags:");
-    expect(datasetSearch.init.method).toBe("POST");
-    expect(JSON.parse(datasetSearch.init.body)).not.toHaveProperty("fq_list");
+    expect(datasetSearch.init.method).toBe("GET");
+    expect(datasetSearch.init.body).toBeUndefined();
 
     const resourceSearch = actionCalls.find(({ url }) =>
       url.pathname.endsWith("/resource_search"),
@@ -787,20 +804,17 @@ describe("CKAN-driven public category cards", () => {
     const facetsRequest = decodeActionCall(
       vi.mocked(globalThis.fetch).mock.calls.at(-1),
     );
-    expect(facetsRequest.init.method).toBe("POST");
-    expect(JSON.parse(facetsRequest.init.body).fq).toBe(
+    expect(facetsRequest.init.method).toBe("GET");
+    expect(facetsRequest.init.body).toBeUndefined();
+    expect(facetsRequest.params.get("fq")).toBe(
       buildDatasetCatalogExclusionFilters().join(" AND "),
     );
-    expect(JSON.parse(facetsRequest.init.body)).not.toHaveProperty("fq_list");
-    expect(JSON.parse(facetsRequest.init.body)["facet.field"]).toEqual([
+    expect(facetsRequest.params.getAll("facet.field")).toEqual([
       "groups",
       "organization",
       "res_format",
       "extras_portal_reference_period",
     ]);
-    expect(facetsRequest.params.get("fq")).toBe(
-      buildDatasetCatalogExclusionFilters().join(" AND "),
-    );
     expect(facetsRequest.params.get("fq_list")).toBeNull();
     expect(response.data.categories).toEqual([
       { id: "kesehatan", name: "Kesehatan", count: 12 },

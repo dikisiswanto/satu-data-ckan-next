@@ -91,7 +91,7 @@ def main() -> None:
         "The username is already associated with another account. Please use a different username.",
         "Please enter both passwords", "Passwords must be strings", "The passwords you entered do not match",
         "Edit not allowed as it looks like spam. Please avoid links in your description.",
-        "There are no views created for this resource yet.", "Not seeing the views you were expecting?",
+        "There are no views created for this resource yet.", "There is no description for this dataset.", "Not seeing the views you were expecting?",
         "Click here for more information.", "Here are some reasons you may not be seeing expected views:",
         "Explore", "More information", "Go to resource", "API Endpoint", "Views", "No preview available",
         "An error occurred", "Loading data...", "Organization members", "Manage members", "Add member",
@@ -285,6 +285,12 @@ def main() -> None:
         import gettext
         with base_path.open("rb") as handle:
             runtime_catalog = gettext.GNUTranslations(handle)
+        dataset_description_prompt = runtime_catalog.gettext("There is no description for this dataset.")
+        if dataset_description_prompt != "Belum ada deskripsi untuk dataset ini.":
+            ERRORS.append(
+                "Compiled CKAN core catalog must render the empty dataset description in Indonesian: "
+                f"{dataset_description_prompt!r}."
+            )
         search_result = runtime_catalog.ngettext(
             '{number} dataset found for "{query}"',
             '{number} datasets found for "{query}"',

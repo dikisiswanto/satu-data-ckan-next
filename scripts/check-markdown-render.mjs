@@ -109,3 +109,86 @@ assert.match(
 process.stdout.write(
   "Markdown renderer checks passed: semantic headings, tables/alignment, tasks, nested lists, Setext, quotes, code, hard breaks, inert HTML, and CMS image upload controls.\n",
 );
+
+const pagesDetail = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/page.html",
+);
+const blogDetail = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/blog.html",
+);
+const pagesRevision = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/page_revisions_preview.html",
+);
+const blogRevision = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/blog_revisions_preview.html",
+);
+const adminMarkdown = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/markdown.py",
+);
+const adminPlugin = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
+);
+for (const [name, template] of [
+  ["Pages", pagesDetail],
+  ["Blog", blogDetail],
+  ["Pages revisions", pagesRevision],
+  ["Blog revisions", blogRevision],
+]) {
+  assert.match(
+    template,
+    /h\.wajo_render_markdown\(/,
+    `${name} detail must render Markdown in CKAN admin.`,
+  );
+  assert.match(
+    template,
+    /editor in \['medium', 'ckeditor'\]/,
+    `${name} must treat only supported WYSIWYG modes as HTML.`,
+  );
+}
+assert.match(
+  blogDetail,
+  /block secondary_content %}\s*{% endblock %}/,
+  "Blog detail must not inject unrelated recent article sidebars.",
+);
+assert.match(
+  adminPlugin,
+  /ITemplateHelpers[\s\S]*wajo_render_markdown/,
+  "CKAN must expose the safe Wajo Markdown helper to Jinja templates.",
+);
+assert.match(
+  adminMarkdown,
+  /extensions=\["extra", "sane_lists", _WajoMarkdownExtension\(\)\]/,
+  "CKAN admin must render tables, fenced code, and sane lists.",
+);
+assert.match(
+  adminMarkdown,
+  /class _TaskListTreeprocessor[\s\S]*def run\(self, root:/,
+  "CKAN admin must render task-list checkboxes.",
+);
+assert.match(
+  adminMarkdown,
+  /_STRIKE_RE[\s\S]*class _StrikethroughProcessor/,
+  "CKAN admin must render strikethrough Markdown.",
+);
+assert.match(
+  adminMarkdown,
+  /nh3\.clean\([\s\S]*_ALLOWED_URL_SCHEMES/,
+  "CKAN Markdown output must be sanitized with a constrained tag/attribute/URL allowlist.",
+);
+
+const newsDetail = await read("src/app/(public)/berita/[slug]/page.jsx");
+assert.match(
+  newsDetail,
+  /getCmsMarkdownImage/,
+  "News detail may derive social image metadata from Markdown images only.",
+);
+assert.match(
+  newsDetail,
+  /<CmsPageBody page=\{page\}\s*\/>/,
+  "News detail must render original inline Markdown images inside the article body.",
+);
+assert.doesNotMatch(
+  newsDetail,
+  /getCmsFeatureImage|ImageLightbox|public-cms-cover|<Image/,
+  "News detail must not render a separate featured/cover image before Markdown content.",
+);

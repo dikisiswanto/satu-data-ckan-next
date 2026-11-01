@@ -31,8 +31,13 @@ assert.match(
 );
 assert.match(
   client,
-  /const useJsonBody = action === "package_search"/,
-  "package_search must use a typed JSON POST request.",
+  /const useJsonBody = action !== "package_search" && hasStructuredParams/,
+  "package_search must stay on a CSRF-safe GET request, including authenticated sessions.",
+);
+assert.match(
+  client,
+  /requestInit\.method = "GET"[\s\S]*url\.searchParams\.append\(key, String\(item\)\)/,
+  "CKAN list-valued search parameters must be repeated as query keys instead of sent as a JSON POST.",
 );
 assert.match(
   publicData,

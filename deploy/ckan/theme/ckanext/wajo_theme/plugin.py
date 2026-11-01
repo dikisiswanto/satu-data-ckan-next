@@ -15,6 +15,8 @@ from ckan.lib.plugins import DefaultTranslation
 from ckanext.pages.interfaces import IPagesSchema
 from ckanext.xloader.interfaces import IXloader
 
+from .markdown import render_wajo_markdown
+
 
 ALLOWED_CONTENT_BLOCK_TYPES = {
     "hero",
@@ -128,6 +130,7 @@ class WajoThemePlugin(plugins.SingletonPlugin):
     """Load the Wajo theme and enforce authentication on the admin hostname."""
 
     plugins.implements(plugins.IConfigurer)
+    plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IMiddleware)
     plugins.implements(plugins.IBlueprint)
     plugins.implements(plugins.IAuthFunctions)
@@ -326,6 +329,10 @@ class WajoThemePlugin(plugins.SingletonPlugin):
         toolkit.add_template_directory(config, "templates")
         toolkit.add_public_directory(config, "public")
         toolkit.add_resource("assets", "wajo_theme")
+
+    def get_helpers(self):
+        """Expose a sanitized GFM-compatible renderer for CKAN Pages/Blog."""
+        return {"wajo_render_markdown": render_wajo_markdown}
 
     def files_file_allows(self, context, file, operation):
         """Allow public reads for the one dedicated editorial-media owner.

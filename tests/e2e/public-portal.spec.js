@@ -965,6 +965,18 @@ test("CKAN Pages blog posts drive the news archive, detail SEO, and referenced m
   await expect(
     page.getByRole("heading", { name: "Warta Data Wajo" }),
   ).toBeVisible();
+  await expect(page.locator(".public-cms-cover")).toHaveCount(0);
+  const markdownImage = page.locator("article.cms-document .cms-markdown img");
+  await expect(markdownImage).toHaveAttribute(
+    "src",
+    "/api/cms/media/cms-cover.png",
+  );
+  await expect(markdownImage).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: /Perbesar gambar: Ilustrasi berita Warta Data Wajo/,
+    }),
+  ).toBeVisible();
   await expect(
     page.locator('script[type="application/ld+json"]'),
   ).toContainText('"@type":"NewsArticle"');

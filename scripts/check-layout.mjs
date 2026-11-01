@@ -44,11 +44,17 @@ for (const route of ["berita", "informasi"]) {
     "reserveTitle",
     "dynamic CMS title must reserve heading geometry",
   );
-  requireText(
-    page,
-    "public-cms-cover",
-    "CMS details must identify the optional cover frame",
-  );
+  if (route === "informasi") {
+    requireText(
+      page,
+      "public-cms-cover",
+      "information details may identify an optional cover frame",
+    );
+  } else if (read(page).includes("public-cms-cover")) {
+    failures.push(
+      "berita/[slug]: article details must not render a separate featured/cover image",
+    );
+  }
   if (read(loading).includes("public-cms-cover")) {
     failures.push(
       `${route}/[slug]/loading.jsx: optional CMS images must not reserve a fake/default cover frame`,
@@ -76,8 +82,8 @@ for (const route of ["berita", "informasi"]) {
     }
     requireText(
       page,
-      "{image ? <figure",
-      "news cover should render only when a real uploaded/Markdown image exists",
+      "<CmsPageBody page={page} />",
+      "news Markdown images must remain inline in the original article body",
     );
   }
   if (route === "informasi") {

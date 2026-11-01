@@ -482,14 +482,14 @@ const cmsPages = [
     private: false,
     publish_date: "2026-10-28",
     content:
-      "# Warta Data Wajo\n\nPengelola memperkenalkan pembaruan portal data daerah.",
+      "# Warta Data Wajo\n\nPengelola memperkenalkan pembaruan portal data daerah.\n\n![Ilustrasi berita Warta Data Wajo](/uploads/page_images/cms-cover.png)",
     excerpt: "Pembaruan dan publikasi terbaru Portal Satu Data Wajo.",
     category: "Kabar portal",
     template_type: "article",
     featured: true,
     show_in_menu: false,
     menu_order: "99",
-    og_image: "/uploads/page_images/cms-cover.png",
+    og_image: "",
     seo_title: "Warta Data Wajo",
     seo_description: "Berita dan pembaruan data Kabupaten Wajo.",
     content_blocks: JSON.stringify([
