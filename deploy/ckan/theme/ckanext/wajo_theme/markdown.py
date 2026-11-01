@@ -65,8 +65,11 @@ _ALLOWED_ATTRIBUTES = {
 _ALLOWED_URL_SCHEMES = {"http", "https", "mailto"}
 
 
-def _append_simple_emphasis(parent: etree.Element, value: str) -> None:
-    """Preserve strong/emphasis nested inside a strikethrough span."""
+def _append_simple_emphasis(parent: etree.Element, value: str, depth: int = 0) -> None:
+    """Preserve nested strong/emphasis inside a strikethrough span."""
+    if depth > 8:
+        parent.text = value
+        return
     cursor = 0
     for match in _INLINE_EMPHASIS_RE.finditer(value):
         if match.start() > cursor:
@@ -77,10 +80,10 @@ def _append_simple_emphasis(parent: etree.Element, value: str) -> None:
         token = match.group(0)
         if token.startswith(("**", "__")):
             element = etree.SubElement(parent, "strong")
-            element.text = token[2:-2]
+            _append_simple_emphasis(element, token[2:-2], depth + 1)
         else:
             element = etree.SubElement(parent, "em")
-            element.text = token[1:-1]
+            _append_simple_emphasis(element, token[1:-1], depth + 1)
         cursor = match.end()
     if cursor < len(value):
         if len(parent):

@@ -67,6 +67,21 @@ assert.match(
 );
 assert.match(
   editor,
+  /const del = document\.createElement\("del"\);\s*appendInline\(del, match\[7\]\)/,
+  "Admin Markdown preview must recursively parse emphasis inside strikethrough, such as ~~*text*~~.",
+);
+assert.match(
+  editor,
+  /const strong = document\.createElement\("strong"\);\s*appendInline\(strong, match\[6\]\)/,
+  "Admin Markdown preview must recursively parse nested inline formatting inside strong text.",
+);
+assert.match(
+  editor,
+  /const em = document\.createElement\("em"\);\s*appendInline\(em, match\[8\] \|\| match\[9\]\)/,
+  "Admin Markdown preview must recursively parse nested inline formatting inside emphasis.",
+);
+assert.match(
+  editor,
   /startsWith\("="\) \? "h1" : "h2"/,
   "Admin preview must support Setext headings.",
 );
@@ -187,6 +202,17 @@ const blogRevision = await read(
 );
 const adminMarkdown = await read(
   "deploy/ckan/theme/ckanext/wajo_theme/markdown.py",
+);
+const ckanRuntimeSmoke = await read("scripts/check-plugins.py");
+assert.match(
+  ckanRuntimeSmoke,
+  /- \[ \] tugas belum selesai[\s\S]*- \[x\] tugas selesai[\s\S]*\| Kolom 1 \| Kolom 2 \|[\s\S]*```text/,
+  "The real CKAN renderer smoke test must include unchecked/checked task lists, a Markdown table and fenced code.",
+);
+assert.match(
+  ckanRuntimeSmoke,
+  /required_markdown_fragments = \([\s\S]*"<ol>"[\s\S]*rendered_markdown\.count\("<ul>"\) < 2/,
+  "The real CKAN renderer smoke test must assert nested unordered and ordered list output.",
 );
 const adminPlugin = await read(
   "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",

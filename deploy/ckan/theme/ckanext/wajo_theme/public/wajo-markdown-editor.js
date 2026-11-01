@@ -89,7 +89,7 @@
         if (href) {
           const link = document.createElement("a");
           link.href = href;
-          link.textContent = match[2];
+          appendInline(link, match[2]);
           link.rel = "noopener noreferrer nofollow";
           if (href.startsWith("https:")) link.target = "_blank";
           if (match[4]) link.title = match[4];
@@ -101,15 +101,15 @@
         parent.append(code);
       } else if (match[6]) {
         const strong = document.createElement("strong");
-        strong.textContent = match[6];
+        appendInline(strong, match[6]);
         parent.append(strong);
       } else if (match[7]) {
         const del = document.createElement("del");
-        del.textContent = match[7];
+        appendInline(del, match[7]);
         parent.append(del);
       } else if (match[8] || match[9]) {
         const em = document.createElement("em");
-        em.textContent = match[8] || match[9];
+        appendInline(em, match[8] || match[9]);
         parent.append(em);
       } else if (match[11]) {
         parent.append(document.createElement("br"));
@@ -372,6 +372,10 @@
             checkbox.type = "checkbox";
             checkbox.disabled = true;
             checkbox.checked = /x/i.test(task[1]);
+            checkbox.setAttribute(
+              "aria-label",
+              checkbox.checked ? "Tugas selesai" : "Tugas belum selesai",
+            );
             li.append(checkbox, document.createTextNode(" "));
             rawItem[0] = task[2];
           }

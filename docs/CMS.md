@@ -28,7 +28,36 @@ Konten private dan artikel bertanggal di masa depan tidak ditampilkan pada porta
 
 ## Konten dan gambar
 
-CKAN Pages memakai Markdown. HTML mentah tidak dirender. Renderer mendukung heading, paragraf, format teks, tautan, gambar, daftar bersarang, blockquote, tabel, code, dan pemisah.
+CKAN Pages memakai Markdown. HTML mentah tidak dirender. Renderer mendukung heading, paragraf, format teks bertingkat (termasuk `~~*teks*~~`), tautan, gambar, daftar bersarang, daftar tugas `[ ]`/`[x]`, blockquote, tabel, fenced code, dan pemisah.
+
+Elemen blok seperti daftar, blockquote, tabel, code block, dan pemisah harus dipisahkan dengan baris baru. Setiap butir daftar harus berada pada barisnya sendiri; tabel harus memiliki baris pemisah kolom. Contoh:
+
+````markdown
+**Tebal** dan _miring_ serta ~~_miring dicoret_~~. [Tautan](https://example.com)
+
+- Butir pertama
+- Butir kedua
+  - Butir bertingkat
+
+1. Langkah pertama
+2. Langkah kedua
+
+- [ ] Belum selesai
+- [x] Sudah selesai
+
+> Ini kutipan.
+
+| Kolom 1 | Kolom 2 |
+| ------- | ------- |
+| Isi A   | Isi B   |
+
+```text
+Contoh kode
+Baris kedua
+```
+
+---
+````
 
 Untuk menyisipkan foto di artikel, gunakan gambar Markdown:
 

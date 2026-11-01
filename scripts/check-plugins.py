@@ -2,6 +2,7 @@
 """Verify pinned packages register the CKAN plugins configured by bootstrap."""
 from importlib import import_module
 from importlib.metadata import entry_points, version
+import re
 import sys
 
 registered = {entry.name for entry in entry_points(group="ckan.plugins")}
@@ -144,12 +145,13 @@ try:
 
 - teks
 - teks 2
+  - subteks
 
 1. teks satu
 2. teks dua
 
-- [ ] teks
-- [x] test
+- [ ] tugas belum selesai
+- [x] tugas selesai
 
 > teks kutipan
 
@@ -177,7 +179,15 @@ alooo <span>teks</span>
         'href="https://fb.com"',
         'href="https://example.com"',
         'rel="noopener noreferrer"',
+        "<ul>",
+        "<ol>",
+        "<li>teks</li>",
+        "<li>teks satu</li>",
         "<table>",
+        "<thead>",
+        "<tbody>",
+        "<th",
+        "<td",
         "<blockquote>",
         '<input type="checkbox"',
         "<pre><code",
@@ -187,6 +197,15 @@ alooo <span>teks</span>
     missing_markdown_fragments = [item for item in required_markdown_fragments if item not in rendered_markdown]
     if missing_markdown_fragments:
         raise RuntimeError("Missing rendered Markdown constructs: " + ", ".join(missing_markdown_fragments))
+    checkboxes = re.findall(r"<input\b[^>]*>", rendered_markdown)
+    if len(checkboxes) != 2:
+        raise RuntimeError(f"Expected two rendered task-list checkboxes, received {len(checkboxes)}")
+    if not any(re.search(r"\bchecked(?:=|\s|>)", checkbox) for checkbox in checkboxes):
+        raise RuntimeError("Checked Markdown task item did not preserve its checked state")
+    if not any(not re.search(r"\bchecked(?:=|\s|>)", checkbox) for checkbox in checkboxes):
+        raise RuntimeError("Unchecked Markdown task item did not remain unchecked")
+    if rendered_markdown.count("<ul>") < 2:
+        raise RuntimeError("Nested unordered Markdown lists were not rendered")
     if "<script" in rendered_markdown.lower() or "onerror" in rendered_markdown.lower():
         raise RuntimeError("Unsafe raw HTML/attributes survived Markdown sanitization")
     if 'rel="opener"' in rendered_markdown:

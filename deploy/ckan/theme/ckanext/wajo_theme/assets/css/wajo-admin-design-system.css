@@ -3266,8 +3266,22 @@ body:has(.wajo-login-frame) {
   :where(p, ul, ol, blockquote, table, pre, hr) {
   margin-block: 0.9em;
 }
-.wajo-admin-workspace .wajo-admin-cms-content :where(ul, ol) {
+.wajo-admin-workspace .wajo-admin-cms-content ul:not(.task-list) {
   padding-left: 1.6rem;
+  list-style: disc outside;
+}
+.wajo-admin-workspace .wajo-admin-cms-content ol {
+  padding-left: 1.6rem;
+  list-style: decimal outside;
+}
+.wajo-admin-workspace .wajo-admin-cms-content ul ul {
+  list-style-type: circle;
+}
+.wajo-admin-workspace .wajo-admin-cms-content ul ul ul {
+  list-style-type: square;
+}
+.wajo-admin-workspace .wajo-admin-cms-content li::marker {
+  color: var(--wajo-color-muted);
 }
 .wajo-admin-workspace .wajo-admin-cms-content li + li {
   margin-top: 0.3rem;

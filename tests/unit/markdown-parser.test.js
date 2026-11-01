@@ -54,6 +54,45 @@ describe("Markdown renderer parser", () => {
     );
   });
 
+  it("parses mixed unordered, ordered, task lists, tables and nested emphasis", () => {
+    const blocks =
+      parseMarkdown(`**aku** *asre* ~~*dodo*~~ [teks](https://fb.com/)
+
+- teks
+- teks 2
+
+1. teks 2
+2. teks 3
+
+- [ ] teks
+- [x] test
+
+> teks
+
+| Kolom 1 | Kolom 2 |
+| --- | --- |
+| Isi | Isi |
+
+\`\`\`text
+alooo
+teks
+\`\`\``);
+
+    const lists = blocks.filter((block) => block.type === "list");
+    expect(lists).toHaveLength(3);
+    expect(lists[0]).toMatchObject({ ordered: false });
+    expect(lists[1]).toMatchObject({ ordered: true, start: 1 });
+    expect(lists[2].items.map((item) => item.checked)).toEqual([false, true]);
+    expect(blocks.some((block) => block.type === "table")).toBe(true);
+    expect(blocks.some((block) => block.type === "blockquote")).toBe(true);
+    expect(blocks.some((block) => block.type === "code")).toBe(true);
+
+    const strike = blocks[0].children.find((item) => item.type === "delete");
+    expect(strike.children).toEqual([
+      { type: "emphasis", children: [{ type: "text", value: "dodo" }] },
+    ]);
+  });
+
   it("keeps raw HTML inert and bounds overly large input", () => {
     const html = parseMarkdown("<script>alert(1)</script>")[0];
     expect(html.type).toBe("paragraph");
