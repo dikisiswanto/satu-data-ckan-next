@@ -100,7 +100,7 @@ export async function getPublishedPublicationsResult({
       rows: safeLimit,
       start: (safePage - 1) * safeLimit,
       sort: "metadata_modified desc",
-      fqList: [buildPortalContentDiscoveryFilter("publication")],
+      fq: buildPortalContentDiscoveryFilter("publication"),
     });
     const packages = (
       Array.isArray(result.results) ? result.results : []

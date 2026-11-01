@@ -30,7 +30,6 @@ export default function InformasiDetailLoading() {
       <p className="public-publish-date mt-3 inline-flex min-h-5 items-center gap-2 text-xs text-muted">
         <Skeleton className="h-3 w-40" />
       </p>
-      <Skeleton className="public-cms-cover mt-7 aspect-[16/7] w-full rounded-2xl" />
       <article
         className="cms-document mt-8 rounded-2xl border border-line bg-white p-5 sm:p-8 lg:p-10"
         aria-hidden="true"

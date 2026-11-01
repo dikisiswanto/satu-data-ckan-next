@@ -240,7 +240,7 @@ export async function getPublishedIndicatorsResult({
       rows: safeLimit,
       start: (safePage - 1) * safeLimit,
       sort: "metadata_modified desc",
-      fqList: [INDICATOR_FQ],
+      fq: INDICATOR_FQ,
     });
     const packages = (
       Array.isArray(result.results) ? result.results : []

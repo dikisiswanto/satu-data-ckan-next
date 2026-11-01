@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -54,6 +56,37 @@ css_source = read(CSS)
 assets_source = read(ASSETS)
 env_source = read(ENV_EXAMPLE)
 bootstrap_source = read(BOOTSTRAP)
+
+# The CI failure mode seen in practice is a newer checker committed without the
+# matching design-system stylesheet. In a Git checkout, require the exact theme
+# inputs to be tracked so a locally present but uncommitted CSS file cannot make
+# the developer's machine pass while GitHub Actions fails. Archives without a
+# .git worktree still run the source/content checks below.
+try:
+    git_context = subprocess.run(
+        ["git", "-C", str(ROOT), "rev-parse", "--is-inside-work-tree"],
+        check=False, capture_output=True, text=True, timeout=5,
+    )
+except (OSError, subprocess.TimeoutExpired):
+    git_context = None
+git_revision = None
+if git_context and git_context.returncode == 0:
+    revision_result = subprocess.run(
+        ["git", "-C", str(ROOT), "rev-parse", "--short=12", "HEAD"],
+        check=False, capture_output=True, text=True, timeout=5,
+    )
+    if revision_result.returncode == 0:
+        git_revision = revision_result.stdout.strip()
+    for tracked_path in (CSS, DESIGN_SYSTEM, ASSETS, PLUGIN):
+        relative_path = tracked_path.relative_to(ROOT).as_posix()
+        tracked = subprocess.run(
+            ["git", "-C", str(ROOT), "ls-files", "--error-unmatch", relative_path],
+            check=False, capture_output=True, text=True, timeout=5,
+        )
+        require(
+            tracked.returncode == 0,
+            f"Theme source wajib belum masuk Git: {relative_path}. Tambahkan file ini ke commit; file lokal saja tidak ikut ke GitHub Actions.",
+        )
 
 # Catch syntax errors in the Python package without importing CKAN at test time.
 for path in (PLUGIN, SETUP, TRANSLATION_COMPILER):
@@ -509,8 +542,26 @@ require("font-size: 1.9rem !important;" in admin_design_source and ".fa-map-loca
 
 if ERRORS:
     print(f"CKAN admin theme regression check failed ({len(ERRORS)}):", file=sys.stderr)
+    print(f"Theme project root: {ROOT}", file=sys.stderr)
+    if git_revision:
+        print(f"Theme Git revision: {git_revision}", file=sys.stderr)
+    print("Theme source files checked:", file=sys.stderr)
+    for path in (CSS, DESIGN_SYSTEM, ASSETS, PLUGIN):
+        if path.is_file():
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()[:12]
+            print(f"- {path.relative_to(ROOT)} sha256={digest} bytes={path.stat().st_size}", file=sys.stderr)
+        else:
+            print(f"- {path.relative_to(ROOT)} MISSING", file=sys.stderr)
     for error in ERRORS:
         print(f"- {error}", file=sys.stderr)
     raise SystemExit(1)
 
+css_fingerprints = "; ".join(
+    f"{path.name}={hashlib.sha256(path.read_bytes()).hexdigest()[:12]}"
+    for path in (CSS, DESIGN_SYSTEM, ASSETS)
+    if path.is_file()
+)
 print("CKAN admin theme/CMS regression check passed: CKAN 2.12 templates, WebAssets, Bahasa Indonesia catalog/default locale, logo, Pages schema/form, packaging, plugin order, responsive login, and additive template scope verified.")
+if git_revision:
+    print(f"Theme Git revision: {git_revision}")
+print(f"Theme source fingerprint: {css_fingerprints}")

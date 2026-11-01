@@ -1,7 +1,10 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  buildCmsFooterLinks,
   getAbsoluteCmsImageUrl,
+  getCmsFeatureImage,
   getCmsMarkdownImage,
+  getPublicCmsFooterPagesResult,
   getCmsPageDescription,
   isCmsRecordPublished,
   normalizeCmsSlug,
@@ -157,6 +160,228 @@ describe("CKAN Pages CMS normalization", () => {
     expect(
       publicCmsImageUrl("/api/editorial-media/not-a-file-id", origin),
     ).toBe("");
+  });
+
+  it("uses the same Markdown cover parser for pages and blog posts without requiring image metadata", () => {
+    process.env.CKAN_ADMIN_URL = "https://ckan.example.go.id";
+    const page = {
+      title: "Halooooo",
+      image: "",
+      ogImage: "",
+      content:
+        "Teks pembuka\n\n![Sampul Halooooo](/uploads/page_images/halooo.webp)",
+    };
+    expect(getCmsFeatureImage(page, "https://data.example.go.id")).toEqual({
+      src: "/api/cms/media/halooo.webp",
+      alt: "Sampul Halooooo",
+    });
+    expect(
+      getCmsFeatureImage(
+        { title: "Tanpa sampul", content: "Halaman tanpa gambar." },
+        "https://data.example.go.id",
+      ),
+    ).toBeNull();
+    expect(
+      getCmsFeatureImage(
+        { ...page, ogImage: "https://cdn.example.test/explicit.webp" },
+        "https://data.example.go.id",
+      ),
+    ).toEqual({
+      src: "https://cdn.example.test/explicit.webp",
+      alt: "Halooooo",
+    });
+    expect(
+      getCmsFeatureImage(
+        {
+          title: "Halaman dengan hero",
+          templateType: "landing",
+          content: "Teks tanpa gambar.",
+          contentBlocks: [
+            {
+              type: "hero",
+              image: "/uploads/page_images/hero-wajo.webp",
+              imageAlt: "Hero Wajo",
+            },
+          ],
+        },
+        "https://data.example.go.id",
+      ),
+    ).toEqual({
+      src: "/api/cms/media/hero-wajo.webp",
+      alt: "Hero Wajo",
+    });
+    expect(
+      getCmsFeatureImage(
+        {
+          title: "Halaman dengan galeri",
+          content: "Teks tanpa gambar.",
+          contentBlocks: [
+            {
+              type: "gallery",
+              items: [
+                {
+                  src: "/uploads/page_images/galeri-wajo.webp",
+                  alt: "Galeri Wajo",
+                },
+              ],
+            },
+          ],
+        },
+        "https://data.example.go.id",
+      ),
+    ).toEqual({
+      src: "/api/cms/media/galeri-wajo.webp",
+      alt: "Galeri Wajo",
+    });
+    expect(
+      getCmsFeatureImage(
+        {
+          title: "Halaman rich text",
+          content: "Teks tanpa gambar.",
+          contentBlocks: [
+            {
+              type: "rich_text",
+              markdown: "![Rich text](/uploads/page_images/rich-text.webp)",
+            },
+          ],
+        },
+        "https://data.example.go.id",
+      ),
+    ).toEqual({
+      src: "/api/cms/media/rich-text.webp",
+      alt: "Rich text",
+    });
+    expect(
+      getCmsFeatureImage(
+        {
+          title: "Landing dengan urutan konten",
+          templateType: "landing",
+          content: "![Gambar Markdown](/uploads/page_images/markdown.webp)",
+          contentBlocks: [
+            {
+              type: "image",
+              src: "/uploads/page_images/block.webp",
+              alt: "Gambar blok",
+            },
+          ],
+        },
+        "https://data.example.go.id",
+      ),
+    ).toEqual({
+      src: "/api/cms/media/block.webp",
+      alt: "Gambar blok",
+    });
+  });
+
+  it("derives footer links from the same published page collection, including pages outside the header menu", async () => {
+    const pageRecords = [
+      {
+        name: "halooo",
+        title: "Halooooo",
+        page_type: "page",
+        private: false,
+        publish_date: "2026-10-30",
+        show_in_menu: false,
+        content: "Halaman tanpa sampul.",
+      },
+      {
+        name: "tentang",
+        title: "Tentang Satu Data",
+        page_type: "page",
+        private: false,
+        publish_date: "2026-10-01",
+        show_in_menu: true,
+        content: "Profil.",
+      },
+      {
+        name: "halaman-pribadi",
+        title: "Halaman privat",
+        page_type: "page",
+        private: true,
+        publish_date: "2026-10-30",
+        show_in_menu: false,
+      },
+    ];
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(Response.json({ success: true, result: pageRecords }));
+
+    const result = await getPublicCmsFooterPagesResult();
+
+    expect(result).toMatchObject({
+      unavailable: false,
+      data: [
+        { href: "/informasi/halooo", title: "Halooooo" },
+        { href: "/informasi/tentang", title: "Tentang Satu Data" },
+      ],
+    });
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [input] = fetchSpy.mock.calls[0];
+    const url = new URL(String(input));
+    expect(url.pathname).toContain("/ckanext_pages_list");
+    expect(url.searchParams.get("page_type")).toBe("page");
+    expect(url.searchParams.get("private")).toBe("false");
+    expect(url.searchParams.get("order_publish_date")).toBe("true");
+  });
+
+  it("lists recent public footer pages independently from the header menu, capped at five", () => {
+    const pages = [
+      {
+        name: "menu-lama",
+        title: "Menu lama",
+        publishDate: "2026-10-01",
+        showInMenu: true,
+        menuOrder: 1,
+      },
+      {
+        name: "halooo",
+        title: "Halooooo",
+        publishDate: "2026-10-30",
+        showInMenu: false,
+        menuOrder: 99,
+      },
+      {
+        name: "panduan",
+        title: "Panduan",
+        publishDate: "2026-10-20",
+        showInMenu: false,
+        menuOrder: 90,
+      },
+      {
+        name: "kebijakan",
+        title: "Kebijakan",
+        publishDate: "2026-10-18",
+        showInMenu: false,
+        menuOrder: 90,
+      },
+      {
+        name: "unduh",
+        title: "Cara mengunduh",
+        publishDate: "2026-10-15",
+        showInMenu: false,
+        menuOrder: 90,
+      },
+      {
+        name: "metadata",
+        title: "Pedoman metadata",
+        publishDate: "2026-10-12",
+        showInMenu: false,
+        menuOrder: 90,
+      },
+      {
+        name: "kamus",
+        title: "Kamus data",
+        publishDate: "2026-10-10",
+        showInMenu: false,
+        menuOrder: 90,
+      },
+    ];
+    const footer = buildCmsFooterLinks(pages, 20);
+    expect(footer).toHaveLength(5);
+    expect(footer[0]).toEqual({ href: "/informasi/halooo", title: "Halooooo" });
+    expect(footer.map((item) => item.title)).toContain("Panduan");
+    expect(footer.map((item) => item.title)).not.toContain("Menu lama");
+    expect(footer.map((item) => item.title)).not.toContain("Kamus data");
   });
 
   it("uses the first safe Markdown image as an article cover", () => {

@@ -548,6 +548,11 @@ const cmsChecks = [
   ],
   [
     "src/lib/cms/pages.js",
+    /getPublicCmsFooterPagesResult[\s\S]*getPublicCmsPagesResult\(\)[\s\S]*buildCmsFooterLinks\(result\.data, 5\)/,
+    "Footer CMS must derive its five links from the exact public page collection used by the information directory, including pages with show_in_menu=false.",
+  ],
+  [
+    "src/lib/cms/pages.js",
     /parseCmsBoolean[\s\S]*isCmsRecordPublished[\s\S]*publish_date[\s\S]*template_type[\s\S]*show_in_menu[\s\S]*content_blocks/,
     "Adapter CMS harus menormalisasi status privasi, jadwal publikasi, field editorial, dan block JSON.",
   ],
@@ -567,14 +572,24 @@ const cmsChecks = [
     "CMS article images must be extracted from Markdown image tokens.",
   ],
   [
+    "src/app/(public)/informasi/[slug]/page.jsx",
+    /getCmsFeatureImage[\s\S]*images: absoluteImage \? \[\{ url: absoluteImage[\s\S]*: \[\]/,
+    "CMS pages must derive Open Graph/Twitter imagery from actual content and must not inherit a generic default hero image when no cover exists.",
+  ],
+  [
     "src/components/cms/content-card.jsx",
-    /getCmsMarkdownImage[\s\S]*Newspaper/,
-    "News cards must use Markdown images and a default article icon when no image exists.",
+    /getCmsFeatureImage[\s\S]*const FallbackIcon = isArticle \? Newspaper : FileText[\s\S]*imageUrl \? [\s\S]*: isArticle \? [\s\S]*: null/,
+    "CMS cards must share the content-image parser; only news articles may use a visual fallback, while ordinary pages remain image-free when no cover exists.",
+  ],
+  [
+    "src/lib/cms/pages.js",
+    /findFirstCmsBlockImage[\s\S]*type === "image"[\s\S]*type === "hero"[\s\S]*type === "gallery"[\s\S]*getCmsFeatureImage[\s\S]*return null/,
+    "CMS page covers must be optional and discover images from Markdown and structured image/hero/gallery blocks without inserting a default image.",
   ],
   [
     "src/components/site-footer.jsx",
-    /(?=[\s\S]*getPublicCmsNavigationResult)(?=[\s\S]*slice\(0, 5\))(?=[\s\S]*item\.title \|\| item\.label)(?=[\s\S]*href=\"\/berita\")[\s\S]*/,
-    "Public footer must show at most five CMS page titles directly and link to the full news list.",
+    /(?=[\s\S]*getPublicCmsFooterPagesResult)(?=[\s\S]*item\.title)(?=[\s\S]*href=\"\/berita\")[\s\S]*/,
+    "Public footer must show the direct CMS page titles from the dedicated capped footer source and link to the full news list.",
   ],
   [
     "src/app/api/3/action/[...action]/route.js",

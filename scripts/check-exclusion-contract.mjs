@@ -16,18 +16,33 @@ const filters = await read("src/lib/data/portal-content-types.js");
 
 assert.match(
   client,
-  /if \(Array\.isArray\(value\)\)\s*\{\s*for \(const item of value\) url\.searchParams\.append\(key, String\(item\)\);/s,
-  "CKAN list parameters must retain all values instead of replacing repeated list entries.",
+  /normalizeCkanActionParams\(action, params\)/,
+  "All package_search inputs must pass through the Action API filter normalizer.",
 );
 assert.match(
   client,
-  /if \(fqList\.length\) params\.fq_list = fqList;/,
-  "searchPackages must send multiple catalogue filters through CKAN's fq_list contract.",
+  /delete normalized\.fq_list;/,
+  "Legacy fq_list inputs must be removed before the CKAN request is sent.",
 );
-assert.doesNotMatch(
+assert.match(
   client,
-  /params\.fq\s*=/,
-  "searchPackages must not send a multi-filter array through scalar fq.",
+  /normalized\.fq = filters\.length === 1[\s\S]*?join\(" AND "\)/,
+  "CKAN filters must be normalized into a single scalar fq expression, never iterated as characters.",
+);
+assert.match(
+  client,
+  /const useJsonBody = action === "package_search"/,
+  "package_search must use a typed JSON POST request.",
+);
+assert.match(
+  publicData,
+  /query: "url:"/,
+  "resource_search must use an actual CKAN Resource column rather than the unsupported id field.",
+);
+assert.match(
+  publicData,
+  /fq: buildDatasetCatalogExclusionFilters\(\)\.join\(" AND "\)/,
+  "Public statistics must apply the same dataset exclusions through one scalar fq expression.",
 );
 for (const [path, source] of [
   ["public dataset", publicData],
@@ -37,15 +52,10 @@ for (const [path, source] of [
 ]) {
   assert.doesNotMatch(
     source,
-    /\bfq\s*:/,
-    `${path} requests must not use repeated scalar fq query parameters.`,
+    /\bfqList\s*:|\bfq_list\s*:/,
+    `${path} requests must not use fq_list; package_search uses one scalar fq expression.`,
   );
 }
-assert.match(
-  publicData,
-  /fq_list:\s*buildDatasetCatalogExclusionFilters\(\)/,
-  "Public statistics must apply the same exclusions with fq_list.",
-);
 assert.match(
   filters,
   /tags:\$\{solrPhrase\(tag\)\}/,
@@ -78,7 +88,7 @@ assert.match(
 );
 
 process.stdout.write(
-  "CKAN exclusion contract passed: multiple Solr filters use fq_list across catalogue, facets, statistics, and thematic public catalogues.\n",
+  "CKAN exclusion contract passed: all package_search filters normalize to a single scalar fq; resource_search uses the CKAN url field.\n",
 );
 
 // Execute the filter builders as well as checking their source contract. This

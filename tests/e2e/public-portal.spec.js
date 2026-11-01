@@ -619,10 +619,10 @@ test("public breadcrumbs and shared navigation make every section discoverable",
   }
   const footerPages = page.locator('footer nav[aria-label="Tautan laman"]');
   await expect(footerPages).toBeVisible();
-  await expect(footerPages.locator("a")).toHaveCount(3);
+  await expect(footerPages.locator("a")).toHaveCount(5);
   await expect(
-    footerPages.getByRole("link", { name: "Tentang Satu Data Wajo" }),
-  ).toHaveAttribute("href", "/informasi/tentang-satu-data");
+    footerPages.getByRole("link", { name: "Halooooo", exact: true }),
+  ).toHaveAttribute("href", "/informasi/halooo");
   await expect(
     footerPages.getByRole("link", {
       name: "Panduan Lengkap Menggunakan Portal Satu Data Kabupaten Wajo untuk Menemukan, Memahami, dan Memanfaatkan Data Terbuka",
@@ -881,6 +881,71 @@ test("CKAN Pages feeds the public information hub, structured page blocks, and i
   );
 });
 
+test("CMS footer lists the latest public page and covers are optional with a shared Markdown parser", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const footerPages = page.locator('footer nav[aria-label="Tautan laman"]');
+  await expect(
+    footerPages.getByRole("link", { name: "Halooooo", exact: true }),
+  ).toHaveAttribute("href", "/informasi/halooo");
+  await expect(footerPages.locator("a")).toHaveCount(5);
+
+  await page.goto("/informasi");
+  const informationCards = page.locator(
+    'section[aria-label="Halaman informasi lainnya"]',
+  );
+  const pageWithoutImage = informationCards.locator(
+    'a[href="/informasi/halooo"]',
+  );
+  await expect(pageWithoutImage).toBeVisible();
+  await expect(pageWithoutImage.locator("img")).toHaveCount(0);
+  await expect(pageWithoutImage.locator('div[class*="aspect-"]')).toHaveCount(
+    0,
+  );
+
+  const markdownImageCard = informationCards.locator(
+    'a[href="/informasi/halaman-dengan-sampul"]',
+  );
+  await expect(markdownImageCard).toBeVisible();
+  await expect(markdownImageCard.locator("img")).toHaveAttribute(
+    "src",
+    "/api/cms/media/cms-cover.png",
+  );
+
+  await page.goto("/informasi/halooo");
+  await expect(
+    page.getByRole("heading", { name: "Halooooo", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".public-cms-cover")).toHaveCount(0);
+  await expect(page.locator('meta[property="og:image"]')).toHaveCount(0);
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveCount(0);
+
+  await page.goto("/informasi/halaman-dengan-sampul");
+  await expect(
+    page.getByRole("heading", {
+      name: "Panduan Visual Satu Data",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.locator(".public-cms-cover img")).toHaveAttribute(
+    "src",
+    "/api/cms/media/cms-cover.png",
+  );
+  await expect(page.locator(".public-cms-cover")).toBeVisible();
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    /cms-cover\.png/,
+  );
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+    "content",
+    /cms-cover\.png/,
+  );
+
+  await page.goto("/informasi/tentang-satu-data");
+  await expect(page.locator(".public-cms-cover")).toHaveCount(0);
+});
+
 test("CKAN Pages blog posts drive the news archive, detail SEO, and referenced media proxy", async ({
   page,
   request,
@@ -947,6 +1012,7 @@ test("public robots and sitemap expose CMS routes without indexing private recor
   expect(sitemap.ok()).toBeTruthy();
   const sitemapText = await sitemap.text();
   expect(sitemapText).toContain("/informasi/tentang-satu-data");
+  expect(sitemapText).toContain("/informasi/halooo");
   expect(sitemapText).toContain("/berita/warta-data-wajo");
   expect(sitemapText).not.toContain("halaman-internal");
   expect(sitemapText).not.toContain("artikel-terjadwal");

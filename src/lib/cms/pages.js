@@ -153,7 +153,9 @@ async function queryCmsPages(pageType) {
   const params = {
     private: false,
     page_type: pageType,
-    ...(pageType === "blog" ? { order_publish_date: true } : {}),
+    ...(pageType === "blog" || pageType === "page"
+      ? { order_publish_date: true }
+      : {}),
   };
   const result = await ckanAction("ckanext_pages_list", params, {
     revalidate: 0,
@@ -246,6 +248,41 @@ export async function getPublicCmsNavigationResult() {
         title: page.title,
         label: page.menuLabel || page.title,
       })),
+    unavailable: result.unavailable,
+  };
+}
+
+/** Footer surfaces recent public pages, not only pages manually enabled in the header menu. */
+export function buildCmsFooterLinks(pages = [], limit = 5) {
+  const safeLimit = Math.min(Math.max(Number(limit) || 5, 1), 5);
+  return (Array.isArray(pages) ? pages : [])
+    .filter(
+      (page) => page && normalizeCmsSlug(page.name) && asText(page.title, 300),
+    )
+    .sort((left, right) => {
+      const leftDate = Date.parse(left.publishDate || "") || 0;
+      const rightDate = Date.parse(right.publishDate || "") || 0;
+      return (
+        rightDate - leftDate ||
+        left.menuOrder - right.menuOrder ||
+        left.title.localeCompare(right.title, "id")
+      );
+    })
+    .slice(0, safeLimit)
+    .map((page) => ({
+      href: `/informasi/${encodeURIComponent(page.name)}`,
+      title: page.title,
+    }));
+}
+
+export async function getPublicCmsFooterPagesResult() {
+  // Use the exact same published page collection as the /informasi directory.
+  // The footer intentionally ignores showInMenu; that flag controls only the
+  // header navigation. Sharing the request-scoped result prevents page lists
+  // from diverging between the page directory and the persistent site shell.
+  const result = await getPublicCmsPagesResult();
+  return {
+    data: buildCmsFooterLinks(result.data, 5),
     unavailable: result.unavailable,
   };
 }
@@ -350,6 +387,70 @@ export function getCmsMarkdownImage(
   return src
     ? { src, alt: markdownImage.alt || page?.title || "Ilustrasi artikel" }
     : null;
+}
+
+function findFirstCmsBlockImage(blocks) {
+  if (!Array.isArray(blocks)) return null;
+  for (const block of blocks.slice(0, 16)) {
+    if (!block || typeof block !== "object" || Array.isArray(block)) continue;
+    const type = asText(block.type, 32).toLowerCase();
+    if (type === "image" && asText(block.src, 2048)) {
+      return { href: asText(block.src, 2048), alt: asText(block.alt, 180) };
+    }
+    if (type === "hero" && asText(block.image, 2048)) {
+      return {
+        href: asText(block.image, 2048),
+        alt: asText(block.imageAlt, 180),
+      };
+    }
+    if (type === "gallery" && Array.isArray(block.items)) {
+      const image = block.items
+        .slice(0, 6)
+        .find((item) => item && asText(item.src, 2048));
+      if (image)
+        return { href: asText(image.src, 2048), alt: asText(image.alt, 180) };
+    }
+    if (type === "rich_text") {
+      const markdownImage = findFirstMarkdownImage(block.markdown);
+      if (markdownImage) return markdownImage;
+    }
+  }
+  return null;
+}
+
+function resolveCmsImage(candidate, page, siteOrigin) {
+  if (!candidate?.href) return null;
+  const src = publicCmsImageUrl(candidate.href, siteOrigin);
+  return src
+    ? { src, alt: candidate.alt || page?.title || "Ilustrasi halaman" }
+    : null;
+}
+
+/**
+ * Resolve a CMS cover from explicit metadata, then the first image in the
+ * rendered content order. Supports Markdown, rich-text, image, hero and
+ * gallery blocks. A page without a real image intentionally has no cover.
+ */
+export function getCmsFeatureImage(
+  page,
+  siteOrigin = process.env.PUBLIC_SITE_ORIGIN,
+) {
+  for (const candidate of [page?.ogImage, page?.image]) {
+    const src = publicCmsImageUrl(candidate, siteOrigin);
+    if (src) return { src, alt: page?.title || "Ilustrasi halaman" };
+  }
+
+  const markdownImage = findFirstMarkdownImage(page?.content);
+  const blockImage = findFirstCmsBlockImage(page?.contentBlocks);
+  const preferBlocks = ["landing", "guide"].includes(page?.templateType);
+  const orderedCandidates = preferBlocks
+    ? [blockImage, markdownImage]
+    : [markdownImage, blockImage];
+  for (const candidate of orderedCandidates) {
+    const resolved = resolveCmsImage(candidate, page, siteOrigin);
+    if (resolved) return resolved;
+  }
+  return null;
 }
 
 export function getCmsPageDescription(page) {

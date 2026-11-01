@@ -50,14 +50,26 @@ if (footer.includes('from "@/lib/public-navigation"')) {
 }
 if (
   !footer.includes('aria-label="Tautan laman"') ||
-  !footer.includes("getPublicCmsNavigationResult") ||
-  !footer.includes(".slice(0, 5)") ||
-  !footer.includes("item.title || item.label") ||
+  !footer.includes("getPublicCmsFooterPagesResult") ||
+  !footer.includes("item.title") ||
   footer.includes('href="/informasi"') ||
   !footer.includes('href="/berita"')
 ) {
   errors.push(
     "Footer harus menampilkan langsung maksimal lima judul laman CMS dan tetap menautkan daftar berita.",
+  );
+}
+const cmsPages = readFileSync(path.join(root, "src/lib/cms/pages.js"), "utf8");
+if (
+  !cmsPages.includes("export function buildCmsFooterLinks") ||
+  !cmsPages.includes("Math.min(Math.max(Number(limit) || 5, 1), 5)") ||
+  !cmsPages.includes("getPublicCmsFooterPagesResult()") ||
+  !cmsPages.includes("getPublicCmsPagesResult()") ||
+  !cmsPages.includes("buildCmsFooterLinks(result.data, 5)") ||
+  !cmsPages.includes('pageType === "blog" || pageType === "page"')
+) {
+  errors.push(
+    "Daftar footer CMS harus memakai koleksi halaman publik yang sama dengan direktori Informasi, mengabaikan show_in_menu, dan dibatasi maksimal lima judul.",
   );
 }
 const sdiLogo = readFileSync(

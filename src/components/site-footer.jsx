@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, ExternalLink } from "lucide-react";
-import { getPublicCmsNavigationResult } from "@/lib/cms/pages";
+import { getPublicCmsFooterPagesResult } from "@/lib/cms/pages";
 import { siteConfig } from "@/lib/site-config";
 
 export async function SiteFooter() {
-  const navigationResult = await getPublicCmsNavigationResult();
-  const pageLinks = (navigationResult.data || []).slice(0, 5);
+  const footerPagesResult = await getPublicCmsFooterPagesResult();
+  const pageLinks = footerPagesResult.data || [];
 
   return (
     <footer className="mt-16 border-t border-line bg-white">
@@ -42,7 +42,7 @@ export async function SiteFooter() {
                   href={item.href}
                   className="text-sm text-muted transition hover:text-primary"
                 >
-                  {item.title || item.label}
+                  {item.title}
                 </Link>
               </li>
             ))}

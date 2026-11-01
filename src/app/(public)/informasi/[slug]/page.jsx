@@ -7,9 +7,10 @@ import { PageHeading } from "@/components/page-heading";
 import { CmsPageBody } from "@/components/cms/content-blocks";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import {
+  getAbsoluteCmsImageUrl,
+  getCmsFeatureImage,
   getCmsPageDescription,
   getPublicCmsPageBySlugResult,
-  publicCmsImageUrl,
 } from "@/lib/cms/pages";
 import {
   getCanonicalMetadata,
@@ -32,8 +33,9 @@ export async function generateMetadata({ params }) {
   const title = page.seoTitle || page.title;
   const description =
     getCmsPageDescription(page) || `Informasi resmi ${siteConfig.regionName}.`;
-  const image = publicCmsImageUrl(
-    page.ogImage || page.image,
+  const featureImage = getCmsFeatureImage(page, getPublicSiteOrigin());
+  const absoluteImage = getAbsoluteCmsImageUrl(
+    featureImage?.src,
     getPublicSiteOrigin(),
   );
   const social = getSocialMetadata({
@@ -47,15 +49,19 @@ export async function generateMetadata({ params }) {
     description,
     ...getCanonicalMetadata(`/informasi/${page.name}`),
     ...social,
-    ...(image
-      ? {
-          openGraph: {
-            ...social.openGraph,
-            images: [{ url: image, alt: title }],
-          },
-          twitter: { ...social.twitter, images: [image] },
-        }
-      : {}),
+    // CMS pages do not inherit the site's generic hero as a fake cover. An
+    // actual image is discovered from metadata, Markdown or content blocks;
+    // otherwise Open Graph/Twitter image arrays remain explicitly empty.
+    openGraph: {
+      ...social.openGraph,
+      images: absoluteImage
+        ? [{ url: absoluteImage, alt: featureImage?.alt || title }]
+        : [],
+    },
+    twitter: {
+      ...social.twitter,
+      images: absoluteImage ? [absoluteImage] : [],
+    },
   };
 }
 
@@ -85,8 +91,9 @@ export default async function InformasiDetailPage({ params }) {
   }
   if (!result.data) notFound();
   const page = result.data;
-  const image = publicCmsImageUrl(
-    page.ogImage || page.image,
+  const featureImage = getCmsFeatureImage(page, getPublicSiteOrigin());
+  const absoluteImage = getAbsoluteCmsImageUrl(
+    featureImage?.src,
     getPublicSiteOrigin(),
   );
   const canonical = getPublicSiteOrigin()
@@ -98,6 +105,7 @@ export default async function InformasiDetailPage({ params }) {
     name: page.title,
     description: getCmsPageDescription(page),
     ...(canonical ? { url: canonical } : {}),
+    ...(absoluteImage ? { image: [absoluteImage] } : {}),
     publisher: { "@type": "Organization", name: siteConfig.organizationName },
   };
 
@@ -127,18 +135,18 @@ export default async function InformasiDetailPage({ params }) {
           "Tanggal terbit belum dicantumkan"
         )}
       </p>
-      <figure className="public-cms-cover relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#e7eff0,#eaf1f8)]">
-        {image ? (
+      {featureImage?.src ? (
+        <figure className="public-cms-cover relative mt-7 aspect-[16/7] overflow-hidden rounded-2xl bg-slate-100">
           <div className="absolute inset-0">
             <ImageLightbox
-              src={image}
-              alt={page.title}
+              src={featureImage.src}
+              alt={featureImage.alt || page.title}
               className="h-full w-full"
             >
               <div className="relative h-full w-full">
                 <Image
-                  src={image}
-                  alt={page.title}
+                  src={featureImage.src}
+                  alt={featureImage.alt || page.title}
                   fill
                   unoptimized
                   sizes="100vw"
@@ -147,13 +155,8 @@ export default async function InformasiDetailPage({ params }) {
               </div>
             </ImageLightbox>
           </div>
-        ) : (
-          <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgb(255_255_255_/_70%),transparent_40%),linear-gradient(135deg,#e7eff0,#eaf1f8)]"
-            aria-hidden="true"
-          />
-        )}
-      </figure>
+        </figure>
+      ) : null}
       <article className="cms-document mt-8 rounded-2xl border border-line bg-white p-5 sm:p-8 lg:p-10">
         <CmsPageBody page={page} />
       </article>

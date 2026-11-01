@@ -8,10 +8,9 @@ import { CmsPageBody } from "@/components/cms/content-blocks";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import {
   getAbsoluteCmsImageUrl,
-  getCmsMarkdownImage,
+  getCmsFeatureImage,
   getCmsPageDescription,
   getPublicCmsBlogPostBySlugResult,
-  publicCmsImageUrl,
 } from "@/lib/cms/pages";
 import {
   getCanonicalMetadata,
@@ -35,10 +34,8 @@ export async function generateMetadata({ params }) {
   const description =
     getCmsPageDescription(page) ||
     `Berita dan artikel resmi ${siteConfig.regionName}.`;
-  const image =
-    publicCmsImageUrl(page.ogImage || page.image, getPublicSiteOrigin()) ||
-    getCmsMarkdownImage(page, getPublicSiteOrigin())?.src ||
-    "";
+  const featureImage = getCmsFeatureImage(page, getPublicSiteOrigin());
+  const image = featureImage?.src || "";
   const social = getSocialMetadata({
     path: `/berita/${page.name}`,
     title: `${title} | ${siteConfig.shortName}`,
@@ -87,16 +84,9 @@ export default async function BeritaDetailPage({ params }) {
   }
   if (!result.data) notFound();
   const page = result.data;
-  const image = publicCmsImageUrl(
-    page.ogImage || page.image,
-    getPublicSiteOrigin(),
-  );
-  const socialImage =
-    image || getCmsMarkdownImage(page, getPublicSiteOrigin())?.src || "";
-  const absoluteImage = getAbsoluteCmsImageUrl(
-    socialImage,
-    getPublicSiteOrigin(),
-  );
+  const featureImage = getCmsFeatureImage(page, getPublicSiteOrigin());
+  const image = featureImage?.src || "";
+  const absoluteImage = getAbsoluteCmsImageUrl(image, getPublicSiteOrigin());
   const canonical = getPublicSiteOrigin()
     ? new URL(`/berita/${page.name}`, getPublicSiteOrigin()).toString()
     : undefined;
@@ -140,13 +130,13 @@ export default async function BeritaDetailPage({ params }) {
           <div className="absolute inset-0">
             <ImageLightbox
               src={image}
-              alt={page.title}
+              alt={featureImage?.alt || page.title}
               className="h-full w-full"
             >
               <div className="relative h-full w-full">
                 <Image
                   src={image}
-                  alt={page.title}
+                  alt={featureImage?.alt || page.title}
                   fill
                   unoptimized
                   sizes="100vw"

@@ -45,6 +45,36 @@ import {
 } from "@/lib/data/portal-content-types";
 import { normalizePublicCategoryFacets } from "@/lib/public-categories";
 
+function decodeActionCall(call) {
+  const [input, init = {}] = call;
+  const url = new URL(String(input));
+  const params = new URLSearchParams(url.searchParams);
+  if (
+    init.body &&
+    String(
+      init.headers?.get?.("Content-Type") ||
+        init.headers?.["Content-Type"] ||
+        "",
+    )
+      .toLowerCase()
+      .includes("application/json")
+  ) {
+    const body = JSON.parse(init.body);
+    for (const [key, value] of Object.entries(body)) {
+      params.delete(key);
+      if (Array.isArray(value)) {
+        for (const item of value) params.append(key, String(item));
+      } else if (value !== null && value !== undefined) {
+        params.set(
+          key,
+          typeof value === "object" ? JSON.stringify(value) : String(value),
+        );
+      }
+    }
+  }
+  return { url, init, params };
+}
+
 const indicatorPackage = {
   id: "package-id-ipm",
   name: "indikator-ipm",
@@ -502,13 +532,34 @@ describe("public portal summary sourced from CKAN", () => {
     });
   });
 
+  it("normalizes legacy fq_list input to one scalar fq before CKAN receives it", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        Response.json({ success: true, result: { count: 1, results: [] } }),
+      );
+    await ckanAction("package_search", {
+      q: "*:*",
+      fq: "state:active",
+      fq_list: 'tags:"portal-indikator"',
+    });
+    const [{ url, init, params }] = fetchSpy.mock.calls.map(decodeActionCall);
+    const body = JSON.parse(init.body);
+    expect(url.pathname).toContain("/package_search");
+    expect(init.method).toBe("POST");
+    expect(body.fq).toBe('(state:active) AND (tags:"portal-indikator")');
+    expect(body).not.toHaveProperty("fq_list");
+    expect(params.get("fq_list")).toBeNull();
+    expect(params.get("fq")).toBe(body.fq);
+  });
+
   it("counts datasets, resources and legacy portal_type indicators without coupling failures", async () => {
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
-      .mockImplementation(async (input) => {
-        const url = new URL(String(input));
+      .mockImplementation(async (input, init) => {
+        const { url, params } = decodeActionCall([input, init]);
         const action = url.pathname.split("/").at(-1);
-        const filters = url.searchParams.getAll("fq_list");
+        const filter = params.get("fq") || "";
         let result;
         if (action === "organization_list") {
           result = [
@@ -525,7 +576,7 @@ describe("public portal summary sourced from CKAN", () => {
             ],
           };
         } else if (
-          filters.includes(buildPortalContentDiscoveryFilter("indicator"))
+          filter.includes(buildPortalContentDiscoveryFilter("indicator"))
         ) {
           result = { count: 2, results: [] };
         } else {
@@ -544,39 +595,38 @@ describe("public portal summary sourced from CKAN", () => {
       partial: false,
     });
     expect(fetchSpy).toHaveBeenCalledTimes(4);
-    const indicatorSearch = fetchSpy.mock.calls
-      .map(([input]) => new URL(String(input)))
-      .find(
-        (url) =>
-          url.pathname.endsWith("/package_search") &&
-          url.searchParams
-            .getAll("fq_list")
-            .includes(buildPortalContentDiscoveryFilter("indicator")),
-      );
-    expect(indicatorSearch).toBeDefined();
-    const datasetSearch = fetchSpy.mock.calls
-      .map(([input]) => new URL(String(input)))
-      .find(
-        (url) =>
-          url.pathname.endsWith("/package_search") &&
-          !url.searchParams
-            .getAll("fq_list")
-            .includes(buildPortalContentDiscoveryFilter("indicator")),
-      );
-    expect(datasetSearch?.searchParams.getAll("fq_list")[0]).toContain(
-      "*:* AND -tags:",
+    const actionCalls = fetchSpy.mock.calls.map(decodeActionCall);
+    const indicatorSearch = actionCalls.find(
+      ({ url, params }) =>
+        url.pathname.endsWith("/package_search") &&
+        params.get("fq") === buildPortalContentDiscoveryFilter("indicator"),
     );
-    expect(datasetSearch?.searchParams.getAll("fq")).toHaveLength(0);
-    const resourceSearch = fetchSpy.mock.calls
-      .map(([input]) => new URL(String(input)))
-      .find((url) => url.pathname.endsWith("/resource_search"));
-    expect(resourceSearch?.searchParams.get("query")).toBe("id:");
-    expect(resourceSearch?.searchParams.get("limit")).toBe("500");
+    expect(indicatorSearch).toBeDefined();
+    expect(indicatorSearch.init.method).toBe("POST");
+    expect(JSON.parse(indicatorSearch.init.body).fq).toBe(
+      buildPortalContentDiscoveryFilter("indicator"),
+    );
+    expect(JSON.parse(indicatorSearch.init.body)).not.toHaveProperty("fq_list");
+
+    const datasetSearch = actionCalls.find(
+      ({ url, params }) =>
+        url.pathname.endsWith("/package_search") &&
+        params.get("fq")?.includes("*:* AND -tags:"),
+    );
+    expect(datasetSearch?.params.get("fq")).toContain("*:* AND -tags:");
+    expect(datasetSearch.init.method).toBe("POST");
+    expect(JSON.parse(datasetSearch.init.body)).not.toHaveProperty("fq_list");
+
+    const resourceSearch = actionCalls.find(({ url }) =>
+      url.pathname.endsWith("/resource_search"),
+    );
+    expect(resourceSearch?.params.get("query")).toBe("url:");
+    expect(resourceSearch?.params.get("limit")).toBe("500");
   });
 
   it("keeps healthy public counts when one CKAN counter fails", async () => {
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
-      const url = new URL(String(input));
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      const { url, params } = decodeActionCall([input, init]);
       const action = url.pathname.split("/").at(-1);
       if (action === "organization_list")
         return Response.json({
@@ -589,9 +639,9 @@ describe("public portal summary sourced from CKAN", () => {
           result: { count: 0, results: [] },
         });
       if (
-        url.searchParams
-          .getAll("fq_list")
-          .includes(buildPortalContentDiscoveryFilter("indicator"))
+        params
+          .get("fq")
+          ?.includes(buildPortalContentDiscoveryFilter("indicator"))
       ) {
         return Response.json({
           success: false,
@@ -734,13 +784,24 @@ describe("CKAN-driven public category cards", () => {
 
     const response = await getPublishedDatasetFacetsResult();
     expect(response.unavailable).toBe(false);
-    const facetsRequest = new URL(
-      String(vi.mocked(globalThis.fetch).mock.calls.at(-1)?.[0]),
+    const facetsRequest = decodeActionCall(
+      vi.mocked(globalThis.fetch).mock.calls.at(-1),
     );
-    expect(facetsRequest.searchParams.getAll("fq_list")).toEqual(
-      buildDatasetCatalogExclusionFilters(),
+    expect(facetsRequest.init.method).toBe("POST");
+    expect(JSON.parse(facetsRequest.init.body).fq).toBe(
+      buildDatasetCatalogExclusionFilters().join(" AND "),
     );
-    expect(facetsRequest.searchParams.getAll("fq")).toHaveLength(0);
+    expect(JSON.parse(facetsRequest.init.body)).not.toHaveProperty("fq_list");
+    expect(JSON.parse(facetsRequest.init.body)["facet.field"]).toEqual([
+      "groups",
+      "organization",
+      "res_format",
+      "extras_portal_reference_period",
+    ]);
+    expect(facetsRequest.params.get("fq")).toBe(
+      buildDatasetCatalogExclusionFilters().join(" AND "),
+    );
+    expect(facetsRequest.params.get("fq_list")).toBeNull();
     expect(response.data.categories).toEqual([
       { id: "kesehatan", name: "Kesehatan", count: 12 },
       { id: "pendidikan", name: "Pendidikan", count: 7 },

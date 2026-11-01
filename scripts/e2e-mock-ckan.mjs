@@ -316,6 +316,41 @@ const indicatorRecords = [
 ];
 const cmsPages = [
   {
+    name: "halooo",
+    title: "Halooooo",
+    page_type: "page",
+    private: false,
+    publish_date: "2026-10-30",
+    content:
+      "# Halooooo\n\ndsfuiyrf dhfudh diufdhsoiud soiudhsid sdbsidh sjdhshuydhsa",
+    excerpt: "Informasi terbaru yang dipublikasikan tanpa gambar sampul.",
+    category: "Informasi",
+    template_type: "standard",
+    featured: false,
+    show_in_menu: false,
+    menu_order: "99",
+    image: "",
+    og_image: "",
+  },
+  {
+    name: "halaman-dengan-sampul",
+    title: "Panduan Visual Satu Data",
+    page_type: "page",
+    private: false,
+    publish_date: "2026-10-25",
+    content:
+      "# Panduan Visual\n\nKonten halaman dengan gambar Markdown sebagai sampul.\n\n![Sampul Panduan Visual](/uploads/page_images/cms-cover.png)",
+    excerpt:
+      "Contoh halaman yang mengambil cover dari gambar Markdown, tanpa field image atau og_image.",
+    category: "Panduan",
+    template_type: "article",
+    featured: false,
+    show_in_menu: false,
+    menu_order: "98",
+    image: "",
+    og_image: "",
+  },
+  {
     name: "tentang-satu-data",
     title: "Tentang Satu Data Wajo",
     page_type: "page",
@@ -739,13 +774,15 @@ function actionResult(action, params) {
       return page || { __not_found: true };
     }
     case "package_search": {
+      if (params.has("fq_list"))
+        return {
+          __validation_error:
+            "package_search filters must be normalized to one scalar fq in this portal contract.",
+        };
       let selected = packages.filter(
         (item) => item.state !== "deleted" && item.private !== true,
       );
-      for (const filter of [
-        ...params.getAll("fq"),
-        ...params.getAll("fq_list"),
-      ]) {
+      for (const filter of params.getAll("fq")) {
         selected = selected.filter((item) => matchesFilter(item, filter));
       }
       const q = params.get("q") || "*:*";
@@ -823,6 +860,11 @@ function actionResult(action, params) {
         : { __not_found: true };
     }
     case "resource_search": {
+      if (params.get("query") !== "url:")
+        return {
+          __validation_error:
+            "resource_search requires the supported url: field for public resource counting.",
+        };
       const resources = packages
         .filter((pkg) => pkg.state === "active" && pkg.private !== true)
         .flatMap((pkg) =>
@@ -920,7 +962,37 @@ function actionResult(action, params) {
   }
 }
 
-const server = createServer((request, response) => {
+async function readActionParams(request, url) {
+  const params = new URLSearchParams(url.searchParams);
+  const contentType = String(
+    request.headers["content-type"] || "",
+  ).toLowerCase();
+  if (request.method !== "POST" || !contentType.includes("application/json"))
+    return params;
+
+  const chunks = [];
+  for await (const chunk of request) chunks.push(chunk);
+  const rawBody = Buffer.concat(chunks).toString("utf8");
+  if (!rawBody) return params;
+  const body = JSON.parse(rawBody);
+  if (!body || typeof body !== "object" || Array.isArray(body))
+    throw new TypeError("CKAN Action API body must be a JSON object");
+
+  for (const [key, value] of Object.entries(body)) {
+    params.delete(key);
+    if (Array.isArray(value)) {
+      for (const item of value) params.append(key, String(item));
+    } else if (value !== null && value !== undefined) {
+      params.set(
+        key,
+        typeof value === "object" ? JSON.stringify(value) : String(value),
+      );
+    }
+  }
+  return params;
+}
+
+const server = createServer(async (request, response) => {
   const url = new URL(
     request.url || "/",
     `http://${request.headers.host || "127.0.0.1"}`,
@@ -973,13 +1045,37 @@ const server = createServer((request, response) => {
     return;
   }
   const action = match[1];
+  let actionParams;
+  try {
+    actionParams = await readActionParams(request, url);
+  } catch (error) {
+    response.writeHead(400).end(
+      JSON.stringify({
+        success: false,
+        error: { message: error.message, __type: "Bad Request" },
+      }),
+    );
+    return;
+  }
   const sendActionResult = () => {
-    const result = actionResult(action, url.searchParams);
+    const result = actionResult(action, actionParams);
     if (result?.__not_found) {
       response.writeHead(200).end(
         JSON.stringify({
           success: false,
           error: { message: "Not found", __type: "Not Found" },
+        }),
+      );
+      return;
+    }
+    if (result?.__validation_error) {
+      response.writeHead(409).end(
+        JSON.stringify({
+          success: false,
+          error: {
+            message: result.__validation_error,
+            __type: "Validation Error",
+          },
         }),
       );
       return;

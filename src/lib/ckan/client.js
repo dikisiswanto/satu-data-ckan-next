@@ -27,6 +27,38 @@ const NEVER_CACHE_ACTIONS = new Set([
   "datastore_search",
 ]);
 
+function normalizeFilterValues(value) {
+  if (value === undefined || value === null || value === "") return [];
+  const values = Array.isArray(value) ? value : [value];
+  return values.map((item) => String(item ?? "").trim()).filter(Boolean);
+}
+
+/**
+ * CKAN 2.12 PackageSearchQuery.run() treats fq as one string but extends fq
+ * with fq_list. A string accidentally supplied as fq_list is therefore split
+ * into individual characters. Normalize every package_search filter into one
+ * scalar fq and never send fq_list over the wire.
+ */
+export function normalizeCkanActionParams(action, params = {}) {
+  const normalized = { ...params };
+  if (action !== "package_search") return normalized;
+
+  const filters = [
+    ...normalizeFilterValues(normalized.fq),
+    ...normalizeFilterValues(normalized.fq_list),
+  ];
+  delete normalized.fq_list;
+  if (filters.length) {
+    normalized.fq =
+      filters.length === 1
+        ? filters[0]
+        : filters.map((filter) => `(${filter})`).join(" AND ");
+  } else {
+    delete normalized.fq;
+  }
+  return normalized;
+}
+
 export async function ckanAction(
   action,
   params = {},
@@ -35,18 +67,31 @@ export async function ckanAction(
   if (!/^[a-z][a-z0-9_]*$/.test(action))
     throw new TypeError("invalid_ckan_action");
   const url = new URL(`${BASE}/${action}`);
-  for (const [key, value] of Object.entries(params)) {
-    if (value === undefined || value === null || value === "") continue;
-    if (Array.isArray(value)) {
-      for (const item of value) url.searchParams.append(key, String(item));
-    } else if (typeof value === "object") {
-      url.searchParams.set(key, JSON.stringify(value));
-    } else {
+  // package_search always uses a JSON POST. This avoids query-string flattening
+  // of structured fields and lets us enforce one scalar fq expression before
+  // CKAN receives it. Other actions use JSON POST whenever a parameter is
+  // structured (arrays/objects), preserving their declared types as well.
+  const actionParams = normalizeCkanActionParams(action, params);
+  const entries = Object.entries(actionParams).filter(
+    ([, value]) => value !== undefined && value !== null && value !== "",
+  );
+  const useJsonBody =
+    action === "package_search" ||
+    entries.some(
+      ([, value]) =>
+        Array.isArray(value) || (typeof value === "object" && value !== null),
+    );
+  const headers = new Headers({ Accept: "application/json" });
+  const requestInit = { signal: AbortSignal.timeout(TIMEOUT_MS) };
+  if (useJsonBody) {
+    headers.set("Content-Type", "application/json");
+    requestInit.method = "POST";
+    requestInit.body = JSON.stringify(Object.fromEntries(entries));
+  } else {
+    for (const [key, value] of entries)
       url.searchParams.set(key, String(value));
-    }
   }
 
-  const headers = new Headers({ Accept: "application/json" });
   const forwardedSession = buildCkanSessionCookieHeader(sessionCookie);
   if (forwardedSession) headers.set("Cookie", forwardedSession);
   // Authenticated CKAN data must never enter Next's shared Data Cache, even
@@ -55,16 +100,16 @@ export async function ckanAction(
     forwardedSession || NEVER_CACHE_ACTIONS.has(action) ? 0 : revalidate;
 
   const response = await fetch(url, {
+    ...requestInit,
     headers,
     next:
-      effectiveRevalidate > 0
+      effectiveRevalidate > 0 && !useJsonBody
         ? {
             revalidate: effectiveRevalidate,
             tags: ["ckan-public", `ckan-action:${action}`],
           }
         : undefined,
-    cache: effectiveRevalidate > 0 ? undefined : "no-store",
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    cache: effectiveRevalidate > 0 && !useJsonBody ? undefined : "no-store",
   });
   if (!response.ok) {
     // CKAN often returns a structured Action API error body with HTTP 409 for
@@ -109,7 +154,7 @@ export async function searchPackages({
   rows = 24,
   start = 0,
   sort = "metadata_modified desc",
-  fqList = [],
+  fq = "",
   facets = false,
   sessionCookie = null,
 } = {}) {
@@ -125,7 +170,15 @@ export async function searchPackages({
     // records are requested. Anonymous searches remain strictly public.
     include_private: Boolean(sessionCookie),
   };
-  if (fqList.length) params.fq_list = fqList;
+  // The public search contract is one scalar `fq`. Arrays supplied by callers
+  // are safely combined before the Action API boundary; fq_list is normalized
+  // only as a backwards-compatibility input inside ckanAction and never sent.
+  const filterQueries = normalizeFilterValues(fq);
+  if (filterQueries.length)
+    params.fq =
+      filterQueries.length === 1
+        ? filterQueries[0]
+        : filterQueries.map((filter) => `(${filter})`).join(" AND ");
   if (facets) {
     params["facet.field"] = [
       "groups",

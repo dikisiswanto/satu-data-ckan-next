@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, CalendarDays, FileText, Newspaper } from "lucide-react";
-import { getCmsMarkdownImage, publicCmsImageUrl } from "@/lib/cms/pages";
+import { getCmsFeatureImage } from "@/lib/cms/pages";
 import { getPublicSiteOrigin } from "@/lib/site-config";
 import { formatDate } from "@/lib/utils";
 
@@ -10,12 +10,8 @@ export function CmsContentCard({ page, href, kind = "Halaman informasi" }) {
     page.pageType === "blog" ||
     kind.toLowerCase() === "berita" ||
     kind.toLowerCase() === "artikel";
-  const markdownImage = isArticle
-    ? getCmsMarkdownImage(page, getPublicSiteOrigin())
-    : null;
-  const imageUrl = isArticle
-    ? markdownImage?.src || ""
-    : publicCmsImageUrl(page.ogImage || page.image, getPublicSiteOrigin());
+  const featureImage = getCmsFeatureImage(page, getPublicSiteOrigin());
+  const imageUrl = featureImage?.src || "";
   const FallbackIcon = isArticle ? Newspaper : FileText;
 
   return (
@@ -31,14 +27,14 @@ export function CmsContentCard({ page, href, kind = "Halaman informasi" }) {
           <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
             <Image
               src={imageUrl}
-              alt={markdownImage?.alt || page.title}
+              alt={featureImage?.alt || page.title}
               fill
               unoptimized
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover transition duration-500 group-hover:scale-[1.02]"
             />
           </div>
-        ) : (
+        ) : isArticle ? (
           <div
             className="flex aspect-[16/9] items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 text-primary"
             aria-hidden="true"
@@ -47,7 +43,7 @@ export function CmsContentCard({ page, href, kind = "Halaman informasi" }) {
               <FallbackIcon size={36} strokeWidth={1.4} />
             </span>
           </div>
-        )}
+        ) : null}
         <div className="p-5">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold uppercase tracking-wide text-muted">
             <span>{page.category || kind}</span>

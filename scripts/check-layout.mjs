@@ -49,11 +49,11 @@ for (const route of ["berita", "informasi"]) {
     "public-cms-cover",
     "CMS details must identify the optional cover frame",
   );
-  requireText(
-    loading,
-    "public-cms-cover",
-    "CMS detail fallback must reserve the cover frame while content loads",
-  );
+  if (read(loading).includes("public-cms-cover")) {
+    failures.push(
+      `${route}/[slug]/loading.jsx: optional CMS images must not reserve a fake/default cover frame`,
+    );
+  }
   requireText(
     loading,
     "public-dynamic-heading",
@@ -77,7 +77,14 @@ for (const route of ["berita", "informasi"]) {
     requireText(
       page,
       "{image ? <figure",
-      "news cover should render only when a real uploaded image exists",
+      "news cover should render only when a real uploaded/Markdown image exists",
+    );
+  }
+  if (route === "informasi") {
+    requireText(
+      page,
+      "{featureImage?.src ? <figure",
+      "information cover must be optional and use the shared Markdown image parser",
     );
   }
 }

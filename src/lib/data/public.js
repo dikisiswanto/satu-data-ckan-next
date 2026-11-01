@@ -130,10 +130,10 @@ async function queryPublishedDatasets(options = {}, sessionCookie = null) {
     rows: perPage,
     start: (page - 1) * perPage,
     sort: order,
-    fqList: [
+    fq: [
       ...buildDatasetCatalogExclusionFilters(),
       ...buildCkanFilters({ organizationId, category, year, format }),
-    ],
+    ].join(" AND "),
     sessionCookie,
   });
   const searchRows = Array.isArray(result.results) ? result.results : [];
@@ -172,7 +172,7 @@ export async function getPublishedDatasetFacetsResult(rawSessionCookie = null) {
     const result = await searchPackages({
       rows: 0,
       facets: true,
-      fqList: buildDatasetCatalogExclusionFilters(),
+      fq: buildDatasetCatalogExclusionFilters().join(" AND "),
       sessionCookie,
     });
     const facets = result.search_facets || {};
@@ -292,7 +292,10 @@ async function countActivePublicResources() {
 
   do {
     const result = await ckanAction("resource_search", {
-      query: "id:",
+      // CKAN 2.12.1 resource_search does not expose `id` in
+      // Resource.get_columns(). `url` is a required, non-nullable resource
+      // column, so an empty substring matches every active public resource.
+      query: "url:",
       limit: pageSize,
       offset,
     });
@@ -316,7 +319,7 @@ export async function getPublicPortalStatsResult() {
     ckanAction("package_search", {
       q: "*:*",
       rows: 0,
-      fq_list: buildDatasetCatalogExclusionFilters(),
+      fq: buildDatasetCatalogExclusionFilters().join(" AND "),
       include_private: false,
     }),
     ckanAction("organization_list", {
@@ -328,7 +331,7 @@ export async function getPublicPortalStatsResult() {
     ckanAction("package_search", {
       q: "*:*",
       rows: 0,
-      fq_list: [buildPortalContentDiscoveryFilter("indicator")],
+      fq: buildPortalContentDiscoveryFilter("indicator"),
       include_private: false,
     }),
     countActivePublicResources(),

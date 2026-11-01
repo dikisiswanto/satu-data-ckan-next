@@ -92,7 +92,7 @@ export async function getPublishedInfographicsResult({
       rows: safeLimit,
       start: (safePage - 1) * safeLimit,
       sort: "metadata_modified desc",
-      fqList: [buildPortalContentDiscoveryFilter("infographic")],
+      fq: buildPortalContentDiscoveryFilter("infographic"),
     });
     const packages = (
       Array.isArray(result.results) ? result.results : []

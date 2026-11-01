@@ -192,13 +192,13 @@ assert.match(
 const catalog = await read("src/lib/data/public.js");
 assert.match(
   catalog,
-  /buildDatasetCatalogExclusionFilters\(\)[\s\S]*fqList:/,
-  "The ordinary dataset catalogue must send dedicated portal-content exclusions as CKAN fq_list values.",
+  /buildDatasetCatalogExclusionFilters\(\)[\s\S]*fq:/,
+  "The ordinary dataset catalogue must send dedicated portal-content exclusions as a scalar CKAN fq expression.",
 );
 assert.match(
   catalog,
-  /facets: true, fqList: buildDatasetCatalogExclusionFilters\(\)/,
-  "Dataset facets must exclude dedicated portal-content types through CKAN fq_list too.",
+  /facets: true, fq: buildDatasetCatalogExclusionFilters\(\)\.join\(" AND "\)/,
+  "Dataset facets must exclude dedicated portal-content types through the same scalar CKAN fq expression.",
 );
 
 process.stdout.write(
