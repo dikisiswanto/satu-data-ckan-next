@@ -336,9 +336,32 @@ class WajoThemePlugin(plugins.SingletonPlugin):
         toolkit.add_public_directory(config, "public")
         toolkit.add_resource("assets", "wajo_theme")
 
+    def _markdown_only_pages_editor(self):
+        """Tell ckanext-pages to use its Markdown form, never WYSIWYG HTML.
+
+        ckanext-pages checks this helper with a truthiness test in its detail
+        templates. Any non-empty config value (including the literal string
+        ``markdown``) activates the raw ``content|safe`` branch and bypasses
+        Markdown parsing. Wajo is loaded after ``pages`` and deliberately
+        overrides this helper so stale deployment config cannot re-enable it.
+        """
+        return None
+
     def get_helpers(self):
-        """Expose a sanitized GFM-compatible renderer for CKAN Pages/Blog."""
-        return {"wajo_render_markdown": render_wajo_markdown}
+        """Override the helpers actually called by upstream Pages/Blog templates.
+
+        The detail templates shipped by ckanext-pages 0.5.2 call
+        ``pages_get_wysiwyg_editor`` and ``render_content``. Registering only a
+        new ``wajo_render_markdown`` helper is insufficient when CKAN resolves
+        the upstream template instead of our template override. Since Wajo is
+        loaded after ``pages``, CKAN's helper registry gives these definitions
+        precedence and both Pages and Blog are parsed even on the upstream path.
+        """
+        return {
+            "wajo_render_markdown": render_wajo_markdown,
+            "render_content": render_wajo_markdown,
+            "pages_get_wysiwyg_editor": self._markdown_only_pages_editor,
+        }
 
     def files_file_allows(self, context, file, operation):
         """Allow public reads for the one dedicated editorial-media owner.

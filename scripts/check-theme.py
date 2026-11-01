@@ -219,7 +219,15 @@ for template_path, template_source, edit_route in (
 require("class _TaskListTreeprocessor" in markdown_renderer_source and "_StrikethroughProcessor" in markdown_renderer_source, "Renderer admin harus mendukung task-list dan strikethrough.")
 require('extensions=["extra", "sane_lists", _WajoMarkdownExtension()]' in markdown_renderer_source, "Renderer admin harus mendukung tabel, fenced code, dan nested/sane lists.")
 require("nh3.clean(" in markdown_renderer_source and "_remove_raw_html" in markdown_renderer_source, "Renderer CKAN harus membersihkan output Markdown dan tidak mengaktifkan raw HTML.")
-require("ITemplateHelpers" in plugin_source and '"wajo_render_markdown": render_wajo_markdown' in plugin_source, "Wajo Theme harus mendaftarkan helper Markdown aman pada CKAN.")
+require(
+    "ITemplateHelpers" in plugin_source
+    and '"wajo_render_markdown": render_wajo_markdown' in plugin_source
+    and '"render_content": render_wajo_markdown' in plugin_source
+    and '"pages_get_wysiwyg_editor": self._markdown_only_pages_editor' in plugin_source
+    and "def _markdown_only_pages_editor(self)" in plugin_source
+    and "return None" in plugin_source,
+    "Wajo harus override helper upstream Pages yang dipakai detail Pages/Blog: render_content wajib mem-parse Markdown dan pages_get_wysiwyg_editor wajib falsey agar HTML mentah tidak pernah dipakai.",
+)
 require('toolkit.add_template_directory(config, "templates")' in plugin_source, "Template Wajo harus didaftarkan melalui plugin_template_paths CKAN.")
 require('config["extra_template_paths"]' not in plugin_source, "Template Wajo tidak boleh didaftarkan ulang melalui extra_template_paths; duplikasi membuat ckan_extends berputar dengan template Midnight Blue.")
 require('plugins.append("wajo_theme")' in bootstrap_source, "Plugin Wajo harus dimuat setelah pages/activity agar override template memperoleh prioritas secara native.")
@@ -282,6 +290,10 @@ require(
 require('"wajo_harvest_i18n"' in bootstrap_source and '"wajo_pages_i18n"' in bootstrap_source and '"wajo_dcat_i18n"' in bootstrap_source, "Bootstrap harus mengaktifkan domain terjemahan khusus Harvest, Pages, dan DCAT.")
 require(all(name in plugin_order for name in ("harvest", "wajo_harvest_i18n", "pages", "wajo_pages_i18n", "wajo_dcat_i18n")) and plugin_order.index("harvest") < plugin_order.index("wajo_harvest_i18n") and plugin_order.index("pages") < plugin_order.index("wajo_pages_i18n") and "dcat" in plugin_order and plugin_order.index("dcat") < plugin_order.index("wajo_dcat_i18n"), "Translation plugin harus diaktifkan bersama extension yang domain terjemahannya ditangani.")
 require("plugins.append(\"wajo_theme\")" in bootstrap_source, "Plugin theme harus diaktifkan setelah extension yang juga menyediakan template.")
+require(
+    plugin_order.index("pages") < bootstrap_source.index('plugins.append("wajo_theme")') < bootstrap_source.index('plugins.append("envvars")'),
+    "wajo_theme harus di-load setelah pages agar override helper render_content dan pages_get_wysiwyg_editor benar-benar menang; envvars tetap terakhir.",
+)
 require('values["CKANEXT__PAGES__EDITOR"]' not in bootstrap_source and "CKANEXT__PAGES__EDITOR=markdown" not in env_source, "CKAN Pages Markdown mode must leave editor unset; the literal markdown value is truthy and triggers the upstream WYSIWYG branch.")
 require('plugins.append("envvars")' in bootstrap_source, "Plugin envvars harus tetap berada terakhir.")
 workflow = "\n".join(path.read_text(encoding="utf-8") for path in (ROOT / ".github/workflows").glob("*.yml"))

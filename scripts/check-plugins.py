@@ -80,6 +80,17 @@ except Exception as exc:
 # sanitizer regressions that source-only checks cannot detect.
 try:
     from ckanext.wajo_theme.markdown import render_wajo_markdown
+    from ckanext.wajo_theme.plugin import WajoThemePlugin
+
+    page_helpers = WajoThemePlugin().get_helpers()
+    if page_helpers["pages_get_wysiwyg_editor"]():
+        raise RuntimeError("ckanext-pages WYSIWYG mode is still enabled; Markdown source would bypass the parser")
+    upstream_renderer = page_helpers["render_content"]
+    upstream_rendered = str(upstream_renderer("## Judul Markdown\n\n**tebal**"))
+    if "<h2>Judul Markdown</h2>" not in upstream_rendered or "<strong>tebal</strong>" not in upstream_rendered:
+        raise RuntimeError("The renderer registered under ckanext-pages' actual render_content helper did not parse Markdown")
+    if page_helpers["wajo_render_markdown"] is not upstream_renderer:
+        raise RuntimeError("Wajo template helper and upstream Pages/Blog render_content must share one renderer")
 
     markdown_sample = """## teks aaa
 

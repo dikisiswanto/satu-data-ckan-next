@@ -211,6 +211,16 @@ assert.match(
   "CKAN must expose the safe Wajo Markdown helper to Jinja templates.",
 );
 assert.match(
+  adminPlugin,
+  /"render_content": render_wajo_markdown[\s\S]*"pages_get_wysiwyg_editor": self\._markdown_only_pages_editor/,
+  "Wajo must override the two ckanext-pages helpers used by upstream Pages/Blog detail templates, not only register a new helper name.",
+);
+assert.match(
+  adminPlugin,
+  /def _markdown_only_pages_editor\(self\):[\s\S]*?return None/,
+  "The upstream WYSIWYG helper must be forced falsey so ckanext-pages cannot send Markdown source into its raw HTML branch.",
+);
+assert.match(
   adminMarkdown,
   /extensions=\["extra", "sane_lists", _WajoMarkdownExtension\(\)\]/,
   "CKAN admin must render tables, fenced code, and sane lists.",
