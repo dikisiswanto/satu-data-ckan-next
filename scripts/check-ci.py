@@ -113,9 +113,9 @@ if not requirements_path.is_file():
     errors.append("requirements-ci.txt must pin Python static-check and localization dependencies")
 else:
     requirements_text = requirements_path.read_text(encoding="utf-8")
-    for dependency in ("Babel==", "Jinja2==", "tinycss2==", "webencodings=="):
+    for dependency in ("setuptools==", "Babel==", "Jinja2==", "tinycss2==", "webencodings=="):
         if dependency not in requirements_text:
-            errors.append(f"requirements-ci.txt must pin {dependency[:-2]} (required by static validation)")
+            errors.append(f"requirements-ci.txt must pin {dependency[:-2]} (required by static validation and reproducible theme wheel packaging)")
 static_runner = (ROOT / "scripts/check-static.sh").read_text(encoding="utf-8")
 if "python3 scripts/check-theme-css.py" not in static_runner:
     errors.append("check-static.sh must run the semantic CKAN CSS AST checker")

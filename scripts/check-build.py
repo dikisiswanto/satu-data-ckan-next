@@ -195,17 +195,42 @@ def main() -> None:
                 build_source,
                 ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.egg-info", "build", "dist"),
             )
-            subprocess.run(
+            # `bdist_wheel` is provided by the pinned setuptools toolchain.
+            # GitHub's setup-python image does not promise to preinstall it, so
+            # requirements-ci.txt owns the version instead of relying on runner state.
+            build_tool_probe = subprocess.run(
                 [
-                    "python3", "setup.py", "bdist_wheel",
-                    "--dist-dir", str(wheel_root / "dist"),
-                    "--bdist-dir", str(wheel_root / "bdist"),
-                    "build", "--build-base", str(wheel_root / "build"),
+                    "python3", "-c",
+                    "import setuptools; "
+                    "from setuptools.command.bdist_wheel import bdist_wheel; "
+                    "print('setuptools=' + setuptools.__version__)",
                 ],
-                cwd=build_source,
-                check=True,
                 capture_output=True,
                 text=True,
+            )
+            assert build_tool_probe.returncode == 0, (
+                "Wajo theme wheel build requires the pinned setuptools package from "
+                "requirements-ci.txt; install it before running static checks.\n"
+                + build_tool_probe.stderr
+            )
+            build_command = [
+                "python3", "setup.py", "bdist_wheel",
+                "--dist-dir", str(wheel_root / "dist"),
+                "--bdist-dir", str(wheel_root / "bdist"),
+                "build", "--build-base", str(wheel_root / "build"),
+            ]
+            build_result = subprocess.run(
+                build_command,
+                cwd=build_source,
+                capture_output=True,
+                text=True,
+            )
+            assert build_result.returncode == 0, (
+                "Wajo theme wheel packaging failed. Command: "
+                + " ".join(build_command)
+                + f"\nExit code: {build_result.returncode}\n"
+                + "\n--- stdout ---\n" + build_result.stdout
+                + "\n--- stderr ---\n" + build_result.stderr
             )
             wheels = list((wheel_root / "dist").glob("ckanext_wajo_theme-*.whl"))
             assert len(wheels) == 1, "Wajo theme build must produce exactly one wheel"
