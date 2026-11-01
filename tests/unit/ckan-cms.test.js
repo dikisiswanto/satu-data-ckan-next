@@ -13,15 +13,20 @@ import {
   publicCmsImageUrl,
 } from "@/lib/cms/pages";
 
+const originalTimeZone = process.env.NEXT_PUBLIC_TIME_ZONE;
+
 afterEach(() => {
   delete process.env.CKAN_ADMIN_URL;
   delete process.env.PUBLIC_SITE_ORIGIN;
+  if (originalTimeZone === undefined) delete process.env.NEXT_PUBLIC_TIME_ZONE;
+  else process.env.NEXT_PUBLIC_TIME_ZONE = originalTimeZone;
 });
 
 describe("CKAN Pages CMS normalization", () => {
   it("accepts safe CMS slugs and rejects path-like identifiers", () => {
     expect(normalizeCmsSlug("tentang-satu-data")).toBe("tentang-satu-data");
     expect(normalizeCmsSlug("wajo_2026")).toBe("wajo_2026");
+    expect(normalizeCmsSlug("a".repeat(100))).toBe("a".repeat(100));
     for (const value of [
       "",
       "../admin",
@@ -44,6 +49,7 @@ describe("CKAN Pages CMS normalization", () => {
   });
 
   it("excludes private, incomplete, invalid-slug and future-published records", () => {
+    process.env.NEXT_PUBLIC_TIME_ZONE = "Asia/Makassar";
     const base = { name: "profil-wajo", title: "Profil Wajo", private: false };
     expect(isCmsRecordPublished(base, Date.parse("2026-10-30T00:00:00Z"))).toBe(
       true,
@@ -57,29 +63,33 @@ describe("CKAN Pages CMS normalization", () => {
         Date.parse("2026-10-30T00:00:00Z"),
       ),
     ).toBe(false);
+    const now = Date.parse("2026-10-29T20:00:00Z");
     expect(
-      isCmsRecordPublished(
-        { ...base, publish_date: "2026-10-30" },
-        Date.parse("2026-10-29T20:00:00Z"),
-      ),
+      isCmsRecordPublished({ ...base, publish_date: "2026-10-30" }, now),
     ).toBe(true);
     expect(
       isCmsRecordPublished(
         { ...base, publish_date: "2026-10-30T00:00:00" },
-        Date.parse("2026-10-29T20:00:00Z"),
+        now,
+      ),
+    ).toBe(true);
+    expect(
+      isCmsRecordPublished(
+        { ...base, publish_date: "2026-10-30T00:00:00Z" },
+        now,
       ),
     ).toBe(true);
     expect(
       isCmsRecordPublished(
         { ...base, publish_date: "2026-10-31T00:00:00" },
-        Date.parse("2026-10-29T20:00:00Z"),
+        now,
       ),
     ).toBe(false);
     expect(
-      isCmsRecordPublished(
-        { ...base, publish_date: "2026-10-31" },
-        Date.parse("2026-10-29T20:00:00Z"),
-      ),
+      isCmsRecordPublished({ ...base, publish_date: "2026-10-31" }, now),
+    ).toBe(false);
+    expect(
+      isCmsRecordPublished({ ...base, publish_date: "2026-02-30" }, now),
     ).toBe(false);
     expect(
       isCmsRecordPublished(

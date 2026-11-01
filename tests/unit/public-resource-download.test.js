@@ -13,6 +13,7 @@ const downloadPath = `/dataset/${datasetId}/resource/${resourceId}/download/${fi
 function fixtures({
   privateDataset = false,
   privateResource = false,
+  resourceName = filename,
   resourceUrl = `https://data.silirdev.com${downloadPath}`,
 } = {}) {
   ckanAction.mockImplementation(async (action) => {
@@ -20,7 +21,7 @@ function fixtures({
       return {
         id: resourceId,
         package_id: datasetId,
-        name: filename,
+        name: resourceName,
         state: "active",
         private: privateResource,
         url: resourceUrl,
@@ -202,11 +203,15 @@ describe("public CKAN resource download", () => {
   });
 
   it("allows legitimate JSON and plain-text resources", async () => {
-    fixtures();
     for (const [filenameValue, contentType] of [
       ["catalog.json", "application/json"],
       ["readme.txt", "text/plain; charset=utf-8"],
     ]) {
+      const matchingPath = `/dataset/${datasetId}/resource/${resourceId}/download/${filenameValue}`;
+      fixtures({
+        resourceName: filenameValue,
+        resourceUrl: `https://data.silirdev.com${matchingPath}`,
+      });
       const upstreamFetch = vi.fn(
         async () =>
           new Response("valid content", {
@@ -216,7 +221,7 @@ describe("public CKAN resource download", () => {
       );
       vi.stubGlobal("fetch", upstreamFetch);
       const response = await GET(
-        new Request(`https://data.silirdev.com${downloadPath}`),
+        new Request(`https://data.silirdev.com${matchingPath}`),
         {
           params: Promise.resolve({
             slug: datasetId,
@@ -461,7 +466,7 @@ describe("public CKAN resource download", () => {
     ckanAction.mockRejectedValue(
       Object.assign(new Error("Not authorized"), { status: 403 }),
     );
-    const consoleInfo = vi.spyOn(console, "info").mockImplementation(() => {});
+    const consoleWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const fetcher = vi.fn();
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
@@ -474,7 +479,7 @@ describe("public CKAN resource download", () => {
     );
     expect(response.status).toBe(404);
     expect(fetcher).not.toHaveBeenCalled();
-    expect(consoleInfo).toHaveBeenCalledWith(
+    expect(consoleWarn).toHaveBeenCalledWith(
       "public_resource_download_denied",
       expect.objectContaining({
         phase: "resource_show",
@@ -482,7 +487,7 @@ describe("public CKAN resource download", () => {
         upstreamStatus: 403,
       }),
     );
-    expect(JSON.stringify(consoleInfo.mock.calls)).not.toContain(
+    expect(JSON.stringify(consoleWarn.mock.calls)).not.toContain(
       "signed-admin-session",
     );
   });

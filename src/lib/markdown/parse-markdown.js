@@ -1,5 +1,7 @@
 const MAX_SOURCE_LENGTH = 240_000;
 const MAX_BLOCK_DEPTH = 12;
+const BARE_LINK_PATTERN =
+  /(?:https?:\/\/[^\s<>]+|www\.[^\s<>]+|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/iy;
 
 function normalizeLabel(value) {
   return String(value || "")
@@ -111,6 +113,30 @@ function parseReferenceDefinitions(source) {
   return { source: retained.join("\n"), references };
 }
 
+function collectClosingDelimiterPositions(source, delimiter) {
+  const positions = [];
+  let cursor = 0;
+  while (cursor < source.length) {
+    const position = source.indexOf(delimiter, cursor);
+    if (position < 0) break;
+    if (position > 0 && !/\s/.test(source[position - 1]))
+      positions.push(position);
+    cursor = position + 1;
+  }
+  return positions;
+}
+
+function findFirstPositionAfter(positions, target) {
+  let low = 0;
+  let high = positions.length;
+  while (low < high) {
+    const middle = (low + high) >>> 1;
+    if (positions[middle] <= target) low = middle + 1;
+    else high = middle;
+  }
+  return positions[low] ?? -1;
+}
+
 function parseInline(source, references, depth = 0) {
   if (depth > 8 || !source) return [{ type: "text", value: source || "" }];
   const tokens = [];
@@ -122,6 +148,16 @@ function parseInline(source, references, depth = 0) {
     }
   };
   const delimiters = ["**", "__", "~~", "*", "_"];
+  // Pre-index closing delimiters once. Repeated indexOf() searches from each
+  // opener become quadratic for adversarial text containing many `*`/`_` chars.
+  const delimiterPositions = /[*_~]/.test(source)
+    ? new Map(
+        delimiters.map((delimiter) => [
+          delimiter,
+          collectClosingDelimiterPositions(source, delimiter),
+        ]),
+      )
+    : null;
 
   for (let index = 0; index < source.length;) {
     if (
@@ -241,19 +277,29 @@ function parseInline(source, references, depth = 0) {
       }
     }
 
+    // Searching for a closing delimiter from every character makes long plain
+    // text quadratic. Only inspect potential Markdown delimiter positions.
     let matchedDelimiter = null;
-    for (const delimiter of delimiters) {
-      if (!source.startsWith(delimiter, index)) continue;
-      if (
-        !source[index + delimiter.length] ||
-        /\s/.test(source[index + delimiter.length])
-      )
-        continue;
-      const close = source.indexOf(delimiter, index + delimiter.length);
-      if (close <= index + delimiter.length || /\s/.test(source[close - 1]))
-        continue;
-      matchedDelimiter = { delimiter, close };
-      break;
+    if (
+      source[index] === "*" ||
+      source[index] === "_" ||
+      source[index] === "~"
+    ) {
+      for (const delimiter of delimiters) {
+        if (!source.startsWith(delimiter, index)) continue;
+        if (
+          !source[index + delimiter.length] ||
+          /\s/.test(source[index + delimiter.length])
+        )
+          continue;
+        const close = findFirstPositionAfter(
+          delimiterPositions?.get(delimiter) || [],
+          index + delimiter.length,
+        );
+        if (close < 0) continue;
+        matchedDelimiter = { delimiter, close };
+        break;
+      }
     }
     if (matchedDelimiter) {
       flush();
@@ -275,32 +321,35 @@ function parseInline(source, references, depth = 0) {
       continue;
     }
 
-    const bareLink = source
-      .slice(index)
-      .match(
-        /^(https?:\/\/[^\s<>]+|www\.[^\s<>]+|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i,
-      );
-    if (bareLink) {
-      flush();
-      let href = bareLink[0];
-      let label = href;
-      while (/[.,!?;:]$/.test(href)) href = href.slice(0, -1);
-      const suffix = label.slice(href.length);
-      if (href) {
-        const target = href.startsWith("www.")
-          ? `https://${href}`
-          : href.includes("@") && !href.includes("://")
-            ? `mailto:${href}`
-            : href;
-        tokens.push({
-          type: "link",
-          href: target,
-          label: href,
-          children: [{ type: "text", value: href }],
-        });
-        if (suffix) tokens.push({ type: "text", value: suffix });
-        index += bareLink[0].length;
-        continue;
+    // Use a sticky expression against the original string instead of slicing
+    // the remaining suffix at every character (another quadratic hot path).
+    const previous = index > 0 ? source[index - 1] : "";
+    const linkBoundary = index === 0 || /[\s([{<]/.test(previous);
+    if (linkBoundary && /[A-Z0-9._%+-]/i.test(source[index])) {
+      BARE_LINK_PATTERN.lastIndex = index;
+      const bareLink = BARE_LINK_PATTERN.exec(source);
+      if (bareLink) {
+        flush();
+        let href = bareLink[0];
+        const label = href;
+        while (/[.,!?;:]$/.test(href)) href = href.slice(0, -1);
+        const suffix = label.slice(href.length);
+        if (href) {
+          const target = href.startsWith("www.")
+            ? `https://${href}`
+            : href.includes("@") && !href.includes("://")
+              ? `mailto:${href}`
+              : href;
+          tokens.push({
+            type: "link",
+            href: target,
+            label: href,
+            children: [{ type: "text", value: href }],
+          });
+          if (suffix) tokens.push({ type: "text", value: suffix });
+          index += bareLink[0].length;
+          continue;
+        }
       }
     }
 

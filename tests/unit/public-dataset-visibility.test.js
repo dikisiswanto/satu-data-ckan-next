@@ -51,7 +51,7 @@ describe("public dataset visibility", () => {
     });
     expect(consoleError).toHaveBeenCalledWith(
       "ckan_public_dataset_detail_failed",
-      { status: 502 },
+      { status: 502, detail: null },
     );
   });
 

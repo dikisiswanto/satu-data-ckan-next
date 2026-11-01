@@ -45,7 +45,7 @@ describe("CKAN visibility facade: public vs session-authorized", () => {
     expect(ckanAction).toHaveBeenCalledWith(
       "package_show",
       { id: "dataset-private" },
-      { revalidate: 0, sessionCookie: null },
+      { revalidate: 0 },
     );
   });
 
@@ -188,7 +188,12 @@ describe("CKAN visibility facade: public vs session-authorized", () => {
     expect(response.headers.get("cache-control")).toBe("private, no-store");
     expect(ckanAction).toHaveBeenCalledWith(
       "package_search",
-      expect.objectContaining({ q: '"dataset"', rows: 10 }),
+      expect.objectContaining({
+        q: '"dataset"',
+        rows: 10,
+        include_private: false,
+      }),
+      { revalidate: 0, sessionCookie: null },
     );
   });
 

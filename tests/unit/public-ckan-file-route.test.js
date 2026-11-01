@@ -266,7 +266,7 @@ describe("public CKAN File API proxy", () => {
     ]);
   });
 
-  it("rejects a package-owned FileStore file when the CKAN owner ID is not the requested package", async () => {
+  it("rejects a package-owned FileStore file when package_show returns a different owner ID", async () => {
     ckanAction.mockImplementation(async (action) => {
       if (action === "file_show")
         return {
@@ -274,6 +274,8 @@ describe("public CKAN File API proxy", () => {
           content_type: "application/pdf",
           owner_info: { owner_type: "package", owner_id: "another-package" },
         };
+      if (action === "package_show")
+        return { id: "different-package", state: "active", private: false };
       throw new Error(`unexpected action ${action}`);
     });
     const fetcher = vi.fn();

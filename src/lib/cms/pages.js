@@ -17,8 +17,14 @@ function asText(value, maxLength = 20_000) {
 }
 
 export function normalizeCmsSlug(value) {
-  const slug = asText(value, 100);
-  return PAGE_SLUG_PATTERN.test(slug) ? slug : "";
+  if (value === null || value === undefined) return "";
+  const raw = String(value)
+    .replace(/\u0000/g, "")
+    .trim();
+  // Never truncate identifiers before validation: doing so could turn an
+  // overlong/path-like input into a different, valid CMS slug.
+  if (!raw || raw.length > 100) return "";
+  return PAGE_SLUG_PATTERN.test(raw) ? raw : "";
 }
 
 export function parseCmsBoolean(value) {
@@ -43,14 +49,27 @@ export function isCmsRecordPublished(record, now = Date.now()) {
     return false;
   if (record.publish_date) {
     const publishDate = String(record.publish_date).trim();
-    if (
-      /^\d{4}-\d{2}-\d{2}(?:T00:00:00(?:\.0+)?(?:Z|[+-]\d{2}:?\d{2})?)?$/.test(
+    const calendarDateMatch =
+      /^(\d{4}-\d{2}-\d{2})(?:T00:00:00(?:\.0+)?(?:Z|[+-]\d{2}:?\d{2})?)?$/.exec(
         publishDate,
-      )
-    ) {
+      );
+    if (calendarDateMatch) {
       // CKAN Pages stores its date picker as a calendar date, not a UTC
-      // timestamp. Compare date-only values in the portal's configured local
-      // timezone so a page scheduled for today is not delayed until 08:00 WITA.
+      // timestamp. Some CKAN/plugin versions serialize that same date as
+      // midnight ISO text. Compare only its YYYY-MM-DD portion, otherwise
+      // "2026-10-30T00:00:00" sorts after "2026-10-30" and is wrongly hidden.
+      const scheduledDate = calendarDateMatch[1];
+      const parsedCalendarDate = Date.parse(`${scheduledDate}T00:00:00.000Z`);
+      if (
+        Number.isNaN(parsedCalendarDate) ||
+        new Date(parsedCalendarDate).toISOString().slice(0, 10) !==
+          scheduledDate
+      ) {
+        return false;
+      }
+
+      // Compare in the portal's configured local timezone so a page scheduled
+      // for today is not delayed until 08:00 WITA.
       const timeZone = process.env.NEXT_PUBLIC_TIME_ZONE || "Asia/Makassar";
       let localDate;
       try {
@@ -68,7 +87,7 @@ export function isCmsRecordPublished(record, now = Date.now()) {
         // A malformed custom timezone must not make all public CMS routes fail.
         localDate = new Date(now).toISOString().slice(0, 10);
       }
-      if (publishDate > localDate) return false;
+      if (scheduledDate > localDate) return false;
     } else {
       const publishTimestamp = Date.parse(publishDate);
       if (Number.isNaN(publishTimestamp) || publishTimestamp > now)

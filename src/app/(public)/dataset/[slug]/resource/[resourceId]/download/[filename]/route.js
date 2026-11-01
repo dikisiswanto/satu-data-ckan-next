@@ -130,7 +130,11 @@ async function handle(request, context) {
       } catch {
         return errorResponse(404, "Nama berkas tidak valid.");
       }
-      if (!sourceFilename || sourceFilename !== requestedFilename) {
+      if (
+        !sourceFilename ||
+        sourceFilename !== requestedFilename ||
+        (resource.name && requestedFilename !== String(resource.name))
+      ) {
         return errorResponse(
           404,
           "Nama berkas tidak sesuai dengan resource CKAN.",
