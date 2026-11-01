@@ -709,6 +709,10 @@ body:has(.public-home) .home-hero-pattern {
   .home-stat:nth-last-child(-n + 2) {
     border-bottom: 0;
   }
+  .home-stat:last-child {
+    grid-column: 1 / -1;
+    border-right: 0;
+  }
   .home-stats-note {
     max-width: 38rem;
     text-align: left;

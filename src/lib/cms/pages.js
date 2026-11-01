@@ -243,6 +243,7 @@ export async function getPublicCmsNavigationResult() {
       .slice(0, 8)
       .map((page) => ({
         href: `/informasi/${encodeURIComponent(page.name)}`,
+        title: page.title,
         label: page.menuLabel || page.title,
       })),
     unavailable: result.unavailable,

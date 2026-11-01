@@ -4,7 +4,10 @@ import { ckanAction, searchPackages } from "@/lib/ckan/client";
 import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
 import { isPrivateMarker } from "@/lib/ckan/privacy";
 import { normalizeCkanSessionCookieValue } from "@/lib/ckan/session";
-import { buildDatasetCatalogExclusionFilters } from "@/lib/data/portal-content-types";
+import {
+  buildDatasetCatalogExclusionFilters,
+  buildPortalContentDiscoveryFilter,
+} from "@/lib/data/portal-content-types";
 
 const safeLimit = (value, fallback = 24) =>
   Math.min(Math.max(Number(value) || fallback, 1), 100);
@@ -154,6 +157,7 @@ export async function getPublishedDatasetsResult(
   } catch (error) {
     console.error("ckan_public_dataset_search_failed", {
       status: error?.status || null,
+      detail: error?.detail || null,
     });
     return { data: [], meta: null, unavailable: true };
   }
@@ -205,6 +209,7 @@ export async function getPublishedDatasetFacetsResult(rawSessionCookie = null) {
   } catch (error) {
     console.error("ckan_public_facets_failed", {
       status: error?.status || null,
+      detail: error?.detail || null,
     });
     return {
       data: { categories: [], organizations: [], years: [] },
@@ -251,6 +256,7 @@ const getCachedPublicDatasetBySlugResult = cache(
     } catch (error) {
       console.error("ckan_public_dataset_detail_failed", {
         status: error?.status || null,
+        detail: error?.detail || null,
       });
       return { data: null, unavailable: true };
     }
@@ -272,50 +278,100 @@ export async function getPublishedDatasetBySlugResult(
   } catch (error) {
     console.error("ckan_authenticated_dataset_detail_failed", {
       status: error?.status || null,
+      detail: error?.detail || null,
     });
     return { data: null, unavailable: true };
   }
 }
 
-export async function getPublicPortalStatsResult() {
-  try {
-    const indicatorTag = process.env.CKAN_INDICATOR_TAG || "portal-indikator";
-    const [packages, organizations, indicators] = await Promise.all([
-      ckanAction("package_search", {
-        q: "*:*",
-        rows: 0,
-        fq_list: buildDatasetCatalogExclusionFilters(),
-        include_private: false,
-      }),
-      ckanAction("organization_list", {
-        all_fields: true,
-        include_dataset_count: true,
-        include_extras: false,
-        include_users: false,
-      }),
-      ckanAction("package_search", {
-        q: "*:*",
-        rows: 0,
-        fq_list: [`tags:${indicatorTag}`],
-        include_private: false,
-      }),
-    ]);
-    return {
-      data: {
-        datasets: Number(packages.count || 0),
-        organizations: Array.isArray(organizations)
-          ? organizations.filter((item) => item.state !== "deleted").length
-          : 0,
-        indicators: Number(indicators.count || 0),
-      },
-      unavailable: false,
-    };
-  } catch (error) {
-    console.error("ckan_public_stats_failed", {
-      status: error?.status || null,
+async function countActivePublicResources() {
+  const pageSize = 500;
+  let offset = 0;
+  let total = 0;
+  let visibleCount = 0;
+
+  do {
+    const result = await ckanAction("resource_search", {
+      query: "id:",
+      limit: pageSize,
+      offset,
     });
-    return { data: null, unavailable: true };
+    const resources = Array.isArray(result?.results) ? result.results : [];
+    total = Math.max(0, Number(result?.count || 0));
+    visibleCount += resources.filter(
+      (resource) =>
+        resource &&
+        (!resource.state || resource.state === "active") &&
+        !isPrivateMarker(resource.private),
+    ).length;
+    if (!resources.length) break;
+    offset += resources.length;
+  } while (offset < total);
+
+  return visibleCount;
+}
+
+export async function getPublicPortalStatsResult() {
+  const requests = await Promise.allSettled([
+    ckanAction("package_search", {
+      q: "*:*",
+      rows: 0,
+      fq_list: buildDatasetCatalogExclusionFilters(),
+      include_private: false,
+    }),
+    ckanAction("organization_list", {
+      all_fields: true,
+      include_dataset_count: true,
+      include_extras: false,
+      include_users: false,
+    }),
+    ckanAction("package_search", {
+      q: "*:*",
+      rows: 0,
+      fq_list: [buildPortalContentDiscoveryFilter("indicator")],
+      include_private: false,
+    }),
+    countActivePublicResources(),
+  ]);
+
+  const [packages, organizations, indicators, resources] = requests;
+  const failed = requests.filter((result) => result.status === "rejected");
+  const valueOrNull = (result, read) =>
+    result.status === "fulfilled" ? read(result.value) : null;
+
+  for (const [name, result] of [
+    ["datasets", packages],
+    ["organizations", organizations],
+    ["indicators", indicators],
+    ["resources", resources],
+  ]) {
+    if (result.status === "rejected") {
+      console.error(`ckan_public_${name}_count_failed`, {
+        status: result.reason?.status || null,
+        detail: result.reason?.detail || null,
+      });
+    }
   }
+
+  return {
+    data: {
+      datasets: valueOrNull(packages, (result) => Number(result.count || 0)),
+      organizations: valueOrNull(organizations, (result) =>
+        Array.isArray(result)
+          ? result.filter(
+              (item) => item.state !== "deleted" && item.state !== "draft",
+            ).length
+          : null,
+      ),
+      indicators: valueOrNull(indicators, (result) =>
+        Number(result.count || 0),
+      ),
+      resources: valueOrNull(resources, (result) => Number(result)),
+    },
+    // A single failing counter must not blank otherwise healthy homepage metrics.
+    unavailable: failed.length === requests.length,
+    partial: failed.length > 0,
+  };
 }
 
 // Indicators are represented by tagged CKAN datasets and DataStore resources;

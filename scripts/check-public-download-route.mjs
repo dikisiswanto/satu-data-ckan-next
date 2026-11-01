@@ -433,7 +433,17 @@ const geoCss = await readFile(
   "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
   "utf8",
 );
-assert.match(geoCss, /format-label\[data-format="geojson" i\]::before/);
+const geoCssRules = geoCss.replace(/\/\*[\s\S]*?\*\//g, "");
+assert.doesNotMatch(
+  geoCssRules,
+  /(?:^|,)\s*[^{}]*\.resource-item\b/,
+  "The CKAN admin resource detail must keep its native format sprite and upstream resource-item icon styles.",
+);
+assert.match(
+  geoCss,
+  /\.dataset-resources a\.label\[data-format="geojson" i\]/,
+  "GeoJSON styling may remain scoped to the separate dataset search/list chips.",
+);
 
 const datasetCard = await readFile("src/components/dataset-card.jsx", "utf8");
 assert.match(datasetCard, /isGeoJSONResource/);

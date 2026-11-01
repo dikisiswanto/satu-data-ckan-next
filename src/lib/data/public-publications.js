@@ -9,6 +9,10 @@ import {
 import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
 import { isPrivateMarker } from "@/lib/ckan/privacy";
 import { publicResourceUrl } from "@/lib/ckan/public-resource-url";
+import {
+  buildPortalContentDiscoveryFilter,
+  isPortalContentPackage,
+} from "@/lib/data/portal-content-types";
 
 export const PUBLICATION_TAG =
   process.env.CKAN_PUBLICATION_TAG || "portal-publikasi";
@@ -18,9 +22,7 @@ export function isPublicPublicationPackage(pkg) {
     pkg &&
     (!pkg.state || pkg.state === "active") &&
     !isPrivateMarker(pkg.private) &&
-    (pkg.tags || []).some(
-      (tag) => (tag.name || tag.display_name) === PUBLICATION_TAG,
-    ),
+    isPortalContentPackage(pkg, "publication"),
   );
 }
 
@@ -98,7 +100,7 @@ export async function getPublishedPublicationsResult({
       rows: safeLimit,
       start: (safePage - 1) * safeLimit,
       sort: "metadata_modified desc",
-      fqList: [`tags:${PUBLICATION_TAG}`],
+      fqList: [buildPortalContentDiscoveryFilter("publication")],
     });
     const packages = (
       Array.isArray(result.results) ? result.results : []
@@ -119,6 +121,7 @@ export async function getPublishedPublicationsResult({
   } catch (error) {
     console.error("ckan_public_publications_failed", {
       status: error?.status || null,
+      detail: error?.detail || null,
     });
     return {
       data: [],
@@ -148,6 +151,7 @@ export const getPublicPublicationBySlugResult = cache(
       if (error?.status === 404) return { data: null, unavailable: false };
       console.error("ckan_public_publication_detail_failed", {
         status: error?.status || null,
+        detail: error?.detail || null,
       });
       return { data: null, unavailable: true };
     }

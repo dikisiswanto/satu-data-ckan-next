@@ -336,16 +336,16 @@ function HomeHeroContent({
               <FolderOpen size={17} aria-hidden="true" />
               <span>
                 <strong className="home-metric-value">
-                  {loading || facetsUnavailable ? (
+                  {loading ? (
                     <span
                       className="loading-skeleton home-metric-skeleton"
                       aria-hidden="true"
                     />
                   ) : (
-                    displayStat(normalizedCategories.length)
+                    displayStat(stats?.resources)
                   )}
                 </strong>
-                <small>Kategori data</small>
+                <small>Resource publik</small>
               </span>
             </Link>
             <Link
@@ -388,6 +388,25 @@ function HomeHeroContent({
                 )}
               </strong>
               <small>Dataset terbuka</small>
+            </span>
+            <ArrowRight size={17} aria-hidden="true" />
+          </Link>
+          <Link href="/dataset" className="home-stat home-stat-blue">
+            <span className="home-stat-icon">
+              <FolderOpen size={22} aria-hidden="true" />
+            </span>
+            <span className="home-stat-copy">
+              <strong className="home-metric-value">
+                {loading ? (
+                  <span
+                    className="loading-skeleton home-metric-skeleton"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  displayStat(stats?.resources)
+                )}
+              </strong>
+              <small>Resource publik</small>
             </span>
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
@@ -452,8 +471,8 @@ function HomeHeroContent({
           </Link>
         </section>
         <p className="home-stats-note">
-          Ringkasan dihitung dari data yang tersedia untuk publik. Jumlah
-          indikator mengikuti data statistik yang diterbitkan.
+          Ringkasan dihitung dari dataset dan resource aktif yang tersedia untuk
+          publik. Jumlah indikator mengikuti dataset indikator yang diterbitkan.
         </p>
       </div>
     </section>

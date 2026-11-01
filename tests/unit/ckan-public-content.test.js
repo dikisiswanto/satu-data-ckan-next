@@ -17,6 +17,7 @@ import {
   isPublicInfographicPackage,
 } from "@/lib/data/public-infographics";
 import {
+  ckanAction,
   ckanExtraValue,
   ckanPackageCategory,
   ckanResourceFormat,
@@ -37,7 +38,11 @@ import {
   getPublicPortalStatsResult,
   getPublishedDatasetFacetsResult,
 } from "@/lib/data/public";
-import { buildDatasetCatalogExclusionFilters } from "@/lib/data/portal-content-types";
+import {
+  buildDatasetCatalogExclusionFilters,
+  buildPortalContentDiscoveryFilter,
+  isPortalContentPackage,
+} from "@/lib/data/portal-content-types";
 import { normalizePublicCategoryFacets } from "@/lib/public-categories";
 
 const indicatorPackage = {
@@ -106,8 +111,15 @@ const infographicPackage = {
 };
 
 describe("native CKAN objects for indicators", () => {
-  it("recognizes only active public packages tagged as indicators", () => {
+  it("recognizes active public indicators by tag, Scheming extra, or native dataset type", () => {
     expect(isPublicIndicatorPackage(indicatorPackage)).toBe(true);
+    expect(
+      isPublicIndicatorPackage({
+        ...indicatorPackage,
+        tags: [{ name: "pembangunan-manusia" }],
+        extras: [{ key: "portal_type", value: "indikator" }],
+      }),
+    ).toBe(true);
     expect(
       isPublicIndicatorPackage({ ...indicatorPackage, private: true }),
     ).toBe(false);
@@ -204,8 +216,15 @@ describe("native CKAN objects for indicators", () => {
 });
 
 describe("native CKAN objects for infographics", () => {
-  it("recognizes a public infographic using its CKAN tag", () => {
+  it("recognizes a public infographic by tag, Scheming extra, or native dataset type", () => {
     expect(isPublicInfographicPackage(infographicPackage)).toBe(true);
+    expect(
+      isPublicInfographicPackage({
+        ...infographicPackage,
+        tags: [{ name: "kesehatan" }],
+        extras: [{ key: "portal_type", value: "infografik" }],
+      }),
+    ).toBe(true);
     expect(
       isPublicInfographicPackage({ ...infographicPackage, private: true }),
     ).toBe(false);
@@ -361,13 +380,20 @@ describe("CKAN field helpers", () => {
     expect(result.external.url).toBe("https://cdn.example.test/file.csv");
   });
 
-  it("recognizes only active public publication packages with the configured tag", () => {
+  it("recognizes public publication packages by tag, Scheming extra, or native dataset type", () => {
     const item = {
       state: "active",
       private: false,
       tags: [{ name: "portal-publikasi" }],
     };
     expect(isPublicPublicationPackage(item)).toBe(true);
+    expect(
+      isPublicPublicationPackage({
+        ...item,
+        tags: [{ name: "statistik" }],
+        extras: [{ key: "portal_type", value: "publikasi" }],
+      }),
+    ).toBe(true);
     expect(isPublicPublicationPackage({ ...item, private: true })).toBe(false);
     expect(isPublicPublicationPackage({ ...item, state: "draft" })).toBe(false);
     expect(
@@ -391,15 +417,47 @@ describe("CKAN field helpers", () => {
 });
 
 describe("separate public product catalogues", () => {
-  it("excludes indicator, infographic and publication records from the general dataset catalogue", () => {
-    expect(buildDatasetCatalogExclusionFilters()).toEqual([
-      "-tags:portal-indikator",
-      "-tags:portal-infografik",
-      "-tags:portal-publikasi",
-      "-extras_portal_type:indikator",
-      "-extras_portal_type:infografik",
-      "-extras_portal_type:publikasi",
-    ]);
+  it("builds quoted/escaped Solr filters for tags containing special characters", () => {
+    expect(buildPortalContentDiscoveryFilter("indicator")).toBe(
+      '(tags:"portal\\-indikator" OR extras_portal_type:"indikator" OR dataset_type:"indikator")',
+    );
+    expect(buildPortalContentDiscoveryFilter("infographic")).toBe(
+      '(tags:"portal\\-infografik" OR extras_portal_type:"infografik" OR dataset_type:"infografik")',
+    );
+  });
+
+  it("recognizes a Scheming portal_type even when a legacy package has no editorial tag", () => {
+    expect(
+      isPortalContentPackage(
+        { extras: [{ key: "portal_type", value: "infografik" }] },
+        "infographic",
+      ),
+    ).toBe(true);
+    expect(
+      isPortalContentPackage({ portal_type: "publikasi" }, "publication"),
+    ).toBe(true);
+    expect(isPortalContentPackage({ type: "indikator" }, "indicator")).toBe(
+      true,
+    );
+    expect(
+      isPortalContentPackage({ dataset_type: "indikator" }, "indicator"),
+    ).toBe(true);
+    expect(
+      isPortalContentPackage(
+        { extras: [{ key: "portal_type", value: "dataset" }] },
+        "indicator",
+      ),
+    ).toBe(false);
+  });
+
+  it("excludes portal records with one positive-anchor Solr filter", () => {
+    const [filter] = buildDatasetCatalogExclusionFilters();
+    expect(filter).toContain('*:* AND -tags:"portal\\-indikator"');
+    expect(filter).toContain('-extras_portal_type:"indikator"');
+    expect(filter).toContain('-extras_portal_type:"publikasi"');
+    expect(filter).toContain('-dataset_type:"indikator"');
+    expect(filter).toContain('-dataset_type:"infografik"');
+    expect(buildDatasetCatalogExclusionFilters()).toHaveLength(1);
   });
 });
 
@@ -421,39 +479,58 @@ describe("flexible public CKAN search", () => {
 describe("public portal summary sourced from CKAN", () => {
   afterEach(() => vi.restoreAllMocks());
 
-  it("counts indicators using the configured CKAN tag instead of hiding the indicator feature", async () => {
+  it("preserves CKAN Action API error details for actionable server diagnostics", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json(
+        {
+          success: false,
+          error: {
+            __type: "Search Error",
+            message: "Unknown field portal_type in filter query",
+          },
+        },
+        { status: 409 },
+      ),
+    );
+
+    await expect(
+      ckanAction("package_search", { q: "*:*" }),
+    ).rejects.toMatchObject({
+      status: 409,
+      detail: "Unknown field portal_type in filter query",
+      action: "package_search",
+    });
+  });
+
+  it("counts datasets, resources and legacy portal_type indicators without coupling failures", async () => {
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
       .mockImplementation(async (input) => {
         const url = new URL(String(input));
         const action = url.pathname.split("/").at(-1);
+        const filters = url.searchParams.getAll("fq_list");
         let result;
-        if (url.searchParams.getAll("fq").length > 1) {
-          return new Response(
-            JSON.stringify({
-              success: false,
-              error: {
-                __type: "Validation Error",
-                message:
-                  "fq must be a string; use fq_list for multiple filters",
-              },
-            }),
-            {
-              status: 409,
-              headers: { "content-type": "application/json" },
-            },
-          );
-        }
-        if (action === "organization_list")
+        if (action === "organization_list") {
           result = [
             { name: "bappeda-wajo", state: "active" },
             { name: "old", state: "deleted" },
           ];
-        else if (
-          url.searchParams.getAll("fq_list").includes("tags:portal-indikator")
-        )
+        } else if (action === "resource_search") {
+          result = {
+            count: 3,
+            results: [
+              { id: "resource-public-a", state: "active" },
+              { id: "resource-private-marker", state: "active", private: true },
+              { id: "resource-deleted", state: "deleted" },
+            ],
+          };
+        } else if (
+          filters.includes(buildPortalContentDiscoveryFilter("indicator"))
+        ) {
           result = { count: 2, results: [] };
-        else result = { count: 37, results: [] };
+        } else {
+          result = { count: 37, results: [] };
+        }
         return new Response(JSON.stringify({ success: true, result }), {
           status: 200,
           headers: { "content-type": "application/json" },
@@ -462,31 +539,77 @@ describe("public portal summary sourced from CKAN", () => {
 
     const response = await getPublicPortalStatsResult();
     expect(response).toMatchObject({
-      data: { datasets: 37, organizations: 1, indicators: 2 },
+      data: { datasets: 37, organizations: 1, indicators: 2, resources: 1 },
       unavailable: false,
+      partial: false,
     });
-    expect(fetchSpy).toHaveBeenCalledTimes(3);
-    expect(
-      fetchSpy.mock.calls.some(([input]) =>
-        new URL(String(input)).searchParams
-          .getAll("fq_list")
-          .includes("tags:portal-indikator"),
-      ),
-    ).toBe(true);
+    expect(fetchSpy).toHaveBeenCalledTimes(4);
+    const indicatorSearch = fetchSpy.mock.calls
+      .map(([input]) => new URL(String(input)))
+      .find(
+        (url) =>
+          url.pathname.endsWith("/package_search") &&
+          url.searchParams
+            .getAll("fq_list")
+            .includes(buildPortalContentDiscoveryFilter("indicator")),
+      );
+    expect(indicatorSearch).toBeDefined();
     const datasetSearch = fetchSpy.mock.calls
       .map(([input]) => new URL(String(input)))
       .find(
         (url) =>
           url.pathname.endsWith("/package_search") &&
-          !url.searchParams.getAll("fq_list").includes("tags:portal-indikator"),
+          !url.searchParams
+            .getAll("fq_list")
+            .includes(buildPortalContentDiscoveryFilter("indicator")),
       );
-    expect(datasetSearch?.searchParams.getAll("fq_list")).toContain(
-      "-tags:portal-infografik",
-    );
-    expect(datasetSearch?.searchParams.getAll("fq_list")).toContain(
-      "-extras_portal_type:publikasi",
+    expect(datasetSearch?.searchParams.getAll("fq_list")[0]).toContain(
+      "*:* AND -tags:",
     );
     expect(datasetSearch?.searchParams.getAll("fq")).toHaveLength(0);
+    const resourceSearch = fetchSpy.mock.calls
+      .map(([input]) => new URL(String(input)))
+      .find((url) => url.pathname.endsWith("/resource_search"));
+    expect(resourceSearch?.searchParams.get("query")).toBe("id:");
+    expect(resourceSearch?.searchParams.get("limit")).toBe("500");
+  });
+
+  it("keeps healthy public counts when one CKAN counter fails", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      const action = url.pathname.split("/").at(-1);
+      if (action === "organization_list")
+        return Response.json({
+          success: true,
+          result: [{ name: "bappeda", state: "active" }],
+        });
+      if (action === "resource_search")
+        return Response.json({
+          success: true,
+          result: { count: 0, results: [] },
+        });
+      if (
+        url.searchParams
+          .getAll("fq_list")
+          .includes(buildPortalContentDiscoveryFilter("indicator"))
+      ) {
+        return Response.json({
+          success: false,
+          error: { __type: "Search Error", message: "Solr unavailable" },
+        });
+      }
+      return Response.json({
+        success: true,
+        result: { count: 12, results: [] },
+      });
+    });
+
+    const response = await getPublicPortalStatsResult();
+    expect(response).toMatchObject({
+      data: { datasets: 12, organizations: 1, indicators: null, resources: 0 },
+      unavailable: false,
+      partial: true,
+    });
   });
 });
 
@@ -614,8 +737,8 @@ describe("CKAN-driven public category cards", () => {
     const facetsRequest = new URL(
       String(vi.mocked(globalThis.fetch).mock.calls.at(-1)?.[0]),
     );
-    expect(facetsRequest.searchParams.getAll("fq_list")).toContain(
-      "-tags:portal-infografik",
+    expect(facetsRequest.searchParams.getAll("fq_list")).toEqual(
+      buildDatasetCatalogExclusionFilters(),
     );
     expect(facetsRequest.searchParams.getAll("fq")).toHaveLength(0);
     expect(response.data.categories).toEqual([

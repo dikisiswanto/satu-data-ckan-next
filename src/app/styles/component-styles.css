@@ -391,9 +391,9 @@
   @apply text-right text-xs font-medium text-[#405b65];
 }
 
-/* Four-part public summary follows the supplied homepage reference. */
+/* Public summary includes dataset, resource, category, indicator and organization counts. */
 .home-stats {
-  @apply grid-cols-2 sm:grid-cols-4;
+  @apply grid-cols-2 sm:grid-cols-3;
 }
 .home-stat {
   @apply min-w-0;

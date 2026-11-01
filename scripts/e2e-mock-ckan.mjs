@@ -1,6 +1,10 @@
 import { createServer } from "node:http";
 
 const PORT = Number(process.env.E2E_CKAN_PORT || 8010);
+const requestedDelay = Number(process.env.E2E_CKAN_DELAY_MS || 0);
+const E2E_CKAN_DELAY_MS = Number.isFinite(requestedDelay)
+  ? Math.min(Math.max(requestedDelay, 0), 5_000)
+  : 0;
 const now = "2026-10-29T00:00:00Z";
 const packages = [
   {
@@ -84,7 +88,6 @@ const packages = [
     metadata_created: "2024-01-01T00:00:00Z",
     metadata_modified: now,
     tags: [
-      { name: "portal-indikator", display_name: "portal-indikator" },
       { name: "pembangunan-manusia", display_name: "Pembangunan Manusia" },
     ],
     groups: [{ name: "sosial", title: "Sosial dan Kesejahteraan" }],
@@ -94,6 +97,7 @@ const packages = [
       title: "Bappeda Wajo",
     },
     extras: [
+      { key: "portal_type", value: "indikator" },
       { key: "portal_unit", value: "poin" },
       { key: "portal_periodicity", value: "Tahunan" },
       {
@@ -132,10 +136,7 @@ const packages = [
     metadata_created: "2025-03-01T00:00:00Z",
     metadata_modified: now,
     version: "2025.1",
-    tags: [
-      { name: "portal-publikasi", display_name: "portal-publikasi" },
-      { name: "statistik", display_name: "Statistik" },
-    ],
+    tags: [{ name: "statistik", display_name: "Statistik" }],
     groups: [{ name: "publikasi", title: "Publikasi Statistik" }],
     organization: {
       id: "org-bappeda",
@@ -143,6 +144,7 @@ const packages = [
       title: "Bappeda Wajo",
     },
     extras: [
+      { key: "portal_type", value: "publikasi" },
       { key: "portal_category", value: "Kabupaten Dalam Angka" },
       { key: "portal_reference_period", value: "2025" },
       { key: "portal_publication_date", value: "2025-03-01" },
@@ -181,10 +183,7 @@ const packages = [
     private: false,
     metadata_created: "2025-01-01T00:00:00Z",
     metadata_modified: now,
-    tags: [
-      { name: "portal-infografik", display_name: "portal-infografik" },
-      { name: "kesehatan", display_name: "Kesehatan" },
-    ],
+    tags: [{ name: "kesehatan", display_name: "Kesehatan" }],
     groups: [{ name: "kesehatan", title: "Kesehatan" }],
     organization: {
       id: "org-dinkes",
@@ -192,6 +191,7 @@ const packages = [
       title: "Dinas Kesehatan Kabupaten Wajo",
     },
     extras: [
+      { key: "portal_type", value: "infografik" },
       { key: "portal_category", value: "Kesehatan" },
       { key: "portal_period", value: "2025" },
       { key: "portal_attribution", value: "Dinas Kesehatan Kabupaten Wajo" },
@@ -548,8 +548,34 @@ function readExtra(pkg, key) {
 
 function matchesFilter(pkg, filter) {
   if (!filter) return true;
-  const tag = filter.match(/^tags:([a-z0-9_-]+)$/i);
-  if (tag) return (pkg.tags || []).some((item) => item.name === tag[1]);
+
+  const quotedFields = [
+    ...filter.matchAll(
+      /(-?)(tags|extras_portal_type|dataset_type):"((?:\\.|[^"])*)"/gi,
+    ),
+  ].map((match) => ({
+    negative: Boolean(match[1]),
+    field: match[2].toLowerCase(),
+    value: match[3].replace(/\\(.)/g, "$1").toLowerCase(),
+  }));
+  if (quotedFields.length) {
+    const matches = quotedFields.map(({ field, value }) => {
+      const candidates =
+        field === "tags"
+          ? (pkg.tags || []).map((tag) => tag.name || tag.display_name)
+          : field === "dataset_type"
+            ? [pkg.type || pkg.dataset_type]
+            : [readExtra(pkg, "extras_portal_type")];
+      return candidates.some(
+        (candidate) => String(candidate || "").toLowerCase() === value,
+      );
+    });
+    if (filter.includes(" OR ") && quotedFields.every((item) => !item.negative))
+      return matches.some(Boolean);
+    return quotedFields.every((item, index) =>
+      item.negative ? !matches[index] : matches[index],
+    );
+  }
 
   const formats = filter.match(/^res_format:([a-z0-9.+_-]+)$/i);
   if (formats)
@@ -716,8 +742,12 @@ function actionResult(action, params) {
       let selected = packages.filter(
         (item) => item.state !== "deleted" && item.private !== true,
       );
-      for (const filter of params.getAll("fq"))
+      for (const filter of [
+        ...params.getAll("fq"),
+        ...params.getAll("fq_list"),
+      ]) {
         selected = selected.filter((item) => matchesFilter(item, filter));
+      }
       const q = params.get("q") || "*:*";
       if (q !== "*:*") {
         // Model the portal's OR-across-terms Solr query: any meaningful term may match
@@ -791,6 +821,21 @@ function actionResult(action, params) {
             },
           ]
         : { __not_found: true };
+    }
+    case "resource_search": {
+      const resources = packages
+        .filter((pkg) => pkg.state === "active" && pkg.private !== true)
+        .flatMap((pkg) =>
+          (pkg.resources || []).filter(
+            (resource) => resource.state === "active",
+          ),
+        );
+      const offset = Number(params.get("offset") || 0);
+      const limit = Number(params.get("limit") || 100);
+      return {
+        count: resources.length,
+        results: resources.slice(offset, offset + limit),
+      };
     }
     case "organization_list":
       return orgs;

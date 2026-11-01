@@ -5,16 +5,34 @@ test("homepage exposes CKAN-driven category cards with exact public dataset coun
 }) => {
   await page.goto("/");
   const categories = page.locator(".home-topic-card");
-  await expect(categories).toHaveCount(4);
+  await expect(categories).toHaveCount(1);
   const education = categories.filter({ hasText: "Pendidikan" });
   await expect(education).toContainText("1 dataset");
   await expect(education).toHaveAttribute(
     "href",
     "/dataset?kategori=pendidikan",
   );
-  const health = categories.filter({ hasText: "Kesehatan" });
-  await expect(health).toContainText("1 dataset");
-  await expect(health).toHaveAttribute("href", "/dataset?kategori=kesehatan");
+  // Editorial content lives in its own public catalogue and must not inflate
+  // the ordinary dataset category facets.
+  await expect(categories.filter({ hasText: "Kesehatan" })).toHaveCount(0);
+  await expect(
+    categories.filter({ hasText: "Publikasi Statistik" }),
+  ).toHaveCount(0);
+});
+
+test("homepage shows accurate public dataset, resource and indicator totals", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const metrics = page.locator(".home-stats .home-stat");
+  await expect(metrics).toHaveCount(5);
+  await expect(metrics.nth(0)).toContainText("1");
+  await expect(metrics.nth(0)).toContainText("Dataset terbuka");
+  await expect(metrics.nth(1)).toContainText("7");
+  await expect(metrics.nth(1)).toContainText("Resource publik");
+  await expect(metrics.nth(3)).toContainText("1");
+  await expect(metrics.nth(3)).toContainText("Indikator statistik");
 });
 
 test("homepage category cards are unique and use semantically matched icons", async ({
@@ -31,21 +49,16 @@ test("homepage category cards are unique and use semantically matched icons", as
       .toLocaleLowerCase("id-ID"),
   );
   expect(new Set(normalized).size).toBe(names.length);
+  await expect(categories).toHaveCount(1);
   await expect(
     categories
       .filter({ hasText: "Pendidikan" })
       .locator("[data-category-icon='graduation-cap']"),
   ).toHaveCount(1);
+  await expect(categories.filter({ hasText: "Kesehatan" })).toHaveCount(0);
   await expect(
-    categories
-      .filter({ hasText: "Kesehatan" })
-      .locator("[data-category-icon='heart-pulse']"),
-  ).toHaveCount(1);
-  await expect(
-    categories
-      .filter({ hasText: "Publikasi Statistik" })
-      .locator("[data-category-icon='file-text']"),
-  ).toHaveCount(1);
+    categories.filter({ hasText: "Publikasi Statistik" }),
+  ).toHaveCount(0);
 });
 
 test("hero artwork and summary counts never duplicate each other across breakpoints", async ({
@@ -604,7 +617,20 @@ test("public breadcrumbs and shared navigation make every section discoverable",
       primaryHeader.locator(`a[href="${href}"]`).first(),
     ).toBeAttached();
   }
-  await expect(page.locator("footer nav")).toHaveCount(0);
+  const footerPages = page.locator('footer nav[aria-label="Tautan laman"]');
+  await expect(footerPages).toBeVisible();
+  await expect(footerPages.locator("a")).toHaveCount(3);
+  await expect(
+    footerPages.getByRole("link", { name: "Tentang Satu Data Wajo" }),
+  ).toHaveAttribute("href", "/informasi/tentang-satu-data");
+  await expect(
+    footerPages.getByRole("link", {
+      name: "Panduan Lengkap Menggunakan Portal Satu Data Kabupaten Wajo untuk Menemukan, Memahami, dan Memanfaatkan Data Terbuka",
+    }),
+  ).toBeVisible();
+  await expect(
+    footerPages.getByRole("link", { name: "Tentang", exact: true }),
+  ).toHaveCount(0);
   await expect(
     page.locator('footer a[href="https://data.go.id"]'),
   ).toBeVisible();

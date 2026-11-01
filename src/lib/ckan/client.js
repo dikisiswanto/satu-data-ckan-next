@@ -23,6 +23,7 @@ const NEVER_CACHE_ACTIONS = new Set([
   "package_activity_list",
   "resource_show",
   "file_show",
+  "resource_search",
   "datastore_search",
 ]);
 
@@ -66,8 +67,21 @@ export async function ckanAction(
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   if (!response.ok) {
+    // CKAN often returns a structured Action API error body with HTTP 409 for
+    // Solr/SearchError. Preserve its short message for server logs so malformed
+    // filters can be diagnosed without exposing request headers or cookies.
+    const errorPayload = await response
+      .clone()
+      .json()
+      .catch(() => null);
+    const detail =
+      typeof errorPayload?.error?.message === "string"
+        ? errorPayload.error.message.slice(0, 400)
+        : null;
     const error = new Error(`ckan_http_${response.status}`);
     error.status = response.status;
+    error.detail = detail;
+    error.action = action;
     throw error;
   }
   const payload = await response.json();
@@ -77,11 +91,13 @@ export async function ckanAction(
     const error = new Error(message);
     error.status = /not found/i.test(type)
       ? 404
-      : /authori[sz]ation|not authori[sz]ed/i.test(type)
+      : /authori[szation]|not authori[sz]ed/i.test(type)
         ? 403
         : /validation/i.test(type)
           ? 400
           : 502;
+    error.detail = String(message).slice(0, 400);
+    error.action = action;
     throw error;
   }
   return payload.result;

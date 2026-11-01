@@ -325,7 +325,7 @@ for (const token of [
   "Organisasi aktif",
   "Indikator publik",
   "Dataset terbuka",
-  "Ringkasan dihitung dari data yang tersedia untuk publik.",
+  "Ringkasan dihitung dari dataset dan resource aktif yang tersedia untuk publik.",
 ]) {
   if (!homePage.includes(token))
     failures.push(`homepage hero: reference content missing "${token}"`);
@@ -357,8 +357,8 @@ requireText(
 );
 requireText(
   "src/app/(public)/page.jsx",
-  "displayStat(normalizedCategories.length)",
-  "hero category metric must count unique normalized CKAN categories",
+  "facetsUnavailable ? null : normalizedCategories.length",
+  "hero category metric must count unique normalized CKAN categories and represent unavailable facets honestly",
 );
 requireText(
   "src/app/styles/public-home-hero.css",

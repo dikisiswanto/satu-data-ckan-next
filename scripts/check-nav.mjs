@@ -51,11 +51,13 @@ if (footer.includes('from "@/lib/public-navigation"')) {
 if (
   !footer.includes('aria-label="Tautan laman"') ||
   !footer.includes("getPublicCmsNavigationResult") ||
-  !footer.includes('href="/informasi"') ||
+  !footer.includes(".slice(0, 5)") ||
+  !footer.includes("item.title || item.label") ||
+  footer.includes('href="/informasi"') ||
   !footer.includes('href="/berita"')
 ) {
   errors.push(
-    "Footer harus menyediakan daftar laman CMS yang ringkas serta tautan ke daftar informasi dan berita.",
+    "Footer harus menampilkan langsung maksimal lima judul laman CMS dan tetap menautkan daftar berita.",
   );
 }
 const sdiLogo = readFileSync(

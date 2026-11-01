@@ -2824,77 +2824,6 @@ body:has(.wajo-login-frame) {
   }
 }
 
-/* GeoJSON format badge: it sits inside CKAN's linked resource heading, so use
-   a more specific selector than the parent link and force readable text fill. */
-.wajo-admin-workspace
-  .resource-item
-  > a.heading
-  .format-label[data-format="geojson" i],
-.wajo-admin-workspace
-  .resource-item
-  > a.heading
-  .format-label[title="geojson" i],
-.wajo-admin-workspace
-  .resource-item
-  > a.heading
-  .format-label.format-label--geojson,
-.wajo-admin-workspace .resource-item .format-label[data-format="geojson" i],
-.wajo-admin-workspace .format-label--geojson {
-  display: inline-flex !important;
-  align-items: center;
-  border: 1px solid #a7d8b8 !important;
-  border-radius: 999px;
-  background: #e7f6ec !important;
-  color: #14532d !important;
-  -webkit-text-fill-color: #14532d !important;
-  font-weight: 750 !important;
-  line-height: 1.35;
-  opacity: 1 !important;
-  text-decoration: none !important;
-  vertical-align: middle;
-}
-.wajo-admin-workspace
-  .resource-item
-  > a.heading
-  .format-label[data-format="geojson" i]
-  *,
-.wajo-admin-workspace
-  .resource-item
-  > a.heading
-  .format-label[title="geojson" i]
-  *,
-.wajo-admin-workspace
-  .resource-item
-  > a.heading
-  .format-label.format-label--geojson
-  * {
-  color: #14532d !important;
-  -webkit-text-fill-color: #14532d !important;
-}
-
-/* GeoJSON format badge icon: do not rely on a Font Awesome alias that may not
-   exist in the CKAN 2.12 bundle. A tiny inline SVG keeps the map glyph stable. */
-.wajo-admin-workspace
-  .resource-item
-  .format-label[data-format="geojson" i]::before,
-.wajo-admin-workspace .resource-item .format-label[title="geojson" i]::before,
-.wajo-admin-workspace
-  .resource-item
-  .format-label.format-label--geojson::before,
-.wajo-admin-workspace .format-label--geojson::before {
-  content: "";
-  display: inline-block;
-  width: 0.82rem;
-  height: 0.82rem;
-  flex: 0 0 0.82rem;
-  margin-inline-end: 0.32rem;
-  background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 6.5 6-3.5 6 3.5 6-3.5v14.5L15 21l-6-3.5L3 21z'/%3E%3Cpath d='M9 3v14.5M15 6.5V21'/%3E%3C/svg%3E")
-    center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 6.5 6-3.5 6 3.5 6-3.5v14.5L15 21l-6-3.5L3 21z'/%3E%3Cpath d='M9 3v14.5M15 6.5V21'/%3E%3C/svg%3E")
-    center / contain no-repeat;
-}
-
 /* Final contrast guard for CKAN-native buttons. CKAN extensions sometimes
    supply white text on a white default/secondary button; keep every variant
    readable while preserving explicit semantic button colors. */
@@ -2929,93 +2858,6 @@ body:has(.wajo-login-frame) {
 .wajo-admin-workspace .btn-secondary :is(i, svg, span) {
   color: inherit !important;
   -webkit-text-fill-color: currentColor;
-}
-
-/* GeoJSON is a green geospatial format, not a purple/red status label. Apply
-   outside the workspace wrapper too because CKAN's dataset result snippets
-   can render the resource format token one level above the workspace node. */
-.wajo-admin-shell .format-label[data-format="geojson" i],
-.wajo-admin-shell .format-label[title="geojson" i],
-.wajo-admin-shell .format-label--geojson,
-.wajo-admin-workspace .resource-item .format-label[data-format="geojson" i],
-.wajo-admin-workspace .resource-item .format-label[title="geojson" i] {
-  border: 1px solid #9bc9aa !important;
-  background: #e5f4e9 !important;
-  color: #174b2c !important;
-  -webkit-text-fill-color: #174b2c !important;
-  font-weight: 800 !important;
-  opacity: 1 !important;
-}
-.wajo-admin-shell .format-label[data-format="geojson" i] *,
-.wajo-admin-shell .format-label[title="geojson" i] *,
-.wajo-admin-shell .format-label--geojson * {
-  color: #174b2c !important;
-  -webkit-text-fill-color: #174b2c !important;
-}
-.wajo-admin-shell .resource-item .format-label[data-format="geojson" i]::before,
-.wajo-admin-shell .resource-item .format-label[title="geojson" i]::before,
-.wajo-admin-shell .resource-item .format-label--geojson::before {
-  content: "\f279" !important;
-  display: inline-block;
-  width: 1.15rem;
-  margin-inline-end: 0.38rem;
-  color: currentColor !important;
-  font-family:
-    "Font Awesome 6 Free", "Font Awesome 5 Free", FontAwesome, sans-serif;
-  font-size: 1rem;
-  font-weight: 900;
-  line-height: 1;
-  text-align: center;
-}
-
-.wajo-admin-workspace
-  .resource-item
-  .format-label[data-format="geojson" i]::before,
-.wajo-admin-workspace .resource-item .format-label[title="geojson" i]::before,
-.wajo-admin-workspace
-  .resource-item
-  .format-label.format-label--geojson::before,
-.wajo-admin-workspace .format-label--geojson::before {
-  background: none !important;
-  -webkit-mask: none !important;
-  mask: none !important;
-}
-
-/* CKAN 2.12 dataset results also use native .label/.badge chips in some
-   extension templates. Keep their default purple/red palette from leaking
-   through when the resource heading is a linked element. */
-.wajo-admin-shell .resource-item .format-label,
-.wajo-admin-shell .resource-item .label,
-.wajo-admin-shell .resource-item .badge,
-.wajo-admin-shell .dataset-resources .label,
-.wajo-admin-shell .dataset-resources .badge {
-  border: 1px solid #c9d8e3 !important;
-  border-radius: 999px !important;
-  background: #eef4f8 !important;
-  color: #294b61 !important;
-  -webkit-text-fill-color: #294b61 !important;
-  font-weight: 700 !important;
-  opacity: 1 !important;
-  text-decoration: none !important;
-}
-.wajo-admin-shell .resource-item .format-label[data-format="geojson" i],
-.wajo-admin-shell .resource-item .format-label[title="geojson" i],
-.wajo-admin-shell .resource-item .format-label--geojson,
-.wajo-admin-shell .resource-item .label[title="geojson" i],
-.wajo-admin-shell .resource-item .badge[data-format="geojson" i],
-.wajo-admin-shell .dataset-resources [data-format="geojson" i] {
-  border-color: #86b99a !important;
-  background: #e4f3e9 !important;
-  color: #174b2c !important;
-  -webkit-text-fill-color: #174b2c !important;
-}
-.wajo-admin-shell .resource-item .format-label[data-format="geojson" i]::before,
-.wajo-admin-shell .resource-item .format-label[title="geojson" i]::before,
-.wajo-admin-shell .resource-item .format-label--geojson::before {
-  width: 1.3rem;
-  min-width: 1.3rem;
-  margin-inline-end: 0.42rem;
-  font-size: 1.18rem;
 }
 
 /* Correct contrast for less-common CKAN/extension button variants. Keep the
@@ -3085,26 +2927,12 @@ body:has(.wajo-login-frame) {
   font-size: 1.42rem;
   line-height: 1;
 }
-.wajo-admin-shell .resource-item .fa-map,
-.wajo-admin-shell .resource-item .fa-map-location-dot,
-.wajo-admin-shell .resource-item .fa-map-marked-alt,
-.wajo-admin-shell .resource-item .fa-map-marker-alt,
-.wajo-admin-shell .resource-item .fa-location-dot {
-  width: 1.35rem;
-  min-width: 1.35rem;
-  font-size: 1.22rem !important;
-  line-height: 1;
-  vertical-align: middle;
-}
-
-/* CKAN's native dataset list uses .dataset-resources a.label[data-format].
-   These selectors intentionally work on both the public CKAN catalogue and
-   the authenticated admin shell; a shell-only selector misses public list
-   markup and lets Bootstrap's purple/red label palette win. */
+/* Keep the compact format chips on CKAN's dataset search/list cards readable.
+   Do not style .resource-item .format-label here: CKAN 2.12.1 uses its native
+   sprite, fixed dimensions, text-indent and transform for format icons on the
+   dataset detail page. Overriding those properties hides XLSX/CSV/PDF icons. */
 .dataset-resources a.label[data-format],
-.dataset-resources a.label[title],
-.resource-item .format-label[data-format],
-.resource-item .format-label[title] {
+.dataset-resources a.label[title] {
   display: inline-flex !important;
   align-items: center;
   gap: 0.28rem;
@@ -3119,10 +2947,7 @@ body:has(.wajo-login-frame) {
   opacity: 1 !important;
 }
 .dataset-resources a.label[data-format="geojson" i],
-.dataset-resources a.label[title="geojson" i],
-.resource-item .format-label[data-format="geojson" i],
-.resource-item .format-label[title="geojson" i],
-.resource-item .format-label--geojson {
+.dataset-resources a.label[title="geojson" i] {
   border-color: #78b58d !important;
   background: #e4f4e9 !important;
   color: #174b2c !important;
@@ -3130,10 +2955,7 @@ body:has(.wajo-login-frame) {
   box-shadow: inset 0 0 0 1px rgb(23 75 44 / 4%);
 }
 .dataset-resources a.label[data-format="geojson" i]::before,
-.dataset-resources a.label[title="geojson" i]::before,
-.resource-item .format-label[data-format="geojson" i]::before,
-.resource-item .format-label[title="geojson" i]::before,
-.resource-item .format-label--geojson::before {
+.dataset-resources a.label[title="geojson" i]::before {
   content: "\f5a0";
   display: inline-block;
   width: 1.18rem;
@@ -3147,9 +2969,7 @@ body:has(.wajo-login-frame) {
   text-align: center;
 }
 .dataset-resources a.label[data-format="geojson" i] *,
-.dataset-resources a.label[title="geojson" i] *,
-.resource-item .format-label[data-format="geojson" i] *,
-.resource-item .format-label[title="geojson" i] * {
+.dataset-resources a.label[title="geojson" i] * {
   color: #174b2c !important;
   -webkit-text-fill-color: #174b2c !important;
 }
@@ -3324,13 +3144,4 @@ body:has(.wajo-login-frame) {
   .fa-map-location-dot {
   font-size: 1.9rem !important;
   line-height: 1;
-}
-.dataset-resources a.label[data-format="geojson" i]::before,
-.dataset-resources a.label[title="geojson" i]::before,
-.resource-item .format-label[data-format="geojson" i]::before,
-.resource-item .format-label[title="geojson" i]::before,
-.resource-item .format-label--geojson::before {
-  width: 1.35rem;
-  min-width: 1.35rem;
-  font-size: 1.24rem;
 }

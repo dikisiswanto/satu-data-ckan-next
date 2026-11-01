@@ -8,10 +8,15 @@ import {
 } from "@/lib/ckan/client";
 import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
 import { isPrivateMarker } from "@/lib/ckan/privacy";
+import {
+  buildPortalContentDiscoveryFilter,
+  isPortalContentPackage,
+} from "@/lib/data/portal-content-types";
 
 /**
  * CKAN-native publishing convention for public statistics.
- * An indicator is a public CKAN Package tagged `portal-indikator` with a public
+ * An indicator is a public CKAN Package discovered by its editorial tag,
+ * Scheming `portal_type` extra, or true CKAN custom dataset type, with a public
  * tabular Resource whose DataStore is active. The resource uses `period`,
  * `region`, `value`, `unit` and optional `source` columns.
  */
@@ -19,7 +24,7 @@ export const INDICATOR_TAG =
   process.env.CKAN_INDICATOR_TAG || "portal-indikator";
 const PAGE_SIZE_MAX = 100;
 const OBSERVATION_LIMIT = 1000;
-const TAG_FQ = `tags:${INDICATOR_TAG}`;
+const INDICATOR_FQ = buildPortalContentDiscoveryFilter("indicator");
 
 function pageMeta(total, page, limit) {
   return {
@@ -35,9 +40,7 @@ export function isPublicIndicatorPackage(pkg) {
     pkg &&
     (!pkg.state || pkg.state === "active") &&
     !isPrivateMarker(pkg.private) &&
-    (pkg.tags || []).some(
-      (tag) => (tag.name || tag.display_name) === INDICATOR_TAG,
-    ),
+    isPortalContentPackage(pkg, "indicator"),
   );
 }
 
@@ -237,7 +240,7 @@ export async function getPublishedIndicatorsResult({
       rows: safeLimit,
       start: (safePage - 1) * safeLimit,
       sort: "metadata_modified desc",
-      fqList: [TAG_FQ],
+      fqList: [INDICATOR_FQ],
     });
     const packages = (
       Array.isArray(result.results) ? result.results : []
@@ -253,6 +256,7 @@ export async function getPublishedIndicatorsResult({
   } catch (error) {
     console.error("ckan_public_indicators_failed", {
       status: error?.status || null,
+      detail: error?.detail || null,
     });
     return {
       data: [],
@@ -309,6 +313,7 @@ export const getPublicIndicatorBySlugResult = cache(
       if (error?.status === 404) return { data: null, unavailable: false };
       console.error("ckan_public_indicator_detail_failed", {
         status: error?.status || null,
+        detail: error?.detail || null,
       });
       return { data: null, unavailable: true };
     }

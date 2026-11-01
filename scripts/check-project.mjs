@@ -276,7 +276,7 @@ const checks = [
   ],
   [
     "src/lib/data/public.js",
-    /indicatorTag[\s\S]*indicators\.count/,
+    /buildPortalContentDiscoveryFilter\("indicator"\)[\s\S]*\["indicators", indicators\][\s\S]*Number\(result\.count \|\| 0\)/,
     "Ringkasan homepage harus menghitung indikator dari CKAN, tidak menyembunyikan fitur.",
   ],
   [
@@ -573,8 +573,8 @@ const cmsChecks = [
   ],
   [
     "src/components/site-footer.jsx",
-    /(?=[\s\S]*getPublicCmsNavigationResult)(?=[\s\S]*href=\"\/berita\")(?=[\s\S]*href=\"\/informasi\")[\s\S]*/,
-    "Public footer must link to published information pages and the full news list.",
+    /(?=[\s\S]*getPublicCmsNavigationResult)(?=[\s\S]*slice\(0, 5\))(?=[\s\S]*item\.title \|\| item\.label)(?=[\s\S]*href=\"\/berita\")[\s\S]*/,
+    "Public footer must show at most five CMS page titles directly and link to the full news list.",
   ],
   [
     "src/app/api/3/action/[...action]/route.js",

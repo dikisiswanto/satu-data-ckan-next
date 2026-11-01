@@ -361,12 +361,16 @@ require("function isPagesAdminListingRoute()" in admin_forms_source and "wajo-pa
 require("fa-pen-to-square" in admin_forms_source and "fa-plus" in admin_forms_source, "Edit actions accidentally rendered with plus icons must be corrected without changing create actions.")
 require('String(parts[1] || "").toLowerCase()' in admin_forms_source, "CKAN editorial route detection must tolerate uppercase path segments.")
 admin_design_source = read(PACKAGE / "assets/css/wajo-admin-design-system.css")
-require('.wajo-admin-workspace .resource-item > a.heading .format-label[data-format="geojson" i]' in admin_design_source, "GeoJSON format badge must override the linked resource heading color with a specific selector.")
-require('.format-label[data-format="geojson" i]::before' in admin_design_source, "GeoJSON format badge must include a visible map glyph.")
-require("-webkit-text-fill-color: #14532d !important" in admin_design_source and "background: #e7f6ec !important" in admin_design_source, "GeoJSON badge must retain readable high-contrast text and background inside CKAN resource links.")
-require(".wajo-admin-shell .resource-item .format-label" in admin_design_source and "#294b61" in admin_design_source, "All native format chips must fall back to a readable neutral palette if a GeoJSON selector variant is missing.")
-require('.dataset-resources a.label[data-format="geojson" i]' in admin_design_source and '.resource-item .format-label[data-format="geojson" i]' in admin_design_source, "GeoJSON label must target CKAN's native dataset list and resource detail markup outside the admin-only shell.")
-require('content: "\\f5a0"' in admin_design_source and 'font-family: "Font Awesome 6 Free"' in admin_design_source, "GeoJSON badge must use the larger Font Awesome map-location-dot glyph.")
+admin_design_without_comments = re.sub(r"/\*.*?\*/", "", admin_design_source, flags=re.S)
+resource_item_selectors = [
+    selector.strip()
+    for rule_selector in re.findall(r"([^{}]+)\{", admin_design_without_comments)
+    for selector in rule_selector.split(",")
+    if ".resource-item" in selector
+]
+require(not resource_item_selectors, "CKAN resource detail rows must keep every upstream .resource-item/.format-label icon and datastore status style untouched.")
+require('.dataset-resources a.label[data-format="geojson" i]' in admin_design_source, "The public dataset-list GeoJSON chip may retain its scoped visual treatment.")
+require("Do not style .resource-item .format-label here" in admin_design_source, "The theme must document why CKAN's native resource format sprite is intentionally not overridden.")
 require(".btn-outline-primary" in admin_design_source and "-webkit-text-fill-color: #29483a !important" in admin_design_source, "Light and outline CKAN buttons must not inherit white text on pale backgrounds.")
 require(".wajo-admin-workspace .btn-primary { background: #176b52 !important; }" in admin_design_source, "Filled CKAN buttons must have an explicit contrasting background, not white-on-white inherited styling.")
 require(".wajo-create-type--geo .wajo-create-type__icon .fa-map-location-dot" in admin_design_source, "Geospatial quick-action Font Awesome icon must be larger than body text.")

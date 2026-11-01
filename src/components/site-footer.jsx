@@ -6,7 +6,7 @@ import { siteConfig } from "@/lib/site-config";
 
 export async function SiteFooter() {
   const navigationResult = await getPublicCmsNavigationResult();
-  const pageLinks = (navigationResult.data || []).slice(0, 6);
+  const pageLinks = (navigationResult.data || []).slice(0, 5);
 
   return (
     <footer className="mt-16 border-t border-line bg-white">
@@ -36,21 +36,13 @@ export async function SiteFooter() {
         <nav aria-label="Tautan laman" className="min-w-0">
           <h2 className="text-sm font-semibold text-ink">Laman</h2>
           <ul className="mt-3 grid gap-2">
-            <li>
-              <Link
-                href="/informasi"
-                className="text-sm text-muted transition hover:text-primary"
-              >
-                Semua informasi
-              </Link>
-            </li>
             {pageLinks.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   className="text-sm text-muted transition hover:text-primary"
                 >
-                  {item.label}
+                  {item.title || item.label}
                 </Link>
               </li>
             ))}
