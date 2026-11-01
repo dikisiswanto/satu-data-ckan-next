@@ -22,9 +22,10 @@
     "test:e2e:ui": "playwright test --ui",
     "test:coverage": "vitest run --coverage",
     "security:check": "npm audit --omit=dev",
-    "format:write": "prettier --write src tests scripts deploy/ckan README.md package.json",
-    "format:check": "prettier --check src tests scripts deploy/ckan README.md package.json",
-    "check:static": "bash scripts/check-static.sh"
+    "format:write": "prettier --write \"src/**/*.{js,jsx,mjs,cjs,json,css}\" \"tests/**/*.{js,jsx,mjs,cjs,json,css}\" \"scripts/**/*.{js,jsx,mjs,cjs,json,css}\" \"deploy/ckan/**/*.{js,jsx,mjs,cjs,json,css,yml,yaml,md}\" \"docs/**/*.md\" \"*.md\" \"*.json\" \"*.mjs\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,mjs,cjs,json,css}\" \"tests/**/*.{js,jsx,mjs,cjs,json,css}\" \"scripts/**/*.{js,jsx,mjs,cjs,json,css}\" \"deploy/ckan/**/*.{js,jsx,mjs,cjs,json,css,yml,yaml,md}\" \"docs/**/*.md\" \"*.md\" \"*.json\" \"*.mjs\"",
+    "check:static": "bash scripts/check-static.sh",
+    "fix": "npm run format:write && npm run lint:fix"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.5",
@@ -46,13 +47,9 @@
     "eslint-config-next": "16.4.0",
     "husky": "9.1.7",
     "lint-staged": "16.2.7",
-    "postcss": "8.5.29",
     "prettier": "3.9.9",
     "tailwindcss": "4.3.3",
     "vitest": "5.0.3"
-  },
-  "overrides": {
-    "uuid": "11.1.1"
   },
   "lint-staged": {
     "**/*.{js,jsx,mjs,cjs}": [

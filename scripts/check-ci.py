@@ -35,6 +35,13 @@ root_lock = lock.get("packages", {}).get("", {})
 for field in ("name", "version"):
     if root_lock.get(field) != package.get(field):
         errors.append(f"package-lock root {field} must match package.json")
+for field in ("dependencies", "devDependencies"):
+    if root_lock.get(field, {}) != package.get(field, {}):
+        errors.append(f"package-lock root {field} must exactly match package.json")
+for override_name in package.get("overrides", {}):
+    package_paths = lock.get("packages", {})
+    if not any(path == f"node_modules/{override_name}" or path.endswith(f"/node_modules/{override_name}") for path in package_paths):
+        errors.append(f"package.json override {override_name} does not match any installed package in package-lock.json")
 if not dev_dependencies.get("eslint"):
     errors.append("ESLint must be declared in devDependencies so npm ci installs the linter used by npm run check")
 if "node_modules/eslint" not in lock.get("packages", {}):

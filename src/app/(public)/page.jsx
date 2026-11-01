@@ -359,7 +359,7 @@ function HomeHeroContent({
                     displayStat(stats?.resources)
                   )}
                 </strong>
-                <small>Resource publik</small>
+                <small>Berkas publik aktif</small>
               </span>
             </Link>
             <Link
@@ -420,7 +420,7 @@ function HomeHeroContent({
                   displayStat(stats?.resources)
                 )}
               </strong>
-              <small>Resource publik</small>
+              <small>Berkas publik aktif</small>
             </span>
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
@@ -485,8 +485,10 @@ function HomeHeroContent({
           </Link>
         </section>
         <p className="home-stats-note">
-          Ringkasan dihitung dari dataset dan resource aktif yang tersedia untuk
-          publik. Jumlah indikator mengikuti dataset indikator yang diterbitkan.
+          Dataset umum, indikator, dan kategori dihitung terpisah sesuai katalog
+          publik masing-masing. Berkas publik aktif menghitung resource aktif
+          yang dapat diakses dari seluruh konten publik; angka ini bukan jumlah
+          dataset.
         </p>
       </div>
     </section>

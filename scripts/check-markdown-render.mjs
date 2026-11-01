@@ -140,10 +140,21 @@ assert.doesNotMatch(
   /config\s*\[\s*["']extra_template_paths["']\s*\]/,
   "Do not duplicate the Wajo template directory in CKAN extra-template configuration; it can loop with Midnight Blue during ckan_extends.",
 );
-assert.match(
-  bootstrapSource,
-  /plugins\.append\(["']wajo_theme["']\)/,
-  "Wajo theme must load after upstream template providers so its override path has deterministic priority.",
+const pluginOrderMatch = bootstrapSource.match(
+  /for plugin in \(\s*([\s\S]*?)\s*\):/,
+);
+const configuredPluginOrder = pluginOrderMatch
+  ? [...pluginOrderMatch[1].matchAll(/["']([a-z0-9_]+)["']/g)].map(
+      (match) => match[1],
+    )
+  : [];
+assert.ok(
+  configuredPluginOrder.indexOf("wajo_theme") >= 0 &&
+    configuredPluginOrder.indexOf("wajo_theme") <
+      configuredPluginOrder.indexOf("pages") &&
+    configuredPluginOrder.indexOf("wajo_theme") <
+      configuredPluginOrder.indexOf("activity"),
+  "Wajo theme must load before Pages and Activity: CKAN's reversed ITemplateHelpers/IConfigurer iteration gives earlier plugins override precedence.",
 );
 const setupSource = await read("deploy/ckan/theme/setup.py");
 assert.match(

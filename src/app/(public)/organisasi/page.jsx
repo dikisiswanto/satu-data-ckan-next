@@ -18,7 +18,7 @@ export const metadata = {
   ...getSocialMetadata({
     path: "/organisasi",
     title: `Perangkat Daerah | ${siteConfig.shortName}`,
-    description: `Temukan perangkat daerah yang menerbitkan data dan dataset publik ${siteConfig.regionName}.`,
+    description: `Temukan perangkat daerah beserta dataset umum, indikator, infografik, dan publikasi publik ${siteConfig.regionName}.`,
   }),
 };
 

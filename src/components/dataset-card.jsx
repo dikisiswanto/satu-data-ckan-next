@@ -110,11 +110,9 @@ export function DatasetCard({ dataset }) {
                     {format.label}
                   </span>
                 ))}
-                {resources.length > formats.length ? (
-                  <span className="text-muted/80">
-                    +{resources.length - formats.length} berkas
-                  </span>
-                ) : null}
+                <span className="text-muted/80">
+                  {resources.length.toLocaleString("id-ID")} berkas
+                </span>
               </span>
             ) : null}
           </div>
@@ -125,5 +123,53 @@ export function DatasetCard({ dataset }) {
         </p>
       </CardContent>
     </Card>
+  );
+}
+
+/** Compact catalogue row for visitors who prefer a simpler, denser list. */
+export function DatasetListItem({ dataset }) {
+  const organizationName =
+    dataset.organization?.title || dataset.organization?.name;
+  const resourceCount = Array.isArray(dataset.resources)
+    ? dataset.resources.length
+    : 0;
+  const updated = dataset.metadata_modified || dataset.metadata_created;
+  return (
+    <article
+      data-public-list-item="true"
+      className="flex min-w-0 flex-col gap-3 rounded-2xl border border-line bg-white px-4 py-4 shadow-[0_2px_10px_rgb(24_58_68_/_0.03)] transition-colors hover:border-primary/30 hover:bg-surface sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-5"
+    >
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="primary">{ckanPackageCategory(dataset)}</Badge>
+          <span className="text-xs text-muted">
+            {resourceCount.toLocaleString("id-ID")} berkas
+          </span>
+        </div>
+        <h3 className="mt-2 break-words text-base font-semibold leading-snug">
+          <Link
+            href={`/dataset/${dataset.name}`}
+            className="rounded-sm text-ink hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          >
+            {dataset.title || dataset.name}
+          </Link>
+        </h3>
+        <p className="mt-1 line-clamp-2 text-sm leading-6 text-muted">
+          {dataset.notes || "Deskripsi dataset belum tersedia."}
+        </p>
+      </div>
+      <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted sm:max-w-[15rem] sm:flex-col sm:items-end sm:gap-1.5">
+        <span className="inline-flex max-w-full items-center gap-1.5">
+          <Building2 size={13} aria-hidden="true" />
+          <span className="line-clamp-1">
+            {organizationName || "Perangkat daerah tidak dicantumkan"}
+          </span>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <Clock3 size={13} aria-hidden="true" /> Diperbarui{" "}
+          {formatDate(updated)}
+        </span>
+      </div>
+    </article>
   );
 }

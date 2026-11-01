@@ -44,7 +44,7 @@ export default async function BeritaPage() {
       <section className="public-news-featured-slot mt-8 grid overflow-hidden rounded-3xl border border-line bg-white shadow-sm lg:grid-cols-[1.1fr_0.9fr]">
         {featured ? (
           <>
-            <div className="flex flex-col justify-center p-6 sm:p-9">
+            <div className="public-news-feature-copy order-2 flex flex-col justify-center p-6 sm:p-9 lg:order-1">
               <span className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
                 {featured.category || "Artikel pilihan"}
               </span>
@@ -62,7 +62,7 @@ export default async function BeritaPage() {
               </Link>
             </div>
             {featuredImage ? (
-              <div className="public-news-feature-media relative min-h-56 bg-slate-100">
+              <div className="public-news-feature-media relative order-1 min-h-56 bg-slate-100 lg:order-2">
                 <Image
                   src={featuredImage.src}
                   alt={featuredImage.alt}
@@ -74,7 +74,7 @@ export default async function BeritaPage() {
               </div>
             ) : (
               <div
-                className="public-news-feature-media flex min-h-56 items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50"
+                className="public-news-feature-media order-1 flex min-h-56 items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 lg:order-2"
                 aria-hidden="true"
               >
                 <span className="flex size-20 items-center justify-center rounded-3xl border border-white/80 bg-white/85 text-primary shadow-sm">

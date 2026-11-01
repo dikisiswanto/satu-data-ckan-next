@@ -22,6 +22,8 @@ import {
 } from "@/lib/site-config";
 import { formatDate } from "@/lib/utils";
 import { publicResourceUrl } from "@/lib/ckan/public-resource-url";
+import { ckanResourceFormat, ckanResourceName } from "@/lib/ckan/client";
+import { PdfResourcePreview } from "@/components/pdf-resource-preview";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -82,6 +84,10 @@ export default async function InfographicDetailPage({ params }) {
   if (!result.data) notFound();
   const item = result.data;
   const images = item.resources.filter(isImageResource);
+  const pdfResources = item.resources.filter(
+    (resource) =>
+      ckanResourceFormat(resource) === "pdf" && publicResourceUrl(resource.url),
+  );
   const downloads = item.resources.filter((resource) =>
     publicResourceUrl(resource.url),
   );
@@ -146,6 +152,16 @@ export default async function InfographicDetailPage({ params }) {
               </p>
             </div>
           )}
+          {pdfResources.slice(0, 1).map((resource) => (
+            <PdfResourcePreview
+              key={`pdf-${resource.id}`}
+              url={publicResourceUrl(resource.url)}
+              title="Pratinjau dokumen PDF"
+              fileName={ckanResourceName(resource)}
+              size={resource.size}
+              heightClassName="h-[60vh] min-h-[380px]"
+            />
+          ))}
         </section>
         <aside className="rounded-2xl border border-line bg-white p-5">
           <h2 className="text-base font-semibold">Informasi publikasi</h2>

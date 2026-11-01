@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { ArrowUpRight, ChartNoAxesColumn, Database, Info } from "lucide-react";
+import { redirect } from "next/navigation";
+import { ArrowUpRight, ChartNoAxesColumn, Database } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
+import { PublicPagination } from "@/components/public-pagination";
+import { normalizePageNumber } from "@/lib/pagination";
+import { PublicNote } from "@/components/public-note";
+import { CatalogSearchForm } from "@/components/catalog-search-form";
 import { publicPageCopy } from "@/lib/public-copy";
 import { GeoPortalStatisticsPromo } from "@/components/geoportal-statistics-promo";
 import { getPublishedIndicatorsResult } from "@/lib/data/public";
@@ -11,16 +16,38 @@ import {
   siteConfig,
 } from "@/lib/site-config";
 
-export const metadata = {
-  title: "Statistik dan Indikator",
-  description: `Jelajahi indikator dan data makro ${siteConfig.regionName} dengan definisi, satuan, periode, serta sumber yang dapat ditelusuri.`,
-  ...getCanonicalMetadata("/statistik"),
-  ...getSocialMetadata({
-    path: "/statistik",
-    title: `Statistik dan Indikator | ${siteConfig.shortName}`,
-    description: `Indikator pembangunan ${siteConfig.regionName} beserta nilai, periode, dan sumber datanya.`,
-  }),
-};
+export async function generateMetadata({ searchParams }) {
+  const params = await searchParams;
+  const hasOrganizationFilter =
+    typeof params?.organisasi === "string" &&
+    params.organisasi.trim().length > 0;
+  const hasSearchFilter =
+    typeof params?.q === "string" && params.q.trim().length > 0;
+  const hasSortFilter =
+    typeof params?.sort === "string" && params.sort !== "terbaru";
+  const pageNumber = Number(params?.halaman || 1);
+  const isPaginated = Number.isSafeInteger(pageNumber) && pageNumber > 1;
+  const description = `Jelajahi indikator dan data makro ${siteConfig.regionName} dengan definisi, satuan, periode, serta sumber yang dapat ditelusuri.`;
+  return {
+    title: "Statistik dan Indikator",
+    description,
+    ...getCanonicalMetadata("/statistik"),
+    ...getSocialMetadata({
+      path: "/statistik",
+      title: `Statistik dan Indikator | ${siteConfig.shortName}`,
+      description: `Indikator pembangunan ${siteConfig.regionName} beserta nilai, periode, dan sumber datanya.`,
+    }),
+    ...(hasOrganizationFilter || hasSearchFilter || hasSortFilter || isPaginated
+      ? {
+          robots: {
+            index: false,
+            follow: true,
+            googleBot: { index: false, follow: true },
+          },
+        }
+      : {}),
+  };
+}
 
 const PAGE_SIZE = 12;
 function formatValue(value) {
@@ -37,22 +64,66 @@ function formatValue(value) {
 export default async function StatistikPage({ searchParams }) {
   await connection();
   const params = await searchParams;
-  const requested =
-    typeof params?.halaman === "string" ? Number(params.halaman) : 1;
-  const page =
-    Number.isSafeInteger(requested) && requested > 0
-      ? Math.min(requested, 10000)
-      : 1;
-  const result = await getPublishedIndicatorsResult({ limit: PAGE_SIZE, page });
+  const page = normalizePageNumber(params?.halaman, 1, 10000);
+  const requestedOrganization =
+    typeof params?.organisasi === "string"
+      ? params.organisasi.slice(0, 100)
+      : "";
+  const organizationId = /^[a-z0-9][a-z0-9_-]*$/i.test(requestedOrganization)
+    ? requestedOrganization
+    : null;
+  const query =
+    typeof params?.q === "string" ? params.q.trim().slice(0, 100) : "";
+  const requestedSort =
+    typeof params?.sort === "string" ? params.sort : "terbaru";
+  const sort = ["terbaru", "judul", "relevansi"].includes(requestedSort)
+    ? requestedSort
+    : "terbaru";
+  const result = await getPublishedIndicatorsResult({
+    limit: PAGE_SIZE,
+    page,
+    organizationId,
+    query,
+    sort,
+    includeLatest: false,
+  });
   if (result.unavailable) await connection();
   const indicators = result.data || [];
-  const hasNextPage = page < Number(result.meta?.last_page || 1);
-  const pageHref = (number) =>
-    number > 1 ? `/statistik?halaman=${number}` : "/statistik";
+  const pageHref = (number) => {
+    const search = new URLSearchParams();
+    if (organizationId) search.set("organisasi", organizationId);
+    if (query) search.set("q", query);
+    if (sort !== "terbaru") search.set("sort", sort);
+    if (number > 1) search.set("halaman", String(number));
+    const suffix = search.toString();
+    return suffix ? `/statistik?${suffix}` : "/statistik";
+  };
+  const totalPages = Math.max(1, Number(result.meta?.last_page || 1));
+  if (!result.unavailable && page > totalPages) redirect(pageHref(totalPages));
 
   return (
     <main className="page-container section-space public-interior-page public-statistics-page">
       <PageHeading {...publicPageCopy.statistik} />
+      <CatalogSearchForm
+        action="/statistik"
+        query={query}
+        sort={sort}
+        organizationId={organizationId}
+        label="Cari indikator"
+        placeholder="Cari nama indikator, definisi, satuan, sumber, atau OPD penerbit…"
+      />
+      {organizationId ? (
+        <p className="mb-4 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-muted">
+          Menampilkan indikator yang diterbitkan oleh perangkat daerah{" "}
+          <strong className="text-ink">{organizationId}</strong>.{" "}
+          <Link
+            href="/statistik"
+            className="font-semibold text-primary underline underline-offset-4"
+          >
+            Hapus filter
+          </Link>
+        </p>
+      ) : null}
       <GeoPortalStatisticsPromo />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted">
@@ -73,6 +144,8 @@ export default async function StatistikPage({ searchParams }) {
         <>
           <div
             id="statistics-list"
+            tabIndex={-1}
+            aria-label="Daftar indikator statistik"
             className="grid scroll-mt-24 gap-4 md:grid-cols-2 xl:grid-cols-3"
           >
             {indicators.map((indicator, index) => (
@@ -103,8 +176,16 @@ export default async function StatistikPage({ searchParams }) {
                   {indicator.metadata.definition}
                 </p>
                 <div className="statistics-card-value">
-                  <strong>{formatValue(indicator.latest?.value)}</strong>
-                  <span>{indicator.metadata.unit}</span>
+                  <strong>
+                    {indicator.latest
+                      ? formatValue(indicator.latest.value)
+                      : indicator.metadata.referencePeriod || "Data tersedia"}
+                  </strong>
+                  <span>
+                    {indicator.latest
+                      ? indicator.metadata.unit
+                      : `Periode referensi · ${indicator.metadata.unit}`}
+                  </span>
                 </div>
                 <dl className="statistics-card-meta">
                   <div>
@@ -132,40 +213,15 @@ export default async function StatistikPage({ searchParams }) {
               </article>
             ))}
           </div>
-          {(page > 1 || hasNextPage) && (
-            <nav
-              aria-label="Navigasi halaman indikator"
-              className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5"
-            >
-              <p className="text-sm text-muted">
-                Halaman {page} ·{" "}
-                {Number(result.meta?.total || 0).toLocaleString("id-ID")}{" "}
-                indikator
-              </p>
-              <div className="flex gap-2">
-                {page > 1 && (
-                  <Link
-                    rel="prev"
-                    href={pageHref(page - 1)}
-                    scroll={false}
-                    className="rounded-control border border-line bg-surface px-4 py-2.5 text-sm font-semibold hover:bg-accent"
-                  >
-                    Sebelumnya
-                  </Link>
-                )}
-                {hasNextPage && (
-                  <Link
-                    rel="next"
-                    href={pageHref(page + 1)}
-                    scroll={false}
-                    className="rounded-control bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
-                  >
-                    Berikutnya
-                  </Link>
-                )}
-              </div>
-            </nav>
-          )}
+          <PublicPagination
+            currentPage={page}
+            totalPages={totalPages}
+            totalItems={result.meta?.total}
+            pageSize={PAGE_SIZE}
+            itemLabel="indikator"
+            ariaLabel="Navigasi halaman indikator"
+            hrefForPage={pageHref}
+          />
         </>
       ) : (
         <section
@@ -181,12 +237,16 @@ export default async function StatistikPage({ searchParams }) {
           <h2 className="mt-2 text-xl font-semibold">
             {result.unavailable
               ? "Indikator belum dapat dimuat"
-              : "Belum ada indikator yang tersedia"}
+              : query
+                ? "Tidak ada indikator yang cocok"
+                : "Belum ada indikator yang tersedia"}
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
             {result.unavailable
               ? "Data statistik belum dapat ditampilkan saat ini. Silakan coba kembali beberapa saat lagi."
-              : "Indikator akan ditampilkan setelah dipublikasikan oleh perangkat daerah. Untuk melihat data yang sudah tersedia, silakan kunjungi katalog dataset."}
+              : query
+                ? `Tidak ditemukan indikator dengan kata kunci “${query}”. Coba istilah lain atau hapus pencarian.`
+                : "Indikator akan ditampilkan setelah dipublikasikan oleh perangkat daerah. Untuk melihat data yang sudah tersedia, silakan kunjungi katalog dataset."}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
             <Link href="/dataset" className="public-empty-action">
@@ -200,13 +260,13 @@ export default async function StatistikPage({ searchParams }) {
               Dokumentasi API
             </Link>
           </div>
-          <p className="mt-5 flex items-start justify-center gap-2 text-xs leading-5 text-muted">
-            <Info size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
-            Nilai statistik hanya ditampilkan jika sumber datanya tersedia untuk
-            publik.
-          </p>
         </section>
       )}
+      <PublicNote>
+        Nilai indikator perlu dibaca bersama definisi, satuan, periode, dan
+        sumbernya. Perbedaan periode atau metodologi dapat memengaruhi
+        keterbandingan antarangka.
+      </PublicNote>
     </main>
   );
 }

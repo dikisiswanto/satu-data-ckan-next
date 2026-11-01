@@ -10,6 +10,7 @@ import {
   getIndicatorResource,
   isPublicIndicatorPackage,
   normalizeObservation,
+  getPublishedIndicatorsResult,
 } from "@/lib/data/public-indicators";
 import {
   getInfographicResources,
@@ -38,6 +39,7 @@ import {
   getPublicPortalStatsResult,
   getPublishedDatasetFacetsResult,
 } from "@/lib/data/public";
+import { getPublicOrganizationsResult } from "@/lib/data/organizations";
 import {
   buildDatasetCatalogExclusionFilters,
   buildPortalContentDiscoveryFilter,
@@ -242,6 +244,57 @@ describe("native CKAN objects for indicators", () => {
     expect(
       normalizeObservation({ period: 2024, value: null }).value,
     ).toBeNull();
+  });
+});
+
+describe("public indicator catalogue query cost", () => {
+  it("does not issue one DataStore request per indicator in metadata-only listings", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(async (input, init) => {
+        const { url } = decodeActionCall([input, init]);
+        const action = url.pathname.split("/").at(-1);
+        const result =
+          action === "package_search"
+            ? { count: 1, results: [indicatorPackage] }
+            : { fields: [], records: [], total: 0 };
+        return Response.json({ success: true, result });
+      });
+
+    const result = await getPublishedIndicatorsResult({ limit: 12 });
+    expect(result.unavailable).toBe(false);
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0].latest).toBeNull();
+    const actions = fetchSpy.mock.calls.map((call) => {
+      const { url } = decodeActionCall(call);
+      return url.pathname.split("/").at(-1);
+    });
+    expect(actions).toEqual(["package_search"]);
+  });
+
+  it("loads latest values only when explicitly requested for a small highlight set", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(async (input, init) => {
+        const { url } = decodeActionCall([input, init]);
+        const action = url.pathname.split("/").at(-1);
+        const result =
+          action === "package_search"
+            ? { count: 1, results: [indicatorPackage] }
+            : {
+                fields: [],
+                records: [{ period: "2025", value: 72, unit: "poin" }],
+                total: 1,
+              };
+        return Response.json({ success: true, result });
+      });
+
+    const result = await getPublishedIndicatorsResult({
+      limit: 3,
+      includeLatest: true,
+    });
+    expect(result.data[0].latest.value).toBe(72);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -506,6 +559,51 @@ describe("flexible public CKAN search", () => {
   });
 });
 
+describe("public organization facet queries", () => {
+  it("requests only the organization facet for each OPD content family", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(async (input, init) => {
+        const { url } = decodeActionCall([input, init]);
+        const action = url.pathname.split("/").at(-1);
+        const result =
+          action === "organization_list"
+            ? ["bappeda-wajo"]
+            : {
+                count: 1,
+                search_facets: {
+                  organization: {
+                    items: [
+                      {
+                        name: "bappeda-wajo",
+                        display_name: "Bappeda Wajo",
+                        count: 1,
+                      },
+                    ],
+                  },
+                },
+              };
+        return Response.json({ success: true, result });
+      });
+
+    const response = await getPublicOrganizationsResult();
+    expect(response.unavailable).toBe(false);
+    expect(response.data[0].public_content_counts).toEqual({
+      datasets: 1,
+      indicators: 1,
+      infographics: 1,
+      publications: 1,
+    });
+    const packageSearchCalls = fetchSpy.mock.calls
+      .map((call) => decodeActionCall(call))
+      .filter(({ url }) => url.pathname.endsWith("/package_search"));
+    expect(packageSearchCalls).toHaveLength(4);
+    for (const call of packageSearchCalls) {
+      expect(call.params.getAll("facet.field")).toEqual(["organization"]);
+    }
+  });
+});
+
 describe("public portal summary sourced from CKAN", () => {
   afterEach(() => vi.restoreAllMocks());
 
@@ -579,10 +677,7 @@ describe("public portal summary sourced from CKAN", () => {
         const filter = params.get("fq") || "";
         let result;
         if (action === "organization_list") {
-          result = [
-            { name: "bappeda-wajo", state: "active" },
-            { name: "old", state: "deleted" },
-          ];
+          result = ["bappeda-wajo"];
         } else if (action === "resource_search") {
           result = {
             count: 3,
@@ -613,6 +708,11 @@ describe("public portal summary sourced from CKAN", () => {
     });
     expect(fetchSpy).toHaveBeenCalledTimes(4);
     const actionCalls = fetchSpy.mock.calls.map(decodeActionCall);
+    const organizationList = actionCalls.find(({ url }) =>
+      url.pathname.endsWith("/organization_list"),
+    );
+    expect(organizationList?.params.get("all_fields")).toBe("false");
+    expect(organizationList?.params.get("limit")).toBe("1000");
     const indicatorSearch = actionCalls.find(
       ({ url, params }) =>
         url.pathname.endsWith("/package_search") &&
@@ -648,7 +748,7 @@ describe("public portal summary sourced from CKAN", () => {
       if (action === "organization_list")
         return Response.json({
           success: true,
-          result: [{ name: "bappeda", state: "active" }],
+          result: ["bappeda"],
         });
       if (action === "resource_search")
         return Response.json({

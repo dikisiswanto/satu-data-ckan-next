@@ -1,8 +1,8 @@
 # Portal Satu Data Kabupaten Wajo
 
-Portal publik **Next.js** terintegrasi dengan **CKAN 2.12.1**. CKAN menjadi sumber data, metadata, pengguna, DataStore, dan CMS; Next.js menyajikan katalog, statistik, visualisasi, berita, dan API baca.
+Portal publik dibangun dengan **Next.js** dan menggunakan **CKAN 2.12.1** sebagai sumber utama dataset, resource, organisasi, pengguna, DataStore, dan CMS.
 
-## Jalankan
+## Menjalankan proyek
 
 ```bash
 cp .env.ckan.example .env.ckan
@@ -11,42 +11,36 @@ bash ./deploy/ckan/bootstrap-upstream.sh
 bash ./deploy/ckan/compose.sh cloudflare up -d --build
 ```
 
-Profil `manual` tersedia untuk ingress non-Tunnel. Jalankan perintah dari root repository. Jangan menghapus volume database, Solr, Redis, atau FileStore saat memperbarui aplikasi.
+Jalankan perintah dari root repository. Profil `manual` tersedia untuk ingress non-Tunnel. Jangan menghapus volume PostgreSQL, Solr, Redis, atau FileStore saat memperbarui aplikasi.
 
-## Pemeriksaan lokal
+## Pemeriksaan dan perapian kode
 
 ```bash
 python -m pip install -r requirements-ci.txt
 npm ci
+npm run fix
+npm run format:check
 npm run check
 npm run test
+npm run test:e2e
 npm run build
 ```
 
-GitHub Actions menjalankan static checks dan ESLint. Smoke test browser/CKAN serta pemeriksaan security tersedia pada workflow extended validation.
+`npm run fix` menjalankan Prettier dan ESLint autofix. `npm run check` menjalankan pemeriksaan statis serta ESLint. `npm run test:e2e` memerlukan browser Playwright.
 
-## Dokumentasi terpelihara
+## Dokumentasi
 
-- `deploy/ckan/README.md` — operasi dan deployment ringkas.
-- `docs/API.md` — API publik.
-- `docs/CMS.md` — Pages, Blog, Markdown, dan media editorial.
-- `docs/WAJO-ADMIN.md` dan `docs/WAJO-ADMIN-DESIGN-SYSTEM.md` — alur kerja dan UI admin.
-- `docs/PANDUAN-MENU-ADMIN.md` — panduan pengguna pengelola.
-- `docs/CKAN-ADMIN-LOKALISASI.md` — katalog bahasa dan proses kompilasi.
-- `docs/CKAN-CUSTOM-FORMS-CONTEXT-AWARE.md` — perilaku form Scheming.
-- `docs/DATASTORE-PREVIEW-SYNC.md` — preview dan sinkronisasi DataStore.
-- `docs/PRIVATE-DATASET-DOWNLOAD-AUTH.md` — otorisasi dataset dan FileStore.
-- `docs/IMAGE-LIGHTBOX-AND-CATALOG.md` — preview gambar dan pemisahan katalog.
+Mulai dari [Indeks Dokumentasi](docs/INDEX.md). Semua panduan operasional dan teknis disimpan pada satu lokasi kanonis di `docs/`; jangan menambahkan salinan panduan atau catatan perubahan sementara ke root repository.
 
-## Struktur
+## Struktur proyek
 
-| Path                    | Fungsi                                      |
-| ----------------------- | ------------------------------------------- |
-| `src/`                  | Next.js, API, komponen, integrasi CKAN      |
-| `deploy/ckan/`          | Compose, Caddy, bootstrap, extension, theme |
-| `scripts/` dan `tests/` | CI checks, unit, E2E                        |
-| `docs/`                 | Panduan teknis dan operasional              |
+| Lokasi                  | Isi                                                  |
+| ----------------------- | ---------------------------------------------------- |
+| `src/`                  | Aplikasi Next.js, API, komponen, dan integrasi CKAN  |
+| `deploy/ckan/`          | Compose, Caddy, bootstrap, extension, dan theme CKAN |
+| `scripts/` dan `tests/` | Pemeriksaan CI, unit test, dan E2E                   |
+| `docs/`                 | Dokumentasi teknis dan operasional                   |
 
-## Produksi
+## Keamanan produksi
 
-Simpan `.env.ckan` di luar Git, batasi akses host admin, gunakan HTTPS, dan backup PostgreSQL, FileStore, serta Solr sebelum migrasi. Jangan menjalankan `docker compose down -v` pada server produksi.
+Simpan `.env.ckan` di luar Git, lindungi hostname admin, gunakan HTTPS, dan cadangkan PostgreSQL, FileStore, serta Solr sebelum migrasi. Jangan menjalankan `docker compose down -v` pada server produksi.

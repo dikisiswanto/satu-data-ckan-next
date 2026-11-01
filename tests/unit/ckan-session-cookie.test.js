@@ -94,22 +94,24 @@ describe("CKAN session cookie forwarding", () => {
   });
 });
 
-describe("CKAN visibility-sensitive Data Cache policy", () => {
+describe("CKAN public Data Cache policy", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it.each([
     "package_search",
     "package_show",
-    "package_activity_list",
     "resource_show",
-    "file_show",
+    "resource_search",
     "datastore_search",
   ])(
-    "does not cache %s even when a caller requests revalidation",
+    "caches public %s reads with the shared invalidation tag",
     async (action) => {
       const fetcher = vi.fn(async (_url, options) => {
-        expect(options.cache).toBe("no-store");
-        expect(options.next).toBeUndefined();
+        expect(options.cache).toBeUndefined();
+        expect(options.next).toMatchObject({
+          revalidate: 60,
+          tags: ["ckan-public", `ckan-action:${action}`],
+        });
         return Response.json({
           success: true,
           result:
@@ -120,24 +122,87 @@ describe("CKAN visibility-sensitive Data Cache policy", () => {
       });
       vi.stubGlobal("fetch", fetcher);
       const { ckanAction } = await import("@/lib/ckan/client");
-      await ckanAction(
-        action,
-        action === "package_search" ? { q: "*:*" } : { id: "record-1" },
-        { revalidate: 60 },
-      );
+      const params =
+        action === "package_search"
+          ? { q: "*:*", include_private: false }
+          : action === "datastore_search"
+            ? { resource_id: "resource-1", limit: 10 }
+            : action === "resource_search"
+              ? { query: "url:", limit: 10 }
+              : { id: "record-1" };
+      await ckanAction(action, params, { revalidate: 60 });
       expect(fetcher).toHaveBeenCalledOnce();
     },
   );
 
-  it("keeps the short shared cache for non-visibility metadata actions", async () => {
+  it("never caches a package_search request that can include private records", async () => {
     const fetcher = vi.fn(async (_url, options) => {
-      expect(options.cache).toBeUndefined();
-      expect(options.next).toMatchObject({ revalidate: 60 });
-      return Response.json({ success: true, result: [] });
+      expect(options.cache).toBe("no-store");
+      expect(options.next).toBeUndefined();
+      return Response.json({
+        success: true,
+        result: { count: 1, results: [{ id: "private-record" }] },
+      });
     });
     vi.stubGlobal("fetch", fetcher);
     const { ckanAction } = await import("@/lib/ckan/client");
-    await ckanAction("organization_list", {}, { revalidate: 60 });
+    await ckanAction(
+      "package_search",
+      { q: "*:*", include_private: true },
+      { revalidate: 60 },
+    );
+    expect(fetcher).toHaveBeenCalledOnce();
+  });
+
+  it.each(["organization_list", "group_list"])(
+    "does not cache %s when include_private is enabled without a session",
+    async (action) => {
+      const fetcher = vi.fn(async (_url, options) => {
+        expect(options.cache).toBe("no-store");
+        expect(options.next).toBeUndefined();
+        return Response.json({ success: true, result: [] });
+      });
+      vi.stubGlobal("fetch", fetcher);
+      const { ckanAction } = await import("@/lib/ckan/client");
+      await ckanAction(action, { include_private: "YES" }, { revalidate: 60 });
+      expect(fetcher).toHaveBeenCalledOnce();
+    },
+  );
+
+  it.each(["package_activity_list", "file_show"])(
+    "does not cache %s because it may contain private activity/file metadata",
+    async (action) => {
+      const fetcher = vi.fn(async (_url, options) => {
+        expect(options.cache).toBe("no-store");
+        expect(options.next).toBeUndefined();
+        return Response.json({
+          success: true,
+          result: { id: "record-1", state: "active" },
+        });
+      });
+      vi.stubGlobal("fetch", fetcher);
+      const { ckanAction } = await import("@/lib/ckan/client");
+      await ckanAction(action, { id: "record-1" }, { revalidate: 60 });
+      expect(fetcher).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("keeps authenticated reads out of the shared Data Cache", async () => {
+    const fetcher = vi.fn(async (_url, options) => {
+      expect(options.cache).toBe("no-store");
+      expect(options.next).toBeUndefined();
+      return Response.json({
+        success: true,
+        result: { id: "private-record", private: true },
+      });
+    });
+    vi.stubGlobal("fetch", fetcher);
+    const { ckanAction } = await import("@/lib/ckan/client");
+    await ckanAction(
+      "package_show",
+      { id: "private-record" },
+      { sessionCookie: "signed.session", revalidate: 60 },
+    );
     expect(fetcher).toHaveBeenCalledOnce();
   });
 });

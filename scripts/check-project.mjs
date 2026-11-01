@@ -66,6 +66,9 @@ const required = [
   "src/components/cms/markdown-content.jsx",
   "src/components/ui/image-lightbox.jsx",
   "src/lib/data/portal-content-types.js",
+  "src/lib/data/catalog-query.js",
+  "src/components/catalog-search-form.jsx",
+  "tests/unit/catalog-query.test.js",
   "src/components/cms/content-blocks.jsx",
   "src/components/cms/content-card.jsx",
   "src/app/(public)/informasi/page.jsx",
@@ -102,7 +105,7 @@ const required = [
   "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css",
   "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
   "scripts/check-admin-forms.mjs",
-  "docs/CKAN-CUSTOM-FORMS-CONTEXT-AWARE.md",
+  "docs/FORM-CKAN-KONTEKSTUAL.md",
   "scripts/check-build.py",
   "scripts/check-public-hero.py",
   "scripts/check-base.py",
@@ -111,7 +114,8 @@ const required = [
   "src/app/api/3/action/[...action]/route.js",
   "src/app/(public)/api-data/page.jsx",
   "docs/API.md",
-  "docs/IMAGE-LIGHTBOX-AND-CATALOG.md",
+  "docs/PRATINJAU-MEDIA-DAN-KATALOG.md",
+  "scripts/check-doc-links.py",
   "src/app/(public)/statistik/page.jsx",
   "src/app/(public)/statistik/[slug]/page.jsx",
   "src/app/(public)/infografik/page.jsx",
@@ -128,7 +132,6 @@ const required = [
   "docs/CMS.md",
   "src/lib/geo/geojson-preview.js",
   "src/components/geojson-resource-preview.jsx",
-  "public/logo-satu-data-indonesia.svg",
   "scripts/e2e-mock-ckan.mjs",
   "deploy/ckan/bootstrap-upstream.sh",
   "deploy/ckan/compose.sh",
@@ -252,7 +255,7 @@ const checks = [
   ],
   [
     "src/components/site-footer.jsx",
-    /data\.go\.id[\s\S]*logo-satu-data-indonesia\.svg[\s\S]*alt="Logo Satu Data Indonesia"[\s\S]*width=\{184\}[\s\S]*height=\{118\}/,
+    /data\.go\.id[\s\S]*images\/logo\.png[\s\S]*alt="Logo resmi Satu Data Indonesia"[\s\S]*width=\{184\}[\s\S]*height=\{110\}/,
     "Footer harus menampilkan logo SDI utuh dengan rasio intrinsik dan menautkan ke portal resminya.",
   ],
   [
@@ -297,18 +300,18 @@ const checks = [
   ],
   [
     "tests/e2e/public-portal.spec.js",
-    /CKAN-driven category cards[\s\S]*organization directory searches[\s\S]*filter penerbit|Memiliki dataset/,
+    /(?=[\s\S]*CKAN-driven category cards)(?=[\s\S]*organization directory searches)(?=[\s\S]*Memiliki terbitan)(?=[\s\S]*1 Infografik dari Dinas Kesehatan)(?=[\s\S]*organization detail separates general datasets)(?=[\s\S]*thematic catalogues support CKAN-backed search)/,
     "E2E harus memverifikasi count kategori CKAN serta pencarian/filter perangkat daerah.",
   ],
   [
     "src/components/organization-directory.jsx",
-    /filterAndSortPublicOrganizations[\s\S]*organization-search[\s\S]*organization-sort[\s\S]*datasetState[\s\S]*organizationDatasetCount/,
-    "Direktori perangkat daerah harus memiliki pencarian kata kunci, filter penerbit dataset, pengurutan, dan count CKAN.",
+    /filterAndSortPublicOrganizations[\s\S]*organization-search[\s\S]*organization-sort[\s\S]*contentState[\s\S]*contentType[\s\S]*organizationContentCount/,
+    "Direktori perangkat daerah harus memiliki pencarian, filter empat kategori penerbitan, pengurutan, dan count terpisah.",
   ],
   [
     "src/lib/public-organizations.js",
-    /package_count[\s\S]*withDatasets[\s\S]*withoutDatasets[\s\S]*terms\.every/,
-    "Logika direktori harus menghitung data CKAN dan mendukung pencarian multi-kata berbasis seluruh istilah yang dimasukkan.",
+    /ORGANIZATION_CONTENT_TYPES[\s\S]*organizationContentCount[\s\S]*organizationTotalContentCount[\s\S]*terms\.every/,
+    "Logika direktori harus menghitung empat kategori publik secara terpisah dan mendukung pencarian multi-kata.",
   ],
   [
     "src/components/page-heading.jsx",
@@ -391,9 +394,39 @@ const checks = [
     "Listing dataset harus selalu menyaring marker resource.private yang belum memiliki ACL CKAN.",
   ],
   [
+    "src/lib/data/organizations.js",
+    /PUBLIC_ORGANIZATION_COUNT_QUERIES[\s\S]*buildDatasetCatalogExclusionFilters[\s\S]*buildPortalContentDiscoveryFilter\("indicator"\)[\s\S]*buildPortalContentDiscoveryFilter\("infographic"\)[\s\S]*buildPortalContentDiscoveryFilter\("publication"\)[\s\S]*public_content_counts/,
+    "Direktori OPD harus menghitung dataset, indikator, infografik, dan publikasi melalui facet terpisah.",
+  ],
+  [
+    "src/lib/data/portal-content-types.js",
+    /export function buildOrganizationFilter[\s\S]*organization:[^`]+/,
+    "Katalog tematik harus memvalidasi dan menerapkan filter OPD yang sama.",
+  ],
+  [
+    "src/app/(public)/dataset/page.jsx",
+    /DatasetListItem[\s\S]*index: false[\s\S]*view === "list"[\s\S]*name="tampilan" value="list"/,
+    "Katalog dataset harus mendukung mode daftar, mempertahankan preferensi saat pencarian, dan mengendalikan indexing filter.",
+  ],
+  [
+    "deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html",
+    /wajo_admin_portal_fqs\.indicators[\s\S]*wajo_admin_portal_fqs\.infographics[\s\S]*wajo_admin_portal_fqs\.publications/,
+    "Tautan metrik dashboard harus menggunakan filter lengkap yang sama dengan hitungan kategorinya.",
+  ],
+  [
+    "src/lib/data/catalog-query.js",
+    /buildPublicCatalogQuery[\s\S]*BASE_SEARCH_FIELDS[\s\S]*normalizePublicCatalogSort/,
+    "Katalog tematik harus menggunakan builder pencarian CKAN yang aman dan sort whitelist.",
+  ],
+  ...["infografik", "publikasi", "statistik"].map((catalog) => [
+    `src/app/(public)/${catalog}/page.jsx`,
+    /(?=[\s\S]*CatalogSearchForm)(?=[\s\S]*query=\{query\})(?=[\s\S]*sort=\{sort\})(?=[\s\S]*search\.set\("q", query\))/,
+    `Katalog ${catalog} harus searchable dan mempertahankan filter saat pagination.`,
+  ]),
+  [
     "src/app/(public)/organisasi/[slug]/page.jsx",
-    /CKAN_SESSION_COOKIE_NAME[\s\S]*getPublishedDatasetsResult\([\s\S]*sessionCookie[\s\S]*\)/,
-    "Daftar dataset pada profil organisasi harus mengikuti sesi CKAN dan izin privat pengguna.",
+    /getPublishedDatasetsResult\(\{ organizationId: org\.name, limit: 3 \}\)[\s\S]*getPublishedIndicatorsResult\(\{ organizationId: org\.name, limit: 3, includeLatest: false \}\)[\s\S]*getPublishedInfographicsResult\(\{ organizationId: org\.name, limit: 3 \}\)[\s\S]*getPublishedPublicationsResult\(\{ organizationId: org\.name, limit: 3 \}\)[\s\S]*counts\s*=\s*\{/,
+    "Profil OPD harus memakai katalog publik terpisah untuk dataset, indikator, infografik, dan publikasi; bukan package_count campuran CKAN.",
   ],
   [
     "src/app/api/3/action/[...action]/route.js",
@@ -544,7 +577,7 @@ const checks = [
 const cmsChecks = [
   [
     "src/lib/cms/pages.js",
-    /import \"server-only\"[\s\S]*ckanext_pages_list[\s\S]*ckanext_pages_show[\s\S]*revalidate: 0/,
+    /import \"server-only\"[\s\S]*ckanext_pages_list[\s\S]*ckanext_pages_show[\s\S]*revalidate: 60/,
     "CMS harus dipanggil server-side lewat action CKAN Pages dan membaca tanpa cache agar perubahan visibility segera berlaku.",
   ],
   [
@@ -669,8 +702,8 @@ const cmsChecks = [
   ],
   [
     "deploy/ckan/bootstrap-upstream.sh",
-    /scheming_datasets[\s\S]*scheming_organizations[\s\S]*scheming_groups[\s\S]*wajo_pages[\s\S]*pages[\s\S]*plugins.append\(\"wajo_theme\"\)/,
-    "Bootstrap harus memuat schema Dataset/Organisasi/Kategori sebelum Pages dan template Wajo setelah Pages.",
+    /scheming_datasets[\s\S]*scheming_organizations[\s\S]*scheming_groups[\s\S]*wajo_pages[\s\S]*wajo_theme[\s\S]*pages[\s\S]*activity/,
+    "Bootstrap harus memuat schema sebelum Pages, serta Wajo theme sebelum Pages dan Activity agar helper dan template override benar-benar menang.",
   ],
   [
     "scripts/e2e-mock-ckan.mjs",
@@ -843,6 +876,22 @@ for (const file of [
   } catch {
     errors.push(`Tidak dapat membaca konfigurasi SEO CKAN Admin: ${file}`);
   }
+}
+
+const datasetDetailSource = await readFile(
+  path.join(root, "src/app/(public)/dataset/[slug]/page.jsx"),
+  "utf8",
+);
+if (
+  datasetDetailSource.indexOf("Berkas unduhan") === -1 ||
+  datasetDetailSource.indexOf('aria-labelledby="dataset-activity-heading"') ===
+    -1 ||
+  datasetDetailSource.indexOf('aria-labelledby="dataset-activity-heading"') <
+    datasetDetailSource.indexOf("Berkas unduhan")
+) {
+  errors.push(
+    "Detail dataset harus menampilkan daftar/pratinjau berkas sebelum riwayat pembaruan.",
+  );
 }
 
 if (errors.length) {

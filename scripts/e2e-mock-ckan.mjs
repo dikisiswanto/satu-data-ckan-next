@@ -261,7 +261,9 @@ const orgs = [
     description:
       "Perencanaan pembangunan dan pengelolaan data pembangunan daerah.",
     state: "active",
-    package_count: 2,
+    // CKAN's package_count aggregates all package-backed catalogue families.
+    // The public directory must not present this as the number of general datasets.
+    package_count: 3,
   },
   {
     id: "org-dinkes",
@@ -279,6 +281,19 @@ const orgs = [
     state: "active",
     package_count: 0,
   },
+  // Additional empty OPDs let browser tests exercise real directory pagination
+  // without changing the content/count fixtures used by catalog assertions.
+  ...Array.from({ length: 10 }, (_, index) => {
+    const sequence = String(index + 1).padStart(2, "0");
+    return {
+      id: `org-uji-${sequence}`,
+      name: `opd-uji-${sequence}`,
+      title: `OPD Uji ${sequence}`,
+      description: "Organisasi pengujian pagination direktori.",
+      state: "active",
+      package_count: 0,
+    };
+  }),
 ];
 const indicatorRecords = [
   {
@@ -791,7 +806,7 @@ function actionResult(action, params) {
         // title, notes, tags, organization/group names or resource metadata.
         const fieldTerms = [
           ...q.matchAll(
-            /(?:title|notes|tags|organization|groups|res_name|res_description):\"([^\"]+)\"/g,
+            /(?:title|notes|tags|organization|groups|res_name|res_description|extras_[a-z0-9_]+):\"([^\"]+)\"/g,
           ),
         ].map((match) => match[1]);
         const terms = [
@@ -817,6 +832,10 @@ function actionResult(action, params) {
                 resource.name,
                 resource.description,
                 resource.format,
+              ]),
+              ...(item.extras || []).flatMap((extra) => [
+                extra.key,
+                extra.value,
               ]),
             ]
               .filter(Boolean)

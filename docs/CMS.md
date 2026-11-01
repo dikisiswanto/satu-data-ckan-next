@@ -42,7 +42,7 @@ Gunakan tombol **Unggah gambar** pada editor Markdown. File disimpan sebagai Fil
 
 URL gambar harus HTTPS atau path media CKAN yang didukung. Next.js memeriksa referensi konten publik, owner, MIME, signature, dan ukuran sebelum menyajikan media. Jangan membuka seluruh FileStore untuk akses anonim.
 
-## Content blocks
+## Blok konten (content blocks)
 
 `content_blocks` menerima array JSON dengan tipe:
 
@@ -82,12 +82,18 @@ Contoh singkat:
 
 Footer menampilkan tautan laman yang ditandai **Tampilkan di menu**, tautan `/informasi`, dan daftar `/berita`.
 
-## Deployment
+## Penerapan
 
-`wajo_pages` harus aktif sebelum `pages`; `wajo_theme` dimuat setelah extension yang menyediakan template. Bootstrap mengatur urutan plugin. Jalankan migrasi awal/upgrade Pages melalui:
+`wajo_pages` dan `wajo_theme` harus terdaftar sebelum `pages` dan `activity` pada `CKAN__PLUGINS`. CKAN 2.12 membalik urutan iterasi `IConfigurer` dan `ITemplateHelpers`; karena itu plugin yang lebih awal memiliki prioritas helper dan template. Urutan ini wajib agar helper `render_content` Wajo menggantikan helper bawaan `ckanext-pages` dan template Wajo mewarisi shell Midnight Blue tanpa rekursi. Bootstrap mengatur urutan plugin secara kanonis; jalankan ulang `bootstrap-upstream.sh` sebelum rebuild CKAN bila memperbarui penerapan lama. Jalankan migrasi awal/upgrade Pages melalui:
 
 ```bash
 ckan db upgrade -p pages
 ```
 
 Simpan `.env.ckan` secara privat. Jangan mengaktifkan `ckanext.pages.allow_html` untuk konten editorial publik.
+
+## Rujukan terkait
+
+- [Lokalisasi admin CKAN](LOKALISASI-ADMIN-CKAN.md)
+- [Panduan Wajo Admin](PANDUAN-ADMIN-WAJO.md)
+- [Indeks dokumentasi](INDEX.md)

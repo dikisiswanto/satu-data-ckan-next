@@ -157,3 +157,27 @@ test("public interior pages receive a subtle one-time scroll reveal", async ({
   );
   expect(transition).toContain("0.46s");
 });
+
+test("featured article puts its image before the copy on mobile and keeps the desktop split", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/berita", { waitUntil: "networkidle" });
+  const featured = page.locator(".public-news-featured-slot");
+  const media = featured.locator(".public-news-feature-media");
+  const copy = featured.locator(".public-news-feature-copy");
+  await expect(media).toBeVisible();
+  await expect(copy).toBeVisible();
+  let [mediaBox, copyBox] = await Promise.all([
+    media.boundingBox(),
+    copy.boundingBox(),
+  ]);
+  expect(mediaBox.y).toBeLessThan(copyBox.y);
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  [mediaBox, copyBox] = await Promise.all([
+    media.boundingBox(),
+    copy.boundingBox(),
+  ]);
+  expect(copyBox.x).toBeLessThan(mediaBox.x);
+});

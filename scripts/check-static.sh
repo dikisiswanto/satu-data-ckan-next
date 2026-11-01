@@ -29,7 +29,12 @@ run_check node scripts/check-editorial-media.mjs
 run_check node scripts/check-markdown-render.mjs
 run_check node scripts/check-image-lightbox.mjs
 run_check node scripts/check-public-download-route.mjs
+run_check node scripts/check-thematic-catalogs.mjs
+run_check node scripts/check-public-quality.mjs
+run_check python3 scripts/check-doc-links.py
+run_check node scripts/check-public-pagination.mjs
 run_check python3 scripts/check-id-translations.py
+run_check python3 scripts/test-publisher-analytics.py
 run_check python3 scripts/check-auth-middleware.py
 run_check python3 scripts/check-build.py
 run_check python3 scripts/check-plugins-config.py

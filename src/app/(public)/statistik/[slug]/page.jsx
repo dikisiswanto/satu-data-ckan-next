@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { ArrowLeft, ArrowUpRight, Info } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
+import { PublicNote } from "@/components/public-note";
 import { IndicatorTrendChart } from "@/components/indicator-trend-chart";
 import { getPublicIndicatorBySlugResult } from "@/lib/data/public-indicators";
 import {
@@ -296,15 +297,12 @@ export default async function IndicatorDetailPage({ params }) {
               <ArrowUpRight size={15} aria-hidden="true" />
             </Link>
           </section>
-          <div className="public-indicator-note-panel rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-950">
-            <Info size={17} className="mb-2" aria-hidden="true" />
-            <p>
-              Nilai dan grafik bersumber dari dataset yang tercantum pada
-              halaman ini. Periksa periode, definisi, dan metode perhitungan
-              sebelum menggunakan angka sebagai bahan analisis atau dasar
-              pengambilan keputusan.
-            </p>
-          </div>
+          <PublicNote className="mt-5">
+            Nilai dan grafik bersumber dari dataset yang tercantum pada halaman
+            ini. Periksa periode, definisi, dan metode perhitungan sebelum
+            menggunakan angka sebagai bahan analisis atau dasar pengambilan
+            keputusan.
+          </PublicNote>
         </aside>
       </div>
     </main>

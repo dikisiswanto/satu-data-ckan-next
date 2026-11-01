@@ -19,6 +19,16 @@ export const NON_GENERAL_DATASET_TYPES = Object.freeze(
   Object.values(PORTAL_CONTENT_TYPES),
 );
 
+/** Build a validated CKAN organization filter shared by every public content type. */
+export function buildOrganizationFilter(organizationId) {
+  const organization = String(organizationId || "")
+    .trim()
+    .slice(0, 100);
+  return /^[a-z0-9][a-z0-9_-]*$/i.test(organization)
+    ? `organization:${organization}`
+    : null;
+}
+
 /**
  * Match CKAN's own legacy tag-query handling: escape Solr metacharacters and
  * wrap the value as a quoted phrase. Tags such as `portal-indikator` contain

@@ -13,6 +13,7 @@ export default function robots() {
           "/dataset",
           "/statistik",
           "/infografik",
+          "/publikasi",
           "/organisasi",
           "/bantuan",
           "/api-data",

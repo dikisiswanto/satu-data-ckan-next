@@ -294,19 +294,12 @@ const ckanClient = await readFile("src/lib/ckan/client.js", "utf8");
 const compactCkanClient = ckanClient.replace(/\s+/g, " ");
 assert.match(ckanClient, /buildCkanSessionCookieHeader/);
 assert.match(ckanClient, /NEVER_CACHE_ACTIONS = new Set\(/);
-for (const action of [
-  "package_search",
-  "package_show",
-  "package_activity_list",
-  "resource_show",
-  "file_show",
-  "datastore_search",
-]) {
+for (const action of ["package_activity_list", "file_show"]) {
   assert.match(ckanClient, new RegExp(`"${action}"`));
 }
 assert.match(
   compactCkanClient,
-  /effectiveRevalidate = forwardedSession \|\| NEVER_CACHE_ACTIONS\.has\(action\) \? 0 : revalidate/,
+  /effectiveRevalidate = forwardedSession \|\| requestsPrivateRecords \|\| NEVER_CACHE_ACTIONS\.has\(action\) \? 0 : revalidate/,
 );
 const datasetPage = await readFile(
   "src/app/(public)/dataset/[slug]/page.jsx",

@@ -68,11 +68,13 @@ export async function SiteFooter() {
             className="inline-flex w-fit items-center gap-2 rounded-lg border border-line bg-white px-2.5 py-2 transition hover:border-[#c4d5df] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
             aria-label="Kunjungi Portal Satu Data Indonesia di data.go.id (tab baru)"
           >
-            <Image
-              src="/logo-satu-data-indonesia.svg"
-              alt="Logo Satu Data Indonesia"
+            <img
+              src="https://data.go.id/images/logo.png"
+              alt="Logo resmi Satu Data Indonesia"
               width={184}
-              height={118}
+              height={110}
+              loading="lazy"
+              decoding="async"
               className="h-auto w-[9.5rem] max-w-none shrink-0 object-contain sm:w-[10rem]"
             />
             <ExternalLink

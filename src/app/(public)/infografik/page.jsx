@@ -1,8 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
-import { ArrowUpRight, Images, Info } from "lucide-react";
+import { redirect } from "next/navigation";
+import { ArrowUpRight, Images } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
+import { PublicPagination } from "@/components/public-pagination";
+import { normalizePageNumber } from "@/lib/pagination";
+import { PublicNote } from "@/components/public-note";
+import { CatalogSearchForm } from "@/components/catalog-search-form";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { publicPageCopy } from "@/lib/public-copy";
 import { getPublishedInfographicsResult } from "@/lib/data/public-infographics";
@@ -13,33 +18,101 @@ import {
 } from "@/lib/site-config";
 import { safeHttpUrl } from "@/lib/utils";
 
-export const metadata = {
-  title: "Infografik",
-  description: `Infografik resmi dan visualisasi data ${siteConfig.regionName}.`,
-  ...getCanonicalMetadata("/infografik"),
-  ...getSocialMetadata({
-    path: "/infografik",
-    title: `Infografik | ${siteConfig.shortName}`,
-    description: `Lihat infografik dan ringkasan data resmi ${siteConfig.regionName}.`,
-  }),
-};
+export async function generateMetadata({ searchParams }) {
+  const params = await searchParams;
+  const hasOrganizationFilter =
+    typeof params?.organisasi === "string" &&
+    params.organisasi.trim().length > 0;
+  const hasSearchFilter =
+    typeof params?.q === "string" && params.q.trim().length > 0;
+  const hasSortFilter =
+    typeof params?.sort === "string" && params.sort !== "terbaru";
+  const pageNumber = Number(params?.halaman || 1);
+  const isPaginated = Number.isSafeInteger(pageNumber) && pageNumber > 1;
+  const description = `Infografik resmi dan visualisasi data ${siteConfig.regionName}.`;
+  return {
+    title: "Infografik",
+    description,
+    ...getCanonicalMetadata("/infografik"),
+    ...getSocialMetadata({
+      path: "/infografik",
+      title: `Infografik | ${siteConfig.shortName}`,
+      description: `Lihat infografik dan ringkasan data resmi ${siteConfig.regionName}.`,
+    }),
+    ...(hasOrganizationFilter || hasSearchFilter || hasSortFilter || isPaginated
+      ? {
+          robots: {
+            index: false,
+            follow: true,
+            googleBot: { index: false, follow: true },
+          },
+        }
+      : {}),
+  };
+}
 
 export default async function InfografikPage({ searchParams }) {
   await connection();
   const params = await searchParams;
-  const requested =
-    typeof params?.halaman === "string" ? Number(params.halaman) : 1;
-  const page =
-    Number.isSafeInteger(requested) && requested > 0
-      ? Math.min(requested, 10000)
-      : 1;
-  const result = await getPublishedInfographicsResult({ limit: 18, page });
+  const page = normalizePageNumber(params?.halaman, 1, 10000);
+  const requestedOrganization =
+    typeof params?.organisasi === "string"
+      ? params.organisasi.slice(0, 100)
+      : "";
+  const organizationId = /^[a-z0-9][a-z0-9_-]*$/i.test(requestedOrganization)
+    ? requestedOrganization
+    : null;
+  const query =
+    typeof params?.q === "string" ? params.q.trim().slice(0, 100) : "";
+  const requestedSort =
+    typeof params?.sort === "string" ? params.sort : "terbaru";
+  const sort = ["terbaru", "judul", "relevansi"].includes(requestedSort)
+    ? requestedSort
+    : "terbaru";
+  const result = await getPublishedInfographicsResult({
+    limit: 18,
+    page,
+    organizationId,
+    query,
+    sort,
+  });
   if (result.unavailable) await connection();
   const items = result.data || [];
+  const pageHref = (number) => {
+    const search = new URLSearchParams();
+    if (organizationId) search.set("organisasi", organizationId);
+    if (query) search.set("q", query);
+    if (sort !== "terbaru") search.set("sort", sort);
+    if (number > 1) search.set("halaman", String(number));
+    const suffix = search.toString();
+    return suffix ? `/infografik?${suffix}` : "/infografik";
+  };
+  const totalPages = Math.max(1, Number(result.meta?.last_page || 1));
+  if (!result.unavailable && page > totalPages) redirect(pageHref(totalPages));
 
   return (
     <main className="page-container section-space public-interior-page">
       <PageHeading {...publicPageCopy.infografik} />
+      <CatalogSearchForm
+        action="/infografik"
+        query={query}
+        sort={sort}
+        organizationId={organizationId}
+        label="Cari infografik"
+        placeholder="Cari judul, kategori, periode, deskripsi, atau OPD penerbit…"
+      />
+      {organizationId ? (
+        <p className="mb-4 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-muted">
+          Menampilkan infografik yang diterbitkan oleh perangkat daerah{" "}
+          <strong className="text-ink">{organizationId}</strong>.{" "}
+          <Link
+            href="/infografik"
+            className="font-semibold text-primary underline underline-offset-4"
+          >
+            Hapus filter
+          </Link>
+        </p>
+      ) : null}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted">
           {result.unavailable
@@ -55,7 +128,12 @@ export default async function InfografikPage({ searchParams }) {
       </div>
 
       {items.length ? (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div
+          id="infographic-list"
+          tabIndex={-1}
+          aria-label="Daftar infografik"
+          className="grid scroll-mt-24 gap-5 sm:grid-cols-2 xl:grid-cols-3"
+        >
           {items.map((item) => {
             const imageUrl = safeHttpUrl(item.cover?.url);
             return (
@@ -135,12 +213,16 @@ export default async function InfografikPage({ searchParams }) {
           <h2 className="mt-2 text-xl font-semibold">
             {result.unavailable
               ? "Infografik belum dapat ditampilkan"
-              : "Belum ada infografik yang tersedia"}
+              : query
+                ? "Tidak ada infografik yang cocok"
+                : "Belum ada infografik yang tersedia"}
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
             {result.unavailable
               ? "Silakan coba kembali beberapa saat lagi."
-              : "Infografik akan ditampilkan setelah diterbitkan untuk umum oleh perangkat daerah. Dataset yang menjadi sumbernya dapat ditelusuri melalui katalog data."}
+              : query
+                ? `Tidak ditemukan infografik dengan kata kunci “${query}”. Coba istilah lain atau hapus pencarian.`
+                : "Infografik akan ditampilkan setelah diterbitkan untuk umum oleh perangkat daerah. Dataset yang menjadi sumbernya dapat ditelusuri melalui katalog data."}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
             <Link href="/dataset" className="public-empty-action">
@@ -148,44 +230,22 @@ export default async function InfografikPage({ searchParams }) {
               <ArrowUpRight size={16} aria-hidden="true" />
             </Link>
           </div>
-          <p className="mt-5 flex items-start justify-center gap-2 text-xs leading-5 text-muted">
-            <Info size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
-            Infografik dan berkas unduhan hanya menampilkan materi yang telah
-            dipublikasikan.
-          </p>
         </section>
       )}
 
-      {items.length &&
-      (page > 1 || page < Number(result.meta?.last_page || 1)) ? (
-        <nav
-          aria-label="Navigasi halaman infografik"
-          className="mt-8 flex justify-between border-t border-line pt-5"
-        >
-          {page > 1 ? (
-            <Link
-              rel="prev"
-              href={
-                page === 2 ? "/infografik" : `/infografik?halaman=${page - 1}`
-              }
-              className="text-sm font-semibold text-primary underline underline-offset-4"
-            >
-              Sebelumnya
-            </Link>
-          ) : (
-            <span />
-          )}
-          {page < Number(result.meta?.last_page || 1) ? (
-            <Link
-              rel="next"
-              href={`/infografik?halaman=${page + 1}`}
-              className="text-sm font-semibold text-primary underline underline-offset-4"
-            >
-              Berikutnya
-            </Link>
-          ) : null}
-        </nav>
-      ) : null}
+      <PublicPagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalItems={result.meta?.total}
+        pageSize={18}
+        itemLabel="infografik"
+        ariaLabel="Navigasi halaman Infografik"
+        hrefForPage={pageHref}
+      />
+      <PublicNote>
+        Infografik dan berkas unduhan hanya menampilkan materi yang telah
+        dipublikasikan untuk umum oleh perangkat daerah.
+      </PublicNote>
     </main>
   );
 }

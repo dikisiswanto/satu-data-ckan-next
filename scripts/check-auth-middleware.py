@@ -401,8 +401,12 @@ def main() -> None:
     import ckan.plugins.toolkit as toolkit
     xloader_calls = []
 
+    dashboard_action_calls = []
+
     def fake_action(action_name):
         def invoke(context, data):
+            if action_name == "package_search":
+                dashboard_action_calls.append(dict(data))
             if action_name == "xloader_submit":
                 xloader_calls.append((context, data))
                 return True
@@ -433,9 +437,41 @@ def main() -> None:
     if dashboard_response != "RENDERED" or dashboard_render.get("template") != "wajo_theme/dashboard.html":
         raise AssertionError("Route Wajo Admin tidak merender dashboard custom.")
     dashboard_vars = dashboard_render.get("vars", {})
-    expected_stats = {"datasets": 42, "organizations": 1, "groups": 1, "my_datasets": 7}
+    expected_stats = {
+        "datasets": 42,
+        "indicators": 7,
+        "infographics": 7,
+        "publications": 7,
+        "organizations": 1,
+        "groups": 1,
+        "my_datasets": 7,
+    }
     if dashboard_vars.get("wajo_admin_stats") != expected_stats:
         raise AssertionError(f"Statistik dashboard tidak sesuai: {dashboard_vars.get('wajo_admin_stats')!r}")
+    general_fq = dashboard_vars.get("wajo_admin_general_dataset_fq", "")
+    if not all(marker in general_fq for marker in ("portal-indikator", "portal-infografik", "portal-publikasi")):
+        raise AssertionError("Hitungan dataset umum wajib mengecualikan seluruh tipe konten portal tematik.")
+    mine_query = next((call for call in dashboard_action_calls if "creator_user_id:" in str(call.get("fq", ""))), None)
+    if not mine_query or not all(marker in mine_query["fq"] for marker in ("portal-indikator", "portal-infografik", "portal-publikasi")):
+        raise AssertionError("Hitungan dataset milik pengguna harus memakai filter dataset umum yang sama.")
+    if dashboard_vars.get("wajo_admin_portal_tags") != {
+        "indicators": "portal-indikator",
+        "infographics": "portal-infografik",
+        "publications": "portal-publikasi",
+    }:
+        raise AssertionError("Dashboard harus menyediakan tag aktual untuk masing-masing katalog portal.")
+    portal_fqs = dashboard_vars.get("wajo_admin_portal_fqs", {})
+    dashboard_template = (ROOT / "deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html").read_text(encoding="utf-8")
+    for key, tag, content_type in (
+        ("indicators", "portal-indikator", "indikator"),
+        ("infographics", "portal-infografik", "infografik"),
+        ("publications", "portal-publikasi", "publikasi"),
+    ):
+        content_fq = portal_fqs.get(key, "")
+        if not all(marker in content_fq for marker in (tag, content_type, "extras_portal_type", "dataset_type")):
+            raise AssertionError(f"Filter hitungan dashboard {key} harus mencakup tag, portal_type, dan dataset_type.")
+        if f"wajo_admin_portal_fqs.{key}" not in dashboard_template:
+            raise AssertionError(f"Tautan dashboard {key} harus memakai filter yang sama dengan hitungan.")
     if not dashboard_vars.get("wajo_admin_recent_datasets") or dashboard_vars["wajo_admin_recent_datasets"][0]["name"] != "dataset-terbaru":
         raise AssertionError("Dashboard harus menampilkan dataset terbaru dari Action API CKAN.")
     print("PASS Wajo Admin overview loads metrics and recent datasets from CKAN actions")

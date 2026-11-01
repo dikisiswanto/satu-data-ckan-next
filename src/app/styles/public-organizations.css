@@ -32,18 +32,20 @@
 }
 
 .organization-directory-summary {
-  display: flex;
-  flex-shrink: 0;
-  gap: 0.65rem;
+  display: grid;
+  width: min(100%, 42rem);
+  flex: 1 1 42rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.55rem;
 }
 
 .organization-directory-summary > div {
   display: flex;
-  min-width: 6.6rem;
+  min-width: 0;
   flex-direction: column;
   gap: 0.1rem;
   border-left: 1px solid #dbe5e9;
-  padding-left: 0.85rem;
+  padding-left: 0.65rem;
 }
 
 .organization-directory-summary strong {
@@ -97,11 +99,6 @@
   box-shadow: 0 2px 9px rgb(25 58 82 / 3%);
 }
 
-.organization-directory-count {
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
 .organization-directory-pagination {
   margin-top: 0.25rem;
 }
@@ -117,9 +114,11 @@
     width: 100%;
   }
 
+  .organization-directory-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
   .organization-directory-summary > div {
     min-width: 0;
-    flex: 1;
   }
 }
 
@@ -200,16 +199,6 @@
   outline-offset: 2px;
 }
 
-.organization-directory-count.has-datasets {
-  background: #eaf4ef;
-  color: #266347;
-}
-
-.organization-directory-count.no-datasets {
-  background: #f1f3f5;
-  color: #64727b;
-}
-
 .organization-directory-card {
   border-color: #dce6eb;
   background: linear-gradient(180deg, #fff 0%, #fff 78%, #fbfcfd 100%);
@@ -254,5 +243,50 @@
     flex: 1 1 auto;
     padding-inline: 0.55rem;
     font-size: 0.7rem;
+  }
+}
+
+.organization-directory-card-metrics {
+  border-top: 1px solid #e7edf0;
+  border-bottom: 1px solid #e7edf0;
+  padding-block: 0.7rem;
+}
+
+.organization-directory-metric {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.45rem;
+  border: 1px solid #e4ebef;
+  border-radius: 0.65rem;
+  background: #f8fafb;
+  padding: 0.45rem 0.6rem;
+  color: #536c79;
+  font-size: 0.72rem;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.organization-directory-metric strong {
+  color: #204e68;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.organization-directory-metric:hover {
+  border-color: #9ab8c8;
+  background: #edf5f8;
+}
+
+.organization-directory-metric:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 2px;
+}
+
+@media (max-width: 420px) {
+  .organization-directory-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

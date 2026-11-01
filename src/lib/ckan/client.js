@@ -14,18 +14,18 @@ const TIMEOUT_MS = Math.min(
   Math.max(Number(process.env.CKAN_API_TIMEOUT_MS || 8000), 1000),
   30000,
 );
-// CKAN search/detail/preview actions can expose metadata that changes visibility
-// when a dataset or resource is unpublished. Never retain those responses in
-// Next.js's shared Data Cache, even when a caller uses the default revalidate.
-const NEVER_CACHE_ACTIONS = new Set([
-  "package_search",
-  "package_show",
-  "package_activity_list",
-  "resource_show",
-  "file_show",
-  "resource_search",
-  "datastore_search",
+// Public read actions are cacheable because CKAN filters their result set by
+// public permissions and every supported mutation sends the signed
+// `ckan-public` invalidation webhook. Authenticated reads are always no-store.
+// Actions that may expose private activity/file metadata remain uncached.
+const NEVER_CACHE_ACTIONS = new Set(["package_activity_list", "file_show"]);
+const DEFAULT_PUBLIC_FACET_FIELDS = Object.freeze([
+  "groups",
+  "organization",
+  "res_format",
+  "extras_portal_reference_period",
 ]);
+const ALLOWED_FACET_FIELDS = new Set(DEFAULT_PUBLIC_FACET_FIELDS);
 
 function normalizeFilterValues(value) {
   if (value === undefined || value === null || value === "") return [];
@@ -106,8 +106,19 @@ export async function ckanAction(
   if (forwardedSession) headers.set("Cookie", forwardedSession);
   // Authenticated CKAN data must never enter Next's shared Data Cache, even
   // when a caller forgets to override the normal public revalidation period.
+  const includePrivateValue =
+    typeof params.include_private === "string"
+      ? params.include_private.trim().toLowerCase()
+      : params.include_private;
+  const requestsPrivateRecords = [true, 1, "1", "true", "yes", "on"].includes(
+    includePrivateValue,
+  );
   const effectiveRevalidate =
-    forwardedSession || NEVER_CACHE_ACTIONS.has(action) ? 0 : revalidate;
+    forwardedSession ||
+    requestsPrivateRecords ||
+    NEVER_CACHE_ACTIONS.has(action)
+      ? 0
+      : revalidate;
 
   const response = await fetch(url, {
     ...requestInit,
@@ -182,6 +193,7 @@ export async function searchPackages({
   sort = "metadata_modified desc",
   fq = "",
   facets = false,
+  facetFields = DEFAULT_PUBLIC_FACET_FIELDS,
   sessionCookie = null,
 } = {}) {
   const params = {
@@ -206,12 +218,15 @@ export async function searchPackages({
         ? filterQueries[0]
         : filterQueries.map((filter) => `(${filter})`).join(" AND ");
   if (facets) {
-    params["facet.field"] = [
-      "groups",
-      "organization",
-      "res_format",
-      "extras_portal_reference_period",
+    const requestedFields = Array.isArray(facetFields) ? facetFields : [];
+    const fields = [
+      ...new Set(
+        requestedFields.filter((field) => ALLOWED_FACET_FIELDS.has(field)),
+      ),
     ];
+    params["facet.field"] = fields.length
+      ? fields
+      : [...DEFAULT_PUBLIC_FACET_FIELDS];
     params["facet.limit"] = 1000;
     params["facet.mincount"] = 1;
   }

@@ -760,6 +760,75 @@ body:has(.wajo-login-frame) {
 .wajo-dashboard__grid {
   gap: 0.875rem;
 }
+.wajo-dashboard-publishers {
+  margin: 0 0 0.875rem;
+  padding-bottom: 1rem;
+}
+.wajo-dashboard-publishers__note,
+.wajo-dashboard-publishers__unavailable {
+  margin: 0 1.125rem 0.875rem;
+  color: var(--wajo-color-muted);
+  font-size: var(--wajo-text-xs);
+  line-height: 1.55;
+}
+.wajo-dashboard-publishers__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.25rem;
+  margin: 0;
+  padding: 0 1.125rem;
+  list-style: none;
+}
+.wajo-dashboard-publisher {
+  min-width: 0;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--wajo-color-border);
+}
+.wajo-dashboard-publisher__topline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.wajo-dashboard-publisher__topline a {
+  overflow-wrap: anywhere;
+  color: var(--wajo-color-ink);
+  font-size: var(--wajo-text-sm);
+  font-weight: 650;
+}
+.wajo-dashboard-publisher__topline a:hover {
+  color: var(--wajo-color-primary);
+}
+.wajo-dashboard-publisher__topline strong {
+  flex: none;
+  color: var(--wajo-color-ink);
+  font-size: 1.125rem;
+  font-variant-numeric: tabular-nums;
+}
+.wajo-dashboard-publisher__bar {
+  height: 0.375rem;
+  overflow: hidden;
+  margin: 0.5rem 0;
+  border-radius: 999px;
+  background: var(--wajo-color-surface-soft);
+}
+.wajo-dashboard-publisher__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--wajo-color-primary);
+}
+.wajo-dashboard-publisher__breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  color: var(--wajo-color-muted);
+  font-size: 0.6875rem;
+}
+.wajo-dashboard-publisher__breakdown b {
+  color: var(--wajo-color-ink);
+  font-variant-numeric: tabular-nums;
+}
 .wajo-dashboard-panel {
   border-radius: var(--wajo-radius-card);
   box-shadow: var(--wajo-shadow-xs);
@@ -978,6 +1047,10 @@ body:has(.wajo-login-frame) {
   }
 }
 @media (max-width: 767.98px) {
+  .wajo-dashboard-publishers__list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
   .wajo-admin-topbar {
     position: relative;
   }
@@ -3290,4 +3363,22 @@ body:has(.wajo-login-frame) {
 .wajo-admin-shell .badge[data-format="geojson"] {
   background: transparent !important;
   background-color: transparent !important;
+}
+
+/* The admin overview may contain seven independent catalogue metrics. */
+.wajo-dashboard__metrics {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr));
+  align-items: stretch;
+}
+@media (max-width: 520px) {
+  .wajo-dashboard__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .wajo-metric-card {
+    min-height: 132px;
+    padding: 0.875rem;
+  }
+  .wajo-metric-card > strong {
+    font-size: clamp(1.35rem, 7vw, 1.75rem);
+  }
 }

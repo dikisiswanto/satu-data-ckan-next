@@ -14,7 +14,7 @@ Hasil API berupa JSON. Cari `success`: jika bernilai `true`, data utama berada d
 
 Untuk dokumentasi yang disusun bertahap dengan tombol contoh yang bisa dibuka, gunakan laman publik **[/api-data](https://data.wajokab.go.id/api-data)**. Dokumen ini melengkapi laman tersebut dengan kontrak teknis yang lebih rinci.
 
-## 1. Base URL dan akses
+## 1. Alamat dasar (Base URL) dan akses
 
 ```text
 https://data.wajokab.go.id/api/3/action
@@ -24,7 +24,7 @@ Semua action publik tidak memerlukan API key. Gunakan hanya untuk membaca metada
 
 | Item                                                             | Perilaku                                                                                                                                                     |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Transport                                                        | HTTPS untuk deployment publik                                                                                                                                |
+| Transportasi                                                     | HTTPS untuk penerapan publik                                                                                                                                 |
 | Method                                                           | `GET`, `HEAD`, `OPTIONS` untuk action yang diizinkan                                                                                                         |
 | Format                                                           | JSON; skema objek `result` mengikuti CKAN native                                                                                                             |
 | Auth                                                             | Tidak dibutuhkan untuk facade publik; permission CKAN tetap berlaku                                                                                          |
@@ -37,7 +37,7 @@ Semua action publik tidak memerlukan API key. Gunakan hanya untuk membaca metada
 
 `HEAD` menjalankan logika GET tanpa body respons. `OPTIONS` hanya mengembalikan `204` untuk action yang di-allowlist; action yang tidak dikenal menghasilkan `404`. Header CORS hanya diberikan kepada origin pada `PUBLIC_API_CORS_ORIGINS` atau, bila kosong, `PUBLIC_SITE_ORIGIN`. Jangan memakai wildcard untuk kebutuhan admin. Request mutasi (`POST`, `PUT`, `PATCH`, `DELETE`) serta action yang tidak di-allowlist ditolak. Path action harus satu segmen, misalnya `/package_show`, bukan path bertingkat.
 
-## 2. Envelope respons
+## 2. Struktur respons (envelope)
 
 ### Sukses
 
@@ -78,7 +78,9 @@ Field di dalam `result` bergantung pada action. Contoh objek di atas hanya ilust
 | `409`, `422` | Konflik/validasi upstream yang dikenali dan diteruskan                                               |
 | `502`        | Upstream CKAN tidak dapat diakses atau menghasilkan kegagalan yang tidak dipetakan ke status di atas |
 
-Pada error, respons tidak disimpan di shared cache. Hasil pencarian dataset, detail dataset, resource/file, riwayat aktivitas, dan baris DataStore memakai `Cache-Control: no-store` serta pemeriksaan CKAN tanpa cache Next.js agar perubahan status publik/privat segera dihormati. Metadata umum seperti status layanan, organisasi, grup/topik, dan tag dapat memakai shared cache singkat. Jangan menambahkan caching di reverse proxy/CDN untuk action yang ditandai no-store.
+Pada error, respons tidak disimpan di shared cache. Hasil pencarian dataset, detail dataset, resource/file, riwayat aktivitas, dan baris DataStore memakai `Cache-Control: no-store` pada **facade HTTP** agar reverse proxy/CDN tidak menyimpan respons yang bergantung pada visibilitas objek. Jangan menambahkan caching di reverse proxy/CDN untuk action yang ditandai no-store.
+
+**Catatan tentang cache internal Next.js:** tabel di atas hanya menjelaskan respons `/api/3/action` yang dilihat browser/aplikasi luar. Pembacaan CKAN langsung dari Server Components/Server Actions Next.js memakai Data Cache terpisah selama 60 detik untuk request anonim yang aman, dengan tag `ckan-public` dan `ckan-action:{nama-action}`. Perubahan CKAN mengirim webhook internal bertanda tangan HMAC untuk menginvalidasi tag `ckan-public`; TTL 60 detik menjadi batas pemulihan jika webhook tidak berhasil. Request dengan sesi CKAN, `include_private=true`, `package_activity_list`, dan `file_show` tetap `no-store`. Jangan menurunkan aturan no-store pada facade atau request privat hanya demi performa.
 
 ## 3. Action yang tersedia
 
@@ -158,7 +160,7 @@ curl -sS 'https://data.wajokab.go.id/api/3/action/resource_show?id=RESOURCE_ID'
 
 ID resource biasanya tersedia pada array `resources` dalam hasil `package_show`; gunakan ID tersebut sebagai `resource_id` saat membaca DataStore. Resource yang berstatus privat/nonaktif dihilangkan dari daftar resource tertanam pada hasil `package_show` dan `package_search`. Activity API juga tidak mengembalikan field `user`, `user_id`, atau `activity_user_id` agar endpoint publik tidak menjadi jalur untuk menemukan identitas staf internal.
 
-## 5. Kesiapan harvesting katalog eksternal
+## 5. Kesiapan pengambilan katalog eksternal (harvesting)
 
 Portal disiapkan untuk kemungkinan diambil oleh harvester CKAN lain, tanpa membuka hostname administrasi. Alamat sumber yang perlu didaftarkan pada harvester adalah:
 
@@ -209,7 +211,7 @@ Nama tipe/tag/field harus mengikuti schema CKAN yang dipasang pada deployment. F
 2. Host admin CKAN harus terpisah dari host publik dan dilindungi oleh satu gerbang perimeter (Basic Auth Caddy atau Cloudflare Access) serta autentikasi/otorisasi CKAN. Hindari menambahkan Basic Auth di depan Cloudflare Access bila ingin mengurangi prompt login.
 3. Jangan meneruskan kredensial admin, token API, atau URL internal ke browser publik.
 4. `package_search` tidak dapat memilih dataset privat melalui facade; CKAN tetap menjadi sumber otoritatif hak akses objek.
-5. Respons error tidak dicache. Metadata umum dapat memakai cache bersama singkat; hasil pencarian dan seluruh data yang bergantung pada visibilitas tidak dicache agar perubahan status privat/publik segera berlaku.
+5. Respons error tidak dicache. Cache HTTP facade mengikuti tabel di atas. Cache server-side Next.js adalah lapisan terpisah: pembacaan anonim yang aman memakai TTL 60 detik dengan invalidasi webhook bertanda tangan; pembacaan login/privat tetap `no-store`.
 6. Endpoint API tidak ditujukan untuk indexing mesin pencari (`X-Robots-Tag: noindex, nofollow, noarchive`).
 
 Referensi protokol umum: [CKAN 2.12 Action API](https://docs.ckan.org/en/2.12/api/index.html). Bila ada perbedaan antara dokumentasi CKAN upstream dan facade ini, batas facade yang dijelaskan dalam dokumen ini yang berlaku untuk API publik portal.
@@ -226,4 +228,12 @@ Semua endpoint detail memeriksa ulang visibilitas dataset dan resource di CKAN s
 
 ### Pratinjau berkas sebelum DataStore siap
 
-Untuk CSV/TSV lokal yang belum selesai diproses XLoader, halaman detail dapat menampilkan pratinjau sementara melalui `/api/public/resource-preview?resource_id={id}&limit={n}`. Fallback membaca paling banyak 1 MiB dan 25 baris secara default, memvalidasi dataset/resource sebagai publik, dan hanya mengambil path unduhan CKAN yang tervalidasi dari origin internal. Endpoint ini bukan pengganti DataStore dan tidak memberi pagination penuh. Preview penuh serta API tabel tetap memakai `datastore_search` setelah XLoader selesai. XLS/XLSX/ODS memerlukan pemrosesan XLoader/DataStore.
+Untuk CSV/TSV lokal yang belum selesai diproses XLoader, halaman detail dapat menampilkan pratinjau sementara melalui `/api/public/resource-preview?resource_id={id}&limit={n}`. Fallback membaca paling banyak 1 MiB dan 25 baris secara default, memvalidasi dataset/resource sebagai publik, dan hanya mengambil path unduhan CKAN yang tervalidasi dari origin internal. Endpoint ini bukan pengganti DataStore dan tidak memberi pagination penuh. Pratinjau penuh serta API tabel tetap memakai `datastore_search` setelah XLoader selesai. XLS/XLSX/ODS memerlukan pemrosesan XLoader/DataStore.
+
+## Rujukan terkait
+
+- [Pratinjau DataStore dan Sinkronisasi](PRATINJAU-DATASTORE-DAN-SINKRONISASI.md) — pemrosesan resource tabular.
+- [Pratinjau Media dan Katalog](PRATINJAU-MEDIA-DAN-KATALOG.md) — pratinjau gambar dan pemisahan katalog.
+- [Akses Unduhan Dataset Privat](AKSES-UNDUHAN-DATASET-PRIVAT.md) — sesi dan otorisasi CKAN.
+- [Kualitas FE Publik](KUALITAS-FE-PUBLIK.md) — pagination, aksesibilitas, pratinjau PDF, dan performa.
+- [Indeks Dokumentasi](INDEX.md) — daftar seluruh panduan kanonis.

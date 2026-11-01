@@ -7,6 +7,8 @@ import { scrollPublicPageToTop, scrollToPublicList } from "@/lib/public-scroll";
 const PAGINATED_PUBLIC_LISTS = {
   "/dataset": "dataset-list",
   "/statistik": "statistics-list",
+  "/infografik": "infographic-list",
+  "/publikasi": "publication-list",
 };
 
 // Only individual content-list items reveal on scroll. Page shells, headings,
@@ -92,7 +94,9 @@ export function PublicScrollManager() {
       const listId = PAGINATED_PUBLIC_LISTS[pathname];
       if (listId) {
         const scheduleScroll = window.requestAnimationFrame(() => {
-          scrollToPublicList(document.getElementById(listId));
+          const list = document.getElementById(listId);
+          scrollToPublicList(list);
+          list?.focus({ preventScroll: true });
         });
         return () => window.cancelAnimationFrame(scheduleScroll);
       }

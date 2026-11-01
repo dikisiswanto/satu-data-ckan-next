@@ -1,16 +1,22 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import {
   ArrowUpRight,
   Check,
   Filter,
+  LayoutGrid,
+  List as ListIcon,
   Search,
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import { DatasetCard } from "@/components/dataset-card";
+import { DatasetCard, DatasetListItem } from "@/components/dataset-card";
 import { PageHeading } from "@/components/page-heading";
+import { PublicPagination } from "@/components/public-pagination";
+import { normalizePageNumber } from "@/lib/pagination";
+import { PublicNote } from "@/components/public-note";
 import { publicPageCopy } from "@/lib/public-copy";
 import {
   getPublishedDatasetFacetsResult,
@@ -29,16 +35,38 @@ import {
   normalizeCkanSessionCookieValue,
 } from "@/lib/ckan/session";
 
-export const metadata = {
-  title: "Katalog Dataset",
-  description: `Temukan dataset ${siteConfig.regionName} berdasarkan judul, uraian, kata kunci, perangkat daerah, topik, tahun, dan format berkas.`,
-  ...getCanonicalMetadata("/dataset"),
-  ...getSocialMetadata({
-    path: "/dataset",
-    title: `Katalog Dataset | ${siteConfig.shortName}`,
-    description: `Telusuri data resmi ${siteConfig.regionName} berdasarkan topik, perangkat daerah, tahun data, dan format berkas.`,
-  }),
-};
+export async function generateMetadata({ searchParams }) {
+  const params = await searchParams;
+  const hasSearchRefinement = [
+    "q",
+    "kategori",
+    "organisasi",
+    "tahun",
+    "format",
+  ].some((key) => typeof params?.[key] === "string" && params[key].trim());
+  const pageNumber = Number(params?.halaman || 1);
+  const isPaginated = Number.isSafeInteger(pageNumber) && pageNumber > 1;
+  const description = `Telusuri data resmi ${siteConfig.regionName} berdasarkan topik, perangkat daerah, tahun data, dan format berkas.`;
+  return {
+    title: "Katalog Dataset",
+    description,
+    ...getCanonicalMetadata("/dataset"),
+    ...getSocialMetadata({
+      path: "/dataset",
+      title: `Katalog Dataset | ${siteConfig.shortName}`,
+      description,
+    }),
+    ...(hasSearchRefinement || isPaginated
+      ? {
+          robots: {
+            index: false,
+            follow: true,
+            googleBot: { index: false, follow: true },
+          },
+        }
+      : {}),
+  };
+}
 
 export default async function DatasetCatalogPage({ searchParams }) {
   const params = await searchParams;
@@ -83,14 +111,8 @@ export default async function DatasetCatalogPage({ searchParams }) {
   )
     ? requestedFormat
     : "";
-  const requestedPage =
-    typeof params?.halaman === "string" ? Number(params.halaman) : 1;
-  const page =
-    Number.isSafeInteger(requestedPage) &&
-    requestedPage >= 1 &&
-    requestedPage <= 4167
-      ? requestedPage
-      : 1;
+  const page = normalizePageNumber(params?.halaman, 1, 10000);
+  const view = params?.tampilan === "list" ? "list" : "cards";
   const pageSize = 24;
   const [facetsResult, datasetResult] = await Promise.all([
     getPublishedDatasetFacetsResult(sessionCookie),
@@ -113,9 +135,6 @@ export default async function DatasetCatalogPage({ searchParams }) {
   if (facetsResult.unavailable || datasetResult.unavailable) await connection();
   const { categories, organizations, years } = facetsResult.data;
   const resultRows = datasetResult.data;
-  const hasNextPage = datasetResult.meta?.last_page
-    ? page < Number(datasetResult.meta.last_page)
-    : resultRows.length === pageSize && page < 4167;
   const datasets = resultRows.slice(0, pageSize);
   const hasFilters = Boolean(
     query || category || organizationId || year || format,
@@ -123,6 +142,19 @@ export default async function DatasetCatalogPage({ searchParams }) {
   const filterCount = [category, organizationId, year, format].filter(
     Boolean,
   ).length;
+  const viewHref = (nextView) => {
+    const search = new URLSearchParams();
+    if (query) search.set("q", query);
+    if (category) search.set("kategori", category);
+    if (organizationId) search.set("organisasi", organizationId);
+    if (sort) search.set("urut", sort);
+    if (year) search.set("tahun", String(year));
+    if (format) search.set("format", format);
+    if (page > 1) search.set("halaman", String(page));
+    if (nextView === "list") search.set("tampilan", "list");
+    const suffix = search.toString();
+    return suffix ? `/dataset?${suffix}` : "/dataset";
+  };
   const organizationLabel = organizations.find(
     (item) => item.id === organizationId,
   )?.name;
@@ -159,6 +191,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
     if (removedKey !== "urut" && sort) search.set("urut", sort);
     if (removedKey !== "tahun" && year) search.set("tahun", String(year));
     if (removedKey !== "format" && format) search.set("format", format);
+    if (view === "list") search.set("tampilan", "list");
     const suffix = search.toString();
     return suffix ? `/dataset?${suffix}` : "/dataset";
   };
@@ -170,10 +203,14 @@ export default async function DatasetCatalogPage({ searchParams }) {
     if (sort) search.set("urut", sort);
     if (year) search.set("tahun", String(year));
     if (format) search.set("format", format);
+    if (view === "list") search.set("tampilan", "list");
     if (pageNumber > 1) search.set("halaman", String(pageNumber));
     const suffix = search.toString();
     return suffix ? `/dataset?${suffix}` : "/dataset";
   };
+  const totalPages = Math.max(1, Number(datasetResult.meta?.last_page || 1));
+  if (!datasetResult.unavailable && page > totalPages)
+    redirect(pageHref(totalPages));
 
   return (
     <main>
@@ -181,6 +218,9 @@ export default async function DatasetCatalogPage({ searchParams }) {
         <div className="page-container py-10 sm:py-14">
           <PageHeading {...publicPageCopy.dataset} />
           <form action="/dataset" method="get" role="search" className="mt-8">
+            {view === "list" ? (
+              <input type="hidden" name="tampilan" value="list" />
+            ) : null}
             <div className="relative flex min-w-0 flex-col items-stretch gap-3 rounded-2xl border border-[#d5e0e8] bg-white p-3 shadow-[0_8px_28px_rgb(20_55_60_/_0.07)] sm:flex-row sm:items-end sm:p-4">
               <div className="min-w-0 flex-1">
                 <label
@@ -248,7 +288,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
                     </div>
                     {hasFilters ? (
                       <Link
-                        href="/dataset"
+                        href={viewHref(view)}
                         className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                       >
                         Hapus filter
@@ -360,6 +400,9 @@ export default async function DatasetCatalogPage({ searchParams }) {
                     </div>
                   </div>
                   <input type="hidden" name="halaman" value="1" />
+                  {view === "list" ? (
+                    <input type="hidden" name="tampilan" value="list" />
+                  ) : null}
                   <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
                     <Button type="submit" size="md">
                       <Check size={15} aria-hidden="true" /> Terapkan filter
@@ -381,6 +424,8 @@ export default async function DatasetCatalogPage({ searchParams }) {
 
       <section
         id="dataset-list"
+        tabIndex={-1}
+        aria-label="Hasil katalog dataset"
         className="page-container section-space public-interior-page scroll-mt-24"
       >
         {facetsResult.unavailable ? (
@@ -402,18 +447,53 @@ export default async function DatasetCatalogPage({ searchParams }) {
             <p className="mt-2 text-sm text-muted" aria-live="polite">
               {datasetResult.unavailable
                 ? "Hasil pencarian belum dapat ditampilkan. Silakan coba kembali beberapa saat lagi."
-                : `${Number(datasetResult.meta?.total ?? datasets.length).toLocaleString("id-ID")} hasil ditemukan · Menampilkan ${datasets.length} dataset pada halaman ${page}${hasFilters ? " sesuai filter" : ""}.`}
+                : `${Number(datasetResult.meta?.total ?? datasets.length).toLocaleString("id-ID")} hasil ditemukan${hasFilters ? " sesuai filter" : ""}.`}
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-2 text-xs font-medium text-muted">
-            <Filter size={14} aria-hidden="true" />
-            {filterCount && query
-              ? `${filterCount} filter · pencarian aktif`
-              : filterCount
-                ? `${filterCount} filter aktif`
-                : query
-                  ? "Pencarian aktif"
-                  : "Semua dataset publik"}
+          <div className="flex flex-wrap items-center gap-3">
+            <nav
+              className="inline-flex items-center rounded-xl border border-line bg-white p-1"
+              aria-label="Pilihan tampilan katalog"
+            >
+              <Link
+                href={viewHref("cards")}
+                aria-current={view === "cards" ? "page" : undefined}
+                aria-label="Tampilan kartu"
+                title="Tampilan kartu"
+                className={cn(
+                  "inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                  view === "cards"
+                    ? "bg-primary text-white"
+                    : "text-muted hover:bg-canvas hover:text-ink",
+                )}
+              >
+                <LayoutGrid size={15} aria-hidden="true" /> Kartu
+              </Link>
+              <Link
+                href={viewHref("list")}
+                aria-current={view === "list" ? "page" : undefined}
+                aria-label="Tampilan daftar sederhana"
+                title="Tampilan daftar sederhana"
+                className={cn(
+                  "inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                  view === "list"
+                    ? "bg-primary text-white"
+                    : "text-muted hover:bg-canvas hover:text-ink",
+                )}
+              >
+                <ListIcon size={15} aria-hidden="true" /> Daftar
+              </Link>
+            </nav>
+            <div className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-2 text-xs font-medium text-muted">
+              <Filter size={14} aria-hidden="true" />
+              {filterCount && query
+                ? `${filterCount} filter · pencarian aktif`
+                : filterCount
+                  ? `${filterCount} filter aktif`
+                  : query
+                    ? "Pencarian aktif"
+                    : "Semua dataset publik"}
+            </div>
           </div>
         </div>
         {activeFilters.length ? (
@@ -441,7 +521,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
               </span>
             ))}
             <Link
-              href="/dataset"
+              href={viewHref(view)}
               className="cursor-pointer px-2 py-1 text-xs font-semibold text-primary underline-offset-4 hover:underline"
             >
               Hapus semua
@@ -461,16 +541,27 @@ export default async function DatasetCatalogPage({ searchParams }) {
               beberapa saat lagi. Hanya dataset yang telah dipublikasikan untuk
               umum yang ditampilkan.
             </p>
-            <a href={pageHref(page)} className="public-empty-action">
+            <Link href={pageHref(page)} className="public-empty-action">
               Coba lagi
-            </a>
+            </Link>
           </div>
         ) : datasets.length ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {datasets.map((dataset) => (
-              <DatasetCard key={dataset.id} dataset={dataset} />
-            ))}
-          </div>
+          view === "list" ? (
+            <div className="grid gap-3" aria-label="Daftar dataset publik">
+              {datasets.map((dataset) => (
+                <DatasetListItem key={dataset.id} dataset={dataset} />
+              ))}
+            </div>
+          ) : (
+            <div
+              className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+              aria-label="Kartu dataset publik"
+            >
+              {datasets.map((dataset) => (
+                <DatasetCard key={dataset.id} dataset={dataset} />
+              ))}
+            </div>
+          )
         ) : (
           <div className="public-empty-panel min-h-64 w-full max-w-none justify-center rounded-2xl border border-[#d7e2ea] bg-white p-8 text-center sm:p-12">
             <span className="public-empty-icon mx-auto">
@@ -489,7 +580,11 @@ export default async function DatasetCatalogPage({ searchParams }) {
                 : "Dataset akan tampil setelah informasinya diperiksa dan dipublikasikan oleh perangkat daerah."}
             </p>
             {hasFilters ? (
-              <Button href="/dataset" variant="secondary" className="mt-5">
+              <Button
+                href={viewHref(view)}
+                variant="secondary"
+                className="mt-5"
+              >
                 Hapus semua filter
               </Button>
             ) : (
@@ -500,38 +595,20 @@ export default async function DatasetCatalogPage({ searchParams }) {
             )}
           </div>
         )}
-        {datasets.length || page > 1 ? (
-          <nav
-            aria-label="Navigasi halaman katalog"
-            className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5"
-          >
-            <p className="text-sm text-muted">Halaman {page}</p>
-            <div className="flex gap-2">
-              {page > 1 ? (
-                <Link
-                  href={pageHref(page - 1)}
-                  scroll={false}
-                  className="rounded-control border border-line bg-surface px-4 py-2.5 text-sm font-semibold hover:bg-accent"
-                >
-                  Sebelumnya
-                </Link>
-              ) : null}
-              {hasNextPage ? (
-                <Link
-                  href={pageHref(page + 1)}
-                  scroll={false}
-                  className="rounded-control bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
-                >
-                  Berikutnya
-                </Link>
-              ) : null}
-            </div>
-          </nav>
-        ) : null}
-        <p className="mt-8 text-xs leading-5 text-muted">
-          Hanya dataset yang sudah dipublikasikan dan masih berlaku yang dapat
-          ditemukan di katalog ini.
-        </p>
+        <PublicPagination
+          currentPage={page}
+          totalPages={totalPages}
+          totalItems={datasetResult.meta?.total}
+          pageSize={pageSize}
+          itemLabel="dataset"
+          ariaLabel="Navigasi halaman katalog dataset"
+          hrefForPage={pageHref}
+        />
+        <PublicNote>
+          Katalog ini hanya memuat dataset yang telah dipublikasikan dan masih
+          berlaku. Jumlah berkas pada setiap dataset dapat berbeda dari jumlah
+          dataset yang ditampilkan.
+        </PublicNote>
       </section>
     </main>
   );

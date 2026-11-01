@@ -16,6 +16,7 @@ from ckanext.pages.interfaces import IPagesSchema
 from ckanext.xloader.interfaces import IXloader
 
 from .markdown import render_wajo_markdown
+from .publisher_analytics import build_portal_facet_filters, build_publisher_rows
 
 
 ALLOWED_CONTENT_BLOCK_TYPES = {
@@ -327,11 +328,12 @@ class WajoThemePlugin(plugins.SingletonPlugin):
 
     def update_config(self, config):
         # Register the theme exactly once through CKAN's plugin template path.
-        # The bootstrap loads wajo_theme after pages/activity, so CKAN gives
-        # these overrides priority without copying the same directory into
-        # extra_template_paths. Registering it in both loaders makes
-        # ckan_extends cycle between this page.html and Midnight Blue's
-        # activity/templates-midnight-blue/page.html at runtime.
+        # CKAN's IConfigurer iteration is reversed and add_template_directory
+        # prepends paths, so wajo_theme must appear before pages/activity in
+        # ckan.plugins. This gives Wajo deterministic override priority while
+        # keeping Activity/Midnight Blue as the next ckan_extends parent. Do
+        # not also add the directory to extra_template_paths: that duplicates
+        # the loader entry and can create a page.html inheritance cycle.
         toolkit.add_template_directory(config, "templates")
         toolkit.add_public_directory(config, "public")
         toolkit.add_resource("assets", "wajo_theme")
@@ -342,8 +344,9 @@ class WajoThemePlugin(plugins.SingletonPlugin):
         ckanext-pages checks this helper with a truthiness test in its detail
         templates. Any non-empty config value (including the literal string
         ``markdown``) activates the raw ``content|safe`` branch and bypasses
-        Markdown parsing. Wajo is loaded after ``pages`` and deliberately
-        overrides this helper so stale deployment config cannot re-enable it.
+        Markdown parsing. Wajo is registered before ``pages`` because CKAN
+        reverses ITemplateHelpers iteration; this makes the falsey override
+        win even if a stale deployment config re-enables the WYSIWYG setting.
         """
         return None
 
@@ -353,9 +356,10 @@ class WajoThemePlugin(plugins.SingletonPlugin):
         The detail templates shipped by ckanext-pages 0.5.2 call
         ``pages_get_wysiwyg_editor`` and ``render_content``. Registering only a
         new ``wajo_render_markdown`` helper is insufficient when CKAN resolves
-        the upstream template instead of our template override. Since Wajo is
-        loaded after ``pages``, CKAN's helper registry gives these definitions
-        precedence and both Pages and Blog are parsed even on the upstream path.
+        the upstream template instead of our template override. CKAN reverses
+        ITemplateHelpers iteration, so Wajo must precede ``pages`` in the
+        configured plugin list for these definitions to win. Both Pages and
+        Blog are then parsed even on the upstream template path.
         """
         return {
             "wajo_render_markdown": render_wajo_markdown,
@@ -708,15 +712,80 @@ class WajoThemePlugin(plugins.SingletonPlugin):
                     LOG.exception("Unable to load Wajo Admin dashboard data from %s", action_name)
                     return None
 
+            # All editorial types are CKAN packages. Count them separately so
+            # the admin dashboard never labels an infographic/publication as a
+            # general dataset (or double-counts a type in an unrelated tile).
+            import os
+            portal_types = (
+                ("indicators", os.environ.get("CKAN_INDICATOR_TAG", "portal-indikator"), "indikator"),
+                ("infographics", os.environ.get("CKAN_INFOGRAPHIC_TAG", "portal-infografik"), "infografik"),
+                ("publications", os.environ.get("CKAN_PUBLICATION_TAG", "portal-publikasi"), "publikasi"),
+            )
+
+            general_dataset_fq, portal_fqs = build_portal_facet_filters(portal_types)
+
+            def package_count(fq):
+                payload = call_action("package_search", {"q": "*:*", "rows": 0, "fq": fq})
+                return payload.get("count") if isinstance(payload, dict) else None
+
             dataset_payload = call_action(
                 "package_search",
-                {"rows": 6, "sort": "metadata_modified desc"},
+                {"q": "*:*", "rows": 6, "sort": "metadata_modified desc", "fq": general_dataset_fq},
             )
+            portal_counts = {key: package_count(fq) for key, fq in portal_fqs.items()}
+
             organization_payload = call_action("organization_list", {"all_fields": True})
             group_payload = call_action("group_list", {"all_fields": True})
+
+            # Give administrators a publishing pulse by OPD. Use the same four
+            # mutually-exclusive package filters as the metric cards; never use
+            # organization.package_count because CKAN counts every package type.
+            facet_filters = {"datasets": general_dataset_fq, **portal_fqs}
+            publisher_facets = {}
+            for content_key, content_fq in facet_filters.items():
+                facet_payload = call_action("package_search", {
+                    "q": "*:*",
+                    "rows": 0,
+                    "fq": content_fq,
+                    "facet.field": ["organization"],
+                    "facet.limit": 1000,
+                    "include_private": False,
+                    "facet.mincount": 1,
+                })
+                if not isinstance(facet_payload, dict):
+                    publisher_facets[content_key] = None
+                    continue
+                search_facets = facet_payload.get("search_facets")
+                organization_facet = (
+                    search_facets.get("organization")
+                    if isinstance(search_facets, dict)
+                    else None
+                )
+                facet_items = (
+                    organization_facet.get("items")
+                    if isinstance(organization_facet, dict)
+                    else None
+                )
+                if not isinstance(facet_items, list):
+                    publisher_facets[content_key] = None
+                    continue
+                publisher_facets[content_key] = {
+                    str(item.get("name")): int(item.get("count", 0))
+                    for item in facet_items
+                    if isinstance(item, dict) and item.get("name")
+                }
+
+            publisher_rows = build_publisher_rows(
+                organization_payload,
+                publisher_facets,
+                limit=10,
+            )
+            publisher_analytics_available = publisher_rows is not None
+            publisher_rows = publisher_rows or []
+
             mine_payload = call_action(
                 "package_search",
-                {"rows": 0, "fq": "creator_user_id:%s" % current_user.id},
+                {"q": "*:*", "rows": 0, "fq": "(creator_user_id:%s AND %s)" % (current_user.id, general_dataset_fq)},
             )
 
             dataset_result = dataset_payload if isinstance(dataset_payload, dict) else {}
@@ -724,6 +793,9 @@ class WajoThemePlugin(plugins.SingletonPlugin):
             recent_datasets = dataset_result.get("results", [])
             stats = {
                 "datasets": dataset_result.get("count"),
+                "indicators": portal_counts["indicators"],
+                "infographics": portal_counts["infographics"],
+                "publications": portal_counts["publications"],
                 "organizations": len(organization_payload) if isinstance(organization_payload, list) else None,
                 "groups": len(group_payload) if isinstance(group_payload, list) else None,
                 "my_datasets": mine_result.get("count"),
@@ -731,6 +803,15 @@ class WajoThemePlugin(plugins.SingletonPlugin):
             return base.render("wajo_theme/dashboard.html", {
                 "wajo_admin_stats": stats,
                 "wajo_admin_recent_datasets": recent_datasets,
+                "wajo_admin_publisher_rows": publisher_rows[:10],
+                "wajo_admin_publisher_analytics_available": publisher_analytics_available,
+                "wajo_admin_general_dataset_fq": general_dataset_fq,
+                "wajo_admin_portal_fqs": portal_fqs,
+                "wajo_admin_portal_tags": {
+                    "indicators": portal_types[0][1],
+                    "infographics": portal_types[1][1],
+                    "publications": portal_types[2][1],
+                },
             })
 
         def require_sysadmin():

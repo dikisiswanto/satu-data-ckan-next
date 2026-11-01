@@ -342,7 +342,7 @@ for (const token of [
   "Organisasi aktif",
   "Indikator publik",
   "Dataset terbuka",
-  "Ringkasan dihitung dari dataset dan resource aktif yang tersedia untuk publik.",
+  "Dataset umum, indikator, dan kategori dihitung terpisah sesuai katalog publik masing-masing.",
 ]) {
   const normalizedHomePage = homePage.replace(/\s+/g, " ");
   if (!normalizedHomePage.includes(token))
@@ -489,13 +489,13 @@ requireText(
 );
 requireText(
   "src/components/site-footer.jsx",
-  'className="h-auto w-[9.5rem] max-w-none shrink-0 object-contain sm:w-[10rem]"',
-  "Satu Data Indonesia mark must render at its full aspect ratio without width clipping",
+  'src="https://data.go.id/images/logo.png"',
+  "Footer must use the exact official Satu Data Indonesia logo asset from data.go.id",
 );
 requireText(
-  "public/logo-satu-data-indonesia.svg",
-  'viewBox="0 0 1000 640"',
-  "Satu Data Indonesia SVG canvas must include the full wordmark descenders",
+  "src/components/site-footer.jsx",
+  "width={184}\n              height={110}",
+  "Official Satu Data Indonesia logo must retain the source image aspect ratio",
 );
 requireText(
   "src/components/site-header.jsx",

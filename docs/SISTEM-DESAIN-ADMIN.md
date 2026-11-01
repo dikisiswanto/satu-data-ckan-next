@@ -1,4 +1,4 @@
-# Design System — Portal Satu Data Kabupaten Wajo (Admin)
+# Sistem Desain Admin — Portal Satu Data Kabupaten Wajo
 
 ## Tujuan dan prinsip
 
@@ -8,7 +8,7 @@ Prinsip implementasi:
 
 - **Satu sumber token:** nilai visual kanonis berada di `deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css`.
 - **Paritas publik/admin:** warna utama, canvas, permukaan, teks, border, radius, dan font stack mengikuti `src/app/styles/foundation.css`.
-- **Native-first:** route, struktur form, `name`, `id`, action, method, CSRF, validasi, permission, upload, widget, dan JavaScript CKAN tetap native.
+- **Native-first:** route, struktur form, `name`, `id`, action, method, CSRF, validasi, hak akses, upload, widget, dan JavaScript CKAN tetap native.
 - **Additive styling:** design layer dimuat setelah `wajo-theme.css` melalui WebAssets; tidak memodifikasi CKAN core.
 - **Use-case typography:** ukuran judul, body, label, tabel, metadata, kode, dan angka disesuaikan dengan fungsi masing-masing, bukan dipaksa seragam.
 - **Responsive and accessible:** navigasi, form, tabel, dashboard, DataStore wizard, footer, dan login mendukung tablet/mobile; focus-visible dan reduced motion dipertahankan.
@@ -58,7 +58,7 @@ Font utama adalah **Inter** dari Google Fonts, mengikuti portal publik Next.js. 
 
 Heading menggunakan line-height rapat dan `letter-spacing` sedikit negatif; body memakai line-height 1.6; catatan/helper memakai 1.5–1.55. Isi tabel tetap kompak tetapi tidak diperkecil berlebihan.
 
-## 3. Grid, lebar konten, dan spacing
+## 3. Grid, lebar konten, dan jarak (spacing)
 
 | Area                                    |                 Lebar maksimum | Alasan                                                      |
 | --------------------------------------- | -----------------------------: | ----------------------------------------------------------- |
@@ -71,7 +71,7 @@ Heading menggunakan line-height rapat dan `letter-spacing` sedikit negatif; body
 | Form panjang                            |                        `960px` | Menghindari field dan label terlalu melebar                 |
 | Login card                              |                        `448px` | Fokus pada satu tugas autentikasi                           |
 
-Gutter halaman memakai `clamp(1rem, 2.1vw, 2rem)`. Spacing mengikuti ritme 4px (`4, 8, 12, 16, 20, 24, 32px`). Tabel lebar harus memakai `.table-responsive`, bukan memperlebar viewport.
+Gutter halaman memakai `clamp(1rem, 2.1vw, 2rem)`. Spacing mengikuti ritme 4px (`4, 8, 12, 16, 20, 24, 32px`). Tabel lebar harus memakai `.table-responsif`, bukan memperlebar viewport.
 
 Breakpoints:
 
@@ -80,7 +80,7 @@ Breakpoints:
 - Di bawah `768px`: semua panel menjadi satu kolom, form actions mengalir, kontrol utama minimal 44px, dan footer ditumpuk.
 - Di bawah `480px`: brand dan toolbar diringkas tanpa membuat tombol ikon lebih kecil dari 40px.
 
-## 4. Bentuk dan elevation komponen
+## 4. Bentuk dan kedalaman visual komponen
 
 | Komponen                | Standar                                                 |
 | ----------------------- | ------------------------------------------------------- |
@@ -139,15 +139,21 @@ Sidebar/topbar memakai satu macro `wajo_icon` dan paket Font Awesome Free bawaan
 
 ## 7. Batas perubahan
 
-Design system tidak boleh mengganti route/action CKAN, struktur input, CSRF, validator, permission, upload, widget JavaScript, atau alur CRUD. Semua perubahan tampilan harus diuji pada login, dashboard, dataset, resource, organisasi, Pages, Harvest, DataStore, dan konfigurasi sistem.
+Design system tidak boleh mengganti route/action CKAN, struktur input, CSRF, validator, hak akses, upload, widget JavaScript, atau alur CRUD. Semua perubahan tampilan harus diuji pada login, dashboard, dataset, resource, organisasi, Pages, Harvest, DataStore, dan konfigurasi sistem.
 
-## 8. UX, interaksi, dan motion
+## 8. Pengalaman pengguna, interaksi, dan animasi
 
 - Susunan halaman: breadcrumb bila relevan, judul/deskripsi, toolbar, konten utama, lalu bantuan kontekstual. Pertahankan pola native CKAN bila sudah memadai.
 - Gunakan satu sumber token untuk warna, permukaan, border, radius, spacing, shadow, dan focus. Jangan menambahkan nilai arbitrer per halaman.
 - Aksi utama memakai satu aksen; aksi pendamping netral; aksi destruktif jelas dan meminta konfirmasi. Status tidak boleh hanya dibedakan dengan warna.
-- Form wajib mempertahankan label, helper, validasi, error summary, CSRF, upload, flash message, dan permission CKAN.
+- Form wajib mempertahankan label, helper, validasi, error summary, CSRF, upload, flash message, dan hak akses CKAN.
 - CSS harus additive dan ter-scope; route, action, context, name/id, method, validator, dan JavaScript native CKAN tidak diubah demi styling.
 - Hindari transisi route dan entrance animation halaman. Motion publik dibatasi pada item daftar yang secara eksplisit ditandai, durasi 200–240 ms, perpindahan maksimal 6 px, dan menghormati `prefers-reduced-motion`.
 - Admin cukup memakai transisi singkat untuk hover/focus dan perubahan state kecil; tidak ada animasi masuk pada setiap halaman.
 - Acceptance mencakup dashboard, dataset, organisasi, Pages/Blog, Harvest, DataStore, login, desktop/tablet/mobile, keyboard focus, filter, dropdown, modal, upload, dan validasi form.
+
+## Rujukan terkait
+
+- [Panduan Wajo Admin](PANDUAN-ADMIN-WAJO.md)
+- [Form Scheming kontekstual](FORM-CKAN-KONTEKSTUAL.md)
+- [Indeks dokumentasi](INDEX.md)

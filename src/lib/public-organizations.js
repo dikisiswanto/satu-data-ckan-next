@@ -5,40 +5,96 @@ function normalizeSearchValue(value) {
     .toLocaleLowerCase("id-ID");
 }
 
-function organizationDatasetCount(organization) {
-  const count = Number(organization?.package_count || 0);
-  return Number.isFinite(count) ? Math.max(0, Math.trunc(count)) : 0;
+export const ORGANIZATION_CONTENT_TYPES = Object.freeze([
+  "datasets",
+  "indicators",
+  "infographics",
+  "publications",
+]);
+
+export function organizationContentCount(organization, kind) {
+  if (!ORGANIZATION_CONTENT_TYPES.includes(kind)) return null;
+  const counts = organization?.public_content_counts;
+  const source =
+    counts && Object.prototype.hasOwnProperty.call(counts, kind)
+      ? counts[kind]
+      : kind === "datasets" &&
+          Object.prototype.hasOwnProperty.call(
+            organization || {},
+            "public_dataset_count",
+          )
+        ? organization.public_dataset_count
+        : null;
+  const count = Number(source);
+  return source !== null && source !== undefined && Number.isFinite(count)
+    ? Math.max(0, Math.trunc(count))
+    : null;
 }
 
-/** Summarize organization records returned by CKAN's organization_list action. */
+export function organizationDatasetCount(organization) {
+  return organizationContentCount(organization, "datasets");
+}
+
+export function organizationTotalContentCount(organization) {
+  const counts = ORGANIZATION_CONTENT_TYPES.map((kind) =>
+    organizationContentCount(organization, kind),
+  );
+  return counts.every((count) => count !== null)
+    ? counts.reduce((total, count) => total + count, 0)
+    : null;
+}
+
+/** Summarize public records by the catalog family that actually owns them. */
 export function summarizePublicOrganizations(organizations = []) {
   const validOrganizations = Array.isArray(organizations) ? organizations : [];
+  const totals = Object.fromEntries(
+    ORGANIZATION_CONTENT_TYPES.map((kind) => {
+      const counts = validOrganizations.map((organization) =>
+        organizationContentCount(organization, kind),
+      );
+      return [
+        kind,
+        counts.every((count) => count !== null)
+          ? counts.reduce((total, count) => total + count, 0)
+          : null,
+      ];
+    }),
+  );
+  const knownOrganizationTotals = validOrganizations.map(
+    organizationTotalContentCount,
+  );
   return {
     organizations: validOrganizations.length,
-    datasets: validOrganizations.reduce(
-      (total, organization) => total + organizationDatasetCount(organization),
-      0,
-    ),
-    withDatasets: validOrganizations.filter(
-      (organization) => organizationDatasetCount(organization) > 0,
-    ).length,
-    withoutDatasets: validOrganizations.filter(
-      (organization) => organizationDatasetCount(organization) === 0,
-    ).length,
+    ...totals,
+    totalPublicItems: knownOrganizationTotals.every((count) => count !== null)
+      ? knownOrganizationTotals.reduce((total, count) => total + count, 0)
+      : null,
+    withContent: knownOrganizationTotals.every((count) => count !== null)
+      ? knownOrganizationTotals.filter((count) => count > 0).length
+      : null,
+    withoutContent: knownOrganizationTotals.every((count) => count !== null)
+      ? knownOrganizationTotals.filter((count) => count === 0).length
+      : null,
+    countsAvailable: knownOrganizationTotals.every((count) => count !== null),
   };
 }
 
 /** Filter and sort the public directory without mutating the CKAN response. */
 export function filterAndSortPublicOrganizations(
   organizations = [],
-  { query = "", sort = "name", datasetState = "all" } = {},
+  { query = "", sort = "name", contentState = "all", contentType = "all" } = {},
 ) {
   const source = Array.isArray(organizations) ? organizations : [];
   const terms = normalizeSearchValue(query).match(/[\p{L}\p{N}]+/gu) || [];
   const filtered = source.filter((organization) => {
-    const count = organizationDatasetCount(organization);
-    if (datasetState === "with-data" && count === 0) return false;
-    if (datasetState === "without-data" && count > 0) return false;
+    const total = organizationTotalContentCount(organization);
+    if (contentState === "with-content" && !(total > 0)) return false;
+    if (contentState === "without-content" && total !== 0) return false;
+    if (
+      contentType !== "all" &&
+      !(organizationContentCount(organization, contentType) > 0)
+    )
+      return false;
 
     if (!terms.length) return true;
     const searchableTokens =
@@ -47,8 +103,6 @@ export function filterAndSortPublicOrganizations(
           .filter(Boolean)
           .join(" "),
       ).match(/[\p{L}\p{N}]+/gu) || [];
-    // Every query term must match a token (prefix matching is supported):
-    // "dinas" must not accidentally match "koordinasi".
     return terms.every(
       (term) =>
         term.length > 1 &&
@@ -56,23 +110,28 @@ export function filterAndSortPublicOrganizations(
     );
   });
 
+  const countForSort = (organization) => {
+    if (sort === "datasets-desc" || sort === "datasets-asc")
+      return organizationContentCount(organization, "datasets");
+    if (sort === "indicators-desc" || sort === "indicators-asc")
+      return organizationContentCount(organization, "indicators");
+    if (sort === "infographics-desc" || sort === "infographics-asc")
+      return organizationContentCount(organization, "infographics");
+    if (sort === "publications-desc" || sort === "publications-asc")
+      return organizationContentCount(organization, "publications");
+    if (sort === "content-desc" || sort === "content-asc")
+      return organizationTotalContentCount(organization);
+    return null;
+  };
+  const ascending = /-asc$/.test(sort);
   return filtered.sort((left, right) => {
     const leftName = String(left.title || left.name || "");
     const rightName = String(right.title || right.name || "");
-    if (sort === "datasets-desc") {
-      return (
-        organizationDatasetCount(right) - organizationDatasetCount(left) ||
-        leftName.localeCompare(rightName, "id-ID")
-      );
-    }
-    if (sort === "datasets-asc") {
-      return (
-        organizationDatasetCount(left) - organizationDatasetCount(right) ||
-        leftName.localeCompare(rightName, "id-ID")
-      );
+    const leftCount = countForSort(left);
+    const rightCount = countForSort(right);
+    if (leftCount !== null && rightCount !== null && leftCount !== rightCount) {
+      return ascending ? leftCount - rightCount : rightCount - leftCount;
     }
     return leftName.localeCompare(rightName, "id-ID");
   });
 }
-
-export { organizationDatasetCount };

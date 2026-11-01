@@ -20,7 +20,7 @@ Theme hanya mengirim format bawaan XLoader 2.6.0:
 
 Format lain tetap dapat diunduh sebagai resource biasa, tetapi tidak dijanjikan memiliki pratinjau tabular DataStore.
 
-## Deployment satu kali
+## Penerapan awal
 
 Setelah source baru dipasang:
 
@@ -36,16 +36,16 @@ bash ./deploy/ckan/compose.sh cloudflare ps
 bash ./deploy/ckan/compose.sh cloudflare logs --tail=120 ckan
 
 # 4. Setelah CKAN sehat, siapkan DataStore dan XLoader
-bash ./deploy/ckan/apply-datastore-permissions.sh
+bash ./deploy/ckan/apply-datastore-hak aksess.sh
 bash ./deploy/ckan/enable-xloader.sh cloudflare
 
 # 5. Mulai Next.js setelah backend dan worker siap
 bash ./deploy/ckan/compose.sh cloudflare up -d nextjs
 ```
 
-`enable-xloader.sh` membuat token internal XLoader bila belum ada, menyimpannya privat di `.env.ckan`, lalu merecreate CKAN dan worker. Kedua skrip DataStore/XLoader menolak berjalan saat CKAN belum `healthy`, sehingga error sekunder tidak menutupi akar startup. Worker harus berstatus berjalan sebelum mengharapkan preview otomatis.
+`enable-xloader.sh` membuat token internal XLoader bila belum ada, menyimpannya privat di `.env.ckan`, lalu merecreate CKAN dan worker. Kedua skrip DataStore/XLoader menolak berjalan saat CKAN belum `healthy`, sehingga error sekunder tidak menutupi akar startup. Worker harus berstatus berjalan sebelum mengharapkan pratinjau otomatis.
 
-## Backfill resource lama
+## Pemrosesan ulang resource lama
 
 Resource yang sudah ada sebelum hook otomatis dipasang perlu dikirim sekali ke XLoader:
 
@@ -62,7 +62,7 @@ bash ./deploy/ckan/compose.sh cloudflare exec -T ckan \
 
 Perintah `all` mengirim resource yang formatnya cocok; XLoader sendiri menolak format yang tidak didukung. `all-existing` hanya memuat ulang resource yang sudah punya tabel DataStore.
 
-## Siklus resource baru/perubahan
+## Alur resource baru dan perubahan
 
 1. Editor membuat atau memperbarui resource CKAN.
 2. `WajoThemePlugin.after_resource_create/update` mengirim action internal `xloader_submit` untuk format yang didukung. Hook tidak menunggu proses parsing; kegagalan antrean dicatat dan tidak membatalkan penyimpanan metadata.
@@ -80,9 +80,11 @@ Hook CKAN mengirim event setelah perubahan dataset, resource, organisasi, grup, 
 - hanya menerima event yang diizinkan;
 - menginvalidasi tag Next.js `ckan-public` secara langsung.
 
-Fetch CKAN server-side memakai tag yang sama. Facade API publik memakai TTL CDN lima detik sebagai fallback, sedangkan detail/resource/DataStore tetap `no-store` untuk menjaga pemeriksaan visibilitas.
+Fetch CKAN server-side anonim yang aman memakai Data Cache Next.js selama 60 detik dengan tag `ckan-public` dan `ckan-action:{action}`. Webhook berhasil menginvalidasi tag portal secara langsung; Jika webhook gagal, masa revalidasi 60 detik menjadi pemicu penyegaran berikutnya. Mekanisme stale-while-revalidate dapat melayani data stale ketika penyegaran berlangsung. Request server-side yang membawa sesi CKAN, meminta `include_private=true`, membaca activity, atau membaca metadata file tetap `no-store`.
 
-### Validasi dan invalidasi manual
+Facade API publik adalah lapisan terpisah: metadata umum dapat memakai TTL CDN lima detik, sedangkan pencarian/detail dataset, resource/file, activity, dan DataStore tetap `no-store` untuk menjaga pemeriksaan visibilitas. Lihat [kontrak API publik](API.md) untuk header HTTP yang diterima pemanggil.
+
+### Validasi dan pembersihan cache manual
 
 Untuk memeriksa kesehatan CKAN lalu memaksa invalidasi cache portal:
 
@@ -99,16 +101,23 @@ bash ./deploy/ckan/compose.sh cloudflare logs --tail=200 ckan xloader-worker nex
 bash ./deploy/ckan/compose.sh cloudflare exec -T ckan ckan -c /srv/app/ckan.ini xloader status
 ```
 
-Jika detail dataset tetap HTTP 500, periksa nilai aktif `scheming.dataset_schemas` dan pastikan `dataset.yaml` ikut terpasang sebagai package data di `ckanext.wajo_theme:schemas/dataset.yaml` dan nilai `scheming.dataset_schemas` memakai format `module:file`. Jika preview tetap belum aktif, periksa format resource, akses unduh dari worker, token XLoader, worker Redis/RQ, permission DataStore, dan log job XLoader.
+Jika detail dataset tetap HTTP 500, periksa nilai aktif `scheming.dataset_schemas` dan pastikan `dataset.yaml` ikut terpasang sebagai package data di `ckanext.wajo_theme:schemas/dataset.yaml` dan nilai `scheming.dataset_schemas` memakai format `module:file`. Jika preview tetap belum aktif, periksa format resource, akses unduh dari worker, token XLoader, worker Redis/RQ, hak akses DataStore, dan log job XLoader.
 
 ## Panduan admin melalui Wajo Admin
 
 Sysadmin dapat memakai menu **Integrasi Data → DataStore & pratinjau** (`/admin/data-preview`) tanpa harus menghafal urutan komponen. Halaman ini menjalankan pemeriksaan konfigurasi saat dibuka atau saat tombol **Periksa ulang** dipilih. Urutannya:
 
 1. Pastikan plugin `datastore` dan `xloader` aktif, `ckan.datastore.read_url` dan `write_url` tersedia, action `xloader_submit` terdaftar, token internal tersedia, serta `ckanext.xloader.jobs_db.uri` terisi. Nilai rahasia tidak pernah dirender ke browser.
-2. Bila hak akses DataStore gagal, gunakan tombol **Salin perintah** untuk `apply-datastore-permissions.sh`, jalankan pada terminal server, lalu kembali dan klik **Periksa ulang**.
+2. Bila hak akses DataStore gagal, gunakan tombol **Salin perintah** untuk `apply-datastore-hak aksess.sh`, jalankan pada terminal server, lalu kembali dan klik **Periksa ulang**.
 3. Periksa container dengan perintah `docker compose ps xloader-worker`; jika belum berjalan, lihat log worker dari tombol salin perintah di halaman. UI tidak menjalankan shell di server karena itu akan memperbesar permukaan serangan.
 4. Setelah konfigurasi dan worker siap, gunakan tombol **Antrekan hingga 25 resource** untuk backfill bertahap dari browser. Form memakai CSRF dan hanya tersedia untuk sysadmin. Resource harus publik serta memiliki format tabular yang didukung.
-5. Buka tautan dataset pada daftar status siap/menunggu. Selesai diproses, `datastore_active` menjadi benar dan panel preview DataStore/API tampil. Jika tidak, periksa log XLoader, konektivitas worker ke URL file, izin database, dan kesesuaian format.
+5. Buka tautan dataset pada daftar status siap/menunggu. Selesai diproses, `datastore_active` menjadi benar dan panel pratinjau DataStore/API tampil. Jika tidak, periksa log XLoader, konektivitas worker ke URL file, izin database, dan kesesuaian format.
 
-UI hanya memindai hingga 100 dataset publik terbaru dan membatasi pengiriman per klik hingga 25 pekerjaan. Untuk katalog besar, jalankan backfill penuh dari terminal deployment sesuai bagian sebelumnya. Resource XLS/XLSX/ODS memerlukan XLoader; fallback parsing langsung di halaman publik hanya disediakan untuk CSV/TSV berukuran kecil.
+UI hanya memindai hingga 100 dataset publik terbaru dan membatasi pengiriman per klik hingga 25 pekerjaan. Untuk katalog besar, jalankan pemrosesan ulang penuh dari terminal penerapan sesuai bagian sebelumnya. Resource XLS/XLSX/ODS memerlukan XLoader; fallback parsing langsung di halaman publik hanya disediakan untuk CSV/TSV berukuran kecil.
+
+## Rujukan terkait
+
+- [Kontrak API publik](API.md)
+- [Pratinjau gambar dan katalog](PRATINJAU-MEDIA-DAN-KATALOG.md)
+- [Akses unduhan dataset privat](AKSES-UNDUHAN-DATASET-PRIVAT.md)
+- [Indeks dokumentasi](INDEX.md)

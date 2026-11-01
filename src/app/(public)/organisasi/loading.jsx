@@ -22,8 +22,8 @@ export default function OrganizationDirectoryLoading() {
             <p className="eyebrow">SUMBER DATA DAERAH</p>
             <h2>Temukan perangkat daerah</h2>
             <p>
-              Telusuri instansi penerbit dan lihat jumlah dataset yang tersedia
-              dari masing-masing perangkat daerah.
+              Telusuri instansi penerbit beserta dataset, indikator, infografik,
+              dan publikasi yang tersedia dari masing-masing perangkat daerah.
             </p>
           </div>
           <div className="organization-directory-summary" aria-hidden="true">

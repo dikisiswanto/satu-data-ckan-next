@@ -30,7 +30,7 @@ test("homepage shows accurate public dataset, resource and indicator totals", as
   await expect(metrics.nth(0)).toContainText("1");
   await expect(metrics.nth(0)).toContainText("Dataset terbuka");
   await expect(metrics.nth(1)).toContainText("7");
-  await expect(metrics.nth(1)).toContainText("Resource publik");
+  await expect(metrics.nth(1)).toContainText("Berkas publik aktif");
   await expect(metrics.nth(3)).toContainText("1");
   await expect(metrics.nth(3)).toContainText("Indikator statistik");
 });
@@ -101,14 +101,14 @@ test("information page keeps a compact title and description rhythm", async ({
   expect(titleDescriptionGap).toBeLessThanOrEqual(8);
 });
 
-test("organization directory searches, filters and sorts CKAN organizations by dataset count", async ({
+test("organization directory searches, filters and shows exact public counts by catalog type", async ({
   page,
 }) => {
   await page.goto("/organisasi");
   await expect(
     page.getByRole("heading", { name: "Temukan perangkat daerah" }),
   ).toBeVisible();
-  await expect(page.getByText("3", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("13", { exact: true }).first()).toBeVisible();
 
   const search = page.getByRole("searchbox", { name: "Cari perangkat daerah" });
   await search.fill("kesehatan dinas");
@@ -129,13 +129,78 @@ test("organization directory searches, filters and sorts CKAN organizations by d
     0,
   );
 
-  await page.getByRole("button", { name: /Memiliki dataset/ }).click();
+  await page.getByRole("button", { name: /Memiliki terbitan/ }).click();
   await page.getByLabel("Urutkan daftar").selectOption("datasets-desc");
   const cards = page.locator(".organization-directory-card");
   await expect(cards).toHaveCount(2);
   await expect(cards.first()).toContainText("Bappeda Wajo");
-  await expect(cards.first()).toContainText("2 dataset");
+  await expect(
+    cards.first().getByRole("link", { name: /1 Dataset dari Bappeda Wajo/i }),
+  ).toBeVisible();
+  await expect(
+    cards.first().getByRole("link", { name: /1 Indikator dari Bappeda Wajo/i }),
+  ).toBeVisible();
+  await expect(
+    cards.first().getByRole("link", { name: /1 Publikasi dari Bappeda Wajo/i }),
+  ).toBeVisible();
   await expect(cards.nth(1)).toContainText("Dinas Kesehatan Kabupaten Wajo");
+  await expect(
+    cards.nth(1).getByRole("link", {
+      name: /0 Dataset dari Dinas Kesehatan Kabupaten Wajo/i,
+    }),
+  ).toBeVisible();
+  await expect(
+    cards.nth(1).getByRole("link", {
+      name: /1 Infografik dari Dinas Kesehatan Kabupaten Wajo/i,
+    }),
+  ).toBeVisible();
+});
+
+test("organization directory pagination identifies the active page and preserves focus", async ({
+  page,
+}) => {
+  await page.goto("/organisasi");
+  const pagination = page.getByRole("navigation", {
+    name: "Paginasi perangkat daerah",
+  });
+  await expect(
+    pagination.getByRole("button", { name: "Halaman 1, halaman aktif" }),
+  ).toBeVisible();
+  await expect(
+    pagination.getByRole("button", { name: "Buka halaman 2" }),
+  ).toBeVisible();
+  await pagination.getByRole("button", { name: "Buka halaman 2" }).click();
+  await expect(
+    pagination.getByRole("button", { name: "Halaman 2, halaman aktif" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Sekretariat Daerah Kabupaten Wajo" }),
+  ).toBeVisible();
+  await expect(
+    pagination.getByRole("button", { name: "Halaman berikutnya" }),
+  ).toBeDisabled();
+});
+
+test("organization detail separates general datasets from thematic publications", async ({
+  page,
+}) => {
+  await page.goto("/organisasi/dinas-kesehatan");
+  await expect(
+    page.getByRole("heading", { name: "Dinas Kesehatan Kabupaten Wajo" }),
+  ).toBeVisible();
+  await expect(page.getByText("0 dataset publik")).toBeVisible();
+  await expect(page.getByText("1 infografik publik")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Dataset umum" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Belum ada dataset umum yang diterbitkan."),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("link", { name: /infografik stunting kabupaten wajo/i })
+      .first(),
+  ).toBeVisible();
 });
 
 test("homepage exposes public catalog, statistics, and infographic routes", async ({
@@ -277,6 +342,38 @@ test("CSV preview remains visible before DataStore indexing and uses a bounded f
   ).toBeVisible();
 });
 
+test("thematic catalogues support CKAN-backed search and preserve result context", async ({
+  page,
+}) => {
+  await page.goto("/infografik?q=2025");
+  await expect(
+    page.getByRole("searchbox", { name: "Cari infografik" }),
+  ).toHaveValue("2025");
+  await expect(
+    page
+      .getByRole("link", { name: /infografik stunting kabupaten wajo/i })
+      .first(),
+  ).toBeVisible();
+
+  await page.goto("/statistik?q=poin");
+  await expect(
+    page.getByRole("searchbox", { name: "Cari indikator" }),
+  ).toHaveValue("poin");
+  await expect(
+    page.getByRole("link", { name: /indeks pembangunan manusia/i }).first(),
+  ).toBeVisible();
+
+  await page.goto("/publikasi?q=kabupaten");
+  await expect(
+    page.getByRole("searchbox", { name: "Cari publikasi" }),
+  ).toHaveValue("kabupaten");
+  await expect(
+    page
+      .getByRole("link", { name: /kabupaten wajo dalam angka 2025/i })
+      .first(),
+  ).toBeVisible();
+});
+
 test("CKAN DataStore powers the public indicator listing and chart page", async ({
   page,
 }) => {
@@ -313,6 +410,16 @@ test("CKAN infographic dataset and public image resource appear on the infograph
   await expect(
     page.getByRole("heading", { name: /informasi publikasi/i }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Pratinjau dokumen PDF" }),
+  ).toBeVisible();
+  await expect(
+    page.locator('iframe[title^="Pratinjau dokumen PDF:"]'),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /Buka PDF/ })).toHaveAttribute(
+    "target",
+    "_blank",
+  );
 });
 
 test("dataset image previews open in a zoomable lightbox", async ({ page }) => {
@@ -489,6 +596,13 @@ test("CKAN publication package drives its listing, revision metadata, and PDF re
   await expect(
     page.getByRole("heading", { name: "Pratinjau dokumen" }),
   ).toBeVisible();
+  await expect(
+    page.locator('iframe[title^="Pratinjau dokumen:"]'),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /Buka PDF/ })).toHaveAttribute(
+    "target",
+    "_blank",
+  );
 });
 
 test("API documentation explains the public endpoint contract in plain language", async ({

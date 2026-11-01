@@ -79,17 +79,54 @@ except Exception as exc:
 # image. This catches dependency, extension-registration, rendering, and
 # sanitizer regressions that source-only checks cannot detect.
 try:
+    from ckan.plugins.interfaces import IConfigurer, ITemplateHelpers
+    from ckanext.pages.plugin import get_wysiwyg_editor as pages_get_wysiwyg_editor
+    from ckanext.pages.plugin import render_content as pages_render_content
     from ckanext.wajo_theme.markdown import render_wajo_markdown
     from ckanext.wajo_theme.plugin import WajoThemePlugin
 
-    page_helpers = WajoThemePlugin().get_helpers()
-    if page_helpers["pages_get_wysiwyg_editor"]():
-        raise RuntimeError("ckanext-pages WYSIWYG mode is still enabled; Markdown source would bypass the parser")
-    upstream_renderer = page_helpers["render_content"]
-    upstream_rendered = str(upstream_renderer("## Judul Markdown\n\n**tebal**"))
+    # This mirrors CKAN 2.12 ckan.lib.helpers.load_plugin_helpers exactly:
+    # ITemplateHelpers reverses ckan.plugins order and later dict updates win.
+    # Therefore an override plugin MUST appear before `pages` in ckan.plugins.
+    if ITemplateHelpers._reverse_iteration_order is not True:
+        raise RuntimeError("Unexpected CKAN ITemplateHelpers iteration semantics")
+    if IConfigurer._reverse_iteration_order is not True:
+        raise RuntimeError("Unexpected CKAN IConfigurer iteration semantics")
+
+    # add_template_directory prepends plugin_template_paths. With the actual
+    # CKAN IConfigurer reverse iteration, this order leaves Wajo first, then
+    # Pages and Activity as the next template providers; ckan_extends can
+    # therefore walk down the chain without returning to Wajo recursively.
+    expected_template_plugin_order = ("wajo_theme", "pages", "activity")
+    template_path_order = []
+    for plugin_name in reversed(expected_template_plugin_order):
+        template_path_order.insert(0, plugin_name)
+    if tuple(template_path_order) != expected_template_plugin_order:
+        raise RuntimeError("Wajo CKAN template path priority is not deterministic")
+
+    expected_plugin_order = ("wajo_theme", "pages")
+    effective_helpers = {}
+    helper_sources = {
+        "pages": {
+            "render_content": pages_render_content,
+            "pages_get_wysiwyg_editor": pages_get_wysiwyg_editor,
+        },
+        "wajo_theme": WajoThemePlugin().get_helpers(),
+    }
+    ordered_for_helper_loading = reversed(expected_plugin_order)
+    for plugin_name in ordered_for_helper_loading:
+        effective_helpers.update(helper_sources[plugin_name])
+
+    if effective_helpers["pages_get_wysiwyg_editor"]() is not None:
+        raise RuntimeError("Effective CKAN helper registry still enables the upstream Pages WYSIWYG branch")
+    if effective_helpers["render_content"] is not render_wajo_markdown:
+        raise RuntimeError(
+            "Effective CKAN helper registry still resolves ckanext-pages render_content instead of Wajo Markdown"
+        )
+    upstream_rendered = str(effective_helpers["render_content"]("## Judul Markdown\n\n**tebal**"))
     if "<h2>Judul Markdown</h2>" not in upstream_rendered or "<strong>tebal</strong>" not in upstream_rendered:
-        raise RuntimeError("The renderer registered under ckanext-pages' actual render_content helper did not parse Markdown")
-    if page_helpers["wajo_render_markdown"] is not upstream_renderer:
+        raise RuntimeError("The effective CKAN render_content helper did not parse Markdown")
+    if effective_helpers["wajo_render_markdown"] is not effective_helpers["render_content"]:
         raise RuntimeError("Wajo template helper and upstream Pages/Blog render_content must share one renderer")
 
     markdown_sample = """## teks aaa

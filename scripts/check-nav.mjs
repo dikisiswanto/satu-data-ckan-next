@@ -72,15 +72,12 @@ if (
     "Daftar footer CMS harus memakai koleksi halaman publik yang sama dengan direktori Informasi, mengabaikan show_in_menu, dan dibatasi maksimal lima judul.",
   );
 }
-const sdiLogo = readFileSync(
-  path.join(root, "public/logo-satu-data-indonesia.svg"),
-  "utf8",
-);
 if (
   !footer.includes('href="https://data.go.id"') ||
+  !footer.includes('src="https://data.go.id/images/logo.png"') ||
   !footer.includes("width={184}") ||
-  !footer.includes("height={118}") ||
-  !sdiLogo.includes('viewBox="0 0 1000 640"')
+  !footer.includes("height={110}") ||
+  !footer.includes('alt="Logo resmi Satu Data Indonesia"')
 ) {
   errors.push(
     "Footer harus menampilkan logo SDI utuh dengan rasio intrinsik yang benar dan tautan ke portal resmi data.go.id.",

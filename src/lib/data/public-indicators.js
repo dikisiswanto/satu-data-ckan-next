@@ -9,9 +9,14 @@ import {
 import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
 import { isPrivateMarker } from "@/lib/ckan/privacy";
 import {
+  buildOrganizationFilter,
   buildPortalContentDiscoveryFilter,
   isPortalContentPackage,
 } from "@/lib/data/portal-content-types";
+import {
+  buildPublicCatalogQuery,
+  normalizePublicCatalogSort,
+} from "@/lib/data/catalog-query";
 
 /**
  * CKAN-native publishing convention for public statistics.
@@ -230,17 +235,28 @@ async function toIndicatorCard(pkg, { includeLatest = true } = {}) {
 export async function getPublishedIndicatorsResult({
   limit = 24,
   page = 1,
-  includeLatest = true,
+  includeLatest = false,
+  organizationId = null,
+  query = "",
+  sort = "terbaru",
 } = {}) {
   const safeLimit = Math.min(Math.max(Number(limit) || 24, 1), PAGE_SIZE_MAX);
   const safePage = Math.min(Math.max(Number(page) || 1, 1), 10000);
   try {
     const result = await searchPackages({
-      q: "*:*",
+      q: buildPublicCatalogQuery(String(query).trim().slice(0, 100), [
+        "extras_portal_definition",
+        "extras_portal_unit",
+        "extras_portal_source",
+        "extras_portal_reference_period",
+        "extras_definition",
+      ]),
       rows: safeLimit,
       start: (safePage - 1) * safeLimit,
-      sort: "metadata_modified desc",
-      fq: INDICATOR_FQ,
+      sort: normalizePublicCatalogSort(sort, query),
+      fq: [INDICATOR_FQ, buildOrganizationFilter(organizationId)]
+        .filter(Boolean)
+        .join(" AND "),
     });
     const packages = (
       Array.isArray(result.results) ? result.results : []

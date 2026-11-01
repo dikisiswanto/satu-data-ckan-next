@@ -282,16 +282,19 @@ portal_plugins = {
 }
 plugins = [plugin for plugin in (plugin_raw.split() if plugin_raw else []) if plugin not in portal_plugins and plugin != "datapusher"]
 for plugin in (
-    "scheming_datasets", "scheming_organizations", "scheming_groups", "wajo_pages", "pages", "dcat", "dcat_rdf_harvester",
+    "scheming_datasets", "scheming_organizations", "scheming_groups",
+    "wajo_pages", "wajo_theme", "pages", "dcat", "dcat_rdf_harvester",
     "structured_data", "resource_proxy", "datatables_view", "image_view", "text_view",
     "geojson_view", "geo_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
     "datastore", "xloader", "activity", "wajo_harvest_i18n", "wajo_pages_i18n", "wajo_dcat_i18n",
 ):
     if plugin not in plugins:
         plugins.append(plugin)
-# Schema extension must load before Pages; the visual theme loads last so its
-# template overrides retain priority without changing the CMS permission model.
-plugins.append("wajo_theme")
+# CKAN's ITemplateHelpers and IConfigurer iterate plugins in reverse order:
+# earlier entries override helper names and their template directories take
+# precedence. Keep Wajo before both Pages and Activity. This makes the safe
+# Markdown render_content helper win over ckanext-pages and prevents the
+# Midnight Blue page.html ckan_extends chain from looping back into Wajo.
 plugins.append("envvars")
 values["CKAN__PLUGINS"] = '"' + " ".join(plugins) + '"'
 # CKAN 2.12 ships the modern Midnight Blue UI; use the supported native theme instead of a prototype theme extension.

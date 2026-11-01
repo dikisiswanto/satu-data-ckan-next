@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { redirect } from "next/navigation";
 import {
   ArrowUpRight,
   BookOpen,
@@ -8,6 +9,10 @@ import {
   LibraryBig,
 } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
+import { PublicPagination } from "@/components/public-pagination";
+import { normalizePageNumber } from "@/lib/pagination";
+import { PublicNote } from "@/components/public-note";
+import { CatalogSearchForm } from "@/components/catalog-search-form";
 import { publicPageCopy } from "@/lib/public-copy";
 import { getPublishedPublicationsResult } from "@/lib/data/public-publications";
 import {
@@ -17,33 +22,101 @@ import {
 } from "@/lib/site-config";
 import { formatDate } from "@/lib/utils";
 
-export const metadata = {
-  title: "Publikasi dan laporan",
-  description: `Temukan publikasi statistik, laporan, dan dokumen resmi ${siteConfig.regionName}.`,
-  ...getCanonicalMetadata("/publikasi"),
-  ...getSocialMetadata({
-    path: "/publikasi",
-    title: `Publikasi | ${siteConfig.shortName}`,
-    description: `Publikasi dan laporan resmi ${siteConfig.regionName}.`,
-  }),
-};
+export async function generateMetadata({ searchParams }) {
+  const params = await searchParams;
+  const hasOrganizationFilter =
+    typeof params?.organisasi === "string" &&
+    params.organisasi.trim().length > 0;
+  const hasSearchFilter =
+    typeof params?.q === "string" && params.q.trim().length > 0;
+  const hasSortFilter =
+    typeof params?.sort === "string" && params.sort !== "terbaru";
+  const pageNumber = Number(params?.halaman || 1);
+  const isPaginated = Number.isSafeInteger(pageNumber) && pageNumber > 1;
+  const description = `Temukan publikasi statistik, laporan, dan dokumen resmi ${siteConfig.regionName}.`;
+  return {
+    title: "Publikasi dan laporan",
+    description,
+    ...getCanonicalMetadata("/publikasi"),
+    ...getSocialMetadata({
+      path: "/publikasi",
+      title: `Publikasi dan laporan | ${siteConfig.shortName}`,
+      description: `Publikasi dan laporan resmi ${siteConfig.regionName}.`,
+    }),
+    ...(hasOrganizationFilter || hasSearchFilter || hasSortFilter || isPaginated
+      ? {
+          robots: {
+            index: false,
+            follow: true,
+            googleBot: { index: false, follow: true },
+          },
+        }
+      : {}),
+  };
+}
 
 export default async function PublicationsPage({ searchParams }) {
   await connection();
   const params = await searchParams;
-  const requested =
-    typeof params?.halaman === "string" ? Number(params.halaman) : 1;
-  const page =
-    Number.isSafeInteger(requested) && requested > 0
-      ? Math.min(requested, 10000)
-      : 1;
-  const result = await getPublishedPublicationsResult({ limit: 18, page });
+  const page = normalizePageNumber(params?.halaman, 1, 10000);
+  const requestedOrganization =
+    typeof params?.organisasi === "string"
+      ? params.organisasi.slice(0, 100)
+      : "";
+  const organizationId = /^[a-z0-9][a-z0-9_-]*$/i.test(requestedOrganization)
+    ? requestedOrganization
+    : null;
+  const query =
+    typeof params?.q === "string" ? params.q.trim().slice(0, 100) : "";
+  const requestedSort =
+    typeof params?.sort === "string" ? params.sort : "terbaru";
+  const sort = ["terbaru", "judul", "relevansi"].includes(requestedSort)
+    ? requestedSort
+    : "terbaru";
+  const result = await getPublishedPublicationsResult({
+    limit: 18,
+    page,
+    organizationId,
+    query,
+    sort,
+  });
   if (result.unavailable) await connection();
   const items = result.data || [];
+  const pageHref = (number) => {
+    const search = new URLSearchParams();
+    if (organizationId) search.set("organisasi", organizationId);
+    if (query) search.set("q", query);
+    if (sort !== "terbaru") search.set("sort", sort);
+    if (number > 1) search.set("halaman", String(number));
+    const suffix = search.toString();
+    return suffix ? `/publikasi?${suffix}` : "/publikasi";
+  };
+  const totalPages = Math.max(1, Number(result.meta?.last_page || 1));
+  if (!result.unavailable && page > totalPages) redirect(pageHref(totalPages));
 
   return (
     <main className="page-container section-space public-interior-page">
       <PageHeading {...publicPageCopy.publikasi} />
+      <CatalogSearchForm
+        action="/publikasi"
+        query={query}
+        sort={sort}
+        organizationId={organizationId}
+        label="Cari publikasi"
+        placeholder="Cari judul, kategori, periode, deskripsi, atau OPD penerbit…"
+      />
+      {organizationId ? (
+        <p className="mb-4 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-muted">
+          Menampilkan publikasi yang diterbitkan oleh perangkat daerah{" "}
+          <strong className="text-ink">{organizationId}</strong>.{" "}
+          <Link
+            href="/publikasi"
+            className="font-semibold text-primary underline underline-offset-4"
+          >
+            Hapus filter
+          </Link>
+        </p>
+      ) : null}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted">
           {result.unavailable
@@ -58,7 +131,12 @@ export default async function PublicationsPage({ searchParams }) {
         </Link>
       </div>
       {items.length ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div
+          id="publication-list"
+          tabIndex={-1}
+          aria-label="Daftar publikasi"
+          className="grid scroll-mt-24 gap-4 lg:grid-cols-2"
+        >
           {items.map((item) => (
             <article
               data-public-list-item="true"
@@ -124,48 +202,36 @@ export default async function PublicationsPage({ searchParams }) {
           <h2 className="mt-2 text-xl font-semibold">
             {result.unavailable
               ? "Publikasi belum dapat dimuat"
-              : "Belum ada publikasi yang diterbitkan"}
+              : query
+                ? "Tidak ada publikasi yang cocok"
+                : "Belum ada publikasi yang diterbitkan"}
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
             {result.unavailable
               ? "Daftar publikasi belum dapat ditampilkan. Silakan coba kembali beberapa saat lagi."
-              : "Publikasi akan ditampilkan setelah dokumen resmi diterbitkan dan dibuka untuk umum oleh perangkat daerah."}
+              : query
+                ? `Tidak ditemukan publikasi dengan kata kunci “${query}”. Coba istilah lain atau hapus pencarian.`
+                : "Publikasi akan ditampilkan setelah dokumen resmi diterbitkan dan dibuka untuk umum oleh perangkat daerah."}
           </p>
           <Link href="/dataset" className="public-empty-action mt-5">
             Telusuri katalog data <ArrowUpRight size={16} aria-hidden="true" />
           </Link>
         </section>
       )}
-      {items.length &&
-      (page > 1 || page < Number(result.meta?.last_page || 1)) ? (
-        <nav
-          aria-label="Navigasi halaman publikasi"
-          className="mt-8 flex justify-between border-t border-line pt-5"
-        >
-          {page > 1 ? (
-            <Link
-              rel="prev"
-              href={
-                page === 2 ? "/publikasi" : `/publikasi?halaman=${page - 1}`
-              }
-              className="text-sm font-semibold text-primary underline underline-offset-4"
-            >
-              Sebelumnya
-            </Link>
-          ) : (
-            <span />
-          )}
-          {page < Number(result.meta?.last_page || 1) ? (
-            <Link
-              rel="next"
-              href={`/publikasi?halaman=${page + 1}`}
-              className="text-sm font-semibold text-primary underline underline-offset-4"
-            >
-              Berikutnya
-            </Link>
-          ) : null}
-        </nav>
-      ) : null}
+      <PublicPagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalItems={result.meta?.total}
+        pageSize={18}
+        itemLabel="publikasi"
+        ariaLabel="Navigasi halaman publikasi"
+        hrefForPage={pageHref}
+      />
+      <PublicNote>
+        Publikasi yang ditampilkan merupakan dokumen yang telah diterbitkan dan
+        dibuka untuk umum. Ketersediaan pratinjau bergantung pada format berkas
+        dan dukungan browser.
+      </PublicNote>
     </main>
   );
 }

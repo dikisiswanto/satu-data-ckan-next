@@ -230,7 +230,7 @@ require(
 )
 require('toolkit.add_template_directory(config, "templates")' in plugin_source, "Template Wajo harus didaftarkan melalui plugin_template_paths CKAN.")
 require('config["extra_template_paths"]' not in plugin_source, "Template Wajo tidak boleh didaftarkan ulang melalui extra_template_paths; duplikasi membuat ckan_extends berputar dengan template Midnight Blue.")
-require('plugins.append("wajo_theme")' in bootstrap_source, "Plugin Wajo harus dimuat setelah pages/activity agar override template memperoleh prioritas secara native.")
+require('"wajo_theme"' in bootstrap_source, "Plugin theme Wajo harus didaftarkan pada urutan plugin CKAN.")
 require("wajo-admin-shell" in page_source and 'wajo_theme/sidebar.html' in page_source and "{{ super() }}" in page_source, "Page shell harus menambahkan sidebar secara aditif tanpa mengganti konten core CKAN.")
 require(re.search(r"{%-?\s*block\s+footer\s*-?%}\s*{%-?\s*endblock\s*-?%}", page_source) is not None, "Footer admin harus dihilangkan dari shell CKAN.")
 
@@ -283,19 +283,17 @@ require("USER root\nRUN python -m pip install --no-cache-dir -r /tmp/portal-ckan
 plugin_order_match = re.search(r"for plugin in \(\s*([\s\S]*?)\s*\):", bootstrap_source)
 plugin_order = re.findall(r'"([a-z0-9_]+)"', plugin_order_match.group(1)) if plugin_order_match else []
 require(
-    all(name in plugin_order for name in ("scheming_datasets", "wajo_pages", "pages"))
-    and plugin_order.index("scheming_datasets") < plugin_order.index("wajo_pages") < plugin_order.index("pages"),
-    "wajo_pages harus dimuat setelah Scheming dan sebelum plugin pages.",
+    all(name in plugin_order for name in ("scheming_datasets", "wajo_pages", "wajo_theme", "pages", "activity"))
+    and plugin_order.index("scheming_datasets") < plugin_order.index("wajo_pages")
+    and plugin_order.index("wajo_pages") < plugin_order.index("pages")
+    and plugin_order.index("wajo_theme") < plugin_order.index("pages")
+    and plugin_order.index("wajo_theme") < plugin_order.index("activity"),
+    "Scheming dan Wajo Pages harus terdaftar sebelum Pages; Wajo theme harus sebelum Pages dan Activity karena CKAN membalik urutan IConfigurer/ITemplateHelpers.",
 )
 require('"wajo_harvest_i18n"' in bootstrap_source and '"wajo_pages_i18n"' in bootstrap_source and '"wajo_dcat_i18n"' in bootstrap_source, "Bootstrap harus mengaktifkan domain terjemahan khusus Harvest, Pages, dan DCAT.")
 require(all(name in plugin_order for name in ("harvest", "wajo_harvest_i18n", "pages", "wajo_pages_i18n", "wajo_dcat_i18n")) and plugin_order.index("harvest") < plugin_order.index("wajo_harvest_i18n") and plugin_order.index("pages") < plugin_order.index("wajo_pages_i18n") and "dcat" in plugin_order and plugin_order.index("dcat") < plugin_order.index("wajo_dcat_i18n"), "Translation plugin harus diaktifkan bersama extension yang domain terjemahannya ditangani.")
-require("plugins.append(\"wajo_theme\")" in bootstrap_source, "Plugin theme harus diaktifkan setelah extension yang juga menyediakan template.")
-require(
-    plugin_order.index("pages") < bootstrap_source.index('plugins.append("wajo_theme")') < bootstrap_source.index('plugins.append("envvars")'),
-    "wajo_theme harus di-load setelah pages agar override helper render_content dan pages_get_wysiwyg_editor benar-benar menang; envvars tetap terakhir.",
-)
+require('plugins.append("envvars")' in bootstrap_source, "envvars harus tetap menjadi plugin terakhir.")
 require('values["CKANEXT__PAGES__EDITOR"]' not in bootstrap_source and "CKANEXT__PAGES__EDITOR=markdown" not in env_source, "CKAN Pages Markdown mode must leave editor unset; the literal markdown value is truthy and triggers the upstream WYSIWYG branch.")
-require('plugins.append("envvars")' in bootstrap_source, "Plugin envvars harus tetap berada terakhir.")
 workflow = "\n".join(path.read_text(encoding="utf-8") for path in (ROOT / ".github/workflows").glob("*.yml"))
 require("COPY deploy/ckan/theme/ /tmp/portal-ckan-theme/" in workflow, "Extended CKAN smoke image harus memasukkan source package wajo_theme.")
 require("compile-id-translations.py" in workflow and "/tmp/compile-id-translations.py" in workflow, "Extended CKAN smoke image harus mengompilasi katalog CKAN Bahasa Indonesia.")

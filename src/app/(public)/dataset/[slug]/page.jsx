@@ -47,6 +47,7 @@ import { DatasetResourcePreview } from "@/components/dataset-resource-preview";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { GeoJSONResourcePreview } from "@/components/geojson-resource-preview";
 import { DatasetApiAccess } from "@/components/dataset-api-access";
+import { PdfResourcePreview } from "@/components/pdf-resource-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -476,83 +477,6 @@ export default async function DatasetDetailPage({ params }) {
                 </div>
               ) : null}
             </div>
-            <DatasetApiAccess
-              datasetName={dataset.name}
-              resources={publicResources.map((resource) => ({
-                id: resource.id,
-                name: ckanResourceName(resource),
-                format: ckanResourceFormat(resource),
-                mimetype: resource.mimetype,
-                datastore_active: resource.datastore_active === true,
-              }))}
-            />
-            <section
-              className="overflow-hidden rounded-2xl border border-line bg-white"
-              aria-labelledby="dataset-activity-heading"
-            >
-              <div className="border-b border-line p-5">
-                <div className="flex items-center gap-2">
-                  <Activity
-                    size={18}
-                    className="text-primary"
-                    aria-hidden="true"
-                  />
-                  <h2
-                    id="dataset-activity-heading"
-                    className="text-lg font-semibold"
-                  >
-                    Riwayat pembaruan
-                  </h2>
-                </div>
-                <p className="mt-1 text-sm leading-6 text-muted">
-                  Riwayat ini merangkum perubahan informasi dataset. Riwayat ini
-                  tidak memuat seluruh versi berkas yang pernah diterbitkan.
-                </p>
-              </div>
-              {activities.length ? (
-                <ol className="divide-y divide-line px-5">
-                  {activities.map((activity, index) => {
-                    const rawType = String(
-                      activity.activity_type || activity.activity || "updated",
-                    ).toLowerCase();
-                    const label = /new|create/.test(rawType)
-                      ? "Dataset diterbitkan"
-                      : /delete|remove/.test(rawType)
-                        ? "Dataset dihapus"
-                        : /change|update|edit/.test(rawType)
-                          ? "Informasi dataset diperbarui"
-                          : rawType.replaceAll("_", " ");
-                    // Public history should not expose CKAN login names or internal user IDs.
-                    const who = "Pengelola data";
-                    const when =
-                      activity.timestamp ||
-                      activity.created_at ||
-                      activity.time;
-                    return (
-                      <li
-                        key={activity.id || `${rawType}-${when || index}`}
-                        className="flex gap-3 py-4 first:pt-5 last:pb-5"
-                      >
-                        <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-primary">
-                          <Clock3 size={16} aria-hidden="true" />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold">{label}</p>
-                          <p className="mt-1 text-xs text-muted">
-                            {who}
-                            {when ? ` · ${formatDate(when)}` : ""}
-                          </p>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              ) : (
-                <p className="p-5 text-sm leading-6 text-muted">
-                  Riwayat pembaruan belum tersedia untuk dataset ini.
-                </p>
-              )}
-            </section>
             {isGeospatialDataset(dataset) ? (
               <section
                 className="surface-panel p-5 sm:p-6"
@@ -707,36 +631,24 @@ export default async function DatasetDetailPage({ params }) {
                     url={publicResourceUrl(resource.url)}
                   />
                 ))}
-              {resources.some(
-                (resource) =>
-                  ["pdf"].includes(ckanResourceFormat(resource)) &&
-                  publicResourceUrl(resource.url),
-              ) ? (
-                <section className="mt-6 overflow-hidden rounded-2xl border border-line bg-white">
-                  <div className="border-b border-line p-4">
-                    <h3 className="font-semibold">Pratinjau PDF</h3>
-                    <p className="mt-1 text-sm text-muted">
-                      Pratinjau dokumen yang tersedia untuk umum.
-                    </p>
-                  </div>
-                  {resources
-                    .filter(
-                      (resource) =>
-                        ckanResourceFormat(resource) === "pdf" &&
-                        publicResourceUrl(resource.url),
-                    )
-                    .slice(0, 1)
-                    .map((resource) => (
-                      <iframe
-                        key={resource.id}
-                        title={`Pratinjau ${ckanResourceName(resource)}`}
-                        src={publicResourceUrl(resource.url)}
-                        className="h-[70vh] min-h-[420px] w-full bg-slate-50"
-                        loading="lazy"
-                      />
-                    ))}
-                </section>
-              ) : null}
+              {resources
+                .filter(
+                  (resource) =>
+                    ckanResourceFormat(resource) === "pdf" &&
+                    publicResourceUrl(resource.url),
+                )
+                .slice(0, 1)
+                .map((resource) => (
+                  <PdfResourcePreview
+                    key={`pdf-${resource.id}`}
+                    url={publicResourceUrl(resource.url)}
+                    title="Pratinjau PDF"
+                    fileName={ckanResourceName(resource)}
+                    size={resource.size}
+                    className="mt-6"
+                    heightClassName="h-[70vh] min-h-[420px]"
+                  />
+                ))}
               {resources.some(
                 (resource) =>
                   ["png", "jpg", "jpeg", "webp", "gif", "avif"].includes(
@@ -798,6 +710,83 @@ export default async function DatasetDetailPage({ params }) {
                 </section>
               ) : null}
             </div>
+            <DatasetApiAccess
+              datasetName={dataset.name}
+              resources={publicResources.map((resource) => ({
+                id: resource.id,
+                name: ckanResourceName(resource),
+                format: ckanResourceFormat(resource),
+                mimetype: resource.mimetype,
+                datastore_active: resource.datastore_active === true,
+              }))}
+            />
+            <section
+              className="overflow-hidden rounded-2xl border border-line bg-white"
+              aria-labelledby="dataset-activity-heading"
+            >
+              <div className="border-b border-line p-5">
+                <div className="flex items-center gap-2">
+                  <Activity
+                    size={18}
+                    className="text-primary"
+                    aria-hidden="true"
+                  />
+                  <h2
+                    id="dataset-activity-heading"
+                    className="text-lg font-semibold"
+                  >
+                    Riwayat pembaruan
+                  </h2>
+                </div>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  Riwayat ini merangkum perubahan informasi dataset. Riwayat ini
+                  tidak memuat seluruh versi berkas yang pernah diterbitkan.
+                </p>
+              </div>
+              {activities.length ? (
+                <ol className="divide-y divide-line px-5">
+                  {activities.map((activity, index) => {
+                    const rawType = String(
+                      activity.activity_type || activity.activity || "updated",
+                    ).toLowerCase();
+                    const label = /new|create/.test(rawType)
+                      ? "Dataset diterbitkan"
+                      : /delete|remove/.test(rawType)
+                        ? "Dataset dihapus"
+                        : /change|update|edit/.test(rawType)
+                          ? "Informasi dataset diperbarui"
+                          : rawType.replaceAll("_", " ");
+                    // Public history should not expose CKAN login names or internal user IDs.
+                    const who = "Pengelola data";
+                    const when =
+                      activity.timestamp ||
+                      activity.created_at ||
+                      activity.time;
+                    return (
+                      <li
+                        key={activity.id || `${rawType}-${when || index}`}
+                        className="flex gap-3 py-4 first:pt-5 last:pb-5"
+                      >
+                        <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-primary">
+                          <Clock3 size={16} aria-hidden="true" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold">{label}</p>
+                          <p className="mt-1 text-xs text-muted">
+                            {who}
+                            {when ? ` · ${formatDate(when)}` : ""}
+                          </p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              ) : (
+                <p className="p-5 text-sm leading-6 text-muted">
+                  Riwayat pembaruan belum tersedia untuk dataset ini.
+                </p>
+              )}
+            </section>
           </section>
           <aside className="h-fit rounded-card border bg-white p-5 lg:sticky lg:top-24">
             <h2 className="font-semibold">Menggunakan data ini</h2>

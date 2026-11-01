@@ -14,9 +14,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { getPublicOrganizationImageUrl } from "@/lib/ckan/public-media-url";
 import { scrollToPublicList } from "@/lib/public-scroll";
+import { getPaginationItems } from "@/lib/pagination";
 import {
   filterAndSortPublicOrganizations,
-  organizationDatasetCount,
+  organizationContentCount,
   summarizePublicOrganizations,
 } from "@/lib/public-organizations";
 
@@ -51,7 +52,8 @@ function OrganizationMark({ organization }) {
 export function OrganizationDirectory({ organizations = [] }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("name");
-  const [datasetState, setDatasetState] = useState("all");
+  const [contentState, setContentState] = useState("all");
+  const [contentType, setContentType] = useState("all");
   const [page, setPage] = useState(1);
   const organizationListRef = useRef(null);
 
@@ -64,9 +66,10 @@ export function OrganizationDirectory({ organizations = [] }) {
       filterAndSortPublicOrganizations(organizations, {
         query,
         sort,
-        datasetState,
+        contentState,
+        contentType,
       }),
-    [organizations, query, sort, datasetState],
+    [organizations, query, sort, contentState, contentType],
   );
   const pageCount = Math.max(
     1,
@@ -84,20 +87,25 @@ export function OrganizationDirectory({ organizations = [] }) {
     currentPage * PAGE_SIZE,
     filteredOrganizations.length,
   );
-  const hasActiveFilter = Boolean(query.trim()) || datasetState !== "all";
+  const hasActiveFilter =
+    Boolean(query.trim()) || contentState !== "all" || contentType !== "all";
+  const paginationItems = getPaginationItems(currentPage, pageCount);
 
   const resetFilters = () => {
     setQuery("");
-    setDatasetState("all");
+    setContentState("all");
+    setContentType("all");
     setSort("name");
     setPage(1);
   };
 
   const changePage = (nextPage) => {
     setPage(nextPage);
-    window.requestAnimationFrame(() =>
-      scrollToPublicList(organizationListRef.current),
-    );
+    window.requestAnimationFrame(() => {
+      const list = organizationListRef.current;
+      scrollToPublicList(list);
+      list?.focus({ preventScroll: true });
+    });
   };
 
   return (
@@ -111,21 +119,49 @@ export function OrganizationDirectory({ organizations = [] }) {
             <p className="eyebrow">SUMBER DATA DAERAH</p>
             <h2>Temukan perangkat daerah</h2>
             <p>
-              Kenali instansi penerbit data dan telusuri dataset publik yang
-              mereka sediakan.
+              Kenali perangkat daerah serta seluruh dataset, indikator,
+              infografik, dan publikasi yang diterbitkan untuk umum.
             </p>
           </div>
           <div
             className="organization-directory-summary"
-            aria-label={`${formatCount(summary.organizations)} perangkat daerah dan ${formatCount(summary.datasets)} dataset`}
+            aria-label={`Ringkasan ${formatCount(summary.organizations)} perangkat daerah; dataset umum ${summary.datasets === null ? "tidak tersedia" : formatCount(summary.datasets)}, indikator ${summary.indicators === null ? "tidak tersedia" : formatCount(summary.indicators)}, infografik ${summary.infographics === null ? "tidak tersedia" : formatCount(summary.infographics)}, publikasi ${summary.publications === null ? "tidak tersedia" : formatCount(summary.publications)}`}
           >
             <div>
               <strong>{formatCount(summary.organizations)}</strong>
               <span>Perangkat daerah</span>
             </div>
             <div>
-              <strong>{formatCount(summary.datasets)}</strong>
-              <span>Dataset publik</span>
+              <strong>
+                {summary.datasets === null
+                  ? "—"
+                  : formatCount(summary.datasets)}
+              </strong>
+              <span>Dataset umum</span>
+            </div>
+            <div>
+              <strong>
+                {summary.indicators === null
+                  ? "—"
+                  : formatCount(summary.indicators)}
+              </strong>
+              <span>Indikator</span>
+            </div>
+            <div>
+              <strong>
+                {summary.infographics === null
+                  ? "—"
+                  : formatCount(summary.infographics)}
+              </strong>
+              <span>Infografik</span>
+            </div>
+            <div>
+              <strong>
+                {summary.publications === null
+                  ? "—"
+                  : formatCount(summary.publications)}
+              </strong>
+              <span>Publikasi</span>
             </div>
           </div>
         </div>
@@ -198,62 +234,142 @@ export function OrganizationDirectory({ organizations = [] }) {
                 className="h-12 w-full appearance-none rounded-xl border border-line bg-white pl-9 pr-8 text-sm font-medium text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
               >
                 <option value="name">Nama A–Z</option>
-                <option value="datasets-desc">Dataset terbanyak</option>
-                <option value="datasets-asc">Dataset paling sedikit</option>
+                <option
+                  value="content-desc"
+                  disabled={summary.totalPublicItems === null}
+                >
+                  Konten terbanyak
+                </option>
+                <option
+                  value="datasets-desc"
+                  disabled={summary.datasets === null}
+                >
+                  Dataset umum terbanyak
+                </option>
+                <option
+                  value="indicators-desc"
+                  disabled={summary.indicators === null}
+                >
+                  Indikator terbanyak
+                </option>
+                <option
+                  value="infographics-desc"
+                  disabled={summary.infographics === null}
+                >
+                  Infografik terbanyak
+                </option>
+                <option
+                  value="publications-desc"
+                  disabled={summary.publications === null}
+                >
+                  Publikasi terbanyak
+                </option>
               </select>
             </div>
           </div>
         </div>
 
-        <div
-          className="organization-directory-filters"
-          role="group"
-          aria-label="Filter penerbit dataset"
-        >
-          <span className="organization-directory-filter-label">Tampilkan</span>
-          <button
-            type="button"
-            onClick={() => {
-              setDatasetState("all");
-              setPage(1);
-            }}
-            aria-pressed={datasetState === "all"}
-            className="organization-directory-filter"
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div
+            className="organization-directory-filters"
+            role="group"
+            aria-label="Filter perangkat daerah berdasarkan penerbitan"
           >
-            {datasetState === "all" ? (
-              <Check size={14} aria-hidden="true" />
-            ) : null}
-            Semua <span>{formatCount(summary.organizations)}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setDatasetState("with-data");
-              setPage(1);
-            }}
-            aria-pressed={datasetState === "with-data"}
-            className="organization-directory-filter"
-          >
-            {datasetState === "with-data" ? (
-              <Check size={14} aria-hidden="true" />
-            ) : null}
-            Memiliki dataset <span>{formatCount(summary.withDatasets)}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setDatasetState("without-data");
-              setPage(1);
-            }}
-            aria-pressed={datasetState === "without-data"}
-            className="organization-directory-filter"
-          >
-            {datasetState === "without-data" ? (
-              <Check size={14} aria-hidden="true" />
-            ) : null}
-            Belum menerbitkan{" "}
-            <span>{formatCount(summary.withoutDatasets)}</span>
-          </button>
+            <span className="organization-directory-filter-label">
+              Status penerbit
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setContentState("all");
+                setPage(1);
+              }}
+              aria-pressed={contentState === "all"}
+              className="organization-directory-filter"
+            >
+              {contentState === "all" ? (
+                <Check size={14} aria-hidden="true" />
+              ) : null}{" "}
+              Semua <span>{formatCount(summary.organizations)}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setContentState("with-content");
+                setPage(1);
+              }}
+              disabled={!summary.countsAvailable}
+              aria-pressed={contentState === "with-content"}
+              className="organization-directory-filter"
+            >
+              {contentState === "with-content" ? (
+                <Check size={14} aria-hidden="true" />
+              ) : null}{" "}
+              Memiliki terbitan{" "}
+              <span>
+                {summary.withContent === null
+                  ? "—"
+                  : formatCount(summary.withContent)}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setContentState("without-content");
+                setPage(1);
+              }}
+              disabled={!summary.countsAvailable}
+              aria-pressed={contentState === "without-content"}
+              className="organization-directory-filter"
+            >
+              {contentState === "without-content" ? (
+                <Check size={14} aria-hidden="true" />
+              ) : null}{" "}
+              Belum menerbitkan{" "}
+              <span>
+                {summary.withoutContent === null
+                  ? "—"
+                  : formatCount(summary.withoutContent)}
+              </span>
+            </button>
+          </div>
+          <div className="min-w-0">
+            <label
+              htmlFor="organization-content-type"
+              className="mb-2 block text-xs font-semibold text-muted"
+            >
+              Jenis katalog
+            </label>
+            <select
+              id="organization-content-type"
+              value={contentType}
+              onChange={(event) => {
+                setContentType(event.target.value);
+                setPage(1);
+              }}
+              className="h-10 w-full rounded-xl border border-line bg-white px-3 text-sm font-medium text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            >
+              <option value="all">Semua jenis terbitan</option>
+              <option value="datasets" disabled={summary.datasets === null}>
+                Dataset umum
+              </option>
+              <option value="indicators" disabled={summary.indicators === null}>
+                Indikator
+              </option>
+              <option
+                value="infographics"
+                disabled={summary.infographics === null}
+              >
+                Infografik
+              </option>
+              <option
+                value="publications"
+                disabled={summary.publications === null}
+              >
+                Publikasi
+              </option>
+            </select>
+          </div>
         </div>
 
         <div className="organization-directory-resultbar" aria-live="polite">
@@ -281,7 +397,10 @@ export function OrganizationDirectory({ organizations = [] }) {
               Hapus semua filter
             </button>
           ) : (
-            <span>Jumlah dataset mengikuti data publik di CKAN.</span>
+            <span>
+              Setiap angka kategori berasal dari katalog publik masing-masing;
+              tanda — berarti hitungan kategori belum tersedia.
+            </span>
           )}
         </div>
       </section>
@@ -293,10 +412,23 @@ export function OrganizationDirectory({ organizations = [] }) {
             id="organization-list"
             className="organization-directory-grid grid scroll-mt-24 gap-4 sm:grid-cols-2 xl:grid-cols-3"
             aria-label="Daftar perangkat daerah"
+            tabIndex={-1}
           >
             {paginatedOrganizations.map((organization) => {
               const title = organization.title || organization.name;
-              const datasetCount = organizationDatasetCount(organization);
+              const contentCounts = [
+                { key: "datasets", label: "Dataset", href: "/dataset" },
+                { key: "indicators", label: "Indikator", href: "/statistik" },
+                {
+                  key: "infographics",
+                  label: "Infografik",
+                  href: "/infografik",
+                },
+                { key: "publications", label: "Publikasi", href: "/publikasi" },
+              ].map((item) => ({
+                ...item,
+                count: organizationContentCount(organization, item.key),
+              }));
               return (
                 <article
                   data-public-list-item="true"
@@ -305,10 +437,8 @@ export function OrganizationDirectory({ organizations = [] }) {
                 >
                   <div className="organization-directory-card-top flex items-center justify-between gap-3">
                     <OrganizationMark organization={organization} />
-                    <span
-                      className={`organization-directory-count inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${datasetCount ? "has-datasets" : "no-datasets"}`}
-                    >
-                      {formatCount(datasetCount)} dataset
+                    <span className="text-[11px] font-medium text-muted">
+                      Ringkasan terbitan publik
                     </span>
                   </div>
                   <h3 className="mt-4 break-words text-base font-semibold leading-6 text-ink">
@@ -321,10 +451,26 @@ export function OrganizationDirectory({ organizations = [] }) {
                   </h3>
                   <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted">
                     {organization.description ||
-                      (datasetCount
-                        ? "Lihat dataset publik yang diterbitkan perangkat daerah ini."
-                        : "Profil perangkat daerah tersedia; dataset publik belum diterbitkan.")}
+                      "Telusuri daftar dataset, indikator, infografik, dan publikasi yang diterbitkan perangkat daerah ini."}
                   </p>
+                  <div
+                    className="organization-directory-card-metrics mt-4 grid grid-cols-2 gap-2"
+                    aria-label={`Jumlah terbitan publik ${title}`}
+                  >
+                    {contentCounts.map((item) => (
+                      <Link
+                        key={item.key}
+                        href={`${item.href}?organisasi=${encodeURIComponent(organization.name)}`}
+                        className="organization-directory-metric"
+                        aria-label={`${item.count === null ? "Jumlah belum tersedia" : formatCount(item.count)} ${item.label} dari ${title}`}
+                      >
+                        <strong>
+                          {item.count === null ? "—" : formatCount(item.count)}
+                        </strong>
+                        <span>{item.label}</span>
+                      </Link>
+                    ))}
+                  </div>
                   <div className="mt-auto flex items-end justify-between gap-3 border-t border-line pt-4">
                     <span
                       className="min-w-0 truncate text-xs text-muted"
@@ -334,10 +480,11 @@ export function OrganizationDirectory({ organizations = [] }) {
                     </span>
                     <Link
                       href={`/organisasi/${organization.name}`}
-                      aria-label={`Lihat dataset dari ${title}`}
+                      aria-label={`Lihat seluruh katalog terbitan dari ${title}`}
                       className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-primary transition group-hover:gap-2"
                     >
-                      Lihat data <ArrowUpRight size={16} aria-hidden="true" />
+                      Lihat katalog{" "}
+                      <ArrowUpRight size={16} aria-hidden="true" />
                     </Link>
                   </div>
                 </article>
@@ -349,34 +496,64 @@ export function OrganizationDirectory({ organizations = [] }) {
             aria-label="Paginasi perangkat daerah"
             className="organization-directory-pagination flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4"
           >
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted" role="status" aria-live="polite">
               Menampilkan {formatCount(firstVisible)}–{formatCount(lastVisible)}{" "}
               dari {formatCount(filteredOrganizations.length)} perangkat daerah
             </p>
             {pageCount > 1 ? (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => changePage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="min-h-10 rounded-lg border border-line bg-white px-3.5 py-2 text-sm font-medium text-ink transition hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Sebelumnya
-                </button>
-                <span className="px-2 text-sm tabular-nums text-muted">
-                  {formatCount(currentPage)} / {formatCount(pageCount)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    changePage(Math.min(pageCount, currentPage + 1))
-                  }
-                  disabled={currentPage === pageCount}
-                  className="min-h-10 rounded-lg border border-line bg-white px-3.5 py-2 text-sm font-medium text-ink transition hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Berikutnya
-                </button>
-              </div>
+              <ol
+                className="flex flex-wrap items-center justify-center gap-1.5"
+                aria-label="Pilih halaman perangkat daerah"
+              >
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => changePage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    aria-label="Halaman sebelumnya"
+                    className="min-h-10 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    Sebelumnya
+                  </button>
+                </li>
+                {paginationItems.map((item) => (
+                  <li key={String(item)}>
+                    {typeof item === "number" ? (
+                      <button
+                        type="button"
+                        onClick={() => changePage(item)}
+                        aria-current={item === currentPage ? "page" : undefined}
+                        aria-label={
+                          item === currentPage
+                            ? `Halaman ${item}, halaman aktif`
+                            : `Buka halaman ${item}`
+                        }
+                        className={`inline-flex size-10 items-center justify-center rounded-lg border text-sm font-semibold tabular-nums transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${item === currentPage ? "border-primary bg-primary text-white shadow-sm" : "border-line bg-white text-ink hover:bg-canvas"}`}
+                      >
+                        {formatCount(item)}
+                      </button>
+                    ) : (
+                      <span
+                        aria-hidden="true"
+                        className="inline-flex size-10 items-center justify-center text-sm text-muted"
+                      >
+                        …
+                      </span>
+                    )}
+                  </li>
+                ))}
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => changePage(currentPage + 1)}
+                    disabled={currentPage === pageCount}
+                    aria-label="Halaman berikutnya"
+                    className="min-h-10 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    Berikutnya
+                  </button>
+                </li>
+              </ol>
             ) : null}
           </nav>
         </>
@@ -389,7 +566,7 @@ export function OrganizationDirectory({ organizations = [] }) {
             Perangkat daerah tidak ditemukan
           </h2>
           <p className="mx-auto mt-1 max-w-lg text-sm leading-6 text-muted">
-            Coba kata kunci lain atau ubah filter penerbit dataset.
+            Coba kata kunci lain atau ubah jenis katalog dan status penerbit.
           </p>
           <button
             type="button"

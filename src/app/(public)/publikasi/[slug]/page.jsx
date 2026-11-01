@@ -20,6 +20,7 @@ import {
   siteConfig,
 } from "@/lib/site-config";
 import { formatDate, formatBytes } from "@/lib/utils";
+import { PdfResourcePreview } from "@/components/pdf-resource-preview";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -99,35 +100,18 @@ export default async function PublicationDetailPage({ params }) {
       <div className="mt-7 grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_340px]">
         <section className="space-y-5">
           {pdfResources.length ? (
-            pdfResources.slice(0, 1).map((resource) => (
-              <section
-                key={resource.id}
-                className="overflow-hidden rounded-2xl border border-line bg-white"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line p-4">
-                  <div className="min-w-0">
-                    <h2 className="font-semibold">Pratinjau dokumen</h2>
-                    <p className="mt-1 line-clamp-1 text-sm text-muted">
-                      {ckanResourceName(resource)}
-                    </p>
-                  </div>
-                  <a
-                    href={publicResourceUrl(resource.url)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-line px-3 text-sm font-semibold hover:bg-accent"
-                  >
-                    <ArrowUpRight size={15} aria-hidden="true" /> Buka PDF
-                  </a>
-                </div>
-                <iframe
-                  title={`Pratinjau ${ckanResourceName(resource)}`}
-                  src={publicResourceUrl(resource.url)}
-                  className="publication-preview-frame h-[68vh] min-h-[460px] w-full bg-slate-50"
-                  loading="lazy"
+            pdfResources
+              .slice(0, 1)
+              .map((resource) => (
+                <PdfResourcePreview
+                  key={resource.id}
+                  url={publicResourceUrl(resource.url)}
+                  title="Pratinjau dokumen"
+                  fileName={ckanResourceName(resource)}
+                  size={resource.size}
+                  heightClassName="h-[68vh] min-h-[460px]"
                 />
-              </section>
-            ))
+              ))
           ) : (
             <section className="publication-preview-frame flex h-[68vh] min-h-[460px] flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-white p-10 text-center">
               <BookOpen size={34} className="text-muted" aria-hidden="true" />

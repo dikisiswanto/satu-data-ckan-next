@@ -8,6 +8,8 @@ import {
   buildDatasetCatalogExclusionFilters,
   buildPortalContentDiscoveryFilter,
 } from "@/lib/data/portal-content-types";
+import { buildPublicCatalogQuery } from "@/lib/data/catalog-query";
+export { buildPublicCatalogQuery } from "@/lib/data/catalog-query";
 
 const safeLimit = (value, fallback = 24) =>
   Math.min(Math.max(Number(value) || fallback, 1), 100);
@@ -23,61 +25,6 @@ const toPageMeta = (count, page, limit) => ({
   total: count,
   last_page: Math.max(1, Math.ceil(count / limit)),
 });
-const SEARCH_STOPWORDS_ID = new Set([
-  "dan",
-  "atau",
-  "yang",
-  "di",
-  "ke",
-  "dari",
-  "untuk",
-  "pada",
-  "dengan",
-  "sebagai",
-  "dalam",
-  "oleh",
-  "adalah",
-  "ini",
-  "itu",
-  "apa",
-  "berapa",
-  "dimana",
-  "data",
-]);
-
-/**
- * Convert a natural-language portal query into a safe CKAN/Solr field query.
- * Each meaningful token can match independently (OR), across native CKAN
- * title, description, tags, organization, group and resource metadata fields.
- * Direct Action API clients can still use native CKAN `q` syntax themselves.
- */
-export function buildPublicCatalogQuery(value) {
-  const tokens =
-    String(value || "")
-      .normalize("NFKC")
-      .match(/[\p{L}\p{N}]+/gu) || [];
-  const uniqueTokens = [
-    ...new Set(tokens.map((token) => token.toLocaleLowerCase("id-ID"))),
-  ]
-    .filter((token) => token.length > 1 && !SEARCH_STOPWORDS_ID.has(token))
-    .slice(0, 12);
-  if (!uniqueTokens.length) return "*:*";
-  const fields = [
-    "title",
-    "notes",
-    "tags",
-    "organization",
-    "groups",
-    "res_name",
-    "res_description",
-  ];
-  const clauses = uniqueTokens.map((token) => {
-    const term = token.replace(/[\\"\^]/g, "\\$&");
-    return `(${fields.map((field) => `${field}:"${term}"`).join(" OR ")})`;
-  });
-  return `(${clauses.join(" OR ")})`;
-}
-
 function buildCkanFilters({ organizationId, category, year, format }) {
   const filters = [];
   const organization = safeSlug(organizationId);
@@ -323,10 +270,10 @@ export async function getPublicPortalStatsResult() {
       include_private: false,
     }),
     ckanAction("organization_list", {
-      all_fields: true,
-      include_dataset_count: true,
-      include_extras: false,
-      include_users: false,
+      // Homepage only needs the active organization names for the count.
+      // Avoid hydrating full metadata/package_count for every organization.
+      all_fields: false,
+      limit: 1000,
     }),
     ckanAction("package_search", {
       q: "*:*",
@@ -360,11 +307,7 @@ export async function getPublicPortalStatsResult() {
     data: {
       datasets: valueOrNull(packages, (result) => Number(result.count || 0)),
       organizations: valueOrNull(organizations, (result) =>
-        Array.isArray(result)
-          ? result.filter(
-              (item) => item.state !== "deleted" && item.state !== "draft",
-            ).length
-          : null,
+        Array.isArray(result) ? result.length : null,
       ),
       indicators: valueOrNull(indicators, (result) =>
         Number(result.count || 0),

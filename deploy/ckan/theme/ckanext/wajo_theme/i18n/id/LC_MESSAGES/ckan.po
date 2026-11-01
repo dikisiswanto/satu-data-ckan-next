@@ -2719,3 +2719,46 @@ msgstr "Aksi halaman"
 
 msgid "Manage public data visuals"
 msgstr "Kelola visualisasi data publik"
+
+msgid "General datasets"
+msgstr "Dataset umum"
+
+msgid "Indicators"
+msgstr "Indikator"
+
+msgid "View indicators"
+msgstr "Lihat indikator"
+
+msgid "View infographics"
+msgstr "Lihat infografik"
+
+msgid "Publications"
+msgstr "Publikasi"
+
+msgid "View publications"
+msgstr "Lihat publikasi"
+
+
+msgid "PUBLISHING ACTIVITY"
+msgstr "AKTIVITAS PENERBITAN"
+
+msgid "Publishing by organization"
+msgstr "Penerbitan menurut organisasi"
+
+msgid "All organizations"
+msgstr "Semua organisasi"
+
+msgid "Counts include public records only, are split by content type, and are not the raw CKAN package_count."
+msgstr "Jumlah hanya mencakup konten publik, dipisahkan berdasarkan jenis konten, dan bukan package_count mentah dari CKAN."
+
+msgid "%(count)s published items"
+msgstr "%(count)s terbitan"
+
+msgid "No publishing activity to display yet"
+msgstr "Belum ada aktivitas penerbitan untuk ditampilkan"
+
+msgid "Published records by organization will appear here."
+msgstr "Konten yang diterbitkan setiap organisasi akan muncul di sini."
+
+msgid "Publishing analytics are temporarily unavailable. The catalog overview remains available."
+msgstr "Analitik penerbitan sementara tidak tersedia. Ringkasan katalog tetap dapat digunakan."

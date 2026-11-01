@@ -29,19 +29,34 @@ export default function OrganizationDetailLoading() {
               Kode perangkat daerah:{" "}
               <Skeleton className="inline-block h-4 w-24 align-middle" />
             </span>
-            <span>
-              <Skeleton className="inline-block h-4 w-10 align-middle" />{" "}
-              dataset publik
-            </span>
+            <span>Statistik konten publik perangkat daerah</span>
+          </div>
+          <div
+            className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4"
+            aria-hidden="true"
+          >
+            {Array.from({ length: 4 }, (_, index) => (
+              <div
+                key={index}
+                className="rounded-xl border border-line bg-white p-4"
+              >
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="mt-3 h-7 w-12" />
+                <Skeleton className="mt-2 h-3 w-28 max-w-full" />
+              </div>
+            ))}
           </div>
         </div>
       </div>
-      <section className="page-container section-space organization-datasets-section">
+      <section
+        className="page-container section-space organization-datasets-section"
+        aria-busy="true"
+      >
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="eyebrow">DATA YANG DIPUBLIKASIKAN</p>
             <h2 className="mt-3 flex flex-wrap items-center gap-2 text-2xl font-semibold">
-              Dataset dari{" "}
+              Konten yang diterbitkan oleh{" "}
               <Skeleton className="inline-block h-7 w-56 max-w-full" />
             </h2>
             <p className="mt-3 flex flex-wrap items-center gap-1 text-sm text-muted">

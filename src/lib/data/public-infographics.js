@@ -5,9 +5,14 @@ import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
 import { isPrivateMarker } from "@/lib/ckan/privacy";
 import { publicResourceUrl } from "@/lib/ckan/public-resource-url";
 import {
+  buildOrganizationFilter,
   buildPortalContentDiscoveryFilter,
   isPortalContentPackage,
 } from "@/lib/data/portal-content-types";
+import {
+  buildPublicCatalogQuery,
+  normalizePublicCatalogSort,
+} from "@/lib/data/catalog-query";
 
 export const INFOGRAPHIC_TAG =
   process.env.CKAN_INFOGRAPHIC_TAG || "portal-infografik";
@@ -83,16 +88,29 @@ function toInfographic(pkg) {
 export async function getPublishedInfographicsResult({
   limit = 24,
   page = 1,
+  organizationId = null,
+  query = "",
+  sort = "terbaru",
 } = {}) {
   const safeLimit = Math.min(Math.max(Number(limit) || 24, 1), 100);
   const safePage = Math.min(Math.max(Number(page) || 1, 1), 10000);
   try {
     const result = await searchPackages({
-      q: "*:*",
+      q: buildPublicCatalogQuery(String(query).trim().slice(0, 100), [
+        "extras_portal_category",
+        "extras_portal_period",
+        "extras_period",
+        "extras_tahun",
+      ]),
       rows: safeLimit,
       start: (safePage - 1) * safeLimit,
-      sort: "metadata_modified desc",
-      fq: buildPortalContentDiscoveryFilter("infographic"),
+      sort: normalizePublicCatalogSort(sort, query),
+      fq: [
+        buildPortalContentDiscoveryFilter("infographic"),
+        buildOrganizationFilter(organizationId),
+      ]
+        .filter(Boolean)
+        .join(" AND "),
     });
     const packages = (
       Array.isArray(result.results) ? result.results : []

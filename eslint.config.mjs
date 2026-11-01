@@ -18,7 +18,10 @@ export default defineConfig([
     files: ["**/*.js", "**/*.jsx", "**/*.mjs"],
     rules: {
       "no-console": ["warn", { allow: ["warn", "error"] }],
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
     },
   },
 ]);

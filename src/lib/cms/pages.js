@@ -177,7 +177,7 @@ async function queryCmsPages(pageType) {
       : {}),
   };
   const result = await ckanAction("ckanext_pages_list", params, {
-    revalidate: 0,
+    revalidate: 60,
   });
   if (!Array.isArray(result))
     throw new Error("ckan_pages_invalid_list_response");
@@ -223,7 +223,7 @@ const getCmsPageBySlug = cache(async (slug) => {
     const result = await ckanAction(
       "ckanext_pages_show",
       { page: slug },
-      { revalidate: 0 },
+      { revalidate: 60 },
     );
     const normalized = normalizeCmsRecord(result, null);
     return { data: normalized, unavailable: false };
