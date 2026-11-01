@@ -8,6 +8,7 @@ setup(
     include_package_data=True,
     package_data={
         "ckanext.wajo_theme": [
+            "config_declaration.yaml",
             "templates/*.html",
             "templates/ckanext_pages/*.html",
             "templates/scheming/display_snippets/*.html",

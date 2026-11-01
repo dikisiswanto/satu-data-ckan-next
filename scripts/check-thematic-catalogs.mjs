@@ -14,10 +14,28 @@ function requireMatch(contents, pattern, message) {
 }
 
 const homepage = await source("src/app/(public)/page.jsx");
+const normalizedHomepage = homepage
+  .replace(/\s+/g, " ")
+  .toLocaleLowerCase("id");
+const resourceMetricLabels =
+  normalizedHomepage.match(/berkas publik aktif/g) || [];
+const resourceMetricValues =
+  normalizedHomepage.match(/displaystat\(stats\?\.resources\)/g) || [];
+if (
+  resourceMetricLabels.length < 1 ||
+  resourceMetricValues.length < 1 ||
+  !/resource aktif/.test(normalizedHomepage) ||
+  !/bukan jumlah dataset/.test(normalizedHomepage)
+) {
+  errors.push(
+    "Metrik beranda harus melabeli resource sebagai berkas publik aktif dan menjelaskan bahwa angka tersebut bukan jumlah dataset.",
+  );
+}
+const ckanClient = await source("src/lib/ckan/client.js");
 requireMatch(
-  homepage,
-  /Berkas publik aktif[\s\S]*Berkas publik aktif menghitung resource aktif[\s\S]*bukan jumlah dataset/,
-  "Metrik resource homepage harus dilabeli sebagai jumlah berkas aktif, bukan jumlah dataset.",
+  ckanClient,
+  /if \(key === "facet\.field" && items\.length === 1\)[\s\S]*url\.searchParams\.append\(key, String\(items\[0\]\)\)/,
+  "Singleton facet.field harus dikirim sebagai query key berulang agar CKAN 2.12 menerima list, bukan scalar.",
 );
 const publicData = await source("src/lib/data/public.js");
 requireMatch(

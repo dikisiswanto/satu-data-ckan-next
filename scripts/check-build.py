@@ -238,6 +238,7 @@ def main() -> None:
                 wheel_files = set(wheel.namelist())
             required_theme_files = {
                 "ckanext/wajo_theme/plugin.py",
+                "ckanext/wajo_theme/config_declaration.yaml",
                 "ckanext/wajo_theme/templates/base.html",
                 "ckanext/wajo_theme/templates/header.html",
                 "ckanext/wajo_theme/templates/page.html",

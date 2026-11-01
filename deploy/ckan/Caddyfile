@@ -46,8 +46,56 @@
   # GeoView can fetch off-domain source files through CKAN's resource_proxy
   # Action API. Forward only that action to CKAN; keep the rest of the public
   # Next.js API namespace on Next.js.
+  # CKAN ResourceView JS builds this URL from ckan.site_url (PUBLIC_HOST).
+  # The public host normally belongs to Next.js, so forward only the public,
+  # read-only translation endpoint back to CKAN. ResourceViews opened on
+  # CKAN_HOST are cross-origin relative to PUBLIC_HOST; allow that exact admin
+  # origin instead of enabling wildcard/global CKAN CORS.
+  @ckanGeoPreflight {
+    path /api/i18n/* /api/3/action/resource_proxy /api/action/resource_proxy
+    method OPTIONS
+  }
+  handle @ckanGeoPreflight {
+    header Access-Control-Allow-Origin "https://{$CKAN_HOST}"
+    header Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+    header Access-Control-Allow-Headers "Accept, Content-Type, X-Requested-With, Range"
+    header Access-Control-Max-Age "600"
+    header +Vary Origin
+    respond "" 204
+  }
+
+  @ckanI18n path /api/i18n/*
+  handle @ckanI18n {
+    header {
+      -Access-Control-Allow-Origin
+      -Access-Control-Allow-Credentials
+      >Access-Control-Allow-Origin "https://{$CKAN_HOST}"
+      >Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+      +Vary Origin
+    }
+    reverse_proxy https://nginx:443 {
+      header_up Host {http.request.host}
+      header_up X-Forwarded-Host {http.request.host}
+      header_up X-Forwarded-Proto https
+      transport http {
+        tls_insecure_skip_verify
+      }
+    }
+  }
+
   @ckanResourceProxy path /api/3/action/resource_proxy /api/action/resource_proxy
   handle @ckanResourceProxy {
+    # GeoView's admin page calls the public-host resource proxy using
+    # ckan.site_url. Permit only the paired CKAN admin origin for browser XHR.
+    header {
+      -Access-Control-Allow-Origin
+      -Access-Control-Allow-Credentials
+      >Access-Control-Allow-Origin "https://{$CKAN_HOST}"
+      >Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+      >Access-Control-Allow-Headers "Accept, Content-Type, X-Requested-With, Range"
+      >Access-Control-Expose-Headers "Content-Length, Content-Range, Accept-Ranges, Content-Type"
+      +Vary Origin
+    }
     reverse_proxy https://nginx:443 {
       header_up Host {http.request.host}
       header_up X-Forwarded-Host {http.request.host}

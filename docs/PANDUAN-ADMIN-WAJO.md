@@ -138,6 +138,23 @@ bash ./deploy/ckan/compose.sh cloudflare up -d --build --force-recreate ckan edg
 
 Untuk ingress Caddy manual, gunakan profil `manual` dan recreate service `ckan caddy`. Jangan menghapus volume database atau filestore untuk menerapkan theme.
 
+## Diagnostik GeoJSON Preview dan Map Viewer
+
+GeoJSON Preview dan Map Viewer CKAN menggunakan extension `ckanext-geoview`. Pastikan plugin `resource_proxy`, `geojson_view`, dan `geo_view` aktif, sedangkan `ckan.views.default_views` memuat viewer yang ingin dibuat otomatis.
+
+Konfigurasi peta dasar OpenStreetMap memakai opsi `ckanext.spatial.common_map.type=custom`, `ckanext.spatial.common_map.custom.url`, dan `ckanext.spatial.common_map.attribution`. Pada `.env.ckan`, nama variabel untuk URL mengikuti pemisahan titik menjadi dua garis bawah: `CKANEXT__SPATIAL__COMMON_MAP__CUSTOM__URL`. Jangan menggantinya dengan `CUSTOM_URL` karena itu menunjuk opsi berbeda.
+
+GeoJSON viewer bawaan mengandalkan `resource.size`. Karena itu resource yang ditautkan ke URL eksternal tanpa ukuran tersimpan dapat tidak memenuhi syarat preview. Batas ukuran GeoJSON proyek ini adalah 25 MiB. Periksa juga format resource harus `GeoJSON` dan file benar-benar tersimpan pada FileStore.
+
+Jika viewer kosong, periksa Network browser secara berurutan:
+
+1. `/api/i18n/id` — katalog terjemahan viewer harus dijawab CKAN melalui host publik.
+2. `/api/3/action/resource_proxy` — sumber data yang diproxy harus menghasilkan respons yang dapat dibaca.
+3. `tile.openstreetmap.org/{z}/{x}/{y}.png` — tile peta dasar harus berhasil dimuat dan atribusinya terlihat.
+4. Request GeoJSON — pastikan status HTTP berhasil, `Content-Type` sesuai, payload valid, dan ukuran file tidak melewati batas.
+
+Jika muncul warning opsi `ckanext.spatial.common_map.*` belum dideklarasikan, pastikan `config_declaration.yaml` dari Wajo Theme ikut terpasang dalam wheel dan container CKAN sudah dibangun ulang.
+
 ## Validasi source code
 
 ```bash

@@ -1,0 +1,16 @@
+version: 1
+groups:
+  - annotation: Konfigurasi peta dasar ckanext-spatial
+    options:
+      - key: ckanext.spatial.common_map.type
+        default: custom
+        example: custom
+        description: Jenis peta dasar bersama yang digunakan oleh viewer geospasial CKAN.
+      - key: ckanext.spatial.common_map.custom.url
+        default: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        example: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        description: Templat URL tile XYZ untuk peta dasar kustom. Gunakan penyedia tile sesuai ketentuan dan atribusinya.
+      - key: ckanext.spatial.common_map.attribution
+        default: "© OpenStreetMap contributors"
+        example: "© OpenStreetMap contributors"
+        description: Atribusi yang ditampilkan pada peta dasar.

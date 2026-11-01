@@ -96,7 +96,7 @@ if git_context and git_context.returncode == 0:
         )
 
 # Catch syntax errors in the Python package without importing CKAN at test time.
-for path in (PLUGIN, SETUP, TRANSLATION_COMPILER):
+for path in (PLUGIN, SETUP, TRANSLATION_COMPILER, MARKDOWN_RENDERER):
     source = read(path)
     try:
         ast.parse(source, filename=str(path))
@@ -217,6 +217,7 @@ for template_path, template_source, edit_route in (
     require("wajo_icon('eye')" in template_source, f"Revision action must use the explicit Wajo eye icon: {template_path.relative_to(ROOT)}.")
     require("wajo-cms-actions" in template_source and "plus-square" not in template_source, f"CMS actions must use a spaced toolbar and must not use a plus icon for editing: {template_path.relative_to(ROOT)}.")
 require("class _TaskListTreeprocessor" in markdown_renderer_source and "_StrikethroughProcessor" in markdown_renderer_source, "Renderer admin harus mendukung task-list dan strikethrough.")
+require("_StrikethroughProcessor(_STRIKE_RE.pattern)" in markdown_renderer_source, "Python-Markdown InlineProcessor harus menerima pattern string, bukan compiled regex; jika tidak, detail Pages/Blog menghasilkan HTTP 500.")
 require('extensions=["extra", "sane_lists", _WajoMarkdownExtension()]' in markdown_renderer_source, "Renderer admin harus mendukung tabel, fenced code, dan nested/sane lists.")
 require("nh3.clean(" in markdown_renderer_source and "_remove_raw_html" in markdown_renderer_source, "Renderer CKAN harus membersihkan output Markdown dan tidak mengaktifkan raw HTML.")
 require(
@@ -253,6 +254,14 @@ require('if site_logo in {"", "/base/logo-kabupaten-wajo.webp"}' in bootstrap_so
 # Ensure the extension is packaged and actually installed into the pinned image.
 require('"wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin"' in setup_source, "Entry point plugin wajo_theme tidak terdaftar pada setup.py.")
 require('"wajo_pages = ckanext.wajo_theme.plugin:WajoPagesSchemaPlugin"' in setup_source, "Entry point schema CMS wajo_pages tidak terdaftar pada setup.py.")
+require("@toolkit.blanket.config_declarations" in plugin_source, "WajoThemePlugin harus mendaftarkan config declaration agar opsi peta tidak memicu warning CKAN 2.11+.")
+config_declaration = read(PACKAGE / "config_declaration.yaml")
+for key in (
+    "ckanext.spatial.common_map.type",
+    "ckanext.spatial.common_map.custom.url",
+    "ckanext.spatial.common_map.attribution",
+):
+    require(f"key: {key}" in config_declaration, f"Opsi peta {key} harus dideklarasikan.")
 require("class WajoHarvestTranslationPlugin" in plugin_source and "return \"ckanext-harvest\"" in plugin_source, "Harvest extension must register its own Indonesian gettext domain.")
 require("class WajoPagesTranslationPlugin" in plugin_source and "return \"ckanext-pages\"" in plugin_source, "Pages extension must register its own Indonesian gettext domain.")
 require("class WajoDcatTranslationPlugin" in plugin_source and "return \"ckanext-dcat\"" in plugin_source, "DCAT extension must register its own Indonesian gettext domain.")
@@ -402,6 +411,7 @@ prettierignore = read(ROOT / ".prettierignore")
 require("deploy/ckan/theme/**/*.html" in prettierignore, "Template CKAN Jinja harus dikecualikan dari Prettier HTML parser.")
 require(not re.search(r"<option\b[^>]*\{\{", form_source), "Form CMS tidak boleh menaruh ekspresi Jinja tanpa kutip di atribut option; gunakan conditional yang membungkus option utuh.")
 
+require('"config_declaration.yaml"' in setup_source and "include ckanext/wajo_theme/config_declaration.yaml" in read(THEME / "MANIFEST.in"), "Config declaration peta harus ikut terpaket bersama extension Wajo.")
 require('"schemas/*.yaml"' in setup_source and "recursive-include ckanext/wajo_theme/schemas *.yaml" in read(THEME / "MANIFEST.in"), "Schema Scheming harus masuk ke wheel extension sebagai package data.")
 
 # Parse CKAN Jinja templates and exercise representative CMS form renderings.

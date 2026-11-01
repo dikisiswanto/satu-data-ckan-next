@@ -429,6 +429,11 @@ const checks = [
     "Profil OPD harus memakai katalog publik terpisah untuk dataset, indikator, infografik, dan publikasi; bukan package_count campuran CKAN.",
   ],
   [
+    "src/app/(public)/organisasi/[slug]/page.jsx",
+    /divide-y divide-line rounded-xl border border-line[\s\S]*resourceCount[\s\S]*text-xs text-muted[\s\S]*Buka dataset/,
+    "Daftar dataset pada detail OPD harus berupa baris ringkas, bukan kartu dataset besar yang mengulang metadata.",
+  ],
+  [
     "src/app/api/3/action/[...action]/route.js",
     /include_data=true tidak tersedia pada API publik/,
     "API activity publik harus menolak snapshot yang berpotensi membawa metadata internal.",

@@ -127,6 +127,7 @@ class WajoDcatTranslationPlugin(plugins.SingletonPlugin, DefaultTranslation):
         return "ckanext-dcat"
 
 
+@toolkit.blanket.config_declarations
 class WajoThemePlugin(plugins.SingletonPlugin):
     """Load the Wajo theme and enforce authentication on the admin hostname."""
 

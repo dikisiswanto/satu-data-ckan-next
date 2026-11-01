@@ -16,6 +16,7 @@ run_check() {
 
 run_check python3 scripts/check-ci.py
 run_check python3 scripts/check-env.py
+run_check python3 scripts/check-geoview-routing.py
 run_check python3 scripts/check-base.py
 run_check python3 scripts/check-theme.py
 run_check python3 scripts/check-theme-css.py

@@ -77,6 +77,9 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     toolkit.add_template_directory = lambda *args: None
     toolkit.add_public_directory = lambda *args: None
     toolkit.add_resource = lambda *args: None
+    toolkit.blanket = types.SimpleNamespace(
+        config_declarations=lambda plugin_class: plugin_class,
+    )
     plugins.toolkit = toolkit
     ckan.plugins = plugins
     ckan_lib = types.ModuleType("ckan.lib")
@@ -462,6 +465,10 @@ def main() -> None:
         raise AssertionError("Dashboard harus menyediakan tag aktual untuk masing-masing katalog portal.")
     portal_fqs = dashboard_vars.get("wajo_admin_portal_fqs", {})
     dashboard_template = (ROOT / "deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html").read_text(encoding="utf-8")
+    if "fq=wajo_admin_" in dashboard_template:
+        raise AssertionError("Kartu dashboard tidak boleh meneruskan filter Solr melalui URL fq; CKAN dataset.search memperlakukan argumen non-q sebagai field filter biasa.")
+    if "q=wajo_admin_general_dataset_fq" not in dashboard_template or not all(f"q=wajo_admin_portal_fqs.{key}" in dashboard_template for key in ("indicators", "infographics", "publications")):
+        raise AssertionError("Kartu kategori dashboard harus meneruskan ekspresi Solr melalui parameter q yang dibaca langsung oleh CKAN dataset.search.")
     for key, tag, content_type in (
         ("indicators", "portal-indikator", "indikator"),
         ("infographics", "portal-infografik", "infografik"),

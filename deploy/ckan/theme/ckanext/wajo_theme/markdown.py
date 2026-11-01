@@ -126,7 +126,7 @@ class _TaskListTreeprocessor(Treeprocessor):
 
 class _WajoMarkdownExtension(Extension):
     def extendMarkdown(self, md: markdown_library.Markdown) -> None:  # noqa: N802
-        md.inlinePatterns.register(_StrikethroughProcessor(_STRIKE_RE), "wajo_strikethrough", 75)
+        md.inlinePatterns.register(_StrikethroughProcessor(_STRIKE_RE.pattern), "wajo_strikethrough", 75)
         md.treeprocessors.register(_TaskListTreeprocessor(md), "wajo_task_lists", 15)
 
 

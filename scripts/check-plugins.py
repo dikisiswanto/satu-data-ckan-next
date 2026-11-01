@@ -167,6 +167,7 @@ alooo <span>teks</span>
         "<strong>aku</strong>",
         "<em>asre</em>",
         "<del>",
+        "<del><em>dodo</em></del>",
         'src="https://data.silirdev.com/api/editorial-media/489a796c-7c87-434d-a777-8c0daf1ade97"',
         'href="https://fb.com"',
         "<table>",

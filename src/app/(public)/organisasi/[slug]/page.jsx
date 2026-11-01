@@ -12,7 +12,6 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
-import { DatasetCard } from "@/components/dataset-card";
 import { getPublicOrganizationBySlugResult } from "@/lib/data/organizations";
 import { getPublicOrganizationImageUrl } from "@/lib/ckan/public-media-url";
 import { formatDate } from "@/lib/utils";
@@ -308,11 +307,51 @@ export default async function OrganizationDetailPage({ params }) {
                 Katalog dataset sementara tidak dapat dimuat.
               </p>
             ) : datasets.length ? (
-              <div className="grid gap-3">
-                {datasets.map((dataset) => (
-                  <DatasetCard key={dataset.id} dataset={dataset} />
-                ))}
-              </div>
+              <ul className="divide-y divide-line rounded-xl border border-line bg-white px-3 sm:px-4">
+                {datasets.map((dataset) => {
+                  const resourceCount = Array.isArray(dataset.resources)
+                    ? dataset.resources.length
+                    : 0;
+                  const updated =
+                    dataset.metadata_modified || dataset.metadata_created;
+                  return (
+                    <li
+                      key={dataset.id || dataset.name}
+                      className="flex min-w-0 items-center gap-3 py-3"
+                    >
+                      <span
+                        className="grid size-8 shrink-0 place-items-center rounded-lg bg-surface text-primary"
+                        aria-hidden="true"
+                      >
+                        <Database size={16} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          href={`/dataset/${encodeURIComponent(dataset.name)}`}
+                          className="block truncate text-sm font-semibold text-ink hover:text-primary focus-visible:underline"
+                          title={dataset.title || dataset.name}
+                        >
+                          {dataset.title || dataset.name}
+                        </Link>
+                        <p className="mt-0.5 line-clamp-1 text-xs text-muted">
+                          {dataset.notes || "Deskripsi belum tersedia."}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-0.5 text-[11px] tabular-nums text-muted">
+                        <span>{formatCount(resourceCount)} berkas</span>
+                        <span>{formatDate(updated)}</span>
+                      </div>
+                      <Link
+                        href={`/dataset/${encodeURIComponent(dataset.name)}`}
+                        aria-label={`Buka dataset ${dataset.title || dataset.name}`}
+                        className="grid size-7 shrink-0 place-items-center rounded-md text-muted hover:bg-surface hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                      >
+                        <ArrowRight size={15} aria-hidden="true" />
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
             ) : (
               <p className="text-sm text-muted">
                 Belum ada dataset umum yang diterbitkan.

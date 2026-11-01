@@ -28,4 +28,5 @@ Dokumen pada folder ini merupakan rujukan kanonis proyek. Perbarui dokumen yang 
 - Perubahan Pages/Blog: baca [CMS](CMS.md), [Lokalisasi Admin CKAN](LOKALISASI-ADMIN-CKAN.md), dan [Panduan Admin Wajo](PANDUAN-ADMIN-WAJO.md).
 - Perubahan tampilan publik: baca [Kualitas FE Publik](KUALITAS-FE-PUBLIK.md).
 - Perubahan antarmuka admin: baca [Panduan Admin Wajo](PANDUAN-ADMIN-WAJO.md) bersama [Sistem Desain Admin](SISTEM-DESAIN-ADMIN.md).
+- Perubahan atau pemecahan masalah GeoJSON/Map Viewer: baca bagian diagnostik pada [Panduan Admin Wajo](PANDUAN-ADMIN-WAJO.md) dan periksa [Panduan Operasional CKAN](../deploy/ckan/README.md).
 - Perubahan penerapan atau layanan: ikuti [Panduan Operasional CKAN](../deploy/ckan/README.md).

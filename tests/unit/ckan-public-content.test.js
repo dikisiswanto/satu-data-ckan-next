@@ -609,7 +609,12 @@ describe("public organization facet queries", () => {
       .filter(({ url }) => url.pathname.endsWith("/package_search"));
     expect(packageSearchCalls).toHaveLength(4);
     for (const call of packageSearchCalls) {
-      expect(call.params.getAll("facet.field")).toEqual(["organization"]);
+      // CKAN 2.12.1 converts repeated GET keys to a Python list. A single
+      // occurrence becomes a scalar and fails facet.field list validation.
+      expect(call.params.getAll("facet.field")).toEqual([
+        "organization",
+        "organization",
+      ]);
     }
   });
 });

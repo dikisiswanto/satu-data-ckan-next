@@ -3,3 +3,4 @@ recursive-include ckanext/wajo_theme/assets *.yml *.css
 recursive-include ckanext/wajo_theme/public *
 recursive-include ckanext/wajo_theme/i18n *.po
 recursive-include ckanext/wajo_theme/schemas *.yaml
+include ckanext/wajo_theme/config_declaration.yaml

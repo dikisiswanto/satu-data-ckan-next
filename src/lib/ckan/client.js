@@ -67,12 +67,11 @@ export async function ckanAction(
   if (!/^[a-z][a-z0-9_]*$/.test(action))
     throw new TypeError("invalid_ckan_action");
   const url = new URL(`${BASE}/${action}`);
-  // package_search is a read-only CKAN Action API endpoint. Keep it on GET,
-  // including when forwarding an authenticated browser session: CKAN's CSRF
-  // middleware protects unsafe requests (POST/PUT/DELETE), and a JSON POST
-  // without CKAN's CSRF token is rejected with HTTP 400. Repeated query keys
-  // preserve CKAN list parameters such as facet.field without coercing arrays
-  // into JSON or comma-separated strings.
+  // Keep package_search on GET. CKAN's CSRF middleware protects unsafe
+  // requests, so switching authenticated searches to JSON POST would require
+  // forwarding a valid CSRF token. Preserve list parameters as repeated query
+  // keys; CKAN 2.12.1 parses one occurrence as a scalar, therefore a single
+  // facet.field value is repeated below to satisfy its list-valued schema.
   const actionParams = normalizeCkanActionParams(action, params);
   const entries = Object.entries(actionParams).filter(
     ([, value]) => value !== undefined && value !== null && value !== "",
@@ -92,9 +91,18 @@ export async function ckanAction(
     requestInit.method = "GET";
     for (const [key, value] of entries) {
       if (Array.isArray(value)) {
-        for (const item of value) {
-          if (item !== undefined && item !== null)
-            url.searchParams.append(key, String(item));
+        const items = value.filter(
+          (item) => item !== undefined && item !== null,
+        );
+        for (const item of items) url.searchParams.append(key, String(item));
+        // CKAN 2.12.1 parses GET parameters with one occurrence as a scalar
+        // and only turns repeated occurrences into a Python list. The
+        // package_search schema requires facet.field to be a list, including
+        // when requesting exactly one facet. Repeat that singleton so CKAN
+        // receives ["organization"] instead of "organization". Duplicate
+        // facet names are harmless to Solr and collapse to one result key.
+        if (key === "facet.field" && items.length === 1) {
+          url.searchParams.append(key, String(items[0]));
         }
       } else {
         url.searchParams.set(key, String(value));

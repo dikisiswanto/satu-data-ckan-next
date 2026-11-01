@@ -24,25 +24,25 @@
     </div>
 
     <div class="wajo-dashboard__metrics">
-      <a class="wajo-metric-card wajo-metric-card--green" href="{{ h.url_for(dataset_type ~ '.search', fq=wajo_admin_general_dataset_fq) }}">
+      <a class="wajo-metric-card wajo-metric-card--green" href="{{ h.url_for(dataset_type ~ '.search', q=wajo_admin_general_dataset_fq) }}">
         <span class="wajo-metric-card__icon">{{ wajo_icon('database') }}</span>
         <span class="wajo-metric-card__label">{{ _('General datasets') }}</span>
         <strong>{{ wajo_admin_stats.datasets if wajo_admin_stats.datasets is not none else '—' }}</strong>
         <small>{{ _('View dataset catalog') }} {{ wajo_icon('arrow-right') }}</small>
       </a>
-      <a class="wajo-metric-card wajo-metric-card--blue" href="{{ h.url_for(dataset_type ~ '.search', fq=wajo_admin_portal_fqs.indicators) }}">
+      <a class="wajo-metric-card wajo-metric-card--blue" href="{{ h.url_for(dataset_type ~ '.search', q=wajo_admin_portal_fqs.indicators) }}">
         <span class="wajo-metric-card__icon">{{ wajo_icon('chart-line') }}</span>
         <span class="wajo-metric-card__label">{{ _('Indicators') }}</span>
         <strong>{{ wajo_admin_stats.indicators if wajo_admin_stats.indicators is not none else '—' }}</strong>
         <small>{{ _('View indicators') }} {{ wajo_icon('arrow-right') }}</small>
       </a>
-      <a class="wajo-metric-card wajo-metric-card--purple" href="{{ h.url_for(dataset_type ~ '.search', fq=wajo_admin_portal_fqs.infographics) }}">
+      <a class="wajo-metric-card wajo-metric-card--purple" href="{{ h.url_for(dataset_type ~ '.search', q=wajo_admin_portal_fqs.infographics) }}">
         <span class="wajo-metric-card__icon">{{ wajo_icon('image') }}</span>
         <span class="wajo-metric-card__label">{{ _('Infographics') }}</span>
         <strong>{{ wajo_admin_stats.infographics if wajo_admin_stats.infographics is not none else '—' }}</strong>
         <small>{{ _('View infographics') }} {{ wajo_icon('arrow-right') }}</small>
       </a>
-      <a class="wajo-metric-card wajo-metric-card--gold" href="{{ h.url_for(dataset_type ~ '.search', fq=wajo_admin_portal_fqs.publications) }}">
+      <a class="wajo-metric-card wajo-metric-card--gold" href="{{ h.url_for(dataset_type ~ '.search', q=wajo_admin_portal_fqs.publications) }}">
         <span class="wajo-metric-card__icon">{{ wajo_icon('book') }}</span>
         <span class="wajo-metric-card__label">{{ _('Publications') }}</span>
         <strong>{{ wajo_admin_stats.publications if wajo_admin_stats.publications is not none else '—' }}</strong>
@@ -164,9 +164,9 @@
             <a href="/pages"><span class="wajo-dashboard-quicklinks__icon">{{ wajo_icon('file-text') }}</span><span><strong>{{ _('Manage portal pages') }}</strong><small>{{ _('Profiles, policies, and evergreen information') }}</small></span>{{ wajo_icon('arrow-right') }}</a>
             <a href="/blog"><span class="wajo-dashboard-quicklinks__icon">{{ wajo_icon('newspaper') }}</span><span><strong>{{ _('Write a news article') }}</strong><small>{{ _('News, announcements, and articles') }}</small></span>{{ wajo_icon('arrow-right') }}</a>
           {% endif %}
-          <a href="{{ h.url_for(dataset_type ~ '.search', fq=wajo_admin_portal_fqs.publications) }}"><span class="wajo-dashboard-quicklinks__icon">{{ wajo_icon('book') }}</span><span><strong>{{ _('Publications & reports') }}</strong><small>{{ _('Manage publication-type datasets') }}</small></span>{{ wajo_icon('arrow-right') }}</a>
-          <a href="{{ h.url_for(dataset_type ~ '.search', fq=wajo_admin_portal_fqs.indicators) }}"><span class="wajo-dashboard-quicklinks__icon">{{ wajo_icon('chart-line') }}</span><span><strong>{{ _('Indicators & statistics') }}</strong><small>{{ _('Manage dataset-based indicators') }}</small></span>{{ wajo_icon('arrow-right') }}</a>
-          <a href="{{ h.url_for(dataset_type ~ '.search', fq=wajo_admin_portal_fqs.infographics) }}"><span class="wajo-dashboard-quicklinks__icon">{{ wajo_icon('image') }}</span><span><strong>{{ _('Infographics') }}</strong><small>{{ _('Manage public data visuals') }}</small></span>{{ wajo_icon('arrow-right') }}</a>
+          <a href="{{ h.url_for(dataset_type ~ '.search', q=wajo_admin_portal_fqs.publications) }}"><span class="wajo-dashboard-quicklinks__icon">{{ wajo_icon('book') }}</span><span><strong>{{ _('Publications & reports') }}</strong><small>{{ _('Manage publication-type datasets') }}</small></span>{{ wajo_icon('arrow-right') }}</a>
+          <a href="{{ h.url_for(dataset_type ~ '.search', q=wajo_admin_portal_fqs.indicators) }}"><span class="wajo-dashboard-quicklinks__icon">{{ wajo_icon('chart-line') }}</span><span><strong>{{ _('Indicators & statistics') }}</strong><small>{{ _('Manage dataset-based indicators') }}</small></span>{{ wajo_icon('arrow-right') }}</a>
+          <a href="{{ h.url_for(dataset_type ~ '.search', q=wajo_admin_portal_fqs.infographics) }}"><span class="wajo-dashboard-quicklinks__icon">{{ wajo_icon('image') }}</span><span><strong>{{ _('Infographics') }}</strong><small>{{ _('Manage public data visuals') }}</small></span>{{ wajo_icon('arrow-right') }}</a>
           {% if h.check_access('harvest_source_list') %}
             <a href="/harvest"><span class="wajo-dashboard-quicklinks__icon">{{ wajo_icon('refresh') }}</span><span><strong>{{ _('Data harvesting') }}</strong><small>{{ _('Refresh external data sources') }}</small></span>{{ wajo_icon('arrow-right') }}</a>
           {% endif %}
