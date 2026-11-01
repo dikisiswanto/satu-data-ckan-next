@@ -123,9 +123,13 @@ try:
         raise RuntimeError(
             "Effective CKAN helper registry still resolves ckanext-pages render_content instead of Wajo Markdown"
         )
-    upstream_rendered = str(effective_helpers["render_content"]("## Judul Markdown\n\n**tebal**"))
-    if "<h2>Judul Markdown</h2>" not in upstream_rendered or "<strong>tebal</strong>" not in upstream_rendered:
-        raise RuntimeError("The effective CKAN render_content helper did not parse Markdown")
+    upstream_rendered = str(effective_helpers["render_content"]("## Judul Markdown\n\n**tebal**\n\n~~*teks miring yang dicoret*~~"))
+    if (
+        "<h2>Judul Markdown</h2>" not in upstream_rendered
+        or "<strong>tebal</strong>" not in upstream_rendered
+        or "<del><em>teks miring yang dicoret</em></del>" not in upstream_rendered
+    ):
+        raise RuntimeError("The installed CKAN render_content helper failed Markdown/strikethrough runtime rendering")
     if effective_helpers["wajo_render_markdown"] is not effective_helpers["render_content"]:
         raise RuntimeError("Wajo template helper and upstream Pages/Blog render_content must share one renderer")
 
@@ -136,6 +140,7 @@ try:
 ![Editorial media](https://data.silirdev.com/api/editorial-media/489a796c-7c87-434d-a777-8c0daf1ade97)
 
 [teks](https://fb.com)
+[tautan dengan rel dari author](https://example.com){rel="opener"}
 
 - teks
 - teks 2
@@ -170,6 +175,8 @@ alooo <span>teks</span>
         "<del><em>dodo</em></del>",
         'src="https://data.silirdev.com/api/editorial-media/489a796c-7c87-434d-a777-8c0daf1ade97"',
         'href="https://fb.com"',
+        'href="https://example.com"',
+        'rel="noopener noreferrer"',
         "<table>",
         "<blockquote>",
         '<input type="checkbox"',
@@ -182,6 +189,8 @@ alooo <span>teks</span>
         raise RuntimeError("Missing rendered Markdown constructs: " + ", ".join(missing_markdown_fragments))
     if "<script" in rendered_markdown.lower() or "onerror" in rendered_markdown.lower():
         raise RuntimeError("Unsafe raw HTML/attributes survived Markdown sanitization")
+    if 'rel="opener"' in rendered_markdown:
+        raise RuntimeError("Author-supplied link rel must not override nh3's safe noopener/noreferrer policy")
 except Exception as exc:
     sys.exit(f"Wajo CKAN Markdown renderer runtime check failed: {exc}")
 

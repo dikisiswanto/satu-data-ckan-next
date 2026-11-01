@@ -49,7 +49,9 @@ _ALLOWED_TAGS = {
     "tbody", "td", "th", "thead", "tr", "ul",
 }
 _ALLOWED_ATTRIBUTES = {
-    "a": {"href", "title", "rel"},
+    # Let nh3 add its own security rel value; allowing author-supplied rel
+    # together with link_rel triggers a ValueError and can break Pages/Blog.
+    "a": {"href", "title"},
     "img": {"src", "alt", "title", "width", "height"},
     "input": {"type", "checked", "disabled", "aria-label"},
     "li": {"class"},
@@ -178,6 +180,7 @@ def render_wajo_markdown(content: Any) -> Markup:
         tags=_ALLOWED_TAGS,
         attributes=_ALLOWED_ATTRIBUTES,
         url_schemes=_ALLOWED_URL_SCHEMES,
+        link_rel="noopener noreferrer",
         strip_comments=True,
     )
     return Markup(cleaned)

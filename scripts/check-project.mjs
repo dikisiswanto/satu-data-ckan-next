@@ -425,13 +425,33 @@ const checks = [
   ]),
   [
     "src/app/(public)/organisasi/[slug]/page.jsx",
-    /getPublishedDatasetsResult\(\{ organizationId: org\.name, limit: 3 \}\)[\s\S]*getPublishedIndicatorsResult\(\{ organizationId: org\.name, limit: 3, includeLatest: false \}\)[\s\S]*getPublishedInfographicsResult\(\{ organizationId: org\.name, limit: 3 \}\)[\s\S]*getPublishedPublicationsResult\(\{ organizationId: org\.name, limit: 3 \}\)[\s\S]*counts\s*=\s*\{/,
-    "Profil OPD harus memakai katalog publik terpisah untuk dataset, indikator, infografik, dan publikasi; bukan package_count campuran CKAN.",
+    /getPublishedDatasetsResult\s*\(\s*\{[^}]*organizationId\s*:\s*org\.name[^}]*\}\s*\)/,
+    "Profil OPD harus mengambil dataset umum dari katalog publik khusus dataset.",
   ],
   [
     "src/app/(public)/organisasi/[slug]/page.jsx",
-    /<ul className="divide-y divide-line rounded-lg border border-line[\s\S]*resourceCount[\s\S]*py-2[\s\S]*text-\[10px\] tabular-nums/,
-    "Daftar dataset pada detail OPD harus berupa baris ringkas, bukan kartu dataset besar yang mengulang metadata.",
+    /getPublishedIndicatorsResult\s*\(\s*\{[^}]*organizationId\s*:\s*org\.name[^}]*includeLatest\s*:\s*false[^}]*\}\s*\)/,
+    "Profil OPD harus mengambil indikator dari katalog publik tanpa memuat nilai terbaru untuk setiap kartu.",
+  ],
+  [
+    "src/app/(public)/organisasi/[slug]/page.jsx",
+    /getPublishedInfographicsResult\s*\(\s*\{[^}]*organizationId\s*:\s*org\.name[^}]*\}\s*\)/,
+    "Profil OPD harus mengambil infografik dari katalog publik khusus infografik.",
+  ],
+  [
+    "src/app/(public)/organisasi/[slug]/page.jsx",
+    /getPublishedPublicationsResult\s*\(\s*\{[^}]*organizationId\s*:\s*org\.name[^}]*\}\s*\)/,
+    "Profil OPD harus mengambil publikasi dari katalog publik khusus publikasi.",
+  ],
+  [
+    "src/app/(public)/organisasi/[slug]/page.jsx",
+    /const counts\s*=\s*\{[\s\S]*datasets:\s*datasetsResult\.unavailable\s*\?\s*null\s*:\s*datasetsResult\.meta\?\.total[\s\S]*indicators:\s*indicatorsResult\.unavailable\s*\?\s*null\s*:\s*indicatorsResult\.meta\?\.total[\s\S]*infographics:\s*infographicsResult\.unavailable\s*\?\s*null\s*:\s*infographicsResult\.meta\?\.total[\s\S]*publications:\s*publicationsResult\.unavailable\s*\?\s*null\s*:\s*publicationsResult\.meta\?\.total/,
+    "Metrik OPD harus memakai total dari masing-masing katalog dan menampilkan null ketika sumber tidak tersedia.",
+  ],
+  [
+    "src/app/(public)/organisasi/[slug]/page.jsx",
+    /datasets\.map\(\s*\(dataset\)\s*=>[\s\S]*resourceCount[\s\S]*<li[\s\S]*py-2[\s\S]*truncate[\s\S]*line-clamp-1[\s\S]*text-\[10px\][\s\S]*tabular-nums/,
+    "Daftar dataset pada detail OPD harus berupa baris ringkas dengan judul terpotong aman, deskripsi satu baris, dan metadata berkas/tanggal.",
   ],
   [
     "src/app/api/3/action/[...action]/route.js",

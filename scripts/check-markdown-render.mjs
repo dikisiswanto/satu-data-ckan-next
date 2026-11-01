@@ -251,6 +251,16 @@ assert.match(
   /nh3\.clean\([\s\S]*_ALLOWED_URL_SCHEMES/,
   "CKAN Markdown output must be sanitized with a constrained tag/attribute/URL allowlist.",
 );
+assert.match(
+  adminMarkdown,
+  /"a": \{\s*"href", "title"\s*\}/,
+  "CKAN Markdown must not allow author-controlled rel attributes on links.",
+);
+assert.match(
+  adminMarkdown,
+  /link_rel="noopener noreferrer"/,
+  "nh3 must add a fixed safe rel value instead of combining its default with an allowed rel attribute.",
+);
 for (const tag of [
   "h1",
   "table",
