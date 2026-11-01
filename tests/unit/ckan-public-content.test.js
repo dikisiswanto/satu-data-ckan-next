@@ -568,7 +568,14 @@ describe("public organization facet queries", () => {
         const action = url.pathname.split("/").at(-1);
         const result =
           action === "organization_list"
-            ? ["bappeda-wajo"]
+            ? [
+                {
+                  name: "bappeda-wajo",
+                  title: "Bappeda Wajo",
+                  display_name: "Bappeda Wajo",
+                  state: "active",
+                },
+              ]
             : {
                 count: 1,
                 search_facets: {
@@ -588,6 +595,9 @@ describe("public organization facet queries", () => {
 
     const response = await getPublicOrganizationsResult();
     expect(response.unavailable).toBe(false);
+    // CKAN organization_list(all_fields=true) returns organization objects,
+    // not a list of organization-name strings. Keep the fixture contract explicit.
+    expect(response.data[0].name).toBe("bappeda-wajo");
     expect(response.data[0].public_content_counts).toEqual({
       datasets: 1,
       indicators: 1,
