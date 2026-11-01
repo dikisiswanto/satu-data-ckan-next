@@ -15,11 +15,13 @@
 
 /* Reserve geometry for asynchronous public content before CKAN/CMS responses arrive. */
 .public-heading-title-reserved {
-  display: -webkit-box;
+  display: block;
   min-block-size: 5rem;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  max-block-size: none;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
 }
 
 .public-heading-description-reserved {
@@ -40,16 +42,22 @@
 }
 
 .public-dynamic-heading h1 {
+  display: block;
+  min-block-size: 0;
+  max-block-size: none;
+  overflow: visible;
   overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
 }
 
 .dataset-detail-title,
 .dataset-detail-title-skeleton {
-  display: -webkit-box;
+  display: block;
   min-block-size: 5rem;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  max-block-size: none;
+  overflow: visible;
+  overflow-wrap: anywhere;
 }
 
 .dataset-detail-description {
@@ -504,7 +512,13 @@
 /* Dataset detail hierarchy: natural content height, no large reserved blank blocks. */
 .dataset-detail-title,
 .dataset-detail-title-skeleton {
+  display: block;
   min-block-size: 0;
+  max-block-size: none;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
   line-height: 1.16;
 }
 .dataset-detail-description {

@@ -113,6 +113,8 @@ export default async function InfographicDetailPage({ params }) {
                 <ImageLightbox
                   src={publicResourceUrl(resource.url)}
                   alt={resource.description || resource.name || item.title}
+                  caption={resource.name || item.title}
+                  group={`infographic-${item.name}`}
                   className="rounded-xl bg-slate-50"
                 >
                   <div className="relative aspect-[4/3] w-full">

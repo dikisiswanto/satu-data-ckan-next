@@ -428,13 +428,29 @@ describe("public portal summary sourced from CKAN", () => {
         const url = new URL(String(input));
         const action = url.pathname.split("/").at(-1);
         let result;
+        if (url.searchParams.getAll("fq").length > 1) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: {
+                __type: "Validation Error",
+                message:
+                  "fq must be a string; use fq_list for multiple filters",
+              },
+            }),
+            {
+              status: 409,
+              headers: { "content-type": "application/json" },
+            },
+          );
+        }
         if (action === "organization_list")
           result = [
             { name: "bappeda-wajo", state: "active" },
             { name: "old", state: "deleted" },
           ];
         else if (
-          url.searchParams.getAll("fq").includes("tags:portal-indikator")
+          url.searchParams.getAll("fq_list").includes("tags:portal-indikator")
         )
           result = { count: 2, results: [] };
         else result = { count: 37, results: [] };
@@ -453,7 +469,7 @@ describe("public portal summary sourced from CKAN", () => {
     expect(
       fetchSpy.mock.calls.some(([input]) =>
         new URL(String(input)).searchParams
-          .getAll("fq")
+          .getAll("fq_list")
           .includes("tags:portal-indikator"),
       ),
     ).toBe(true);
@@ -462,14 +478,15 @@ describe("public portal summary sourced from CKAN", () => {
       .find(
         (url) =>
           url.pathname.endsWith("/package_search") &&
-          !url.searchParams.getAll("fq").includes("tags:portal-indikator"),
+          !url.searchParams.getAll("fq_list").includes("tags:portal-indikator"),
       );
-    expect(datasetSearch?.searchParams.getAll("fq")).toContain(
+    expect(datasetSearch?.searchParams.getAll("fq_list")).toContain(
       "-tags:portal-infografik",
     );
-    expect(datasetSearch?.searchParams.getAll("fq")).toContain(
+    expect(datasetSearch?.searchParams.getAll("fq_list")).toContain(
       "-extras_portal_type:publikasi",
     );
+    expect(datasetSearch?.searchParams.getAll("fq")).toHaveLength(0);
   });
 });
 
@@ -594,6 +611,13 @@ describe("CKAN-driven public category cards", () => {
 
     const response = await getPublishedDatasetFacetsResult();
     expect(response.unavailable).toBe(false);
+    const facetsRequest = new URL(
+      String(vi.mocked(globalThis.fetch).mock.calls.at(-1)?.[0]),
+    );
+    expect(facetsRequest.searchParams.getAll("fq_list")).toContain(
+      "-tags:portal-infografik",
+    );
+    expect(facetsRequest.searchParams.getAll("fq")).toHaveLength(0);
     expect(response.data.categories).toEqual([
       { id: "kesehatan", name: "Kesehatan", count: 12 },
       { id: "pendidikan", name: "Pendidikan", count: 7 },

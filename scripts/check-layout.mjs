@@ -137,11 +137,81 @@ requireText(
   "public-heading-description-reserved",
   "indicator detail fallback must reserve its real heading copy",
 );
+const titleLayoutCss = read("src/app/styles/public-layout-stability.css");
 requireText(
   "src/app/styles/public-layout-stability.css",
-  "-webkit-line-clamp: 2",
-  "dynamic page titles must have a stable maximum line count",
+  ".public-heading-title-reserved",
+  "dynamic page-title class must remain available for layout reservations",
 );
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  "max-block-size: none",
+  "dynamic page titles must have no maximum block size",
+);
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  "overflow: visible",
+  "dynamic page titles must not hide wrapped text",
+);
+if (
+  /\.public-heading-title-reserved\s*\{[^}]*-webkit-line-clamp:\s*2/s.test(
+    titleLayoutCss,
+  )
+) {
+  failures.push("dynamic page headings must not be line-clamped to two lines");
+}
+if (
+  /\.dataset-detail-title,\s*\.dataset-detail-title-skeleton\s*\{[^}]*-webkit-line-clamp:\s*2/s.test(
+    titleLayoutCss,
+  )
+) {
+  failures.push("dataset detail titles must not be line-clamped to two lines");
+}
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  ".public-dynamic-heading h1",
+  "all CKAN/CMS detail headings must share the unbounded dynamic-title rule",
+);
+requireText(
+  "src/app/styles/public-layout-stability.css",
+  "line-clamp: unset",
+  "dynamic detail headings must explicitly reset inherited clamping",
+);
+const dynamicTitleFiles = [
+  [
+    "src/components/organization-directory.jsx",
+    '<h3 className="mt-4 line-clamp-2',
+    "OPD names in the organization directory must remain fully readable",
+  ],
+  [
+    "src/components/cms/content-card.jsx",
+    '<h2 className="mt-3 line-clamp-2',
+    "CMS news/information titles must not be clipped in cards",
+  ],
+  [
+    "src/app/(public)/berita/page.jsx",
+    '<h2 className="mt-3 line-clamp-2',
+    "featured news title must not be clipped",
+  ],
+  [
+    "src/app/(public)/informasi/page.jsx",
+    '<h3 className="mt-2 min-h-12 line-clamp-2',
+    "featured information title must not be clipped",
+  ],
+  [
+    "src/app/(public)/page.jsx",
+    '<h3 className="mt-3 line-clamp-2',
+    "homepage indicator title must not be clipped",
+  ],
+  [
+    "src/app/(public)/page.jsx",
+    '<h4 className="mt-1 line-clamp-2',
+    "homepage infographic/publication titles must not be clipped",
+  ],
+];
+for (const [path, marker, message] of dynamicTitleFiles) {
+  if (read(path).includes(marker)) failures.push(`${path}: ${message}`);
+}
 requireText(
   "src/app/styles/public-layout-stability.css",
   ".dataset-api-panel__header",

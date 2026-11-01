@@ -12,12 +12,48 @@ const caddyFiles = [
   "deploy/ckan/Caddyfile.tunnel.basic-auth",
 ];
 assert.match(route, /resource_show/);
+assert.doesNotMatch(
+  route,
+  /console\.info\(/,
+  "Download denial diagnostics must use only the allowed console.warn/error methods.",
+);
+assert.match(
+  route,
+  /console\.warn\(/,
+  "Expected authorization denials should be logged as warnings.",
+);
 assert.match(route, /package_show/);
-assert.match(route, /dataset\.private === true/);
-assert.match(route, /publicResource\.private === true/);
+assert.match(route, /isPrivateMarker\(dataset\.private\)/);
+assert.match(
+  route,
+  /isPrivateMarker\(resource\.private\)/,
+  "Non-core resource.private markers must fail closed even for authenticated sessions.",
+);
+assert.match(
+  route,
+  /isPrivateMarker\(file\.private\)/,
+  "Non-core file.private markers must fail closed even for authenticated sessions.",
+);
+assert.match(route, /ownerType === "resource"/);
+assert.match(route, /ownerType === "package"/);
+assert.match(
+  route,
+  /permission_download_file/,
+  "FileStore downloads must remain behind CKAN's final permission_download_file check.",
+);
 assert.match(route, /redirect:\s*"manual"/);
 assert.match(route, /Range/);
 assert.match(route, /Content-Disposition/);
+assert.match(
+  route,
+  /"Cache-Control": "private, no-store"/,
+  "Download responses must not remain in a shared cache after a dataset becomes private.",
+);
+assert.doesNotMatch(
+  route,
+  /resource\.package_id \|\| resource\.package_name/,
+  "Resource authorization must use the canonical CKAN package_id.",
+);
 assert.match(
   route,
   /sourceFilename !== requestedFilename/,
@@ -115,8 +151,18 @@ const genericFileProxy = await readFile(
 assert.match(genericFileProxy, /file_show/);
 assert.match(genericFileProxy, /resource_show/);
 assert.match(genericFileProxy, /package_show/);
-assert.match(genericFileProxy, /ownerType === "wajo_media"/);
-assert.match(genericFileProxy, /private !== true/);
+assert.match(
+  genericFileProxy,
+  /ownerType !== "resource" && ownerType !== "package"/,
+);
+assert.match(genericFileProxy, /isPrivateMarker\(resource\.private\)/);
+assert.match(genericFileProxy, /isPrivateMarker\(file\.private\)/);
+assert.match(genericFileProxy, /permission_download_file/);
+assert.match(
+  genericFileProxy,
+  /\[401, 403, 404, 410\]\.includes\(upstream\.status\)/,
+);
+assert.match(genericFileProxy, /!isPrivateMarker\(record\.private\)/);
 assert.match(
   genericFileProxy,
   /new URL\(\`\/file\/download\/\$\{encodeURIComponent\(fileId\)\}\`, internalOrigin\)/,
@@ -158,6 +204,11 @@ assert.match(
 assert.match(sidebar, /h\.url_for\('pages\.new'\)/);
 assert.match(sidebar, /h\.url_for\('pages\.blog_new'\)/);
 assert.match(genericFileProxy, /imageSignatureMatches/);
+assert.match(
+  genericFileProxy,
+  /"Cache-Control": "private, no-store"/,
+  "FileStore bytes must not be left in a shared cache after a visibility change.",
+);
 assert.match(genericFileProxy, /image\/svg\+xml/);
 const publicResourceUrls = await readFile(
   "src/lib/ckan/public-resource-url.js",
@@ -199,6 +250,26 @@ assert.match(css, /wajo-login-frame.*460px/);
 assert.match(css, /input\[type="file"\]::file-selector-button/);
 assert.match(css, /wajo-file-preview/);
 
+const fileCascadeBootstrap = await readFile(
+  "deploy/ckan/bootstrap-upstream.sh",
+  "utf8",
+);
+assert.match(
+  fileCascadeBootstrap,
+  /CKAN__FILES__OWNER__CASCADE_ACCESS[^\n]*package resource/,
+  "CKAN FileStore owner cascade must inherit Package/Resource permissions for first-class files.",
+);
+const fileCascadeEnvExample = await readFile(".env.ckan.example", "utf8");
+assert.match(
+  fileCascadeEnvExample,
+  /^CKAN__FILES__OWNER__CASCADE_ACCESS=.*package resource/m,
+  "The canonical environment example must keep FileStore package/resource owner cascade enabled.",
+);
+const privacyHelper = await readFile("src/lib/ckan/privacy.js", "utf8");
+assert.match(privacyHelper, /export function isPrivateMarker/);
+assert.match(privacyHelper, /toLowerCase\(\)/);
+assert.match(privacyHelper, /"true"/);
+assert.match(privacyHelper, /"private"/);
 const sessionHelper = await readFile("src/lib/ckan/session.js", "utf8");
 assert.match(sessionHelper, /CKAN_SESSION_COOKIE_NAME/);
 assert.match(sessionHelper, /getCkanSessionCookieValue/);
@@ -250,18 +321,21 @@ const publicSanitizer = await readFile(
   "src/lib/ckan/public-api-sanitize.js",
   "utf8",
 );
-assert.match(publicSanitizer, /includePrivateResources = false/);
-const viewerPackage = await readFile("src/lib/ckan/viewer-package.js", "utf8");
-assert.match(viewerPackage, /resource_show/);
-assert.match(viewerPackage, /sessionCookie/);
+assert.doesNotMatch(publicSanitizer, /includePrivateResources/);
 assert.match(
-  viewerPackage,
-  /error\?\.status === 403 \|\| error\?\.status === 404/,
+  publicSanitizer,
+  /!isPrivateMarker\(resource\.private\)/,
+  "Custom private resource markers must never be included based on a login cookie.",
 );
-assert.match(publicDatasetLoader, /resolveAuthorizedPackageResources/);
-assert.match(
+assert.doesNotMatch(publicDatasetLoader, /resolveAuthorizedPackageResources/);
+assert.doesNotMatch(
   sessionAwarePublicActionRoute,
   /resolveAuthorizedPackageResources/,
+);
+assert.match(publicDatasetLoader, /sanitizePublicPackage\(pkg\)/);
+assert.match(
+  sessionAwarePublicActionRoute,
+  /result = sanitizePublicPackage\(pkg\)/,
 );
 assert.match(
   sessionAwarePublicActionRoute,
@@ -283,6 +357,11 @@ const previewRoute = await readFile(
 );
 assert.match(previewRoute, /getCkanSessionCookieFromRequest/);
 assert.match(previewRoute, /buildCkanSessionCookieHeader/);
+assert.match(
+  previewRoute,
+  /isPrivateMarker\(resource\.private\)/,
+  "CSV preview must fail closed for unsupported per-resource privacy markers.",
+);
 const clientFileRoute = await readFile(
   "src/app/api/public/ckan-file/[fileId]/route.js",
   "utf8",
@@ -317,6 +396,10 @@ assert.match(
   bootstrap,
   /CKANEXT__SPATIAL__COMMON_MAP__CUSTOM__URL.*tile\.openstreetmap\.org/,
 );
+assert.match(
+  bootstrap,
+  /CKANEXT__GEOVIEW__GEOJSON__MAX_FILE_SIZE.*25 \* 1024 \* 1024/,
+);
 assert.doesNotMatch(
   bootstrap,
   /values\["CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL"\]\s*=/,
@@ -329,6 +412,10 @@ const envExampleMap = await readFile(".env.ckan.example", "utf8");
 assert.match(
   envExampleMap,
   /^CKANEXT__SPATIAL__COMMON_MAP__CUSTOM__URL=https:\/\/tile\.openstreetmap\.org/m,
+);
+assert.match(
+  envExampleMap,
+  /^CKANEXT__GEOVIEW__GEOJSON__MAX_FILE_SIZE=26214400$/m,
 );
 assert.doesNotMatch(envExampleMap, /CKANEXT__SPATIAL__COMMON_MAP__CUSTOM_URL/);
 const geoPreview = await readFile(

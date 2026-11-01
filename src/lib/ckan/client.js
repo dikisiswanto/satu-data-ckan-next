@@ -93,10 +93,9 @@ export async function searchPackages({
   rows = 24,
   start = 0,
   sort = "metadata_modified desc",
-  fq = [],
+  fqList = [],
   facets = false,
   sessionCookie = null,
-  includePrivateResources = false,
 } = {}) {
   const params = {
     q: String(q || "*:*"),
@@ -110,7 +109,7 @@ export async function searchPackages({
     // records are requested. Anonymous searches remain strictly public.
     include_private: Boolean(sessionCookie),
   };
-  if (fq.length) params.fq = fq;
+  if (fqList.length) params.fq_list = fqList;
   if (facets) {
     params["facet.field"] = [
       "groups",
@@ -127,11 +126,6 @@ export async function searchPackages({
       params,
       sessionCookie ? { revalidate: 0, sessionCookie } : {},
     ),
-    {
-      includePrivateResources: Boolean(
-        includePrivateResources && sessionCookie,
-      ),
-    },
   );
 }
 

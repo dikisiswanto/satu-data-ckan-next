@@ -165,6 +165,42 @@ describe("public CKAN resource download", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
+  it("keeps FileStore infrastructure failures distinct from permission denials", async () => {
+    fixtures({
+      resourceUrl:
+        "https://ckan.example.test/file/c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+    });
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: datasetId,
+          name: filename,
+          state: "active",
+          url: "https://ckan.example.test/file/c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+        };
+      if (action === "package_show")
+        return {
+          id: datasetId,
+          name: "data-menara-telekomunikasi",
+          state: "active",
+        };
+      if (action === "file_show")
+        throw Object.assign(new Error("CKAN unavailable"), { status: 502 });
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`),
+      {
+        params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+      },
+    );
+    expect(response.status).toBe(502);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it("allows legitimate JSON and plain-text resources", async () => {
     fixtures();
     for (const [filenameValue, contentType] of [
@@ -241,8 +277,59 @@ describe("public CKAN resource download", () => {
     expect(response.status).toBe(404);
   });
 
-  it("allows an authorized CKAN session to download the same private resource URL without shared caching", async () => {
-    fixtures({ privateDataset: true, privateResource: true });
+  it("allows an authorized admin to download a private dataset resource when package_show omits its resource summary", async () => {
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: datasetId,
+          name: filename,
+          state: "active",
+          private: false,
+          url: `https://data.silirdev.com${downloadPath}`,
+        };
+      if (action === "package_show")
+        return {
+          id: datasetId,
+          name: "data-menara-telekomunikasi",
+          state: "active",
+          private: true,
+          resources: [],
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    const upstreamFetch = vi.fn(async (_url, options) => {
+      expect(options.headers.get("cookie")).toBe(
+        "wajo_ckan_session=signed-admin-session",
+      );
+      return new Response("authorized-private-resource", {
+        status: 200,
+        headers: {
+          "content-type":
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        },
+      });
+    });
+    vi.stubGlobal("fetch", upstreamFetch);
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-admin-session" },
+      }),
+      {
+        params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+      },
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(await response.text()).toBe("authorized-private-resource");
+    expect(ckanAction.mock.calls.map(([action]) => action)).toEqual([
+      "resource_show",
+      "package_show",
+    ]);
+  });
+
+  it("allows an authorized CKAN session to download the same private dataset resource URL without shared caching", async () => {
+    fixtures({ privateDataset: true });
     const upstreamFetch = vi.fn(async (_url, options) => {
       expect(options.headers.get("cookie")).toBe(
         "wajo_ckan_session=signed-admin-session",
@@ -274,6 +361,165 @@ describe("public CKAN resource download", () => {
         ([, , options]) => options.sessionCookie === "signed-admin-session",
       ),
     ).toBe(true);
+  });
+
+  it("does not let a CKAN session bypass an unsupported resource.private marker", async () => {
+    fixtures({ privateDataset: true, privateResource: true });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-admin-session" },
+      }),
+      {
+        params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+      },
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("fails closed for string-valued private markers from legacy/custom CKAN metadata", async () => {
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: datasetId,
+          name: filename,
+          state: "active",
+          private: "true",
+          url: `https://data.silirdev.com${downloadPath}`,
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-admin-session" },
+      }),
+      {
+        params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+      },
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("never caches download bytes at a shared browser or CDN cache", async () => {
+    fixtures();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response("public-xlsx", {
+            status: 200,
+            headers: {
+              "content-type":
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            },
+          }),
+      ),
+    );
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`),
+      {
+        params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+      },
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+  });
+
+  it("normalizes FileStore permission_download_file denial to 404", async () => {
+    fixtures({
+      privateDataset: true,
+      resourceUrl:
+        "https://ckan.example.test/file/c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url, options) => {
+        expect(options.headers.get("cookie")).toBe(
+          "wajo_ckan_session=signed-admin-session",
+        );
+        return new Response("not authorized", { status: 403 });
+      }),
+    );
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-admin-session" },
+      }),
+      {
+        params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+      },
+    );
+    expect(response.status).toBe(404);
+  });
+
+  it("records only session presence when CKAN rejects a forwarded admin session", async () => {
+    ckanAction.mockRejectedValue(
+      Object.assign(new Error("Not authorized"), { status: 403 }),
+    );
+    const consoleInfo = vi.spyOn(console, "info").mockImplementation(() => {});
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-admin-session" },
+      }),
+      {
+        params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+      },
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(consoleInfo).toHaveBeenCalledWith(
+      "public_resource_download_denied",
+      expect.objectContaining({
+        phase: "resource_show",
+        sessionForwarded: true,
+        upstreamStatus: 403,
+      }),
+    );
+    expect(JSON.stringify(consoleInfo.mock.calls)).not.toContain(
+      "signed-admin-session",
+    );
+  });
+
+  it("does not treat a present session cookie as permission when CKAN denies package_show", async () => {
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: datasetId,
+          name: filename,
+          state: "active",
+          private: false,
+          url: `https://data.silirdev.com${downloadPath}`,
+        };
+      if (action === "package_show") {
+        throw Object.assign(new Error("Not authorized"), { status: 403 });
+      }
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`, {
+        headers: { Cookie: "wajo_ckan_session=forged-or-expired-session" },
+      }),
+      {
+        params: Promise.resolve({ slug: datasetId, resourceId, filename }),
+      },
+    );
+
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(ckanAction.mock.calls.map(([action]) => action)).toEqual([
+      "resource_show",
+      "package_show",
+    ]);
   });
 
   it.each(["resource_show", "package_show"])(

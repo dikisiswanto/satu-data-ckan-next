@@ -82,6 +82,13 @@ if grep -qE '^[[:space:]]*env_file:[[:space:]]*\.env[[:space:]]*$|^[[:space:]]*-
   echo "Compose upstream masih merujuk .env lama; jalankan ulang bootstrap agar hanya .env.ckan digunakan." >&2
   exit 2
 fi
+# Older .env.ckan files may predate the public tile setting. Keep the public
+# GeoJSON preview on the same attributable OSM base layer instead of passing an
+# empty build argument (which otherwise produces a Compose warning).
+if ! grep -qE '^NEXT_PUBLIC_MAP_TILE_URL=.+$' "$ENV_FILE"; then
+  export NEXT_PUBLIC_MAP_TILE_URL='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+fi
+
 python3 "$ROOT/deploy/ckan/sync-env.py" "$ENV_FILE"
 python3 "$ROOT/deploy/ckan/render-upstream-env.py" "$ENV_FILE" "$UPSTREAM/.env.generated"
 

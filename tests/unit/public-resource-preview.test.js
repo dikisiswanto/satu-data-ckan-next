@@ -14,7 +14,7 @@ afterEach(() => {
 });
 
 describe("CKAN CSV preview session authorization", () => {
-  it("allows an authorized CKAN session to preview a private resource through the same URL", async () => {
+  it("allows an authorized CKAN session to preview a resource in a private dataset", async () => {
     ckanAction.mockImplementation(async (action, _params, options) => {
       expect(options.sessionCookie).toBe("signed-organization-member");
       if (action === "resource_show")
@@ -22,7 +22,6 @@ describe("CKAN CSV preview session authorization", () => {
           id: resourceId,
           package_id: "private-dataset",
           state: "active",
-          private: true,
           format: "CSV",
           url: `https://data.silirdev.com/dataset/private-dataset/resource/${resourceId}/download/data.csv`,
         };
@@ -52,6 +51,62 @@ describe("CKAN CSV preview session authorization", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect((await response.json()).result.state).toBe("ready");
+  });
+
+  it("does not let a CKAN session bypass an unsupported resource.private marker", async () => {
+    ckanAction.mockImplementation(async (action, _params, options) => {
+      expect(options.sessionCookie).toBe("signed-organization-member");
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: "private-dataset",
+          state: "active",
+          private: true,
+          format: "CSV",
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(
+        `https://data.silirdev.com/api/public/resource-preview?resource_id=${resourceId}`,
+        {
+          headers: { Cookie: "wajo_ckan_session=signed-organization-member" },
+        },
+      ),
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(ckanAction.mock.calls.map(([action]) => action)).toEqual([
+      "resource_show",
+    ]);
+  });
+
+  it("fails closed for string-valued resource.private markers despite a valid session", async () => {
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: "private-dataset",
+          state: "active",
+          private: "true",
+          format: "CSV",
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(
+        `https://data.silirdev.com/api/public/resource-preview?resource_id=${resourceId}`,
+        {
+          headers: { Cookie: "wajo_ckan_session=signed-organization-member" },
+        },
+      ),
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
   });
 
   it("keeps an anonymous request hidden when CKAN denies private resource metadata", async () => {

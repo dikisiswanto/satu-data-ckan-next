@@ -207,7 +207,10 @@ async function ContentBlock({ block, index }) {
     return (
       <section key={index} className="my-7">
         <h2 className="mb-3 text-xl font-semibold">{text(block.title, 180)}</h2>
-        <MarkdownContent content={text(block.markdown, 20_000)} />
+        <MarkdownContent
+          content={text(block.markdown, 20_000)}
+          lightboxGroup={`cms-rich-text-${index}`}
+        />
       </section>
     );
   }
@@ -222,6 +225,7 @@ async function ContentBlock({ block, index }) {
         <ImageLightbox
           src={src}
           alt={text(block.alt, 180) || "Ilustrasi konten"}
+          caption={text(block.caption, 300)}
           className="rounded-xl bg-slate-50"
         >
           <Image
@@ -329,6 +333,8 @@ async function ContentBlock({ block, index }) {
               <ImageLightbox
                 src={item.src}
                 alt={text(item.alt, 160) || "Dokumentasi"}
+                caption={text(item.caption, 220)}
+                group={`cms-gallery-${index}`}
                 className="rounded-lg bg-slate-50"
               >
                 <Image
@@ -367,7 +373,9 @@ export async function CmsContentBlocks({ blocks = [] }) {
 
 export function CmsPageBody({ page }) {
   const blocks = <CmsContentBlocks blocks={page.contentBlocks} />;
-  const markdown = <MarkdownContent content={page.content} />;
+  const markdown = (
+    <MarkdownContent content={page.content} lightboxGroup="cms-page-markdown" />
+  );
   const templateType = [
     "standard",
     "landing",

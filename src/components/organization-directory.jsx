@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import {
   ArrowUpRight,
@@ -31,11 +32,12 @@ function OrganizationMark({ organization }) {
   return (
     <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-[#d7e7f2] bg-[#edf5fb] text-[#245e83]">
       {imageUrl && !failed ? (
-        <img
+        <Image
           src={imageUrl}
           alt={`Logo ${organization.title || organization.name || "perangkat daerah"}`}
-          loading="lazy"
-          decoding="async"
+          width={44}
+          height={44}
+          unoptimized
           className="size-full object-contain p-1"
           onError={() => setFailed(true)}
         />
@@ -309,7 +311,7 @@ export function OrganizationDirectory({ organizations = [] }) {
                       {formatCount(datasetCount)} dataset
                     </span>
                   </div>
-                  <h3 className="mt-4 line-clamp-2 text-base font-semibold leading-6 text-ink">
+                  <h3 className="mt-4 break-words text-base font-semibold leading-6 text-ink">
                     <Link
                       href={`/organisasi/${organization.name}`}
                       className="decoration-primary/40 underline-offset-4 hover:text-primary hover:underline focus-visible:underline"

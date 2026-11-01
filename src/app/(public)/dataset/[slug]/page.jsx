@@ -31,6 +31,7 @@ import {
   CKAN_SESSION_COOKIE_NAME,
   normalizeCkanSessionCookieValue,
 } from "@/lib/ckan/session";
+import { isPrivateMarker } from "@/lib/ckan/privacy";
 import {
   publicResourceUrl,
   ckanResourceExtra,
@@ -146,7 +147,7 @@ export async function generateMetadata({ params }) {
       ).slice(0, 160),
       type: "article",
     }),
-    ...(dataset.private === true
+    ...(isPrivateMarker(dataset.private)
       ? { robots: { index: false, follow: false, noarchive: true } }
       : {}),
   };
@@ -295,7 +296,7 @@ export default async function DatasetDetailPage({ params }) {
       : {}),
     ...(tags.length ? { keywords: tags } : {}),
     ...(temporalCoverage ? { temporalCoverage } : {}),
-    isAccessibleForFree: dataset.private !== true,
+    isAccessibleForFree: !isPrivateMarker(dataset.private),
     distribution: resources.map((resource) => ({
       "@type": "DataDownload",
       name: ckanResourceName(resource),
@@ -771,6 +772,8 @@ export default async function DatasetDetailPage({ params }) {
                               resource.name ||
                               dataset.title
                             }
+                            caption={ckanResourceName(resource)}
+                            group={`dataset-${dataset.name}`}
                             className="bg-slate-50"
                           >
                             <Image

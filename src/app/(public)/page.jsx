@@ -926,7 +926,7 @@ function HomeIndicatorHighlights({ indicators = [] }) {
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
                   {indicator.metadata?.periodicity || "Indikator statistik"}
                 </p>
-                <h3 className="mt-3 line-clamp-2 min-h-12 text-base font-semibold leading-6 text-ink">
+                <h3 className="mt-3 min-h-12 break-words text-base font-semibold leading-6 text-ink">
                   <Link
                     href={`/statistik/${encodeURIComponent(indicator.name)}`}
                     className="hover:text-primary hover:underline"
@@ -1048,7 +1048,7 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
                       {item.category || "Infografik"}
                       {item.period ? ` · ${item.period}` : ""}
                     </p>
-                    <h4 className="mt-1 line-clamp-2 text-sm font-semibold leading-5">
+                    <h4 className="mt-1 break-words text-sm font-semibold leading-5">
                       <Link
                         href={`/infografik/${encodeURIComponent(item.name)}`}
                         className="hover:text-primary hover:underline"
@@ -1106,7 +1106,7 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
                       {item.category || "Publikasi"}
                       {item.period ? ` · ${item.period}` : ""}
                     </p>
-                    <h4 className="mt-1 line-clamp-2 text-sm font-semibold leading-5">
+                    <h4 className="mt-1 break-words text-sm font-semibold leading-5">
                       <Link
                         href={`/publikasi/${encodeURIComponent(item.name)}`}
                         className="hover:text-primary hover:underline"

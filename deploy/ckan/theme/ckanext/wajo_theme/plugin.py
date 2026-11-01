@@ -252,9 +252,41 @@ class WajoThemePlugin(plugins.SingletonPlugin):
         self._notify_public_portal("resource.created", resource)
         self._enqueue_resource_preview(context, resource)
 
+    def _ensure_geojson_resource_views(self, context, resource):
+        """Backfill default map views when an existing GeoJSON resource is edited.
+
+        CKAN applies ``ckan.views.default_views`` automatically on create, but
+        changing that setting does not retrofit old ResourceView records. The
+        resource-update path gives legacy .geojson records a safe repair path:
+        after format normalization, ask CKAN's own default-view action to add
+        any missing configured views (without manufacturing duplicate views).
+        """
+        resource_id = self._record_value(resource, "id")
+        resource_format = str(self._record_value(resource, "format") or "").strip().lower()
+        mimetype = str(self._record_value(resource, "mimetype") or "").split(";", 1)[0].strip().lower()
+        if not resource_id or not (
+            resource_format == "geojson"
+            or mimetype in {"application/geo+json", "application/vnd.geo+json"}
+        ):
+            return
+
+        view_context = dict(context or {})
+        view_context["ignore_auth"] = True
+        try:
+            created = toolkit.get_action("resource_create_default_resource_views")(
+                view_context,
+                {"resource": resource},
+            )
+            if created:
+                LOG.info("geojson_default_views_backfilled resource_id=%s count=%s", resource_id, len(created))
+        except Exception:
+            # A preview problem must not invalidate an otherwise valid metadata edit.
+            LOG.warning("geojson_default_views_backfill_failed resource_id=%s", resource_id, exc_info=True)
+
     def after_resource_update(self, context, resource):
         self._notify_public_portal("resource.updated", resource)
         self._enqueue_resource_preview(context, resource)
+        self._ensure_geojson_resource_views(context, resource)
 
     def after_resource_delete(self, context, resources):
         self._notify_public_portal("resource.deleted")
@@ -336,6 +368,59 @@ class WajoThemePlugin(plugins.SingletonPlugin):
             return {"success": allowed, "msg": "Akses media editorial ditolak."}
 
         return {"wajo_media_show": wajo_media_show}
+
+    def make_error_log_middleware(self, app, config):
+        """Return CKAN's wrapped application unchanged.
+
+        The theme has no custom error-log middleware, but CKAN 2.12 requires
+        every IMiddleware implementation to expose this hook. Returning the
+        wrapped WSGI app preserves CKAN's standard exception logging.
+        """
+        return app
+
+    @staticmethod
+    def _normalize_geojson_resource_format(resource, current=None):
+        """Normalize .geojson uploads so CKAN can create their resource views.
+
+        GeoView selects files by their resource ``format`` rather than only
+        their filename. A user can upload a valid .geojson file while leaving
+        that optional metadata blank or choosing the generic JSON format.
+        """
+        if not isinstance(resource, dict):
+            return
+        combined = dict(current or {})
+        combined.update(resource)
+        upload = combined.get("upload")
+        upload_name = getattr(upload, "filename", "") if upload is not None else ""
+        names = (
+            combined.get("name"),
+            combined.get("url"),
+            upload_name,
+        )
+        mime_types = (
+            combined.get("mimetype"),
+            combined.get("mimetype_inner"),
+        )
+        is_geojson = any(
+            str(value or "").split("?", 1)[0].split("#", 1)[0].lower().endswith(".geojson")
+            for value in names
+        ) or any(
+            str(value or "").split(";", 1)[0].strip().lower() in {
+                "application/geo+json",
+                "application/vnd.geo+json",
+            }
+            for value in mime_types
+        )
+        if is_geojson:
+            resource["format"] = "GeoJSON"
+
+    def before_resource_create(self, context, resource):
+        """Set a canonical format before CKAN chooses default resource views."""
+        self._normalize_geojson_resource_format(resource)
+
+    def before_resource_update(self, context, current, resource):
+        """Keep GeoJSON format canonical when a resource is edited."""
+        self._normalize_geojson_resource_format(resource, current)
 
     def make_middleware(self, app, config):
         """Gate every browser/API route on CKAN_HOST while leaving internal CKAN API use intact.

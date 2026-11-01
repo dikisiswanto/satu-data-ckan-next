@@ -48,7 +48,7 @@ export default async function BeritaPage() {
               <span className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
                 {featured.category || "Artikel pilihan"}
               </span>
-              <h2 className="mt-3 line-clamp-2 min-h-[2.4em] text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+              <h2 className="mt-3 min-h-[2.4em] break-words text-2xl font-bold tracking-tight text-ink sm:text-3xl">
                 {featured.title}
               </h2>
               <p className="mt-4 line-clamp-4 min-h-[7rem] leading-7 text-muted">

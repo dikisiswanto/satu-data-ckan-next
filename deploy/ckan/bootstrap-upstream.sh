@@ -349,6 +349,9 @@ values["CKAN__VIEWS__DEFAULT_VIEWS"] = "datatables_view image_view text_view geo
 values["CKANEXT__SPATIAL__COMMON_MAP__TYPE"] = "custom"
 values["CKANEXT__SPATIAL__COMMON_MAP__CUSTOM__URL"] = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 values["CKANEXT__SPATIAL__COMMON_MAP__ATTRIBUTION"] = "© OpenStreetMap contributors"
+# Keep CKAN's native GeoJSON viewer aligned with its documented 25 MiB limit.
+# The viewer relies on resource.size, so the upload path must retain CKAN FileStore metadata.
+values["CKANEXT__GEOVIEW__GEOJSON__MAX_FILE_SIZE"] = values.get("CKANEXT__GEOVIEW__GEOJSON__MAX_FILE_SIZE", "").strip() or str(25 * 1024 * 1024)
 
 # Append missing keys and replace existing keys without destroying comments/order.
 written = set()

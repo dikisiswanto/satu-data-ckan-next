@@ -1,11 +1,15 @@
+import { isPrivateMarker } from "@/lib/ckan/privacy";
+
 /**
- * Keep CKAN-native public responses useful without exposing separately private
- * resources or staff identifiers that are not needed by public consumers.
+ * Sanitize CKAN responses before they cross the public Next.js boundary.
+ *
+ * CKAN core authorizes Resource visibility through the parent Package. It does
+ * not provide a per-resource private ACL. A non-core `resource.private` marker
+ * therefore must never be exposed merely because a browser has a CKAN session.
+ * If per-resource privacy is introduced later, it must be backed by a CKAN
+ * auth plugin before this sanitizer can be relaxed.
  */
-export function sanitizePublicPackage(
-  pkg,
-  { includePrivateResources = false } = {},
-) {
+export function sanitizePublicPackage(pkg) {
   if (!pkg || typeof pkg !== "object" || Array.isArray(pkg)) return pkg;
   if (!Array.isArray(pkg.resources)) return pkg;
   return {
@@ -13,23 +17,18 @@ export function sanitizePublicPackage(
     resources: pkg.resources.filter(
       (resource) =>
         resource &&
-        (includePrivateResources || resource.private !== true) &&
+        !isPrivateMarker(resource.private) &&
         (!resource.state || resource.state === "active"),
     ),
   };
 }
 
-export function sanitizePublicSearchResult(
-  result,
-  { includePrivateResources = false } = {},
-) {
+export function sanitizePublicSearchResult(result) {
   if (!result || typeof result !== "object" || !Array.isArray(result.results))
     return result;
   return {
     ...result,
-    results: result.results.map((pkg) =>
-      sanitizePublicPackage(pkg, { includePrivateResources }),
-    ),
+    results: result.results.map((pkg) => sanitizePublicPackage(pkg)),
   };
 }
 

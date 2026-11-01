@@ -60,7 +60,7 @@ export function DatasetCard({ dataset }) {
             size={17}
           />
         </div>
-        <h2 className="mt-4 text-lg font-semibold leading-snug">
+        <h2 className="mt-4 break-words text-lg font-semibold leading-snug">
           <Link
             className="rounded-sm hover:text-primary focus-visible:outline-none"
             href={`/dataset/${dataset.name}`}

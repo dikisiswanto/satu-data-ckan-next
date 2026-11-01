@@ -58,7 +58,7 @@ export function CmsContentCard({ page, href, kind = "Halaman informasi" }) {
               </span>
             ) : null}
           </div>
-          <h2 className="mt-3 line-clamp-2 text-lg font-semibold leading-6 text-ink group-hover:text-primary">
+          <h2 className="mt-3 break-words text-lg font-semibold leading-6 text-ink group-hover:text-primary">
             {page.title}
           </h2>
           <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">

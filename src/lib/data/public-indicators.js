@@ -7,6 +7,7 @@ import {
   searchPackages,
 } from "@/lib/ckan/client";
 import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
+import { isPrivateMarker } from "@/lib/ckan/privacy";
 
 /**
  * CKAN-native publishing convention for public statistics.
@@ -33,7 +34,7 @@ export function isPublicIndicatorPackage(pkg) {
   return Boolean(
     pkg &&
     (!pkg.state || pkg.state === "active") &&
-    pkg.private !== true &&
+    !isPrivateMarker(pkg.private) &&
     (pkg.tags || []).some(
       (tag) => (tag.name || tag.display_name) === INDICATOR_TAG,
     ),
@@ -109,7 +110,7 @@ export function getIndicatorResource(pkg = {}) {
       (!resource.state || resource.state === "active") &&
       resource.datastore_active === true &&
       resource.id &&
-      !resource.private,
+      !isPrivateMarker(resource.private),
   );
   return (
     resources.find((resource) => {
@@ -236,7 +237,7 @@ export async function getPublishedIndicatorsResult({
       rows: safeLimit,
       start: (safePage - 1) * safeLimit,
       sort: "metadata_modified desc",
-      fq: [TAG_FQ],
+      fqList: [TAG_FQ],
     });
     const packages = (
       Array.isArray(result.results) ? result.results : []

@@ -16,11 +16,11 @@ Sebelum menerbitkan dataset, periksa judul, deskripsi, organisasi, lisensi, peri
 
 ## Publikasi data
 
-Menu berikut memfilter dataset berdasarkan tag yang dikenali portal publik. Ini bukan penyimpanan terpisah. Ketika membuat data dari pintasan tipe konten, `portal_type` dipilih otomatis dan tag penemuan publik akan diselaraskan saat formulir berubah/disimpan.
+Menu berikut adalah katalog khusus yang memfilter Package CKAN berdasarkan `portal_type` dan tag portal. Penyimpanannya tetap satu di CKAN, bukan tiga database terpisah. Katalog publik `/dataset` hanya berisi tipe dataset umum dan mengecualikan `indikator`, `infografik`, serta `publikasi`; masing-masing tampil pada laman khusus agar pencarian tidak bercampur dan hitungan tidak ganda. Ketika membuat record dari pintasan tipe konten, `portal_type` dipilih otomatis dan tag penemuan publik diselaraskan saat formulir berubah/disimpan.
 
 - **Publikasi & laporan:** gunakan tag `portal-publikasi`; isi penerbit, tanggal rilis, periode, lisensi, ringkasan, dan file publikasi.
 - **Indikator & statistik:** gunakan tag `portal-indikator`; isi definisi, satuan, rumus/metodologi, cakupan wilayah, periode, frekuensi, dan resource tabular.
-- **Infografik:** gunakan tag `portal-infografik`; tambahkan gambar utama, deskripsi, periode, atribusi, dan dataset sumber.
+- **Infografik:** gunakan tag `portal-infografik`; tambahkan gambar utama, deskripsi, periode, atribusi, dan dataset sumber. Jika visual hanya lampiran dari satu dataset, masukkan sebagai resource pada dataset tersebut, bukan membuat record infografik terpisah.
 - **Data geospasial:** pilih tipe `geospasial`; lengkapi cakupan wilayah/metodologi dan unggah GeoJSON, GeoPackage, KML/KMZ, SHP dalam ZIP, atau data berkoordinat. Saat ini data geospasial ditemukan melalui katalog/detail dataset umum, belum mempunyai halaman listing khusus bertag.
 
 ## Halaman dan informasi

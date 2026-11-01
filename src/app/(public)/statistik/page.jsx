@@ -91,7 +91,7 @@ export default async function StatistikPage({ searchParams }) {
                     <ChartNoAxesColumn size={18} aria-hidden="true" />
                   </span>
                 </div>
-                <h2 className="mt-4 text-lg font-semibold leading-6">
+                <h2 className="mt-4 break-words text-lg font-semibold leading-6">
                   <Link
                     href={`/statistik/${encodeURIComponent(indicator.name)}`}
                     className="rounded-sm hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"

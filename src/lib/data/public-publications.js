@@ -7,6 +7,7 @@ import {
   searchPackages,
 } from "@/lib/ckan/client";
 import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
+import { isPrivateMarker } from "@/lib/ckan/privacy";
 import { publicResourceUrl } from "@/lib/ckan/public-resource-url";
 
 export const PUBLICATION_TAG =
@@ -16,7 +17,7 @@ export function isPublicPublicationPackage(pkg) {
   return Boolean(
     pkg &&
     (!pkg.state || pkg.state === "active") &&
-    pkg.private !== true &&
+    !isPrivateMarker(pkg.private) &&
     (pkg.tags || []).some(
       (tag) => (tag.name || tag.display_name) === PUBLICATION_TAG,
     ),
@@ -28,7 +29,7 @@ export function getPublicationResources(pkg = {}) {
     (resource) =>
       resource &&
       (!resource.state || resource.state === "active") &&
-      resource.private !== true &&
+      !isPrivateMarker(resource.private) &&
       resource.url,
   );
 }
@@ -97,7 +98,7 @@ export async function getPublishedPublicationsResult({
       rows: safeLimit,
       start: (safePage - 1) * safeLimit,
       sort: "metadata_modified desc",
-      fq: [`tags:${PUBLICATION_TAG}`],
+      fqList: [`tags:${PUBLICATION_TAG}`],
     });
     const packages = (
       Array.isArray(result.results) ? result.results : []

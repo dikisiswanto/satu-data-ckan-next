@@ -68,6 +68,8 @@ export default async function InfografikPage({ searchParams }) {
                   <ImageLightbox
                     src={imageUrl}
                     alt={item.title}
+                    caption={item.category || item.period || "Infografik"}
+                    group={`infographic-list-${item.name}`}
                     className="aspect-[4/3] bg-slate-50"
                   >
                     <div className="relative h-full w-full">
@@ -96,7 +98,7 @@ export default async function InfografikPage({ searchParams }) {
                     <span>{item.category}</span>
                     {item.period ? <span>{item.period}</span> : null}
                   </div>
-                  <h2 className="mt-3 text-lg font-semibold leading-6 text-ink">
+                  <h2 className="mt-3 break-words text-lg font-semibold leading-6 text-ink">
                     <Link
                       href={`/infografik/${encodeURIComponent(item.name)}`}
                       className="rounded-sm hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"

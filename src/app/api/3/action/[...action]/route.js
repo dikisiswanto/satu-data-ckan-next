@@ -6,7 +6,7 @@ import {
   sanitizePublicSearchResult,
 } from "@/lib/ckan/public-api-sanitize";
 import { getCkanSessionCookieFromRequest } from "@/lib/ckan/session";
-import { resolveAuthorizedPackageResources } from "@/lib/ckan/viewer-package";
+import { isPrivateMarker } from "@/lib/ckan/privacy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -259,7 +259,9 @@ function notPublicRecord(
 
 function isPublicPackage(pkg) {
   return Boolean(
-    pkg && pkg.private !== true && (!pkg.state || pkg.state === "active"),
+    pkg &&
+    !isPrivateMarker(pkg.private) &&
+    (!pkg.state || pkg.state === "active"),
   );
 }
 
@@ -269,7 +271,8 @@ async function getPublicRecord(action, params) {
   } catch (error) {
     // Anonymous callers get an indistinguishable 404 for private/unpublished
     // records. CKAN itself remains the authority for authenticated access.
-    if (error?.status === 403 || error?.status === 404) throw notPublicRecord();
+    if (error?.status === 401 || error?.status === 403 || error?.status === 404)
+      throw notPublicRecord();
     throw error;
   }
 }
@@ -281,7 +284,8 @@ async function getViewerRecord(action, params, sessionCookie) {
     // A valid CKAN session can read a private record only when CKAN authorizes
     // that exact user. Expired/forged sessions and users without permission
     // remain hidden behind the same not-found response as anonymous visitors.
-    if (error?.status === 403 || error?.status === 404) throw notPublicRecord();
+    if (error?.status === 401 || error?.status === 403 || error?.status === 404)
+      throw notPublicRecord();
     throw error;
   }
 }
@@ -313,13 +317,13 @@ async function requireViewerResource(identifier, sessionCookie) {
   const resource = sessionCookie
     ? await getViewerRecord("resource_show", { id: identifier }, sessionCookie)
     : await getPublicRecord("resource_show", { id: identifier });
-  if (
-    !isActiveRecord(resource) ||
-    (!sessionCookie && resource.private === true)
-  ) {
+  // CKAN core has no independent private-resource ACL: resource_show checks
+  // its parent package. Never treat a session cookie as authority for a
+  // non-core `resource.private` marker; keep that marker fail-closed.
+  if (!isActiveRecord(resource) || isPrivateMarker(resource.private)) {
     throw notPublicRecord();
   }
-  const packageIdentifier = resource.package_id || resource.package_name;
+  const packageIdentifier = resource.package_id;
   if (!packageIdentifier) throw notPublicRecord();
   await requireViewerPackage(packageIdentifier, sessionCookie);
   return resource;
@@ -511,26 +515,13 @@ export async function GET(request, { params }) {
       const searchRows = Array.isArray(searchResult?.results)
         ? searchResult.results
         : [];
-      const authorizedRows = sessionCookie
-        ? await Promise.all(
-            searchRows.map((pkg) =>
-              resolveAuthorizedPackageResources(pkg, sessionCookie),
-            ),
-          )
-        : searchRows;
-      result = sanitizePublicSearchResult(
-        { ...searchResult, results: authorizedRows },
-        { includePrivateResources: Boolean(sessionCookie) },
-      );
+      result = sanitizePublicSearchResult({
+        ...searchResult,
+        results: searchRows,
+      });
     } else if (action === "package_show") {
       const pkg = await requireViewerPackage(params.id, sessionCookie);
-      const visiblePkg = await resolveAuthorizedPackageResources(
-        pkg,
-        sessionCookie,
-      );
-      result = sanitizePublicPackage(visiblePkg, {
-        includePrivateResources: Boolean(sessionCookie),
-      });
+      result = sanitizePublicPackage(pkg);
     } else if (action === "package_activity_list") {
       // The same URL works for public and private datasets. CKAN checks the
       // forwarded browser session before returning activity for private data.
@@ -542,16 +533,21 @@ export async function GET(request, { params }) {
       result = await requireViewerResource(params.id, sessionCookie);
     } else if (action === "file_show") {
       result = await getViewerRecord(action, params, sessionCookie);
-      if (
-        !isActiveRecord(result) ||
-        (!sessionCookie && result.private === true)
-      )
+      if (!isActiveRecord(result) || isPrivateMarker(result.private))
         throw notPublicRecord();
-      const resourceId = result.resource_id || result.resource?.id;
-      if (resourceId) await requireViewerResource(resourceId, sessionCookie);
-      else if (result.package_id)
-        await requireViewerPackage(result.package_id, sessionCookie);
-      else throw notPublicRecord();
+      const owner =
+        result.owner_info && typeof result.owner_info === "object"
+          ? result.owner_info
+          : {};
+      const ownerType = String(
+        owner.owner_type || result.owner_type || "",
+      ).toLowerCase();
+      const ownerId = String(owner.owner_id || result.owner_id || "");
+      if (!ownerId || (ownerType !== "resource" && ownerType !== "package"))
+        throw notPublicRecord();
+      if (ownerType === "resource")
+        await requireViewerResource(ownerId, sessionCookie);
+      else await requireViewerPackage(ownerId, sessionCookie);
     } else if (action === "datastore_search") {
       await requireViewerResource(params.resource_id, sessionCookie);
       result = await ckanAction(action, params, {
@@ -575,7 +571,9 @@ export async function GET(request, { params }) {
       }),
     });
   } catch (error) {
-    const status = [400, 403, 404, 409, 422].includes(Number(error?.status))
+    const status = [400, 401, 403, 404, 409, 422].includes(
+      Number(error?.status),
+    )
       ? Number(error.status)
       : 502;
     const message =

@@ -13,6 +13,7 @@ const params = { params: Promise.resolve({ fileId }) };
 function fixtures({
   privateDataset = false,
   privateResource = false,
+  privateFile = false,
   mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 } = {}) {
   ckanAction.mockImplementation(async (action) => {
@@ -21,6 +22,7 @@ function fixtures({
         id: fileId,
         name: "data-menara-wajo.xlsx",
         content_type: mime,
+        private: privateFile,
         owner_info: { owner_type: "resource", owner_id: resourceId },
       };
     if (action === "resource_show")
@@ -102,8 +104,8 @@ describe("public CKAN File API proxy", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
-  it("allows the same FileStore URL for a CKAN-authorized user and disables shared caching", async () => {
-    fixtures({ privateDataset: true, privateResource: true });
+  it("allows a CKAN-authorized private dataset and disables shared caching", async () => {
+    fixtures({ privateDataset: true });
     const fetcher = vi.fn(async (_url, options) => {
       expect(options.headers.get("cookie")).toBe(
         "wajo_ckan_session=signed-editor-session",
@@ -133,6 +135,157 @@ describe("public CKAN File API proxy", () => {
     ).toBe(true);
   });
 
+  it("does not treat a present session cookie as permission when CKAN denies the parent dataset", async () => {
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "file_show")
+        return {
+          id: fileId,
+          name: "data-menara-wajo.xlsx",
+          content_type:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          owner_info: { owner_type: "resource", owner_id: resourceId },
+        };
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: datasetId,
+          state: "active",
+        };
+      if (action === "package_show") {
+        throw Object.assign(new Error("Not authorized"), { status: 403 });
+      }
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+
+    const response = await GET(
+      new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
+        headers: { Cookie: "wajo_ckan_session=forged-or-expired-session" },
+      }),
+      params,
+    );
+
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(ckanAction.mock.calls.map(([action]) => action)).toEqual([
+      "file_show",
+      "resource_show",
+      "package_show",
+    ]);
+  });
+
+  it("allows a CKAN-authorized private dataset when package_show omits its embedded resource summary", async () => {
+    fixtures({ privateDataset: true });
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "file_show")
+        return {
+          id: fileId,
+          name: "data-menara-wajo.xlsx",
+          content_type:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          owner_info: { owner_type: "resource", owner_id: resourceId },
+        };
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: datasetId,
+          state: "active",
+        };
+      if (action === "package_show")
+        return {
+          id: datasetId,
+          state: "active",
+          private: true,
+          resources: [],
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn(async (_url, options) => {
+      expect(options.headers.get("cookie")).toBe(
+        "wajo_ckan_session=signed-editor-session",
+      );
+      return new Response("private-file", {
+        status: 200,
+        headers: {
+          "content-type":
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        },
+      });
+    });
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+      }),
+      params,
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(await response.text()).toBe("private-file");
+  });
+
+  it("allows a package-owned FileStore file only for the exact CKAN-authorized package", async () => {
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "file_show")
+        return {
+          id: fileId,
+          name: "package-attachment.pdf",
+          content_type: "application/pdf",
+          owner_info: { owner_type: "package", owner_id: datasetId },
+        };
+      if (action === "package_show")
+        return {
+          id: datasetId,
+          name: "dataset-private",
+          state: "active",
+          private: true,
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn(async (_url, options) => {
+      expect(options.headers.get("cookie")).toBe(
+        "wajo_ckan_session=signed-editor-session",
+      );
+      return new Response("package-file", {
+        status: 200,
+        headers: { "content-type": "application/pdf" },
+      });
+    });
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+      }),
+      params,
+    );
+    expect(response.status).toBe(200);
+    expect(ckanAction.mock.calls.map(([action]) => action)).toEqual([
+      "file_show",
+      "package_show",
+    ]);
+  });
+
+  it("rejects a package-owned FileStore file when the CKAN owner ID is not the requested package", async () => {
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "file_show")
+        return {
+          id: fileId,
+          content_type: "application/pdf",
+          owner_info: { owner_type: "package", owner_id: "another-package" },
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`),
+      params,
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it("rejects non-public CKAN ownership types and unsupported active content", async () => {
     ckanAction.mockResolvedValue({
       id: fileId,
@@ -155,6 +308,119 @@ describe("public CKAN File API proxy", () => {
     );
     expect(htmlResponse.status).toBe(415);
   });
+
+  it("does not treat a CKAN session as authorization for a non-core resource.private marker", async () => {
+    fixtures({ privateDataset: true, privateResource: true });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+      }),
+      params,
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("does not let a CKAN session bypass an unsupported file.private marker", async () => {
+    fixtures({ privateDataset: true, privateFile: true });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+      }),
+      params,
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("fails closed for string-valued private FileStore and Resource markers", async () => {
+    fixtures({ privateDataset: true });
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "file_show")
+        return {
+          id: fileId,
+          content_type: "application/pdf",
+          private: "true",
+          owner_info: { owner_type: "resource", owner_id: resourceId },
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
+        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+      }),
+      params,
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("never caches successful public FileStore bytes in a shared cache", async () => {
+    fixtures();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response("public-file", {
+            status: 200,
+            headers: {
+              "content-type":
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            },
+          }),
+      ),
+    );
+    const response = await GET(
+      new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`),
+      params,
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+  });
+
+  it("fails closed when FileStore owner metadata is missing or unsupported", async () => {
+    ckanAction.mockResolvedValue({
+      id: fileId,
+      content_type: "application/pdf",
+      resource_id: resourceId,
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal("fetch", fetcher);
+    const response = await GET(
+      new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`),
+      params,
+    );
+    expect(response.status).toBe(404);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it.each([401, 403, 404, 410])(
+    "normalizes CKAN FileStore %s responses to 404 after metadata authorization",
+    async (status) => {
+      fixtures({ privateDataset: true });
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => new Response("denied", { status })),
+      );
+      const response = await GET(
+        new Request(
+          `https://data.silirdev.com/api/public/ckan-file/${fileId}`,
+          {
+            headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+          },
+        ),
+        params,
+      );
+      expect(response.status).toBe(404);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+    },
+  );
 
   it("preserves range requests and supports HEAD", async () => {
     fixtures();

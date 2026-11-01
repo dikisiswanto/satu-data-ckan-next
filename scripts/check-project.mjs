@@ -110,7 +110,7 @@ const required = [
   "src/app/api/3/action/[...action]/route.js",
   "src/app/(public)/api-data/page.jsx",
   "docs/API.md",
-  "docs/IMAGE-LIGHTBOX-AND-CATALOG-SEPARATION-2026-10-31.md",
+  "docs/IMAGE-LIGHTBOX-AND-CATALOG.md",
   "src/app/(public)/statistik/page.jsx",
   "src/app/(public)/statistik/[slug]/page.jsx",
   "src/app/(public)/infografik/page.jsx",
@@ -271,7 +271,7 @@ const checks = [
   ],
   [
     "src/components/ui/image-lightbox.jsx",
-    /(?=[\s\S]*createPortal)(?=[\s\S]*aria-modal="true")(?=[\s\S]*MAX_ZOOM = 4)(?=[\s\S]*Escape)[\s\S]*/,
+    /(?=[\s\S]*createPortal)(?=[\s\S]*aria-modal="true")(?=[\s\S]*MAX_ZOOM = 5)(?=[\s\S]*Escape)[\s\S]*/,
     "Lightbox gambar harus modal aksesibel dengan close Escape dan batas zoom.",
   ],
   [
@@ -281,8 +281,8 @@ const checks = [
   ],
   [
     "src/lib/data/public.js",
-    /buildDatasetCatalogExclusionFilters[\s\S]*includePrivateResources/,
-    "Katalog dataset umum harus mengecualikan produk portal khusus tanpa mengubah kontrol akses sesi.",
+    /buildDatasetCatalogExclusionFilters[\s\S]*sanitizePublicPackage/,
+    "Katalog dataset harus tetap mengecualikan produk portal khusus dan menyaring marker privasi resource non-core.",
   ],
   [
     "src/lib/data/public.js",
@@ -371,18 +371,23 @@ const checks = [
   ],
   [
     "src/lib/ckan/public-api-sanitize.js",
-    /resource\.private !== true[\s\S]*resource\.state === "active"[\s\S]*delete safeEntry\.user[\s\S]*delete safeEntry\.user_id[\s\S]*delete safeEntry\.data/,
+    /!isPrivateMarker\(resource\.private\)[\s\S]*resource\.state === "active"[\s\S]*delete safeEntry\.user[\s\S]*delete safeEntry\.user_id[\s\S]*delete safeEntry\.data/,
     "Sanitasi API publik harus membuang resource private/nonaktif, identitas aktor, dan snapshot aktivitas.",
   ],
   [
+    "src/lib/ckan/privacy.js",
+    /export function isPrivateMarker[\s\S]*"true"[\s\S]*"private"/,
+    "Penanda privasi legacy harus dinormalisasi konsisten tanpa menganggap string false sebagai true.",
+  ],
+  [
     "src/lib/ckan/client.js",
-    /sanitizePublicSearchResult[\s\S]*includePrivateResources[\s\S]*sessionCookie[\s\S]*ckanAction\("package_search", params, sessionCookie \? \{ revalidate: 0, sessionCookie \} : \{\}\)/,
-    "Search CKAN harus memakai session admin dan hanya mempertahankan kandidat resource privat pada jalur autentikasi.",
+    /sanitizePublicSearchResult[\s\S]*sessionCookie[\s\S]*ckanAction\("package_search", params, sessionCookie \? \{ revalidate: 0, sessionCookie \} : \{\}\)/,
+    "Search CKAN harus memakai sesi browser untuk meminta dataset privat; CKAN sendiri yang mengotorisasi dataset.",
   ],
   [
     "src/lib/data/public.js",
-    /includePrivateResources: Boolean\(sessionCookie\)[\s\S]*searchRows\.map\(\(pkg\) => resolveAuthorizedPackageResources\(pkg, sessionCookie\)\)/,
-    "Listing dataset admin harus memeriksa setiap resource privat melalui resource_show sebelum dirender.",
+    /searchRows\.map\(\(pkg\) => sanitizePublicPackage\(pkg\)\)/,
+    "Listing dataset harus selalu menyaring marker resource.private yang belum memiliki ACL CKAN.",
   ],
   [
     "src/app/(public)/organisasi/[slug]/page.jsx",
@@ -433,6 +438,11 @@ const checks = [
     "deploy/ckan/bootstrap-upstream.sh",
     /CKAN_VERSION[\s\S]*2\.12\.1[\s\S]*scheming_datasets[\s\S]*structured_data[\s\S]*geojson_view[\s\S]*harvest[\s\S]*ckan_harvester[\s\S]*datastore[\s\S]*xloader[\s\S]*CKANEXT__XLOADER__JOBS_DB__URI[\s\S]*CKANEXT__XLOADER__SITE_URL/,
     "Bootstrap harus mematok CKAN 2.12.1, mengaktifkan XLoader dan menjaga konfigurasi jobs.",
+  ],
+  [
+    "deploy/ckan/bootstrap-upstream.sh",
+    /CKANEXT__GEOVIEW__GEOJSON__MAX_FILE_SIZE[\s\S]*25 \* 1024 \* 1024/,
+    "CKAN GeoJSON viewer must have an explicit safe file-size limit.",
   ],
   [
     "deploy/ckan/docker-compose.override.yml",
@@ -583,7 +593,7 @@ const cmsChecks = [
   ],
   [
     "src/app/api/public/ckan-file/[fileId]/route.js",
-    /buildCkanSessionCookieHeader[\s\S]*function isVisibleToViewer[\s\S]*private !== true[\s\S]*async function verifyFileOwner[\s\S]*resource_show[\s\S]*package_show[\s\S]*file_show[\s\S]*redirect:\s*"manual"[\s\S]*private, no-store/,
+    /buildCkanSessionCookieHeader[\s\S]*function isVisiblePackageToViewer[\s\S]*!isPrivateMarker\(record\.private\)[\s\S]*async function verifyFileOwner[\s\S]*resource_show[\s\S]*package_show[\s\S]*file_show[\s\S]*permission_download_file[\s\S]*redirect:\s*"manual"[\s\S]*private, no-store/,
     "File API harus memeriksa izin resource/dataset melalui CKAN, meneruskan sesi browser, dan melarang cache bersama untuk file privat.",
   ],
   [

@@ -4,6 +4,7 @@ import {
   buildCkanSessionCookieHeader,
   getCkanSessionCookieFromRequest,
 } from "@/lib/ckan/session";
+import { isPrivateMarker } from "@/lib/ckan/privacy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -117,9 +118,11 @@ export async function GET(request) {
       { id: resourceId },
       ckanOptions,
     );
+    // CKAN core does not authorize a separate resource.private marker.
+    // Do not turn an authenticated dataset session into resource-level access.
     if (
       !resource ||
-      (!sessionCookie && resource.private === true) ||
+      isPrivateMarker(resource.private) ||
       (resource.state && resource.state !== "active")
     ) {
       return json(
@@ -132,7 +135,7 @@ export async function GET(request) {
         404,
       );
     }
-    const packageId = resource.package_id || resource.package_name;
+    const packageId = resource.package_id;
     if (!packageId)
       return json(
         {
@@ -148,7 +151,7 @@ export async function GET(request) {
     );
     if (
       !pkg ||
-      (!sessionCookie && pkg.private === true) ||
+      (!sessionCookie && isPrivateMarker(pkg.private)) ||
       (pkg.state && pkg.state !== "active")
     ) {
       return json(
@@ -199,6 +202,17 @@ export async function GET(request) {
     });
     // Do not follow redirects to arbitrary storage hosts. DataStore/XLoader
     // remains the supported full preview path for object-storage resources.
+    if ([401, 403, 404, 410].includes(response.status)) {
+      return json(
+        {
+          success: false,
+          error: {
+            message: "Resource tidak tersedia atau tidak dapat diakses.",
+          },
+        },
+        404,
+      );
+    }
     if (response.status !== 200 && response.status !== 206) {
       return json({
         success: true,
@@ -235,7 +249,7 @@ export async function GET(request) {
     });
   } catch (error) {
     const status = Number(error?.status || 0);
-    if (status === 404 || status === 403) {
+    if (status === 401 || status === 404 || status === 403) {
       return json(
         {
           success: false,

@@ -3,6 +3,7 @@ import {
   buildCkanSessionCookieHeader,
   getCkanSessionCookieFromRequest,
 } from "@/lib/ckan/session";
+import { isPrivateMarker } from "@/lib/ckan/privacy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -57,10 +58,12 @@ function isActiveRecord(record) {
   return Boolean(record && record.state === "active");
 }
 
-function isVisibleToViewer(record, sessionCookie) {
+function isVisiblePackageToViewer(record, sessionCookie) {
+  // A forwarded session identifies the user; CKAN's successful package_show
+  // call below is the authorization decision for private datasets.
   return (
     isActiveRecord(record) &&
-    (Boolean(sessionCookie) || record.private !== true)
+    (Boolean(sessionCookie) || !isPrivateMarker(record.private))
   );
 }
 
@@ -86,7 +89,7 @@ async function verifyFileOwner(file, fileId, sessionCookie) {
   if (
     !file ||
     file.id !== fileId ||
-    (!sessionCookie && file.private === true) ||
+    isPrivateMarker(file.private) ||
     (file.state && file.state !== "active")
   )
     return false;
@@ -99,71 +102,44 @@ async function verifyFileOwner(file, fileId, sessionCookie) {
     owner.owner_type || file.owner_type || "",
   ).toLowerCase();
   const ownerId = String(owner.owner_id || file.owner_id || "");
-
-  // The dedicated editorial media route has a separate owner check, and group
-  // logos use CKAN's public-download/groups FileStore path. Do not broaden this
-  // generic proxy to those owner types.
-  if (
-    ownerType === "wajo_media" ||
-    ownerType === "group" ||
-    ownerType === "user" ||
-    ownerType === "organization"
-  )
+  if (!ownerId || (ownerType !== "resource" && ownerType !== "package"))
     return false;
 
-  const resourceId =
-    ownerType === "resource" ? ownerId : String(file.resource_id || "");
-  const packageId =
-    ownerType === "package" ? ownerId : String(file.package_id || "");
-
-  if (resourceId) {
-    if (ownerType === "package" && packageId && ownerId !== packageId)
-      return false;
-    const ckanOptions = { revalidate: 0, sessionCookie };
+  const ckanOptions = { revalidate: 0, sessionCookie };
+  if (ownerType === "resource") {
     const resource = await ckanAction(
       "resource_show",
-      { id: resourceId },
+      { id: ownerId },
       ckanOptions,
     );
+    // CKAN core Resource visibility inherits Package visibility. A custom
+    // resource.private flag has no built-in ACL and is therefore always denied.
     if (
-      !isVisibleToViewer(resource, sessionCookie) ||
-      resource.id !== resourceId ||
+      !isActiveRecord(resource) ||
+      isPrivateMarker(resource.private) ||
+      resource.id !== ownerId ||
       !resource.package_id
     )
       return false;
-    if (packageId && resource.package_id !== packageId) return false;
     const dataset = await ckanAction(
       "package_show",
       { id: resource.package_id },
       ckanOptions,
     );
-    if (
-      !isVisibleToViewer(dataset, sessionCookie) ||
-      dataset.id !== resource.package_id
-    )
-      return false;
-    // `resource_show` above is the authoritative per-resource permission check.
-    // package_show may embed summaries for private resources in a public
-    // package, so the embedded summary must only confirm ownership, never grant
-    // access on its own.
-    const matchingResource = (
-      Array.isArray(dataset.resources) ? dataset.resources : []
-    ).find((item) => item?.id === resourceId);
-    return Boolean(matchingResource && matchingResource.id === resource.id);
-  }
-
-  if (packageId) {
-    const dataset = await ckanAction(
-      "package_show",
-      { id: packageId },
-      { revalidate: 0, sessionCookie },
-    );
     return Boolean(
-      isVisibleToViewer(dataset, sessionCookie) && dataset.id === packageId,
+      isVisiblePackageToViewer(dataset, sessionCookie) &&
+      dataset.id === resource.package_id,
     );
   }
 
-  return false;
+  const dataset = await ckanAction(
+    "package_show",
+    { id: ownerId },
+    ckanOptions,
+  );
+  return Boolean(
+    isVisiblePackageToViewer(dataset, sessionCookie) && dataset.id === ownerId,
+  );
 }
 
 function imageSignatureMatches(bytes, mime) {
@@ -225,7 +201,7 @@ async function handle(request, context) {
       return errorResponse(404);
   } catch (error) {
     return errorResponse(
-      [403, 404].includes(Number(error?.status)) ? 404 : 502,
+      [401, 403, 404].includes(Number(error?.status)) ? 404 : 502,
       "Berkas tidak tersedia untuk publik.",
     );
   }
@@ -268,6 +244,8 @@ async function handle(request, context) {
       );
   }
 
+  // CKAN's generic FileStore endpoint performs the final permission_download_file
+  // check. Metadata authorization above is necessary but is not sufficient.
   let upstream;
   try {
     upstream = await fetch(
@@ -290,8 +268,8 @@ async function handle(request, context) {
     );
   if (![200, 206, 304, 416].includes(upstream.status)) {
     return errorResponse(
-      upstream.status === 404 || upstream.status === 410 ? 404 : 502,
-      "Berkas tidak ditemukan di FileStore CKAN.",
+      [401, 403, 404, 410].includes(upstream.status) ? 404 : 502,
+      "Berkas tidak ditemukan atau tidak diizinkan oleh FileStore CKAN.",
     );
   }
 
@@ -330,9 +308,7 @@ async function handle(request, context) {
   const headers = new Headers({
     "Content-Type": mime,
     "Content-Disposition": `${disposition}; filename*=UTF-8''${encodeURIComponent(filename)}`,
-    "Cache-Control": sessionCookie
-      ? "private, no-store"
-      : "public, max-age=300, stale-while-revalidate=1800",
+    "Cache-Control": "private, no-store",
     "X-Content-Type-Options": "nosniff",
     "X-Robots-Tag": "noindex, nofollow, noarchive",
     "Cross-Origin-Resource-Policy": "same-site",

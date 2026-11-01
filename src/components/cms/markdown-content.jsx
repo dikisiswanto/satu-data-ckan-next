@@ -61,7 +61,7 @@ export function normalizeMarkdownHref(value) {
   }
 }
 
-function renderInline(tokens, keyPrefix) {
+function renderInline(tokens, keyPrefix, lightboxGroup) {
   return tokens.map((token, index) => {
     const key = `${keyPrefix}-${index}`;
     if (token.type === "text") return token.value;
@@ -74,11 +74,19 @@ function renderInline(tokens, keyPrefix) {
         </code>
       );
     if (token.type === "strong")
-      return <strong key={key}>{renderInline(token.children, key)}</strong>;
+      return (
+        <strong key={key}>
+          {renderInline(token.children, key, lightboxGroup)}
+        </strong>
+      );
     if (token.type === "emphasis")
-      return <em key={key}>{renderInline(token.children, key)}</em>;
+      return (
+        <em key={key}>{renderInline(token.children, key, lightboxGroup)}</em>
+      );
     if (token.type === "delete")
-      return <del key={key}>{renderInline(token.children, key)}</del>;
+      return (
+        <del key={key}>{renderInline(token.children, key, lightboxGroup)}</del>
+      );
     if (token.type === "image") {
       const src = publicCmsImageUrl(token.href, getPublicSiteOrigin());
       return src ? (
@@ -86,6 +94,7 @@ function renderInline(tokens, keyPrefix) {
           key={key}
           src={src}
           alt={token.label || "Ilustrasi konten"}
+          group={lightboxGroup}
           className="cms-markdown__image-trigger"
         >
           <Image
@@ -110,10 +119,12 @@ function renderInline(tokens, keyPrefix) {
             { type: "text", value: token.label || token.href },
           ],
           key,
+          lightboxGroup,
         );
       const children = renderInline(
         token.children || [{ type: "text", value: token.label || token.href }],
         key,
+        lightboxGroup,
       );
       return href.startsWith("/") ? (
         <Link
@@ -145,7 +156,7 @@ function renderInline(tokens, keyPrefix) {
   });
 }
 
-function renderBlocks(blocks, keyPrefix = "md") {
+function renderBlocks(blocks, keyPrefix = "md", lightboxGroup) {
   return blocks.map((block, index) => {
     const key = `${keyPrefix}-${index}`;
     if (block.type === "heading") {
@@ -155,14 +166,14 @@ function renderBlocks(blocks, keyPrefix = "md") {
           key={key}
           className={`cms-markdown__heading cms-markdown__heading--${block.level}`}
         >
-          {renderInline(block.children, key)}
+          {renderInline(block.children, key, lightboxGroup)}
         </Heading>
       );
     }
     if (block.type === "paragraph")
       return (
         <p key={key} className="cms-markdown__paragraph">
-          {renderInline(block.children, key)}
+          {renderInline(block.children, key, lightboxGroup)}
         </p>
       );
     if (block.type === "hr")
@@ -176,7 +187,7 @@ function renderBlocks(blocks, keyPrefix = "md") {
     if (block.type === "blockquote")
       return (
         <blockquote key={key} className="cms-markdown__quote">
-          {renderBlocks(block.blocks, key)}
+          {renderBlocks(block.blocks, key, lightboxGroup)}
         </blockquote>
       );
     if (block.type === "table") {
@@ -202,6 +213,7 @@ function renderBlocks(blocks, keyPrefix = "md") {
                         (item) => item.children || [],
                       ),
                       `${key}-head-${cellIndex}`,
+                      lightboxGroup,
                     )}
                   </th>
                 ))}
@@ -222,6 +234,7 @@ function renderBlocks(blocks, keyPrefix = "md") {
                           (item) => item.children || [],
                         ),
                         `${key}-${rowIndex}-${cellIndex}`,
+                        lightboxGroup,
                       )}
                     </td>
                   ))}
@@ -258,7 +271,13 @@ function renderBlocks(blocks, keyPrefix = "md") {
                   }
                 />
               ) : null}
-              <div>{renderBlocks(item.blocks, `${key}-item-${itemIndex}`)}</div>
+              <div>
+                {renderBlocks(
+                  item.blocks,
+                  `${key}-item-${itemIndex}`,
+                  lightboxGroup,
+                )}
+              </div>
             </li>
           ))}
         </List>
@@ -268,11 +287,11 @@ function renderBlocks(blocks, keyPrefix = "md") {
   });
 }
 
-export function MarkdownContent({ content, className = "" }) {
+export function MarkdownContent({ content, className = "", lightboxGroup }) {
   const blocks = parseMarkdown(content);
   return (
     <div className={`cms-markdown ${className}`.trim()}>
-      {renderBlocks(blocks)}
+      {renderBlocks(blocks, "md", lightboxGroup)}
     </div>
   );
 }

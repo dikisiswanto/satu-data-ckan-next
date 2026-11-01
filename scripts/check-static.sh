@@ -20,6 +20,7 @@ run_check python3 scripts/check-base.py
 run_check python3 scripts/check-theme.py
 run_check node scripts/check-admin-forms.mjs
 run_check node scripts/check-geojson-component.mjs
+run_check node scripts/check-exclusion-contract.mjs
 run_check node scripts/check-public-media.mjs
 run_check node scripts/check-editorial-media.mjs
 run_check node scripts/check-markdown-render.mjs

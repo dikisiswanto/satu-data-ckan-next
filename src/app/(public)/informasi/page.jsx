@@ -135,7 +135,7 @@ export default async function InformasiPage() {
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted">
                   {page.category || "Informasi"}
                 </span>
-                <h3 className="mt-2 min-h-12 line-clamp-2 font-semibold leading-6">
+                <h3 className="mt-2 min-h-12 break-words font-semibold leading-6">
                   {page.menuLabel || page.title}
                 </h3>
                 <p className="mt-2 min-h-[4.5rem] line-clamp-3 text-sm leading-6 text-muted">

@@ -206,6 +206,51 @@ def main() -> None:
 
     app = FakeApp()
     plugin = module.WajoThemePlugin()
+    wrapped_app = object()
+    if plugin.make_error_log_middleware(wrapped_app, {}) is not wrapped_app:
+        raise AssertionError("CKAN make_error_log_middleware must preserve the wrapped WSGI app.")
+    print("PASS CKAN 2.12 IMiddleware error-log hook is implemented")
+
+    geojson_resource = {"name": "batas-kecamatan.geojson", "format": "JSON"}
+    plugin.before_resource_create({}, geojson_resource)
+    if geojson_resource.get("format") != "GeoJSON":
+        raise AssertionError("GeoJSON upload must be normalized before CKAN generates default resource views.")
+    mime_resource = {"name": "batas-kecamatan.json", "mimetype": "application/geo+json"}
+    plugin.before_resource_create({}, mime_resource)
+    if mime_resource.get("format") != "GeoJSON":
+        raise AssertionError("GeoJSON MIME type must be normalized before CKAN generates resource views.")
+    existing_geojson = {"name": "batas-lama.geojson", "format": "JSON"}
+    partial_update = {"description": "Metadata diperbarui"}
+    plugin.before_resource_update({}, existing_geojson, partial_update)
+    if partial_update.get("format") != "GeoJSON":
+        raise AssertionError("Updating an existing .geojson resource must restore its canonical format.")
+    plain_json = {"name": "statistik.json", "format": "JSON"}
+    plugin.before_resource_create({}, plain_json)
+    if plain_json.get("format") != "JSON":
+        raise AssertionError("Ordinary JSON resources must not be reclassified as GeoJSON.")
+
+    # Updating an old GeoJSON resource should invoke CKAN's default-view action
+    # so missing geojson_view/geo_view records can be created without duplicates.
+    geo_plugin = module.WajoThemePlugin()
+    geo_plugin._notify_public_portal = lambda *args, **kwargs: None
+    geo_plugin._enqueue_resource_preview = lambda *args, **kwargs: None
+    default_view_calls = []
+    toolkit = sys.modules["ckan.plugins.toolkit"]
+    toolkit.get_action = lambda name: (
+        lambda context, data: default_view_calls.append((name, context, data)) or []
+    )
+    geo_plugin.after_resource_update({}, {"id": "legacy-geojson", "format": "GeoJSON"})
+    geo_plugin.after_resource_update({}, {"id": "ordinary-json", "format": "JSON"})
+    if len(default_view_calls) != 1:
+        raise AssertionError("Only GeoJSON edits should trigger CKAN's default map-view action.")
+    action_name, action_context, action_data = default_view_calls[0]
+    if action_name != "resource_create_default_resource_views" or action_context.get("ignore_auth") is not True:
+        raise AssertionError("GeoJSON view repair must use CKAN's standard action with internal authorization.")
+    if action_data.get("resource", {}).get("id") != "legacy-geojson":
+        raise AssertionError("GeoJSON view repair must target the updated resource only.")
+    print("PASS legacy GeoJSON updates backfill missing CKAN resource views via the standard Action API")
+    print("PASS GeoJSON resources receive canonical format before CKAN default-view generation")
+
     media_auth = plugin.get_auth_functions().get("wajo_media_show")
     if not callable(media_auth) or media_auth({}, {"id": "public-editorial-media"}).get("success") is not True:
         raise AssertionError("Owner media editorial harus dapat dibaca melalui auth function khusus.")

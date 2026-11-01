@@ -1,3 +1,4 @@
+import { isPrivateMarker } from "@/lib/ckan/privacy";
 import { ckanAction } from "@/lib/ckan/client";
 import {
   buildCkanSessionCookieHeader,
@@ -44,22 +45,35 @@ async function handle(request, context) {
 
   const sessionCookie = getCkanSessionCookieFromRequest(request);
   const ckanOptions = { revalidate: 0, sessionCookie };
+  let authorizationPhase = "resource_show";
   try {
     const resource = await ckanAction(
       "resource_show",
       { id: resourceId },
       ckanOptions,
     );
+    // CKAN's built-in Resource privacy is inherited from its parent dataset.
+    // A custom resource.private flag is not an independent CKAN ACL and must
+    // never be bypassed merely because a session cookie is present.
     if (
       !resource ||
       resource.id !== resourceId ||
       resource.state !== "active" ||
-      (!sessionCookie && resource.private === true) ||
+      isPrivateMarker(resource.private) ||
       !resource.package_id
     ) {
+      console.warn("public_resource_download_denied", {
+        resourceId,
+        phase: authorizationPhase,
+        reason: isPrivateMarker(resource?.private)
+          ? "unsupported_resource_private_acl"
+          : "resource_not_visible",
+        sessionForwarded: Boolean(sessionCookie),
+      });
       return errorResponse(404, "Berkas tidak ditemukan.");
     }
 
+    authorizationPhase = "package_show";
     const dataset = await ckanAction(
       "package_show",
       { id: resource.package_id },
@@ -67,22 +81,25 @@ async function handle(request, context) {
     );
     if (
       !dataset ||
-      (!sessionCookie && dataset.private === true) ||
+      dataset.id !== resource.package_id ||
+      (!sessionCookie && isPrivateMarker(dataset.private)) ||
       dataset.state !== "active" ||
       (dataset.name !== datasetSlug && dataset.id !== datasetSlug)
     ) {
+      console.warn("public_resource_download_denied", {
+        resourceId,
+        phase: authorizationPhase,
+        reason:
+          !sessionCookie && isPrivateMarker(dataset?.private)
+            ? "session_cookie_missing"
+            : "dataset_not_visible_or_mismatched",
+        sessionForwarded: Boolean(sessionCookie),
+      });
       return errorResponse(404, "Berkas tidak tersedia untuk publik.");
     }
-    const publicResource = (dataset.resources || []).find(
-      (item) => item.id === resourceId,
-    );
-    if (
-      !publicResource ||
-      publicResource.state !== "active" ||
-      (!sessionCookie && publicResource.private === true)
-    ) {
-      return errorResponse(404, "Berkas tidak tersedia untuk publik.");
-    }
+    // CKAN's resource_show auth delegates to package_show for the parent
+    // dataset. The explicit package_show also validates the dataset slug/id.
+    // package_show.resources is only a metadata summary and is not an ACL gate.
 
     // CKAN may return an absolute public URL or a relative download path.
     // Only its validated pathname is reused; the original host is never fetched.
@@ -132,18 +149,29 @@ async function handle(request, context) {
       // owner chain before using CKAN 2.12's /file/download/<id> endpoint.
       const fileId = genericFileMatch[1];
       let file;
+      authorizationPhase = "file_show";
       try {
         file = await ckanAction("file_show", { id: fileId }, ckanOptions);
-      } catch {
-        return errorResponse(
-          404,
-          "Berkas tidak ditemukan pada metadata FileStore CKAN.",
-        );
+      } catch (error) {
+        const status = Number(error?.status || 0);
+        if ([401, 403, 404].includes(status)) {
+          console.warn("public_resource_download_denied", {
+            resourceId,
+            phase: authorizationPhase,
+            upstreamStatus: status,
+            sessionForwarded: Boolean(sessionCookie),
+          });
+          return errorResponse(
+            404,
+            "Berkas tidak ditemukan pada metadata FileStore CKAN.",
+          );
+        }
+        throw error;
       }
       if (
         !file ||
         file.id !== fileId ||
-        (!sessionCookie && file.private === true) ||
+        isPrivateMarker(file.private) ||
         (file.state && file.state !== "active")
       ) {
         return errorResponse(404, "Berkas tidak tersedia untuk publik.");
@@ -156,36 +184,26 @@ async function handle(request, context) {
         owner.owner_type || file.owner_type || "",
       ).toLowerCase();
       const ownerId = String(owner.owner_id || file.owner_id || "");
-      const fileResourceId =
-        ownerType === "resource" ? ownerId : String(file.resource_id || "");
-      const filePackageId =
-        ownerType === "package" ? ownerId : String(file.package_id || "");
-      if (
-        ownerType === "wajo_media" ||
-        ownerType === "group" ||
-        ownerType === "user" ||
-        ownerType === "organization"
-      ) {
-        return errorResponse(
-          404,
-          "Berkas bukan milik resource dataset publik.",
-        );
-      }
-      if (fileResourceId && fileResourceId !== resourceId) {
-        return errorResponse(404, "Berkas bukan milik resource yang diminta.");
-      }
-      if (filePackageId && filePackageId !== dataset.id) {
-        return errorResponse(404, "Berkas bukan milik dataset yang diminta.");
-      }
-      if (!fileResourceId && !filePackageId) {
+      if (ownerType === "resource") {
+        if (!ownerId || ownerId !== resourceId)
+          return errorResponse(
+            404,
+            "Berkas bukan milik resource yang diminta.",
+          );
+      } else if (ownerType === "package") {
+        if (!ownerId || ownerId !== dataset.id)
+          return errorResponse(404, "Berkas bukan milik dataset yang diminta.");
+      } else {
+        // Editorial media, group logos, user files and unknown owner types use
+        // separate policies. Missing owner metadata is never a reason to trust
+        // legacy file.resource_id/file.package_id hints.
         return errorResponse(
           404,
           "Kepemilikan berkas tidak dapat diverifikasi.",
         );
       }
-      // A package-owned file must belong to the same dataset. A resource-owned
-      // file must refer to this exact resource. The resource_show/package_show
-      // checks above establish that the requested resource is public.
+      // The FileStore download endpoint performs CKAN's final
+      // permission_download_file check using the same forwarded user session.
       upstreamPath = `/file/download/${encodeURIComponent(fileId)}`;
     } else {
       return errorResponse(404, "Alamat berkas tidak valid.");
@@ -193,6 +211,7 @@ async function handle(request, context) {
 
     // Fetch only the validated CKAN path against the private service origin.
     // Never fetch the public hostname here: that would loop through Caddy/Next.
+    authorizationPhase = "file_download";
     const upstreamUrl = new URL(upstreamPath, apiBase.origin);
     const headers = new Headers();
     const range = request.headers.get("range");
@@ -209,8 +228,11 @@ async function handle(request, context) {
       cache: "no-store",
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    if (upstream.status === 404 || upstream.status === 410)
-      return errorResponse(404, "Berkas tidak ditemukan di penyimpanan CKAN.");
+    if ([401, 403, 404, 410].includes(upstream.status))
+      return errorResponse(
+        404,
+        "Berkas tidak ditemukan atau tidak diizinkan oleh CKAN.",
+      );
     if (upstream.status >= 300 && upstream.status < 400)
       return errorResponse(
         502,
@@ -248,9 +270,7 @@ async function handle(request, context) {
     const responseHeaders = new Headers({
       "Content-Type": contentType,
       "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
-      "Cache-Control": sessionCookie
-        ? "private, no-store"
-        : "public, max-age=300, stale-while-revalidate=1800",
+      "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
       "X-Robots-Tag": "noindex, nofollow, noarchive",
       "Content-Security-Policy": "default-src 'none'; sandbox",
@@ -280,7 +300,17 @@ async function handle(request, context) {
     // unpublished records. On a public route this is an expected visibility
     // result, not an infrastructure failure. Return 404 to avoid disclosing
     // whether a private dataset/resource exists and do not attempt a file stream.
-    if (upstreamStatus === 403 || upstreamStatus === 404) {
+    if (
+      upstreamStatus === 401 ||
+      upstreamStatus === 403 ||
+      upstreamStatus === 404
+    ) {
+      console.warn("public_resource_download_denied", {
+        resourceId,
+        phase: authorizationPhase,
+        upstreamStatus,
+        sessionForwarded: Boolean(sessionCookie),
+      });
       return errorResponse(
         404,
         "Dataset atau resource tidak tersedia untuk publik.",

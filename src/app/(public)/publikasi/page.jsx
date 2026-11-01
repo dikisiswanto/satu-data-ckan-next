@@ -77,7 +77,7 @@ export default async function PublicationsPage({ searchParams }) {
                     </span>
                   ) : null}
                 </div>
-                <h2 className="mt-3 text-lg font-semibold leading-6 text-ink">
+                <h2 className="mt-3 break-words text-lg font-semibold leading-6 text-ink">
                   <Link
                     href={`/publikasi/${encodeURIComponent(item.name)}`}
                     className="hover:text-primary hover:underline"

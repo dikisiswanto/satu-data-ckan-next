@@ -2,8 +2,8 @@ import "server-only";
 import { cache } from "react";
 import { ckanAction, searchPackages } from "@/lib/ckan/client";
 import { sanitizePublicPackage } from "@/lib/ckan/public-api-sanitize";
+import { isPrivateMarker } from "@/lib/ckan/privacy";
 import { normalizeCkanSessionCookieValue } from "@/lib/ckan/session";
-import { resolveAuthorizedPackageResources } from "@/lib/ckan/viewer-package";
 import { buildDatasetCatalogExclusionFilters } from "@/lib/data/portal-content-types";
 
 const safeLimit = (value, fallback = 24) =>
@@ -127,27 +127,18 @@ async function queryPublishedDatasets(options = {}, sessionCookie = null) {
     rows: perPage,
     start: (page - 1) * perPage,
     sort: order,
-    fq: [
+    fqList: [
       ...buildDatasetCatalogExclusionFilters(),
       ...buildCkanFilters({ organizationId, category, year, format }),
     ],
     sessionCookie,
-    // Retain private resource candidates only for an authenticated search;
-    // each is verified with resource_show below before reaching the page.
-    includePrivateResources: Boolean(sessionCookie),
   });
   const searchRows = Array.isArray(result.results) ? result.results : [];
-  const visibleRows = sessionCookie
-    ? await Promise.all(
-        searchRows.map((pkg) =>
-          resolveAuthorizedPackageResources(pkg, sessionCookie),
-        ),
-      )
-    : searchRows;
   return {
-    // package_search returns CKAN Package dictionaries. Don't translate them
-    // into synthetic `slug`, `published_at`, `dataset_resources`, or versions.
-    data: visibleRows,
+    // CKAN package_search applies the logged-in user's dataset permissions.
+    // Sanitize again at the data boundary so a future client refactor cannot
+    // accidentally expose unsupported resource.private markers.
+    data: searchRows.map((pkg) => sanitizePublicPackage(pkg)),
     meta: toPageMeta(Number(result.count || 0), page, perPage),
   };
 }
@@ -177,7 +168,7 @@ export async function getPublishedDatasetFacetsResult(rawSessionCookie = null) {
     const result = await searchPackages({
       rows: 0,
       facets: true,
-      fq: buildDatasetCatalogExclusionFilters(),
+      fqList: buildDatasetCatalogExclusionFilters(),
       sessionCookie,
     });
     const facets = result.search_facets || {};
@@ -236,20 +227,14 @@ async function queryPublishedDatasetBySlug(name, sessionCookie = null) {
     // carrying a signed CKAN session, successful package_show is the authority:
     // CKAN has already checked this user's organization/sysadmin permission.
     if (
-      (!authenticated && pkg?.private === true) ||
+      (!authenticated && isPrivateMarker(pkg?.private)) ||
       (pkg?.state && pkg.state !== "active")
     )
       return null;
-    // Never expose every private resource merely because a cookie exists.
-    // Each private resource must independently pass CKAN resource_show for
-    // this browser's signed session.
-    const visiblePkg = await resolveAuthorizedPackageResources(
-      pkg,
-      sessionCookie,
-    );
-    return sanitizePublicPackage(visiblePkg, {
-      includePrivateResources: authenticated,
-    });
+    // CKAN core's resource_show inherits the parent dataset permission; it is
+    // not a separate per-resource ACL. Hide any custom private marker until a
+    // CKAN authorization plugin explicitly implements that feature.
+    return sanitizePublicPackage(pkg);
   } catch (error) {
     if (error?.status === 403 || error?.status === 404) return null;
     throw error;
@@ -299,7 +284,7 @@ export async function getPublicPortalStatsResult() {
       ckanAction("package_search", {
         q: "*:*",
         rows: 0,
-        fq: buildDatasetCatalogExclusionFilters(),
+        fq_list: buildDatasetCatalogExclusionFilters(),
         include_private: false,
       }),
       ckanAction("organization_list", {
@@ -311,7 +296,7 @@ export async function getPublicPortalStatsResult() {
       ckanAction("package_search", {
         q: "*:*",
         rows: 0,
-        fq: [`tags:${indicatorTag}`],
+        fq_list: [`tags:${indicatorTag}`],
         include_private: false,
       }),
     ]);

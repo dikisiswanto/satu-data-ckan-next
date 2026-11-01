@@ -5,11 +5,6 @@ const { ckanAction, searchPackages } = vi.hoisted(() => ({
   searchPackages: vi.fn(),
 }));
 vi.mock("@/lib/ckan/client", () => ({ ckanAction, searchPackages }));
-vi.mock("@/lib/ckan/public-api-sanitize", () => ({
-  sanitizePublicPackage: (value) => value,
-  sanitizePublicSearchResult: (value) => value,
-  sanitizePublicActivity: (value) => value,
-}));
 vi.mock("@/lib/data/public-indicators", () => ({
   getPublishedIndicatorsResult: vi.fn(),
 }));
@@ -25,7 +20,7 @@ afterEach(() => {
   searchPackages.mockReset();
 });
 
-describe("public dataset detail visibility", () => {
+describe("public dataset visibility", () => {
   it.each([403, 404])(
     "treats CKAN %s for a private/unpublished package as not found",
     async (status) => {
@@ -60,7 +55,7 @@ describe("public dataset detail visibility", () => {
     );
   });
 
-  it("rejects a package returned as private even when CKAN allows metadata read", async () => {
+  it("rejects a private package returned to an anonymous caller", async () => {
     ckanAction.mockResolvedValue({
       id: "private-id",
       name: "dataset-private",
@@ -75,53 +70,65 @@ describe("public dataset detail visibility", () => {
     });
   });
 
-  it("returns a private dataset only when CKAN authorizes its package and private resources", async () => {
+  it("rejects legacy string-valued private package markers for anonymous detail requests", async () => {
+    ckanAction.mockResolvedValue({
+      id: "private-id",
+      name: "dataset-private",
+      private: "true",
+      state: "active",
+    });
+    await expect(
+      getPublishedDatasetBySlugResult("dataset-private"),
+    ).resolves.toEqual({
+      data: null,
+      unavailable: false,
+    });
+  });
+
+  it("keeps string false package markers public instead of treating non-empty strings as private", async () => {
+    ckanAction.mockResolvedValue({
+      id: "public-id",
+      name: "dataset-public",
+      private: "false",
+      state: "active",
+    });
+    const result = await getPublishedDatasetBySlugResult("dataset-public");
+    expect(result.data).toMatchObject({ id: "public-id", private: "false" });
+    expect(result.unavailable).toBe(false);
+  });
+
+  it("returns a CKAN-authorized private dataset but strips unsupported per-resource private markers", async () => {
     ckanAction.mockImplementation(async (action, params, options) => {
       expect(options.sessionCookie).toBe("signed-member-session");
-      if (action === "package_show")
-        return {
-          id: "private-id",
-          name: "dataset-private",
-          private: true,
-          state: "active",
-          resources: [
-            { id: "private-resource", private: true, state: "active" },
-          ],
-        };
-      if (action === "resource_show")
-        return {
-          id: "private-resource",
-          package_id: "private-id",
-          private: true,
-          state: "active",
-        };
-      throw new Error(`unexpected action ${action}`);
+      expect(action).toBe("package_show");
+      expect(params).toEqual({ id: "dataset-private" });
+      return {
+        id: "private-id",
+        name: "dataset-private",
+        private: true,
+        state: "active",
+        resources: [
+          { id: "public-resource", state: "active" },
+          {
+            id: "unsupported-private-resource",
+            private: true,
+            state: "active",
+          },
+        ],
+      };
     });
     const result = await getPublishedDatasetBySlugResult(
       "dataset-private",
       "signed-member-session",
     );
     expect(result.data.private).toBe(true);
-    expect(result.data.resources).toHaveLength(1);
-    expect(ckanAction).toHaveBeenCalledWith(
-      "package_show",
-      { id: "dataset-private" },
-      {
-        revalidate: 0,
-        sessionCookie: "signed-member-session",
-      },
-    );
-    expect(ckanAction).toHaveBeenCalledWith(
-      "resource_show",
-      { id: "private-resource" },
-      {
-        revalidate: 0,
-        sessionCookie: "signed-member-session",
-      },
-    );
+    expect(result.data.resources.map((resource) => resource.id)).toEqual([
+      "public-resource",
+    ]);
+    expect(ckanAction).toHaveBeenCalledTimes(1);
   });
 
-  it("shows CKAN-authorized private datasets and resources in the authenticated catalogue", async () => {
+  it("shows CKAN-authorized private datasets in the authenticated catalogue without treating a cookie as resource ACL", async () => {
     searchPackages.mockResolvedValue({
       count: 1,
       results: [
@@ -131,21 +138,15 @@ describe("public dataset detail visibility", () => {
           private: true,
           state: "active",
           resources: [
-            { id: "private-resource", private: true, state: "active" },
+            { id: "public-resource", state: "active" },
+            {
+              id: "unsupported-private-resource",
+              private: true,
+              state: "active",
+            },
           ],
         },
       ],
-    });
-    ckanAction.mockImplementation(async (action, params, options) => {
-      expect(options.sessionCookie).toBe("signed-admin-session");
-      if (action === "resource_show")
-        return {
-          id: "private-resource",
-          package_id: "private-id",
-          private: true,
-          state: "active",
-        };
-      throw new Error(`unexpected action ${action}`);
     });
 
     const result = await getPublishedDatasetsResult(
@@ -157,25 +158,18 @@ describe("public dataset detail visibility", () => {
     expect(result.data).toHaveLength(1);
     expect(result.data[0].private).toBe(true);
     expect(result.data[0].resources.map((resource) => resource.id)).toEqual([
-      "private-resource",
+      "public-resource",
     ]);
     expect(searchPackages).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sessionCookie: "signed-admin-session",
-        includePrivateResources: true,
-      }),
+      expect.objectContaining({ sessionCookie: "signed-admin-session" }),
     );
-    expect(ckanAction).toHaveBeenCalledWith(
-      "resource_show",
-      { id: "private-resource" },
-      {
-        revalidate: 0,
-        sessionCookie: "signed-admin-session",
-      },
+    expect(searchPackages.mock.calls[0][0]).not.toHaveProperty(
+      "includePrivateResources",
     );
+    expect(ckanAction).not.toHaveBeenCalled();
   });
 
-  it("does not include a private resource in an authenticated listing when CKAN denies resource_show", async () => {
+  it("strips unsupported private resource markers from catalogue results even when a session exists", async () => {
     searchPackages.mockResolvedValue({
       count: 1,
       results: [
@@ -185,50 +179,25 @@ describe("public dataset detail visibility", () => {
           private: false,
           state: "active",
           resources: [
-            { id: "public-resource", private: false, state: "active" },
-            { id: "private-resource", private: true, state: "active" },
+            { id: "public-resource", state: "active" },
+            {
+              id: "unsupported-private-resource",
+              private: true,
+              state: "active",
+            },
           ],
         },
       ],
     });
-    ckanAction.mockRejectedValue(
-      Object.assign(new Error("Not authorized"), { status: 403 }),
-    );
 
     const result = await getPublishedDatasetsResult(
       { limit: 12 },
       "signed-but-unauthorized-session",
     );
 
-    expect(result.unavailable).toBe(false);
     expect(result.data[0].resources.map((resource) => resource.id)).toEqual([
       "public-resource",
     ]);
-  });
-
-  it("omits private resources the current session cannot read from a public dataset", async () => {
-    ckanAction.mockImplementation(async (action) => {
-      if (action === "package_show")
-        return {
-          id: "public-id",
-          name: "dataset-public",
-          private: false,
-          state: "active",
-          resources: [
-            { id: "public-resource", private: false, state: "active" },
-            { id: "private-resource", private: true, state: "active" },
-          ],
-        };
-      if (action === "resource_show")
-        throw Object.assign(new Error("Not authorized"), { status: 403 });
-      throw new Error(`unexpected action ${action}`);
-    });
-    const result = await getPublishedDatasetBySlugResult(
-      "dataset-public",
-      "forged-session-cookie",
-    );
-    expect(result.data.resources.map((resource) => resource.id)).toEqual([
-      "public-resource",
-    ]);
+    expect(ckanAction).not.toHaveBeenCalled();
   });
 });

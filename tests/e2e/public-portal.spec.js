@@ -321,13 +321,107 @@ test("dataset image previews open in a zoomable lightbox", async ({ page }) => {
   await expect(trigger).toBeVisible();
   await trigger.click();
 
-  const dialog = page.getByRole("dialog", { name: /Pratinjau gambar/ });
+  const dialog = page.getByRole("dialog", {
+    name: /Denah titik sekolah Kabupaten Wajo/,
+  });
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText("100%");
   await dialog.getByRole("button", { name: "Perbesar gambar" }).click();
   await expect(dialog).toContainText("150%");
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
+});
+
+test("image lightbox supports gallery navigation, focus containment and view reset", async ({
+  page,
+}) => {
+  await page.route("https://images.example.test/**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "image/png",
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/pVQAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    }),
+  );
+  await page.goto("/dataset/data-sekolah-wajo");
+
+  const trigger = page.getByRole("button", {
+    name: "Perbesar gambar: Denah titik sekolah Kabupaten Wajo",
+  });
+  await trigger.evaluate((element) => {
+    const second = element.cloneNode(true);
+    second.dataset.imageLightboxSrc =
+      "https://images.example.test/denah-sekolah-kedua.png";
+    second.dataset.imageLightboxAlt = "Pratinjau peta sekolah kedua";
+    second.dataset.imageLightboxCaption = "Lampiran kedua";
+    element.parentElement.appendChild(second);
+  });
+  await trigger.click();
+
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText("1 / 2");
+  await expect(
+    dialog.getByRole("button", { name: "Tutup pratinjau gambar" }),
+  ).toBeFocused();
+  await expect(
+    dialog.getByRole("navigation", { name: "Pilih gambar dalam galeri" }),
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: /Tampilkan gambar 1:/ }),
+  ).toHaveAttribute("aria-pressed", "true");
+
+  await dialog.getByRole("button", { name: "Gambar berikutnya" }).click();
+  await expect(
+    page.getByRole("dialog", { name: /Pratinjau peta sekolah kedua/ }),
+  ).toBeVisible();
+  await expect(dialog).toContainText("2 / 2");
+  await expect(
+    dialog.getByRole("button", { name: /Tampilkan gambar 2:/ }),
+  ).toHaveAttribute("aria-pressed", "true");
+
+  await page.keyboard.press("ArrowLeft");
+  await expect(dialog).toContainText("1 / 2");
+  await dialog.getByRole("button", { name: "Perbesar gambar" }).click();
+  await expect(dialog).toContainText("150%");
+  await dialog
+    .getByRole("button", { name: "Atur ulang ukuran gambar" })
+    .click();
+  await expect(dialog).toContainText("100%");
+
+  await dialog.getByRole("button", { name: "Gambar berikutnya" }).focus();
+  await page.keyboard.press("Tab");
+  await expect(
+    dialog.getByRole("button", { name: "Perkecil gambar" }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
+
+test("image lightbox shows a recovery action when the source image fails", async ({
+  page,
+}) => {
+  await page.route("https://images.example.test/**", (route) => route.abort());
+  await page.goto("/dataset/data-sekolah-wajo");
+
+  await page
+    .getByRole("button", {
+      name: "Perbesar gambar: Denah titik sekolah Kabupaten Wajo",
+    })
+    .click();
+  const dialog = page.getByRole("dialog", {
+    name: /Denah titik sekolah Kabupaten Wajo/,
+  });
+  await expect(dialog.getByRole("alert")).toContainText(
+    "Gambar tidak dapat dimuat",
+  );
+  await expect(
+    dialog.getByRole("alert").getByRole("link", { name: /Buka gambar asli/ }),
+  ).toHaveAttribute("href", "https://images.example.test/denah-sekolah.png");
+  await page.keyboard.press("Escape");
 });
 
 test("infographic previews open in a zoomable lightbox", async ({ page }) => {
@@ -349,7 +443,9 @@ test("infographic previews open in a zoomable lightbox", async ({ page }) => {
   await expect(trigger).toBeVisible();
   await trigger.click();
 
-  const dialog = page.getByRole("dialog", { name: /Pratinjau gambar/ });
+  const dialog = page.getByRole("dialog", {
+    name: /Infografik utama stunting/,
+  });
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText("100%");
   await dialog.getByRole("button", { name: "Perbesar gambar" }).click();

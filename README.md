@@ -73,6 +73,10 @@ npm run build
 - [Design system admin](docs/WAJO-ADMIN-DESIGN-SYSTEM.md)
 - [Sinkronisasi DataStore](docs/DATASTORE-PREVIEW-SYNC.md)
 - [Lokalisasi CKAN](docs/CKAN-ADMIN-LOKALISASI.md)
+- [Form CKAN berbasis konteks](docs/CKAN-CUSTOM-FORMS-CONTEXT-AWARE.md)
+- [Otorisasi dataset privat dan unduhan Next.js](docs/PRIVATE-DATASET-DOWNLOAD-AUTH.md)
+- [Lightbox gambar dan pemisahan katalog](docs/IMAGE-LIGHTBOX-AND-CATALOG.md)
+- [Panduan UI/UX](docs/UI-UX-DESIGN-GUIDELINES.md)
 
 ## Keamanan produksi
 
