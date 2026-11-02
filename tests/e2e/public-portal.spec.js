@@ -20,7 +20,7 @@ test("homepage exposes CKAN-driven category cards with exact public dataset coun
   ).toHaveCount(0);
 });
 
-test("homepage shows accurate public dataset, category, indicator and organization totals", async ({
+test("homepage mobile summary counts use a balanced two-by-two layout with accurate public totals", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -35,6 +35,28 @@ test("homepage shows accurate public dataset, category, indicator and organizati
   await expect(metrics.nth(2)).toContainText("1");
   await expect(metrics.nth(2)).toContainText("Indikator statistik");
   await expect(metrics.nth(3)).toContainText("Perangkat daerah");
+
+  const layout = await metrics.evaluateAll((elements) => {
+    const grid = elements[0]?.parentElement;
+    const boxes = elements.map((element) => {
+      const rect = element.getBoundingClientRect();
+      return { top: rect.top, width: rect.width };
+    });
+    return {
+      columns: grid
+        ? getComputedStyle(grid).gridTemplateColumns.split(" ").length
+        : 0,
+      boxes,
+      hasHorizontalOverflow: grid ? grid.scrollWidth > grid.clientWidth : true,
+    };
+  });
+  expect(layout.columns).toBe(2);
+  expect(layout.hasHorizontalOverflow).toBe(false);
+  expect(Math.abs(layout.boxes[0].width - layout.boxes[1].width)).toBeLessThan(
+    2,
+  );
+  expect(Math.abs(layout.boxes[0].top - layout.boxes[1].top)).toBeLessThan(2);
+  expect(Math.abs(layout.boxes[2].top - layout.boxes[3].top)).toBeLessThan(2);
 });
 
 test("homepage category metric opens a searchable category directory without adding a header menu", async ({
@@ -192,6 +214,33 @@ test("organization directory searches, filters and shows exact public counts by 
       name: /1 Infografik dari Dinas Kesehatan Kabupaten Wajo/i,
     }),
   ).toBeVisible();
+});
+
+test("organization directory summary stays balanced beside the search controls on mobile", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/organisasi");
+
+  const summary = page.locator(".organization-directory-summary");
+  await expect(summary.locator(":scope > div")).toHaveCount(5);
+  await expect(
+    page.getByRole("searchbox", { name: "Cari perangkat daerah" }),
+  ).toBeVisible();
+
+  const layout = await summary.evaluate((element) => ({
+    columns: getComputedStyle(element).gridTemplateColumns.split(" ").length,
+    lastMetricColumn: getComputedStyle(element.lastElementChild).gridColumn,
+    hasHorizontalOverflow: element.scrollWidth > element.clientWidth,
+    metricOverflow: Array.from(element.children).some(
+      (metric) => metric.scrollWidth > metric.clientWidth + 1,
+    ),
+  }));
+
+  expect(layout.columns).toBe(2);
+  expect(layout.lastMetricColumn).toContain("-1");
+  expect(layout.hasHorizontalOverflow).toBe(false);
+  expect(layout.metricOverflow).toBe(false);
 });
 
 test("organization directory pagination identifies the active page and preserves focus", async ({

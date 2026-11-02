@@ -27,14 +27,12 @@ export default function OrganizationDirectoryLoading() {
             </p>
           </div>
           <div className="organization-directory-summary" aria-hidden="true">
-            <div>
-              <Skeleton className="h-6 w-10" />
-              <Skeleton className="mt-1 h-3 w-20" />
-            </div>
-            <div>
-              <Skeleton className="h-6 w-12" />
-              <Skeleton className="mt-1 h-3 w-20" />
-            </div>
+            {Array.from({ length: 5 }, (_, index) => (
+              <div key={index}>
+                <Skeleton className="h-6 w-10" />
+                <Skeleton className="mt-1 h-3 w-20" />
+              </div>
+            ))}
           </div>
         </div>
         <div className="organization-directory-controls">

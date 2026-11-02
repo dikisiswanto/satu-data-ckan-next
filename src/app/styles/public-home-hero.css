@@ -751,20 +751,58 @@ body:has(.public-home) .home-hero-pattern {
   }
   .home-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
-  .home-stat:nth-child(odd) {
-    border-right: 1px solid #e6edf1;
+  .home-stat {
+    min-height: 4.65rem;
+    gap: 0.6rem;
+    border: 1px solid #e2ebf0;
+    border-radius: 0.85rem;
+    background: #fff;
+    padding: 0.7rem 0.75rem;
+    box-shadow: 0 3px 12px rgb(18 48 68 / 5%);
   }
-  .home-stat:nth-last-child(-n + 2) {
-    border-bottom: 0;
+  .home-stat-icon {
+    width: 2.45rem;
+    height: 2.45rem;
+    border-radius: 0.7rem;
   }
+  .home-stat-copy {
+    flex: 1 1 auto;
+  }
+  .home-stat-copy strong {
+    font-size: clamp(1.1rem, 4.2vw, 1.35rem);
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+  .home-stat-copy small {
+    margin-top: 0.2rem;
+    font-size: 0.68rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  .home-stat > svg {
+    width: 14px;
+    height: 14px;
+  }
+  .home-stat:nth-child(odd),
+  .home-stat:nth-last-child(-n + 2),
   .home-stat:last-child {
-    grid-column: 1 / -1;
-    border-right: 0;
+    border-right: 1px solid #e2ebf0;
+    border-bottom: 1px solid #e2ebf0;
+    grid-column: auto;
   }
   .home-stats-note {
     max-width: 38rem;
+    margin-top: 0.55rem;
     text-align: left;
+    font-size: 0.68rem;
+    line-height: 1.45;
   }
 }
 
@@ -777,6 +815,12 @@ body:has(.public-home) .home-hero-pattern {
   }
   .home-search-suggestions {
     gap: 0.4rem;
+  }
+  .home-stat > svg {
+    display: none;
+  }
+  .home-stat {
+    padding-inline: 0.65rem;
   }
 }
 
