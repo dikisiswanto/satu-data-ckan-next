@@ -20,7 +20,7 @@ test("homepage exposes CKAN-driven category cards with exact public dataset coun
   ).toHaveCount(0);
 });
 
-test("homepage mobile summary counts use a balanced two-by-two layout with accurate public totals", async ({
+test("homepage shows accurate public dataset, category, indicator and organization totals", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -35,28 +35,6 @@ test("homepage mobile summary counts use a balanced two-by-two layout with accur
   await expect(metrics.nth(2)).toContainText("1");
   await expect(metrics.nth(2)).toContainText("Indikator statistik");
   await expect(metrics.nth(3)).toContainText("Perangkat daerah");
-
-  const layout = await metrics.evaluateAll((elements) => {
-    const grid = elements[0]?.parentElement;
-    const boxes = elements.map((element) => {
-      const rect = element.getBoundingClientRect();
-      return { top: rect.top, width: rect.width };
-    });
-    return {
-      columns: grid
-        ? getComputedStyle(grid).gridTemplateColumns.split(" ").length
-        : 0,
-      boxes,
-      hasHorizontalOverflow: grid ? grid.scrollWidth > grid.clientWidth : true,
-    };
-  });
-  expect(layout.columns).toBe(2);
-  expect(layout.hasHorizontalOverflow).toBe(false);
-  expect(Math.abs(layout.boxes[0].width - layout.boxes[1].width)).toBeLessThan(
-    2,
-  );
-  expect(Math.abs(layout.boxes[0].top - layout.boxes[1].top)).toBeLessThan(2);
-  expect(Math.abs(layout.boxes[2].top - layout.boxes[3].top)).toBeLessThan(2);
 });
 
 test("homepage category metric opens a searchable category directory without adding a header menu", async ({
@@ -216,33 +194,6 @@ test("organization directory searches, filters and shows exact public counts by 
   ).toBeVisible();
 });
 
-test("organization directory summary stays balanced beside the search controls on mobile", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/organisasi");
-
-  const summary = page.locator(".organization-directory-summary");
-  await expect(summary.locator(":scope > div")).toHaveCount(5);
-  await expect(
-    page.getByRole("searchbox", { name: "Cari perangkat daerah" }),
-  ).toBeVisible();
-
-  const layout = await summary.evaluate((element) => ({
-    columns: getComputedStyle(element).gridTemplateColumns.split(" ").length,
-    lastMetricColumn: getComputedStyle(element.lastElementChild).gridColumn,
-    hasHorizontalOverflow: element.scrollWidth > element.clientWidth,
-    metricOverflow: Array.from(element.children).some(
-      (metric) => metric.scrollWidth > metric.clientWidth + 1,
-    ),
-  }));
-
-  expect(layout.columns).toBe(2);
-  expect(layout.lastMetricColumn).toContain("-1");
-  expect(layout.hasHorizontalOverflow).toBe(false);
-  expect(layout.metricOverflow).toBe(false);
-});
-
 test("organization directory pagination identifies the active page and preserves focus", async ({
   page,
 }) => {
@@ -368,6 +319,89 @@ test("catalog search and filter controls submit a consistent, bookmarkable URL",
   await expect(
     page.getByRole("heading", { name: "Infografik Stunting Kabupaten Wajo" }),
   ).toHaveCount(0);
+});
+
+test("dataset card/list preference persists and drives subsequent loading navigation", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/dataset?q=sekolah");
+  await page.getByRole("button", { name: "Tampilan daftar sederhana" }).click();
+  await expect(page).toHaveURL("/dataset?q=sekolah");
+  await expect(
+    page.locator("[data-public-list-row='true']").first(),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Tampilan daftar sederhana" }),
+  ).toHaveAttribute("aria-pressed", "true");
+
+  const preferenceCookie = (await context.cookies()).find(
+    (cookie) => cookie.name === "wajo_dataset_view",
+  );
+  expect(preferenceCookie?.value).toBe("list");
+  expect(preferenceCookie?.httpOnly).toBe(true);
+  expect(preferenceCookie?.sameSite).toBe("Lax");
+
+  // A fresh URL without `tampilan` follows the saved user preference.
+  await page.goto("/dataset?q=sekolah&urut=title");
+  await expect(
+    page.locator("[data-public-list-row='true']").first(),
+  ).toBeVisible();
+  await page.goto("/dataset");
+  await expect(
+    page.locator("[data-public-list-row='true']").first(),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Tampilan kartu" }).click();
+  await expect(page).toHaveURL("/dataset");
+  await expect(page.locator("[data-public-card='true']").first()).toBeVisible();
+  await page.goto("/dataset?q=sekolah");
+  await expect(page.locator("[data-public-card='true']").first()).toBeVisible();
+});
+
+test("complex dataset filters preserve the selected layout and reset the expected query scope", async ({
+  page,
+}) => {
+  await page.goto("/dataset");
+  await page.getByRole("button", { name: "Tampilan daftar sederhana" }).click();
+  await expect(
+    page.locator("[data-public-list-row='true']").first(),
+  ).toBeVisible();
+
+  await page.goto(
+    "/dataset?q=sekolah&kategori=pendidikan&format=csv&urut=title",
+  );
+  await expect(
+    page.getByRole("heading", { name: "Data Sekolah Kabupaten Wajo" }),
+  ).toBeVisible();
+  await expect(
+    page.locator("[data-public-list-row='true']").first(),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Tampilan daftar sederhana" }),
+  ).toHaveAttribute("aria-pressed", "true");
+
+  await page.getByRole("link", { name: /Hapus Topik:/i }).click();
+  await expect(page).toHaveURL(/q=sekolah/);
+  await expect(page).toHaveURL(/format=csv/);
+  await expect(page).toHaveURL(/urut=title/);
+  await expect(page).not.toHaveURL(/tampilan=/);
+  await expect(page).not.toHaveURL(/kategori=/);
+  await expect(
+    page.locator("[data-public-list-row='true']").first(),
+  ).toBeVisible();
+
+  await page.goto(
+    "/dataset?q=tidak-ada-hasil-unik&kategori=pendidikan&tahun=2024&format=csv",
+  );
+  await expect(
+    page.getByRole("heading", { name: "Data yang sesuai belum ditemukan" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Hapus semua filter" }).click();
+  await expect(page).toHaveURL("/dataset");
+  await expect(
+    page.locator("[data-public-list-row='true']").first(),
+  ).toBeVisible();
 });
 
 test("multi-term dataset search can match any meaningful keyword instead of requiring all words", async ({

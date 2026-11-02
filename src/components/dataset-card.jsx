@@ -49,6 +49,7 @@ export function DatasetCard({ dataset }) {
   return (
     <Card
       data-public-list-item="true"
+      data-public-card="true"
       className="flex h-full flex-col shadow-[0_4px_20px_rgb(24_58_68_/_0.04)] transition hover:-translate-y-0.5 hover:shadow-md"
     >
       <CardHeader className="flex-1">
@@ -137,7 +138,8 @@ export function DatasetListItem({ dataset }) {
   return (
     <article
       data-public-list-item="true"
-      className="flex min-w-0 flex-col gap-3 rounded-2xl border border-line bg-white px-4 py-4 shadow-[0_2px_10px_rgb(24_58_68_/_0.03)] transition-colors hover:border-primary/30 hover:bg-surface sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-5"
+      data-public-list-row="true"
+      className="dataset-catalog-list-item flex min-w-0 flex-col gap-3 rounded-2xl border border-line bg-white px-4 py-4 shadow-[0_2px_10px_rgb(24_58_68_/_0.03)] transition-colors hover:border-primary/30 hover:bg-surface sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-5"
     >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">

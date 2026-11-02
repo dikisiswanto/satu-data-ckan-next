@@ -23,6 +23,7 @@ run_check python3 scripts/check-theme-css.py
 run_check python3 scripts/check-public-hero.py
 run_check python3 scripts/test-theme-css-formatting.py
 run_check node scripts/check-admin-forms.mjs
+run_check node scripts/check-admin-navigation-progress.mjs
 run_check node scripts/check-geojson-component.mjs
 run_check node scripts/check-exclusion-contract.mjs
 run_check node scripts/check-public-media.mjs
@@ -36,6 +37,8 @@ run_check node scripts/check-pwa.mjs
 run_check node scripts/test-service-worker.mjs
 run_check python3 scripts/check-doc-links.py
 run_check node scripts/check-public-pagination.mjs
+run_check node scripts/test-dataset-catalog-state.mjs
+run_check node scripts/check-loading-preferences.mjs
 run_check python3 scripts/check-id-translations.py
 run_check python3 scripts/test-publisher-analytics.py
 run_check python3 scripts/check-auth-middleware.py

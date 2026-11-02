@@ -2788,6 +2788,9 @@ msgstr "Ruang kerja tepercaya untuk pengelolaan data daerah."
 msgid "Manage catalogue records, publications, and portal information in one secure workspace."
 msgstr "Kelola katalog data, publikasi, dan informasi portal dalam satu ruang kerja yang aman."
 
+msgid "Manage official datasets and portal content."
+msgstr "Kelola dataset resmi dan konten portal."
+
 msgid "Organize official datasets and metadata."
 msgstr "Atur dataset resmi beserta metadatanya."
 

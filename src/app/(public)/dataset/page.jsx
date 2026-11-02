@@ -16,6 +16,10 @@ import { DatasetCard, DatasetListItem } from "@/components/dataset-card";
 import { PageHeading } from "@/components/page-heading";
 import { PublicPagination } from "@/components/public-pagination";
 import { normalizePageNumber } from "@/lib/pagination";
+import {
+  buildDatasetCatalogHref,
+  buildDatasetClearFiltersHref,
+} from "@/lib/dataset-catalog-state";
 import { PublicNote } from "@/components/public-note";
 import { publicPageCopy } from "@/lib/public-copy";
 import {
@@ -34,6 +38,7 @@ import {
   CKAN_SESSION_COOKIE_NAME,
   normalizeCkanSessionCookieValue,
 } from "@/lib/ckan/session";
+import { getDatasetViewPreference } from "@/lib/dataset-view-preference";
 
 export async function generateMetadata({ searchParams }) {
   const params = await searchParams;
@@ -91,7 +96,10 @@ export default async function DatasetCatalogPage({ searchParams }) {
     ? requestedOrganization
     : "";
   const requestedSort = typeof params?.urut === "string" ? params.urut : "";
-  const sort = ["relevance", "updated", "title"].includes(requestedSort)
+  const hasExplicitSort = ["relevance", "updated", "title"].includes(
+    requestedSort,
+  );
+  const sort = hasExplicitSort
     ? requestedSort
     : query
       ? "relevance"
@@ -112,7 +120,9 @@ export default async function DatasetCatalogPage({ searchParams }) {
     ? requestedFormat
     : "";
   const page = normalizePageNumber(params?.halaman, 1, 10000);
-  const view = params?.tampilan === "list" ? "list" : "cards";
+  // Layout is a user preference, not a search refinement. Keeping it in the
+  // HttpOnly cookie lets the loading boundary and final page render identically.
+  const view = getDatasetViewPreference(cookieStore);
   const pageSize = 24;
   const [facetsResult, datasetResult] = await Promise.all([
     getPublishedDatasetFacetsResult(sessionCookie),
@@ -142,19 +152,17 @@ export default async function DatasetCatalogPage({ searchParams }) {
   const filterCount = [category, organizationId, year, format].filter(
     Boolean,
   ).length;
-  const viewHref = (nextView) => {
-    const search = new URLSearchParams();
-    if (query) search.set("q", query);
-    if (category) search.set("kategori", category);
-    if (organizationId) search.set("organisasi", organizationId);
-    if (sort) search.set("urut", sort);
-    if (year) search.set("tahun", String(year));
-    if (format) search.set("format", format);
-    if (page > 1) search.set("halaman", String(page));
-    if (nextView === "list") search.set("tampilan", "list");
-    const suffix = search.toString();
-    return suffix ? `/dataset?${suffix}` : "/dataset";
+  const catalogState = {
+    query,
+    category,
+    organizationId,
+    sort,
+    hasExplicitSort,
+    year,
+    format,
   };
+  const viewReturnPath = () =>
+    buildDatasetCatalogHref(catalogState, { pageNumber: page });
   const organizationLabel = organizations.find(
     (item) => item.id === organizationId,
   )?.name;
@@ -182,32 +190,12 @@ export default async function DatasetCatalogPage({ searchParams }) {
       ? { key: "format", label: `Format: ${formatLabels[format] || format}` }
       : null,
   ].filter(Boolean);
-  const hrefWithoutFilter = (removedKey) => {
-    const search = new URLSearchParams();
-    if (removedKey !== "q" && query) search.set("q", query);
-    if (removedKey !== "kategori" && category) search.set("kategori", category);
-    if (removedKey !== "organisasi" && organizationId)
-      search.set("organisasi", organizationId);
-    if (removedKey !== "urut" && sort) search.set("urut", sort);
-    if (removedKey !== "tahun" && year) search.set("tahun", String(year));
-    if (removedKey !== "format" && format) search.set("format", format);
-    if (view === "list") search.set("tampilan", "list");
-    const suffix = search.toString();
-    return suffix ? `/dataset?${suffix}` : "/dataset";
-  };
-  const pageHref = (pageNumber) => {
-    const search = new URLSearchParams();
-    if (query) search.set("q", query);
-    if (category) search.set("kategori", category);
-    if (organizationId) search.set("organisasi", organizationId);
-    if (sort) search.set("urut", sort);
-    if (year) search.set("tahun", String(year));
-    if (format) search.set("format", format);
-    if (view === "list") search.set("tampilan", "list");
-    if (pageNumber > 1) search.set("halaman", String(pageNumber));
-    const suffix = search.toString();
-    return suffix ? `/dataset?${suffix}` : "/dataset";
-  };
+  const hrefWithoutFilter = (removedKey) =>
+    buildDatasetCatalogHref(catalogState, { omit: [removedKey] });
+  const clearFilterHref = () => buildDatasetClearFiltersHref(catalogState);
+  const clearAllHref = () => "/dataset";
+  const pageHref = (pageNumber) =>
+    buildDatasetCatalogHref(catalogState, { pageNumber });
   const totalPages = Math.max(1, Number(datasetResult.meta?.last_page || 1));
   if (!datasetResult.unavailable && page > totalPages)
     redirect(pageHref(totalPages));
@@ -218,9 +206,6 @@ export default async function DatasetCatalogPage({ searchParams }) {
         <div className="page-container py-10 sm:py-14">
           <PageHeading {...publicPageCopy.dataset} />
           <form action="/dataset" method="get" role="search" className="mt-8">
-            {view === "list" ? (
-              <input type="hidden" name="tampilan" value="list" />
-            ) : null}
             <div className="relative flex min-w-0 flex-col items-stretch gap-3 rounded-2xl border border-[#d5e0e8] bg-white p-3 shadow-[0_8px_28px_rgb(20_55_60_/_0.07)] sm:flex-row sm:items-end sm:p-4">
               <div className="min-w-0 flex-1">
                 <label
@@ -286,9 +271,9 @@ export default async function DatasetCatalogPage({ searchParams }) {
                         dataset diterbitkan.
                       </p>
                     </div>
-                    {hasFilters ? (
+                    {filterCount ? (
                       <Link
-                        href={viewHref(view)}
+                        href={clearFilterHref()}
                         className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                       >
                         Hapus filter
@@ -400,9 +385,6 @@ export default async function DatasetCatalogPage({ searchParams }) {
                     </div>
                   </div>
                   <input type="hidden" name="halaman" value="1" />
-                  {view === "list" ? (
-                    <input type="hidden" name="tampilan" value="list" />
-                  ) : null}
                   <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
                     <Button type="submit" size="md">
                       <Check size={15} aria-hidden="true" /> Terapkan filter
@@ -455,34 +437,42 @@ export default async function DatasetCatalogPage({ searchParams }) {
               className="inline-flex items-center rounded-xl border border-line bg-white p-1"
               aria-label="Pilihan tampilan katalog"
             >
-              <Link
-                href={viewHref("cards")}
-                aria-current={view === "cards" ? "page" : undefined}
-                aria-label="Tampilan kartu"
-                title="Tampilan kartu"
-                className={cn(
-                  "inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-                  view === "cards"
-                    ? "bg-primary text-white"
-                    : "text-muted hover:bg-canvas hover:text-ink",
-                )}
-              >
-                <LayoutGrid size={15} aria-hidden="true" /> Kartu
-              </Link>
-              <Link
-                href={viewHref("list")}
-                aria-current={view === "list" ? "page" : undefined}
-                aria-label="Tampilan daftar sederhana"
-                title="Tampilan daftar sederhana"
-                className={cn(
-                  "inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-                  view === "list"
-                    ? "bg-primary text-white"
-                    : "text-muted hover:bg-canvas hover:text-ink",
-                )}
-              >
-                <ListIcon size={15} aria-hidden="true" /> Daftar
-              </Link>
+              <form action="/api/public/preferences/dataset-view" method="post">
+                <input type="hidden" name="view" value="cards" />
+                <input type="hidden" name="returnTo" value={viewReturnPath()} />
+                <button
+                  type="submit"
+                  aria-pressed={view === "cards"}
+                  aria-label="Tampilan kartu"
+                  title="Tampilan kartu"
+                  className={cn(
+                    "inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                    view === "cards"
+                      ? "bg-primary text-white"
+                      : "text-muted hover:bg-canvas hover:text-ink",
+                  )}
+                >
+                  <LayoutGrid size={15} aria-hidden="true" /> Kartu
+                </button>
+              </form>
+              <form action="/api/public/preferences/dataset-view" method="post">
+                <input type="hidden" name="view" value="list" />
+                <input type="hidden" name="returnTo" value={viewReturnPath()} />
+                <button
+                  type="submit"
+                  aria-pressed={view === "list"}
+                  aria-label="Tampilan daftar sederhana"
+                  title="Tampilan daftar sederhana"
+                  className={cn(
+                    "inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                    view === "list"
+                      ? "bg-primary text-white"
+                      : "text-muted hover:bg-canvas hover:text-ink",
+                  )}
+                >
+                  <ListIcon size={15} aria-hidden="true" /> Daftar
+                </button>
+              </form>
             </nav>
             <div className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-2 text-xs font-medium text-muted">
               <Filter size={14} aria-hidden="true" />
@@ -521,7 +511,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
               </span>
             ))}
             <Link
-              href={viewHref(view)}
+              href={clearAllHref()}
               className="cursor-pointer px-2 py-1 text-xs font-semibold text-primary underline-offset-4 hover:underline"
             >
               Hapus semua
@@ -581,7 +571,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
             </p>
             {hasFilters ? (
               <Button
-                href={viewHref(view)}
+                href={clearAllHref()}
                 variant="secondary"
                 className="mt-5"
               >

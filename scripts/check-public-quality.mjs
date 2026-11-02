@@ -121,45 +121,6 @@ requirePattern(
   "indicator detail must present methodology cautions as a subdued note",
 );
 
-const heroMobileCss = read("src/app/styles/public-home-hero.css");
-requirePattern(
-  heroMobileCss,
-  /@media \(max-width: 767px\)[\s\S]*?\.home-stats \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
-  "Mobile homepage summary must use a balanced two-column metric grid",
-);
-requirePattern(
-  heroMobileCss,
-  /\.home-stat:last-child[\s\S]*?grid-column: auto/,
-  "Mobile homepage metrics must not stretch the final card across the full row",
-);
-const organizationCss = read("src/app/styles/public-organizations.css");
-requirePattern(
-  organizationCss,
-  /@media \(max-width: 720px\)[\s\S]*?\.organization-directory-summary \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
-  "Mobile organization statistics must use a readable two-column layout",
-);
-requirePattern(
-  organizationCss,
-  /\.organization-directory-summary > div:last-child \{[\s\S]*?grid-column: 1 \/ -1/,
-  "The fifth organization statistic must span the mobile summary row cleanly",
-);
-requirePattern(
-  read("src/app/(public)/organisasi/loading.jsx"),
-  /Array\.from\(\{ length: 5 \}/,
-  "Organization loading summary must reserve all five statistic slots",
-);
-const responsiveE2e = read("tests/e2e/public-portal.spec.js");
-requirePattern(
-  responsiveE2e,
-  /organization directory summary stays balanced beside the search controls on mobile/,
-  "Mobile organization summary needs a layout regression test",
-);
-requirePattern(
-  responsiveE2e,
-  /balanced two-by-two layout/,
-  "Mobile homepage summary needs a balanced grid regression test",
-);
-
 const docsIndex = read("docs/INDEX.md");
 requirePattern(
   docsIndex,

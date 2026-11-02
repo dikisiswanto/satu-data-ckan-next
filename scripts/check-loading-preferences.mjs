@@ -1,0 +1,104 @@
+#!/usr/bin/env node
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+
+const read = (path) => readFile(path, "utf8");
+const datasetPage = await read("src/app/(public)/dataset/page.jsx");
+const datasetLoading = await read("src/app/(public)/dataset/loading.jsx");
+const preferenceLib = await read("src/lib/dataset-view-preference.js");
+const catalogState = await read("src/lib/dataset-catalog-state.js");
+const preferenceRoute = await read(
+  "src/app/api/public/preferences/dataset-view/route.js",
+);
+const datasetCard = await read("src/components/dataset-card.jsx");
+const publicCss = await read("src/app/styles/public-layout-stability.css");
+const adminBase = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
+);
+const adminProgress = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/public/wajo-admin-navigation-progress.js",
+);
+const adminCss = await read(
+  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+);
+const e2e = await read("tests/e2e/public-portal.spec.js");
+
+assert.match(datasetPage, /getDatasetViewPreference\(cookieStore\)/);
+assert.match(
+  datasetPage,
+  /action="\/api\/public\/preferences\/dataset-view" method="post"/,
+);
+assert.match(datasetPage, /name="returnTo"[\s\S]*?viewReturnPath\(\)/);
+assert.match(datasetPage, /buildDatasetCatalogHref/);
+assert.match(datasetPage, /buildDatasetClearFiltersHref/);
+assert.equal((datasetPage.match(/name="returnTo"/g) || []).length, 2);
+assert.match(datasetPage, /href=\{clearFilterHref\(\)\}/);
+assert.equal((datasetPage.match(/href=\{clearAllHref\(\)\}/g) || []).length, 2);
+assert.doesNotMatch(datasetPage, /search\.set\("tampilan"/);
+assert.equal((datasetPage.match(/name="tampilan"/g) || []).length, 0);
+assert.match(catalogState, /pageNumber > 1/);
+
+assert.match(datasetLoading, /await cookies\(\)/);
+assert.match(datasetLoading, /getDatasetViewPreference\(cookieStore\)/);
+assert.match(datasetLoading, /view === "list" \?/);
+assert.match(datasetLoading, /public-loading-list/);
+assert.match(datasetLoading, /public-loading-grid-md/);
+assert.match(
+  preferenceLib,
+  /DATASET_VIEW_COOKIE_MAX_AGE = 60 \* 60 \* 24 \* 365/,
+);
+assert.match(preferenceLib, /target\.origin !== requestOrigin/);
+assert.match(preferenceLib, /target\.pathname !== "\/dataset"/);
+assert.match(preferenceLib, /search\.delete\("tampilan"\)/);
+assert.match(catalogState, /state\.hasExplicitSort/);
+assert.match(catalogState, /queryRemains/);
+assert.match(catalogState, /FILTER_KEYS/);
+assert.match(preferenceRoute, /request\.formData\(\)/);
+assert.match(preferenceRoute, /httpOnly: true/);
+assert.match(preferenceRoute, /sameSite: "lax"/);
+assert.match(
+  preferenceRoute,
+  /secure: process\.env\.NODE_ENV === "production"/,
+);
+assert.match(preferenceRoute, /maxAge: DATASET_VIEW_COOKIE_MAX_AGE/);
+assert.match(preferenceRoute, /Cache-Control/);
+assert.match(datasetCard, /data-public-card="true"/);
+assert.match(datasetCard, /data-public-list-row="true"/);
+
+for (const route of ["statistik", "infografik", "publikasi"]) {
+  const loading = await read(`src/app/(public)/${route}/loading.jsx`);
+  assert.match(
+    loading,
+    /CatalogSearchFormSkeleton/,
+    `${route} loading should reserve the final search/filter form geometry`,
+  );
+}
+const organizationLoading = await read(
+  "src/app/(public)/organisasi/loading.jsx",
+);
+assert.match(organizationLoading, /organization-directory-summary/);
+assert.equal(
+  (organizationLoading.match(/\["w-10", "w-20"\]/g) || []).length,
+  3,
+);
+assert.match(organizationLoading, /Cari perangkat daerah/);
+assert.match(organizationLoading, /organization-directory-grid/);
+assert.match(publicCss, /@keyframes public-skeleton-shimmer/);
+assert.match(publicCss, /prefers-reduced-motion: reduce/);
+
+assert.match(adminBase, /wajo-admin-navigation-progress\.js/);
+assert.match(adminProgress, /event\.defaultPrevented/);
+assert.match(adminProgress, /target\.origin !== window\.location\.origin/);
+assert.match(
+  adminProgress,
+  /target\.pathname === window\.location\.pathname[\s\S]*?return false/,
+);
+assert.match(adminProgress, /data-no-navigation-progress/);
+assert.match(adminCss, /\.wajo-admin-navigation-progress/);
+assert.match(adminCss, /prefers-reduced-motion: reduce/);
+assert.match(e2e, /dataset card\/list preference persists/);
+assert.match(e2e, /complex dataset filters preserve the selected layout/);
+
+process.stdout.write(
+  "Loading geometry, dataset-view persistence/filter state, and CKAN admin progress contracts passed.\n",
+);
