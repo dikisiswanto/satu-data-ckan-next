@@ -155,6 +155,35 @@ requireText(
   "indicator detail fallback must reserve its real heading copy",
 );
 const titleLayoutCss = read("src/app/styles/public-layout-stability.css");
+const heroMobileCss = read("src/app/styles/public-home-hero.css");
+const heroMobileBlock = heroMobileCss.slice(
+  heroMobileCss.indexOf("@media (max-width: 767px)"),
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "grid-template-columns: repeat(2, minmax(0, 1fr))",
+  "mobile homepage metrics must use a balanced two-column grid",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "min-height: 4.55rem",
+  "mobile homepage metric cards must retain their compact card height",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "grid-column: auto",
+  "the final homepage metric must not span a full mobile row",
+);
+if (
+  /\.home-stat:last-child\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/s.test(
+    heroMobileBlock,
+  )
+) {
+  failures.push(
+    "homepage hero metrics must remain four equal cards in a 2x2 mobile grid",
+  );
+}
+
 requireText(
   "src/app/styles/public-layout-stability.css",
   ".public-heading-title-reserved",

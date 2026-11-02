@@ -44,6 +44,24 @@ assert.match(datasetLoading, /getDatasetViewPreference\(cookieStore\)/);
 assert.match(datasetLoading, /view === "list" \?/);
 assert.match(datasetLoading, /public-loading-list/);
 assert.match(datasetLoading, /public-loading-grid-md/);
+// Dataset loading search controls must line up with the resolved form: the
+// search input owns the flexible column; CTA and filter sit level with the
+// input (below its label), not at the bottom of the helper-copy block.
+const resolvedDatasetSearch =
+  datasetPage.split('<form action="/dataset"')[1]?.split("</form>")[0] || "";
+const loadingDatasetSearch =
+  datasetLoading
+    .split('aria-label="Memuat hasil katalog dataset"')[1]
+    ?.split('aria-label="Hasil katalog sedang dimuat"')[0] || "";
+assert.match(resolvedDatasetSearch, /sm:flex-row sm:items-start/);
+assert.match(loadingDatasetSearch, /sm:flex-row sm:items-start/);
+assert.doesNotMatch(loadingDatasetSearch, /sm:items-end/);
+assert.match(resolvedDatasetSearch, /className="min-w-0 flex-1"/);
+assert.match(loadingDatasetSearch, /className="min-w-0 flex-1"/);
+assert.match(resolvedDatasetSearch, /sm:mt-7 sm:w-auto/);
+assert.match(loadingDatasetSearch, /sm:mt-7 sm:w-\[9\.75rem\]/);
+assert.match(loadingDatasetSearch, /sm:mt-7 sm:w-auto/);
+assert.match(loadingDatasetSearch, /<SlidersHorizontal[\s\S]*?>[\s\S]*?Filter/);
 assert.match(
   preferenceLib,
   /DATASET_VIEW_COOKIE_MAX_AGE = 60 \* 60 \* 24 \* 365/,

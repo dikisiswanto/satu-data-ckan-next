@@ -114,6 +114,34 @@ test("hero artwork and summary counts never duplicate each other across breakpoi
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator(".home-hero-visual")).toBeHidden();
   await expect(page.locator(".home-stats-wrap")).toBeVisible();
+
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    const layout = await page.locator(".home-stats").evaluate((grid) => {
+      const cards = [...grid.querySelectorAll(":scope > .home-stat")];
+      const rects = cards.map((card) => card.getBoundingClientRect());
+      const columns = getComputedStyle(grid)
+        .gridTemplateColumns.trim()
+        .split(/\s+/).length;
+      const rows = new Set(rects.map((rect) => Math.round(rect.top)));
+      return {
+        columns,
+        rows: rows.size,
+        widths: rects.map((rect) => rect.width),
+        lastGridColumn: getComputedStyle(cards.at(-1)).gridColumn,
+        documentWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+      };
+    });
+
+    expect(layout.columns).toBe(2);
+    expect(layout.rows).toBe(2);
+    expect(
+      Math.max(...layout.widths) - Math.min(...layout.widths),
+    ).toBeLessThan(1);
+    expect(layout.lastGridColumn).toBe("auto");
+    expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+  }
 });
 
 test("information page keeps a compact title and description rhythm", async ({

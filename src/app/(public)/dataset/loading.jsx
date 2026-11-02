@@ -1,5 +1,10 @@
 import { cookies } from "next/headers";
-import { Filter, LayoutGrid, List as ListIcon, Search } from "lucide-react";
+import {
+  LayoutGrid,
+  List as ListIcon,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
 import { publicPageCopy } from "@/lib/public-copy";
 import { getDatasetViewPreference } from "@/lib/dataset-view-preference";
@@ -70,8 +75,8 @@ export default async function DatasetCatalogLoading() {
         <div className="page-container py-10 sm:py-14">
           <PageHeading {...publicPageCopy.dataset} />
           <div className="mt-8 rounded-2xl border border-[#d5e0e8] bg-white p-3 shadow-[0_8px_28px_rgb(20_55_60_/_0.07)] sm:p-4">
-            <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
-              <div className="min-w-0">
+            <div className="flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:items-start">
+              <div className="min-w-0 flex-1">
                 <p className="mb-2 block text-sm font-semibold">Kata kunci</p>
                 <div className="relative">
                   <Search
@@ -81,11 +86,16 @@ export default async function DatasetCatalogLoading() {
                   />
                   <Skeleton className="h-12 w-full rounded-control" />
                 </div>
-                <Skeleton className="mt-2 h-3 w-11/12 max-w-2xl" />
+                <Skeleton className="mt-2 h-3 w-full max-w-2xl sm:w-11/12" />
+                <Skeleton className="mt-1 h-3 w-4/5 sm:hidden" />
               </div>
-              <Skeleton className="h-12 w-full rounded-control sm:w-36" />
-              <div className="flex h-12 w-full items-center justify-center gap-2 rounded-control border border-line bg-surface px-4 sm:w-28">
-                <Filter size={16} aria-hidden="true" className="text-muted" />
+              <Skeleton className="h-12 w-full shrink-0 rounded-lg sm:mt-7 sm:w-[9.75rem]" />
+              <div className="flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-control border border-line bg-surface px-4 sm:mt-7 sm:w-auto">
+                <SlidersHorizontal
+                  size={16}
+                  aria-hidden="true"
+                  className="text-muted"
+                />
                 <span className="text-sm font-semibold text-muted">Filter</span>
               </div>
             </div>
