@@ -260,6 +260,10 @@ def main() -> int:
     require(has_selector(design_rules, ".wajo-login-identity") and has_selector(design_rules, ".wajo-login-panel"), "Both branded identity and authentication panels must exist.")
     require(has_decl(design_rules, "body:has(.wajo-login-frame)", "overflow-y", "auto", important=True), "Login must remain scrollable on short viewports so the form is never clipped.")
     require(has_decl(design_rules, ".wajo-login-frame .login-main:has(#field-login) .btn-primary", "min-height", "48px"), "Login submit action must retain a comfortable touch target.")
+    require(has_decl(design_rules, ".wajo-login-frame .login-form :is(.input-prepend, .input-append, .input-group):has(#field-login)", "position", "relative", important=True), "Login field wrapper must establish the positioning context for its icon.")
+    require(has_decl(design_rules, ".wajo-login-frame .login-form :is(.input-prepend, .input-append, .input-group) :is(.add-on, .input-group-addon, .input-group-text)", "position", "absolute", important=True), "Login icon must be absolutely positioned inside the input wrapper.")
+    require(has_decl(design_rules, ".wajo-login-frame .login-form #field-login", "padding-inline", "3.25rem 2.9rem", important=True), "Login text must reserve left icon space and right credential-manager space.")
+    require(has_decl(design_rules, ".main:has(.wajo-login-frame)", "min-height", "100svh"), "Login main area must fill the small viewport height for vertical centering.")
     require(has_decl(design_rules, ".wajo-admin-workspace :where(input, select, textarea, button, a, summary):focus-visible", "outline", "2px solid rgb(29 95 167 / 38%)", important=True), "Keyboard focus must have a single visible outline without a second shadow ring.")
     require(
         has_decl(base_rules, ".wajo-admin-menu-toggle", "display", "inline-flex", media="(max-width: 991.98px)"),

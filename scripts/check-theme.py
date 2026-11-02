@@ -69,10 +69,12 @@ public_motion_source = read(PUBLIC_MOTION)
 # screens/mobile, concise identity panel, and non-overlapping native inputs.
 login_fix = design_system_source.rsplit("/* Login viewport and field spacing regression fix.", 1)[-1]
 require("height: auto !important" in login_fix and "overflow-y: auto !important" in login_fix, "Login CKAN harus membiarkan dokumen bertambah tinggi dan dapat discroll pada mobile.")
-require("align-content: center" in login_fix and "justify-items: center" in login_fix, "Kartu login CKAN harus terpusat horizontal dan vertikal ketika cukup ruang.")
+require("align-content: safe center" in login_fix and "justify-items: center" in login_fix, "Kartu login CKAN harus terpusat saat cukup ruang dan fallback ke atas saat konten overflow.")
 require("max-height: none !important" in login_fix and "overflow: visible !important" in login_fix, "Login tidak boleh mengunci tinggi kartu atau memotong konten form.")
-require("padding-inline: 0.95rem 2.9rem !important" in login_fix, "Field login/password harus menyediakan jarak dari affordance browser di sisi kanan.")
-require("gap: 0.65rem" in login_fix and "margin: 0 !important" in login_fix, "Addon ikon pada input login harus memiliki jarak eksplisit dan tidak bertumpuk.")
+require("padding-inline: 3.25rem 2.9rem !important" in login_fix, "Field login/password harus menyediakan ruang dari ikon kiri dan affordance browser di kanan.")
+require("position: relative !important" in login_fix and "position: absolute !important" in login_fix, "Ikon username/password harus diposisikan absolute di dalam wrapper input.")
+require("padding-inline: 3.25rem 2.9rem !important" in login_fix, "Teks input login/password harus memiliki ruang kiri dari ikon dan ruang kanan untuk affordance browser.")
+require("align-content: safe center" in login_fix and "min-height: 100svh" in login_fix, "Area login harus memakai tinggi viewport dan aman dipusatkan tanpa memotong konten.")
 require("wajo-login-benefits" not in page_source and "wajo-login-identity__status" not in page_source, "Kolom identitas login harus ringkas dan tidak dipenuhi daftar teks tambahan.")
 require('msgid "Manage official datasets and portal content."' in read(INDONESIAN_PO), "Copy ringkas login harus memiliki terjemahan Bahasa Indonesia.")
 

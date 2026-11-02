@@ -12,6 +12,7 @@ const preferenceRoute = await read(
 );
 const datasetCard = await read("src/components/dataset-card.jsx");
 const publicCss = await read("src/app/styles/public-layout-stability.css");
+const organizationCss = await read("src/app/styles/public-organizations.css");
 const adminBase = await read(
   "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
 );
@@ -54,6 +55,11 @@ assert.match(catalogState, /state\.hasExplicitSort/);
 assert.match(catalogState, /queryRemains/);
 assert.match(catalogState, /FILTER_KEYS/);
 assert.match(preferenceRoute, /request\.formData\(\)/);
+assert.match(preferenceRoute, /headers: \{ Location: returnPath \}/);
+assert.doesNotMatch(
+  preferenceRoute,
+  /NextResponse\.redirect\(new URL\(returnPath, request\.url\)/,
+);
 assert.match(preferenceRoute, /httpOnly: true/);
 assert.match(preferenceRoute, /sameSite: "lax"/);
 assert.match(
@@ -85,6 +91,10 @@ assert.match(organizationLoading, /Cari perangkat daerah/);
 assert.match(organizationLoading, /organization-directory-grid/);
 assert.match(publicCss, /@keyframes public-skeleton-shimmer/);
 assert.match(publicCss, /prefers-reduced-motion: reduce/);
+assert.match(
+  organizationCss,
+  /@media \(max-width: 639px\)[\s\S]*?\.organization-directory-summary[\s\S]*?display: none !important/,
+);
 
 assert.match(adminBase, /wajo-admin-navigation-progress\.js/);
 assert.match(adminProgress, /event\.defaultPrevented/);

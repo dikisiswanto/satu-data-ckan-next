@@ -4145,8 +4145,8 @@ body:has(.wajo-login-frame) {
 }
 
 /* Login viewport and field spacing regression fix.
-   Keep the card centered when it fits, but let the document grow and scroll
-   whenever the viewport is shorter than the complete login composition. */
+   Center the composition when it fits; safe alignment falls back to the top
+   when the form grows beyond the viewport, leaving normal document scrolling. */
 html:has(.wajo-login-frame) {
   width: 100%;
   min-height: 100%;
@@ -4171,7 +4171,7 @@ body:has(.wajo-login-frame) {
   min-height: 100vh;
   min-height: 100svh;
   height: auto !important;
-  align-content: center;
+  align-content: safe center;
   justify-items: center;
   overflow: visible !important;
   margin: 0;
@@ -4180,7 +4180,7 @@ body:has(.wajo-login-frame) {
 }
 .wajo-login-frame {
   width: min(100%, 1080px);
-  min-height: 610px;
+  min-height: min(72vh, 42rem);
   height: auto !important;
   max-height: none !important;
   margin: 0 auto;
@@ -4208,9 +4208,9 @@ body:has(.wajo-login-frame) {
   justify-content: center;
 }
 
-/* CKAN renders these inputs through its native form macro. Reserve clear
-   leading/trailing space for browser/credential-manager affordances and keep
-   any theme/Bootstrap icon addon in its own flex segment. */
+/* CKAN's native login macro may render a Bootstrap input-prepend/input-group.
+   Keep the icon absolutely positioned inside the field wrapper and reserve
+   leading space in the input text so labels, typed text and autofill never collide. */
 .wajo-login-frame .login-form .controls:has(#field-login),
 .wajo-login-frame .login-form .controls:has(#field-password) {
   min-width: 0;
@@ -4221,42 +4221,42 @@ body:has(.wajo-login-frame) {
 .wajo-login-frame
   .login-form
   :is(.input-prepend, .input-append, .input-group):has(#field-password) {
-  display: flex;
+  position: relative !important;
+  display: block !important;
   width: 100%;
   min-width: 0;
-  align-items: center;
-  gap: 0.65rem;
 }
 .wajo-login-frame
   .login-form
   :is(.input-prepend, .input-append, .input-group)
   :is(.add-on, .input-group-addon, .input-group-text) {
-  position: static !important;
+  position: absolute !important;
+  z-index: 2;
+  inset-inline-start: 0.95rem;
+  inset-block-start: 50%;
   display: inline-flex;
-  min-width: 2.65rem;
-  min-height: 2.65rem;
-  flex: 0 0 2.65rem;
+  width: 1.45rem;
+  min-width: 1.45rem;
+  min-height: 1.45rem;
   align-items: center;
   justify-content: center;
+  transform: translateY(-50%);
   margin: 0 !important;
-  border: 1px solid var(--wajo-color-border-strong);
-  border-radius: 0.65rem;
-  background: #f5f8fb;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   color: #61788a;
+  pointer-events: none;
 }
 .wajo-login-frame .login-form #field-login,
 .wajo-login-frame .login-form #field-password {
+  display: block;
+  width: 100% !important;
   min-width: 0;
-  padding-inline: 0.95rem 2.9rem !important;
+  margin-inline-start: 0 !important;
+  padding-inline: 3.25rem 2.9rem !important;
   text-overflow: ellipsis;
-}
-.wajo-login-frame .login-form .input-prepend #field-login,
-.wajo-login-frame .login-form .input-prepend #field-password,
-.wajo-login-frame .login-form .input-group #field-login,
-.wajo-login-frame .login-form .input-group #field-password {
-  width: 1%;
-  flex: 1 1 auto;
-  padding-inline: 0.95rem !important;
 }
 .wajo-login-frame .login-form #field-password::-ms-reveal,
 .wajo-login-frame .login-form #field-password::-ms-clear {
@@ -4275,13 +4275,20 @@ body:has(.wajo-login-frame) {
   .login-form
   :is(.input-prepend, .input-append, .input-group)
   > :is(i, .fa, .fas, .icon) {
-  margin-inline: 0.25rem 0.1rem;
-  flex: 0 0 auto;
+  position: absolute !important;
+  z-index: 2;
+  inset-inline-start: 0.95rem;
+  inset-block-start: 50%;
+  margin: 0 !important;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 @media (max-width: 860px) {
   .main:has(.wajo-login-frame) {
-    align-content: start;
+    min-height: 100vh;
+    min-height: 100svh;
+    align-content: safe center;
     padding: 1rem;
   }
   .wajo-login-frame {
@@ -4316,6 +4323,7 @@ body:has(.wajo-login-frame) {
 }
 @media (max-width: 479.98px) {
   .main:has(.wajo-login-frame) {
+    min-height: 100vh;
     min-height: 100svh;
     padding: 0;
   }

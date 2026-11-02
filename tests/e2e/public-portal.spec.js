@@ -194,6 +194,19 @@ test("organization directory searches, filters and shows exact public counts by 
   ).toBeVisible();
 });
 
+test("organization search panel hides summary metrics on mobile to keep the search compact", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/organisasi");
+
+  await expect(
+    page.getByRole("searchbox", { name: "Cari perangkat daerah" }),
+  ).toBeVisible();
+  await expect(page.locator(".organization-directory-summary")).toBeHidden();
+  await expect(page.locator(".organization-directory-controls")).toBeVisible();
+});
+
 test("organization directory pagination identifies the active page and preserves focus", async ({
   page,
 }) => {
