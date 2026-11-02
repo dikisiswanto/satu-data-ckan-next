@@ -375,3 +375,11 @@ msgstr "Contoh: Judul halaman"
 msgid "Content blocks JSON"
 msgstr "Blok konten JSON"
 
+msgid "Landing page"
+msgstr "Halaman utama"
+
+msgid "Page actions"
+msgstr "Aksi halaman"
+
+msgid "Revisions"
+msgstr "Revisi"

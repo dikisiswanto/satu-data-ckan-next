@@ -174,6 +174,19 @@ assert.match(
   "Upload fields must explain how to select a file.",
 );
 
+assert.match(
+  script,
+  /function isBlogAdminRoute\(\)[\s\S]*?wajo-blog-admin-route/,
+  "Editorial admin UI must distinguish Blog routes from Pages routes.",
+);
+assert.match(
+  await read(
+    "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  ),
+  /wajo-blog-admin-route[\s\S]*?\.secondary[\s\S]*?display:\s*none\s*!important/,
+  "The Blog editor must remove its contextual sidebar without hiding global navigation.",
+);
+
 const sandbox = {
   window: {},
   document: { readyState: "loading", addEventListener() {} },
@@ -184,6 +197,86 @@ assert.ok(
   rules,
   "Conditional form rules must be exposed for deterministic validation.",
 );
+const editorialRouteCases = [
+  ["/pages/new", true, false],
+  ["/pages/panduan-portal/edit", true, false],
+  ["/blog", true, true],
+  ["/blog/new", true, true],
+  ["/blog/pembaruan-katalog", false, false],
+  ["/blog/pembaruan-katalog/edit", true, true],
+  ["/organization/dinas-kominfo/blog/berita/edit", true, true],
+  ["/group/dinas-kominfo/blog/new", true, true],
+  ["/organization/dinas-kominfo/pages/new", true, false],
+  ["/dataset/new", false, false],
+];
+for (const [pathname, expectedEditorial, expectedBlog] of editorialRouteCases) {
+  const routeWindow = { location: { pathname, search: "" } };
+  vm.runInNewContext(
+    script,
+    {
+      window: routeWindow,
+      document: { readyState: "loading", addEventListener() {} },
+    },
+    { filename: `wajo-editorial-route-${pathname.replace(/\W+/g, "-")}.js` },
+  );
+  assert.equal(
+    routeWindow.WajoEditorialAdminRoutes.isEditorialRoute(),
+    expectedEditorial,
+    `Unexpected editorial route classification for ${pathname}`,
+  );
+  assert.equal(
+    routeWindow.WajoEditorialAdminRoutes.isBlogRoute(),
+    expectedBlog,
+    `Unexpected Blog route classification for ${pathname}`,
+  );
+}
+for (const [pathname, expectedBlog] of [
+  ["/pages/new", false],
+  ["/blog/new", true],
+  ["/organization/dinas-kominfo/blog/berita/edit", true],
+]) {
+  const bodyClasses = new Set();
+  const body = {
+    classList: {
+      add(name) {
+        bodyClasses.add(name);
+      },
+      toggle(name, active) {
+        if (active) bodyClasses.add(name);
+        else bodyClasses.delete(name);
+      },
+    },
+  };
+  const routeWindow = { location: { pathname, search: "" } };
+  const routeDocument = {
+    readyState: "complete",
+    body,
+    getElementById() {
+      return null;
+    },
+    querySelector() {
+      return null;
+    },
+    querySelectorAll() {
+      return [];
+    },
+  };
+  vm.runInNewContext(
+    script,
+    { window: routeWindow, document: routeDocument, URLSearchParams },
+    { filename: `wajo-editorial-layout-${pathname.replace(/\W+/g, "-")}.js` },
+  );
+  assert.ok(
+    bodyClasses.has("wajo-pages-admin-route"),
+    `${pathname} must receive the shared editorial layout class`,
+  );
+  assert.equal(
+    bodyClasses.has("wajo-blog-admin-route"),
+    expectedBlog,
+    `${pathname} must receive only the correct Blog-specific layout modifier`,
+  );
+}
+
 for (const [field, types] of Object.entries(rules.dataset)) {
   assert.ok(
     Array.isArray(types) && types.length > 0,
@@ -610,5 +703,5 @@ assert.ok(
   "Category help links must open the correct dynamic dataset form.",
 );
 process.stdout.write(
-  "Admin custom forms passed: content-type query defaults, FE discovery tags, dynamic field visibility, inherited resource roles, and distinct thematic Group behavior verified.\n",
+  "Admin custom forms passed: CMS Page/Blog route parity, Blog contextual sidebar removal, content-type query defaults, FE discovery tags, dynamic field visibility, inherited resource roles, and thematic Group behavior verified.\n",
 );

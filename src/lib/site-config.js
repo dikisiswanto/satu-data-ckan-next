@@ -120,6 +120,8 @@ export const siteConfig = Object.freeze({
   ).trim(),
   locale: process.env.NEXT_PUBLIC_LOCALE || "id-ID",
   timeZone: process.env.NEXT_PUBLIC_TIME_ZONE || "Asia/Makassar",
+  themeColor: process.env.NEXT_PUBLIC_THEME_COLOR || "#174566",
+  backgroundColor: process.env.NEXT_PUBLIC_PWA_BACKGROUND_COLOR || "#f4f6f8",
 });
 
 /**

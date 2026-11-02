@@ -80,7 +80,7 @@
         <a class="wajo-admin-nav__item{% if active_path.startswith('/harvest') %} is-active{% endif %}" href="/harvest">{{ wajo_icon('refresh') }}<span>{{ _('Data harvesting') }}</span></a>
       {% endif %}
       {% if c.userobj.sysadmin %}
-        <a class="wajo-admin-nav__item{% if active_path.startswith('/admin/data-preview') %} is-active{% endif %}" href="{{ h.url_for('wajo_admin.data_preview') }}">{{ wajo_icon('table') }}<span>{{ _('DataStore & preview') }}</span><span class="wajo-admin-nav__badge">Atur</span></a>
+        <a class="wajo-admin-nav__item{% if active_path.startswith('/admin/data-preview') %} is-active{% endif %}" href="{{ h.url_for('wajo_admin.data_preview') }}">{{ wajo_icon('table') }}<span>{{ _('DataStore & preview') }}</span><span class="wajo-admin-nav__badge">{{ _('Manage') }}</span></a>
       {% endif %}
 
       <span class="wajo-admin-nav__label">{{ _('MY ACCOUNT') }}</span>

@@ -639,6 +639,24 @@
     );
   }
 
+  function isBlogAdminRoute() {
+    const path =
+      String(window.location?.pathname || "").replace(/\/+$/, "") || "/";
+    const segments = path.split("/").filter(Boolean);
+    const editorialSegments =
+      /^(?:organization|group)$/i.test(segments[0] || "") && segments[1]
+        ? segments.slice(2)
+        : segments;
+    return (
+      /^blog$/i.test(editorialSegments[0] || "") &&
+      (editorialSegments.length === 1 ||
+        ["new", "edit"].includes(
+          String(editorialSegments[1] || "").toLowerCase(),
+        ) ||
+        String(editorialSegments.at(-1) || "").toLowerCase() === "edit")
+    );
+  }
+
   function isPagesAdminListingRoute() {
     const path =
       String(window.location?.pathname || "").replace(/\/+$/, "") || "/";
@@ -655,6 +673,7 @@
   function enhancePagesAdminUi() {
     if (!isPagesAdminRoute() || !document.body) return false;
     document.body.classList.add("wajo-pages-admin-route");
+    document.body.classList.toggle("wajo-blog-admin-route", isBlogAdminRoute());
     document.body.classList.toggle(
       "wajo-pages-admin-list-route",
       isPagesAdminListingRoute(),
@@ -721,6 +740,12 @@
     enhanceFileInputs();
     observePagesAdminUi();
   }
+
+  window.WajoEditorialAdminRoutes = Object.freeze({
+    isEditorialRoute: isPagesAdminRoute,
+    isBlogRoute: isBlogAdminRoute,
+    isListingRoute: isPagesAdminListingRoute,
+  });
 
   window.WajoAdminFormRules = Object.freeze({
     dataset: DATASET_FIELD_RULES,

@@ -18,12 +18,46 @@
     </div>
   {% else %}
     <div class="wajo-login-frame">
-      <a class="wajo-login-brand" href="{{ g.site_url }}" aria-label="Portal Satu Data Kabupaten Wajo">
-        <img src="/logo-kabupaten-wajo.webp" alt="Lambang Kabupaten Wajo" width="60" height="70" />
-        <span><strong>Portal Satu Data Kabupaten Wajo</strong><small>Sistem Pengelolaan Data Pemerintah Daerah</small></span>
-      </a>
-      {{ super() }}
-      <p class="wajo-login-footnote">Akses khusus pengelola data yang memiliki akun CKAN.</p>
+      <section class="wajo-login-identity" aria-label="{{ _('Official management workspace') }}">
+        <a class="wajo-login-brand" href="{{ g.site_url }}" aria-label="{{ _('Wajo Regency One Data Portal') }}">
+          <span class="wajo-login-brand__mark">
+            <img src="/logo-kabupaten-wajo.webp" alt="{{ _('Wajo Regency coat of arms') }}" width="58" height="68" />
+          </span>
+          <span class="wajo-login-brand__copy">
+            <strong>{{ _('One Data Portal of Wajo Regency') }}</strong>
+            <small>{{ _('Official data portal of Wajo Regency Government') }}</small>
+          </span>
+        </a>
+
+        <div class="wajo-login-identity__content">
+          <span class="wajo-login-identity__eyebrow">{{ _('GOVERNMENT DATA MANAGEMENT') }}</span>
+          <h1>{{ _('A trusted workspace for regional data.') }}</h1>
+          <p>{{ _('Manage catalogue records, publications, and portal information in one secure workspace.') }}</p>
+          <ul class="wajo-login-benefits">
+            <li><span aria-hidden="true">✓</span>{{ _('Organize official datasets and metadata.') }}</li>
+            <li><span aria-hidden="true">✓</span>{{ _('Maintain publications and public information.') }}</li>
+            <li><span aria-hidden="true">✓</span>{{ _('Support accountable, data-driven decisions.') }}</li>
+          </ul>
+        </div>
+
+        <div class="wajo-login-identity__status">
+          <span aria-hidden="true"></span>{{ _('Official management workspace') }}
+        </div>
+        <div class="wajo-login-identity__watermark" aria-hidden="true">WAJO</div>
+      </section>
+
+      <section class="wajo-login-panel" aria-label="{{ _('Administrator access') }}">
+        <div class="wajo-login-panel__heading">
+          <span>{{ _('ADMINISTRATOR ACCESS') }}</span>
+          <p>{{ _('Sign in with your CKAN account to continue.') }}</p>
+        </div>
+        <div class="wajo-login-native">{{ super() }}</div>
+        <div class="wajo-login-footnote">
+          <span aria-hidden="true">{{ '◆' }}</span>
+          <p>{{ _('Access is limited to authorized data managers.') }}</p>
+        </div>
+        <p class="wajo-login-copyright">{{ _('One Data Portal · Wajo Regency Government') }}</p>
+      </section>
     </div>
   {% endif %}
 {% endblock %}

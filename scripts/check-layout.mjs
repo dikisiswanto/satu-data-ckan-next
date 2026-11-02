@@ -587,12 +587,15 @@ if (
   );
 }
 if (
-  !/background-position:\s*center,\s*center,\s*center 47%/.test(
+  !/\.home-hero-background img\s*\{[^}]*object-position:\s*center 47%/s.test(
+    read("src/app/styles/public-home-hero.css"),
+  ) ||
+  !/\.home-hero-background img\s*\{[^}]*object-fit:\s*cover/s.test(
     read("src/app/styles/public-home-hero.css"),
   )
 ) {
   failures.push(
-    "src/app/styles/public-home-hero.css: Wajo panorama crop must be deliberate and stable",
+    "src/app/styles/public-home-hero.css: Wajo panorama crop must use a deliberate object-fit frame and stable focal point",
   );
 }
 requireText(

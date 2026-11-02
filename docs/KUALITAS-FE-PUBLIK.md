@@ -44,6 +44,9 @@ Target Core Web Vitals pada persentil ke-75:
 - **Katalog indikator:** daftar tidak lagi membaca DataStore untuk setiap kartu. Nilai terbaru hanya diambil pada highlight beranda yang dibatasi dan pada halaman detail indikator. Ini menghilangkan pola N+1 request DataStore dari halaman daftar.
 - **Pencarian:** jumlah token unik dibatasi 12, field pencarian memakai allowlist, dan parameter pengurutan menggunakan kontrak tetap. Token memang muncul berulang pada query Solr karena masing-masing dicoba pada beberapa field; batas 12 berlaku pada token unik, bukan jumlah kemunculan teks token pada query.
 - **Build FE:** Docker memakai multi-stage build Next.js standalone, image runner terpisah, user non-root, kompresi respons, dan source map browser produksi dinonaktifkan.
+- **LCP beranda:** foto hero dirender melalui `next/image` di HTML server, memakai `preload` native Next.js, ukuran responsif `100vw`, dan titik fokus terpisah untuk layar kecil. URL eksternal tetap melewati jalur `unoptimized` agar tidak membuka Image Optimizer ke host yang belum di-allowlist.
+- **PWA dan cache browser:** manifest, warna tema, dan ikon instalasi mengikuti satu konfigurasi situs. Service worker hanya didaftarkan di produksi; halaman navigasi selalu mengambil HTML terbaru dari jaringan, dengan `/offline.html` sebagai fallback saat offline. Cache v5 dibatasi pada ikon, chunk Next.js ber-hash yang ditandai `immutable`, dan daftar gambar publik berukuran kecil. Cache dibatasi 140 aset dan 2 MiB per aset; respons `private`/`no-store`, API, HTML, endpoint unduhan CKAN, serta unggahan editorial tidak pernah disimpan.
+- **Update service worker:** pemanggilan `register()` dibiarkan memakai mekanisme update browser dan `updateViaCache: "none"`; aplikasi tidak memaksa request `registration.update()` pada setiap kunjungan agar tidak menambah request jaringan yang tidak perlu.
 
 ### Area yang masih perlu dipantau
 

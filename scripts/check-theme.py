@@ -146,6 +146,7 @@ require("{% block header_wrapper %}" in header_source, "Header Wajo Admin harus 
 require("h.url_for('wajo_admin.index')" in header_source, "Brand harus mengarah ke ringkasan Wajo Admin.")
 require('src="/logo-kabupaten-wajo.webp"' in header_source and "wajo-admin-brand__mark" in header_source, "Header harus memakai logo extension yang diekspos langsung oleh add_public_directory().")
 require("wajo-admin-user" in header_source and "h.csrf_input()" in header_source and "user.logout" in header_source, "Topbar harus mempertahankan identitas pengguna dan logout dengan CSRF.")
+require("_('One Data Portal of Wajo Regency')" in header_source and "_('Open public portal')" in header_source and "_('Log out')" in header_source, "Identitas dan aksi utama topbar harus menggunakan katalog Bahasa Indonesia.")
 icon_source = read(PACKAGE / "templates/wajo_theme/icon.html")
 require("wajo_theme/icon.html" in read(SIDEBAR) and 'class="fa fa-' in icon_source and "wajo-icons.svg#" not in icon_source and 'src="/logo-kabupaten-wajo.webp"' in header_source, "Ikon admin harus memakai pustaka Font Awesome bawaan CKAN, bukan SVG buatan sendiri, dan logo lokal extension.")
 require("fa-solid" in icon_source, "Ikon Wajo harus memakai family solid Font Awesome Free yang dibundel CKAN 2.12.1.")
@@ -235,6 +236,9 @@ require('toolkit.add_template_directory(config, "templates")' in plugin_source, 
 require('config["extra_template_paths"]' not in plugin_source, "Template Wajo tidak boleh didaftarkan ulang melalui extra_template_paths; duplikasi membuat ckan_extends berputar dengan template Midnight Blue.")
 require('"wajo_theme"' in bootstrap_source, "Plugin theme Wajo harus didaftarkan pada urutan plugin CKAN.")
 require("wajo-admin-shell" in page_source and 'wajo_theme/sidebar.html' in page_source and "{{ super() }}" in page_source, "Page shell harus menambahkan sidebar secara aditif tanpa mengganti konten core CKAN.")
+require(all(token in page_source for token in ("wajo-login-identity", "wajo-login-panel", "wajo-login-native", "{{ super() }}")), "Login harus memiliki layout autentikasi modern dan tetap membungkus form native CKAN.")
+require("field-login" not in page_source and "field-password" not in page_source, "Template login tidak boleh mengganti field autentikasi native CKAN.")
+require("_('A trusted workspace for regional data.')" in page_source and "_('Access is limited to authorized data managers.')" in page_source, "Copy halaman login harus menggunakan gettext katalog Bahasa Indonesia.")
 require(re.search(r"{%-?\s*block\s+footer\s*-?%}\s*{%-?\s*endblock\s*-?%}", page_source) is not None, "Footer admin harus dihilangkan dari shell CKAN.")
 
 # Verify WebAssets bundle name and its CSS file are consistent.
@@ -334,6 +338,7 @@ data_preview_source = read(DATA_PREVIEW)
 require("Portal Data Wajo" not in sidebar_source and "Kabupaten Wajo" not in sidebar_source and "wajo-admin-sidebar__context" not in sidebar_source and "wajo-admin-sidebar__footer" not in sidebar_source, "Sidebar admin harus langsung dimulai dari grup menu tanpa identitas tambahan atau footer.")
 require("wajo-admin-nav__children" in sidebar_source and "Add information page" in sidebar_source and "Add news article" in sidebar_source, "Aksi tambah CMS harus berada tepat di bawah menu parent-nya.")
 require("wajo_admin_stats" in dashboard_source and "wajo_admin_recent_datasets" in dashboard_source, "Dashboard harus memakai ringkasan yang disiapkan oleh view CKAN.")
+require("_('Welcome back')" in dashboard_source and "wajo-dashboard__metrics" in dashboard_source, "Dashboard harus memiliki sapaan yang dilokalkan dan panel metrik.")
 require("h.check_access('package_create')" in dashboard_source and "h.check_access('organization_create')" in dashboard_source, "Quick action dashboard harus menghormati permission CKAN.")
 require("h.url_for(dataset_type ~ '.read', id=item.name)" in dashboard_source, "Tautan dataset terbaru harus menggunakan route native CKAN.")
 require("request.path" in sidebar_source and "h.url_for('wajo_admin.index')" in sidebar_source, "Sidebar harus mendeteksi route aktif dan memakai route ringkasan Wajo Admin.")
@@ -406,6 +411,8 @@ require("'edit': 'pen-to-square'" in icon_source and "'pencil': 'pencil'" in ico
 admin_forms_source = read(PACKAGE / "public/wajo-admin-forms.js")
 require("function enhancePagesAdminUi()" in admin_forms_source and "wajo-pages-admin-route" in admin_forms_source, "Pages and News admin routes must receive the editorial layout treatment.")
 require("function isPagesAdminListingRoute()" in admin_forms_source and "wajo-pages-admin-list-route" in admin_forms_source, "Collection list styling must be scoped separately from Pages/News editor content.")
+require("function isBlogAdminRoute()" in admin_forms_source and "wajo-blog-admin-route" in admin_forms_source, "News routes must be identifiable independently so only their contextual sidebar is removed.")
+require("WajoEditorialAdminRoutes" in admin_forms_source, "Editorial route detection must be exposed for deterministic route regression tests.")
 require("fa-pen-to-square" in admin_forms_source and "fa-plus" in admin_forms_source, "Edit actions accidentally rendered with plus icons must be corrected without changing create actions.")
 require('String(parts[1] || "").toLowerCase()' in admin_forms_source, "CKAN editorial route detection must tolerate uppercase path segments.")
 require(not re.search(r"{%\s*set\b", form_source), "Form CMS tidak boleh memakai assignment tag Jinja; gunakan ekspresi inline agar kompatibilitas template tetap sederhana.")
@@ -453,8 +460,8 @@ try:
         "wajo_theme/context_help.html": "WAJO_CONTEXT_HELP",
     }))
     chrome_template = chrome_env.get_template("page.html")
-    anonymous_render = chrome_template.render(c={"userobj": None}, g={"site_url": "https://data.example.test"})
-    admin_render = chrome_template.render(c={"userobj": object()}, g={"site_url": "https://data.example.test"})
+    anonymous_render = chrome_template.render(c={"userobj": None}, g={"site_url": "https://data.example.test"}, _=lambda message: message)
+    admin_render = chrome_template.render(c={"userobj": object()}, g={"site_url": "https://data.example.test"}, _=lambda message: message)
     require("UPSTREAM_HEADER" not in anonymous_render and "UPSTREAM_FOOTER" not in anonymous_render and "WAJO_ADMIN_SIDEBAR" not in anonymous_render and "WAJO_CONTEXT_HELP" not in anonymous_render,
             "Header/footer/sidebar CKAN harus disembunyikan untuk pengguna anonim.")
     require("ADMIN_CONTENT" in anonymous_render,

@@ -2141,6 +2141,38 @@ body:has(.wajo-login-frame) {
 .wajo-pages-admin-route .wajo-admin-workspace .main {
   padding-top: clamp(1rem, 2vw, 1.75rem);
 }
+/* Page and News create/edit screens share one full-width editorial canvas. */
+.wajo-pages-admin-route .wajo-admin-workspace .primary {
+  float: none;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+.wajo-pages-admin-route .wajo-admin-workspace .primary > .module {
+  width: 100%;
+  max-width: none;
+}
+/* The Blog editor inherited an unrelated contextual column from CKAN's
+   two-column page shell. Keep the global Wajo navigation, remove only that
+   in-page sidebar, and let the News form use the same width as Pages. */
+.wajo-blog-admin-route .wajo-admin-workspace .secondary,
+.wajo-blog-admin-route .wajo-admin-workspace .secondary_content {
+  display: none !important;
+}
+.wajo-blog-admin-route .wajo-admin-workspace .wrapper,
+.wajo-blog-admin-route .wajo-admin-workspace #content > .row {
+  display: block;
+}
+.wajo-blog-admin-route .wajo-admin-workspace .primary {
+  float: none;
+  width: 100%;
+  max-width: none;
+}
+.wajo-pages-admin-route .wajo-admin-workspace .pages-form {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+}
 .wajo-pages-admin-route .wajo-admin-workspace .page-header {
   margin-bottom: 1.35rem;
   padding-bottom: 1rem;
@@ -3394,5 +3426,665 @@ body:has(.wajo-login-frame) {
   }
   .wajo-metric-card > strong {
     font-size: clamp(1.35rem, 7vw, 1.75rem);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Refined Wajo Admin shell and authentication workspace
+   -------------------------------------------------------------------------- */
+.wajo-admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background: rgb(255 255 255 / 94%);
+  backdrop-filter: saturate(160%) blur(16px);
+}
+.wajo-admin-topbar__inner {
+  min-height: 72px;
+}
+.wajo-admin-user {
+  min-height: 42px;
+  border: 1px solid var(--wajo-color-border);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem 0.25rem 0.35rem;
+  background: var(--wajo-color-surface-soft);
+}
+.wajo-admin-user__avatar {
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+.wajo-admin-user__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.wajo-admin-sidebar {
+  position: sticky;
+  top: 72px;
+  height: calc(100svh - 72px);
+  max-height: calc(100svh - 72px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.wajo-admin-sidebar__inner {
+  min-height: 100%;
+}
+.wajo-admin-nav__item {
+  position: relative;
+  transition:
+    background-color var(--wajo-transition-fast),
+    color var(--wajo-transition-fast),
+    border-color var(--wajo-transition-fast);
+}
+.wajo-admin-nav__item.is-active::before {
+  position: absolute;
+  inset-block: 0.48rem;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: var(--wajo-color-primary);
+  content: "";
+}
+.wajo-admin-nav__item:focus-visible,
+.wajo-metric-card:focus-visible,
+.wajo-dashboard-quicklinks > a:focus-visible {
+  outline: 3px solid rgb(29 95 167 / 25%);
+  outline-offset: 2px;
+}
+.wajo-admin-workspace .page-header {
+  align-items: flex-start;
+  border-bottom-color: var(--wajo-color-border);
+  padding-bottom: 1.1rem;
+}
+.wajo-admin-workspace .page-header .page-heading,
+.wajo-admin-workspace .page-header h1 {
+  max-width: 48ch;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.wajo-admin-workspace .module-content > :last-child,
+.wajo-admin-workspace .module-content > .form-actions:last-child {
+  margin-bottom: 0;
+}
+.wajo-admin-workspace .control-group .controls {
+  min-width: 0;
+}
+.wajo-admin-workspace
+  .control-group
+  .controls
+  > :where(input, select, textarea, .select2-container, .editor) {
+  max-width: 100%;
+}
+.wajo-admin-workspace .control-group .control-label {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+.wajo-admin-workspace .alert {
+  border-radius: var(--wajo-radius-card);
+  box-shadow: none;
+}
+.wajo-dashboard__welcome {
+  position: relative;
+  min-height: 148px;
+  overflow: hidden;
+  border-color: #d8e5f1;
+  background:
+    radial-gradient(circle at 92% 12%, rgb(29 95 167 / 9%), transparent 14rem),
+    linear-gradient(120deg, #fff 0%, #f4f8fd 100%);
+}
+.wajo-dashboard__welcome::before {
+  position: absolute;
+  inset-inline-end: 1.5rem;
+  inset-block-end: -4.3rem;
+  width: 11rem;
+  height: 11rem;
+  border: 1px solid rgb(29 95 167 / 9%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1.35rem rgb(29 95 167 / 3%),
+    0 0 0 2.7rem rgb(29 95 167 / 2%);
+  content: "";
+  pointer-events: none;
+}
+.wajo-dashboard__welcome-mark {
+  box-shadow: 0 8px 24px rgb(29 95 167 / 8%);
+}
+.wajo-dashboard__section-heading {
+  align-items: center;
+}
+.wajo-dashboard__section-heading a,
+.wajo-dashboard-panel__header > a {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  text-decoration: none;
+}
+.wajo-dashboard__section-heading a:hover,
+.wajo-dashboard-panel__header > a:hover {
+  background: var(--wajo-color-primary-tint);
+  text-decoration: none;
+}
+.wajo-metric-card {
+  min-height: 148px;
+  border-color: #dce5eb;
+}
+.wajo-metric-card:hover {
+  transform: translateY(-2px);
+  border-color: #b9cfe2;
+  box-shadow: var(--wajo-shadow-md);
+}
+.wajo-metric-card__icon {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgb(29 95 167 / 8%);
+  border-radius: 0.8rem;
+}
+.wajo-dashboard-panel__header {
+  border-top: 0;
+  border-bottom: 1px solid var(--wajo-color-border);
+  background: linear-gradient(180deg, #fff, #fbfcfd);
+}
+.wajo-dashboard-publisher__bar span {
+  min-width: 2px;
+}
+.wajo-admin-table__title {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.wajo-admin-table td small {
+  overflow-wrap: anywhere;
+}
+
+/* A single visible focus treatment: border color plus outline, never a second shadow ring. */
+.wajo-admin-workspace
+  :where(input, select, textarea, button, a, summary):focus-visible,
+.wajo-login-frame :where(input, select, textarea, button, a):focus-visible {
+  outline: 2px solid rgb(29 95 167 / 38%) !important;
+  outline-offset: 2px;
+  box-shadow: none !important;
+}
+.wajo-admin-workspace :where(input, select, textarea):focus:not(:focus-visible),
+.wajo-login-frame :where(input, select, textarea):focus:not(:focus-visible) {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Split-panel login: accessible native CKAN form on a more intentional branded surface. */
+body:has(.wajo-login-frame) {
+  display: block !important;
+  width: 100%;
+  min-height: 100svh;
+  height: auto !important;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  padding: 0 !important;
+  background:
+    radial-gradient(ellipse at 10% 8%, rgb(29 95 167 / 9%), transparent 28rem),
+    radial-gradient(ellipse at 92% 92%, rgb(35 112 83 / 7%), transparent 30rem),
+    #f3f6f8;
+}
+.main:has(.wajo-login-frame) {
+  display: grid;
+  width: 100%;
+  min-height: 100svh;
+  place-items: center;
+  margin: 0;
+  padding: clamp(1rem, 3.5vw, 3rem);
+  background: transparent;
+}
+.wajo-login-frame {
+  display: grid;
+  width: min(100%, 1080px);
+  min-height: 610px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(390px, 0.95fr);
+  overflow: hidden;
+  margin: 0 auto;
+  border: 1px solid #dce5ec;
+  border-radius: 1.35rem;
+  background: #fff;
+  box-shadow: 0 24px 70px rgb(25 49 68 / 11%);
+}
+.wajo-login-identity {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: clamp(1.75rem, 4vw, 3rem);
+  background:
+    radial-gradient(
+      circle at 100% 8%,
+      rgb(255 255 255 / 13%),
+      transparent 18rem
+    ),
+    linear-gradient(145deg, #153d65 0%, #1d5fa7 56%, #164c7e 100%);
+  color: #fff;
+  isolation: isolate;
+}
+.wajo-login-identity::before,
+.wajo-login-identity::after {
+  position: absolute;
+  z-index: -1;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+.wajo-login-identity::before {
+  inset-inline-end: -9rem;
+  inset-block-end: -11rem;
+  width: 31rem;
+  height: 31rem;
+  box-shadow:
+    0 0 0 2rem rgb(255 255 255 / 3%),
+    0 0 0 4rem rgb(255 255 255 / 2%);
+}
+.wajo-login-identity::after {
+  inset-inline-end: 3rem;
+  inset-block-start: 10rem;
+  width: 8rem;
+  height: 8rem;
+  border-color: rgb(255 255 255 / 8%);
+}
+.wajo-login-brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.85rem;
+  margin: 0;
+  color: #fff !important;
+  text-decoration: none !important;
+}
+.wajo-login-brand__mark {
+  display: grid;
+  width: 54px;
+  height: 58px;
+  flex: 0 0 54px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 0.85rem;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 6px 18px rgb(4 26 48 / 14%);
+}
+.wajo-login-brand img {
+  display: block;
+  width: 40px;
+  height: 48px;
+  flex: none;
+  object-fit: contain;
+}
+.wajo-login-brand__copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+}
+.wajo-login-brand__copy strong {
+  color: #fff;
+  font-size: 0.98rem;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+}
+.wajo-login-brand__copy small {
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+.wajo-login-identity__content {
+  position: relative;
+  z-index: 1;
+  max-width: 34rem;
+  margin-block: 4rem;
+}
+.wajo-login-identity__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: rgb(255 255 255 / 76%);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+}
+.wajo-login-identity__eyebrow::before {
+  width: 1.5rem;
+  height: 2px;
+  background: #a7d2f3;
+  content: "";
+}
+.wajo-login-identity__content h1 {
+  max-width: 12ch;
+  margin: 1rem 0 0.85rem;
+  color: #fff;
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 760;
+  letter-spacing: -0.055em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+.wajo-login-identity__content p {
+  max-width: 42ch;
+  margin: 0;
+  color: rgb(255 255 255 / 80%);
+  font-size: 0.94rem;
+  line-height: 1.75;
+}
+.wajo-login-benefits {
+  display: grid;
+  gap: 0.8rem;
+  margin: 1.75rem 0 0;
+  padding: 0;
+  color: rgb(255 255 255 / 92%);
+  font-size: 0.84rem;
+  list-style: none;
+}
+.wajo-login-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+.wajo-login-benefits li > span {
+  display: grid;
+  width: 1.3rem;
+  height: 1.3rem;
+  flex: 0 0 1.3rem;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 12%);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+.wajo-login-identity__status {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: rgb(255 255 255 / 76%);
+  font-size: 0.72rem;
+}
+.wajo-login-identity__status > span {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: #83d6ae;
+  box-shadow: 0 0 0 4px rgb(131 214 174 / 15%);
+}
+.wajo-login-identity__watermark {
+  position: absolute;
+  z-index: -1;
+  inset-inline-end: 1.5rem;
+  inset-block-end: -1.65rem;
+  color: rgb(255 255 255 / 5%);
+  font-size: clamp(5rem, 12vw, 9rem);
+  font-weight: 900;
+  letter-spacing: -0.08em;
+  line-height: 1;
+  pointer-events: none;
+}
+.wajo-login-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.75rem, 4vw, 3.25rem);
+  background: #fff;
+}
+.wajo-login-panel__heading {
+  margin-bottom: 1.2rem;
+}
+.wajo-login-panel__heading > span {
+  color: var(--wajo-color-primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.wajo-login-panel__heading p {
+  margin: 0.35rem 0 0;
+  color: var(--wajo-color-muted);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+.wajo-login-native,
+.wajo-login-native .login-main,
+.wajo-login-native #content {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+}
+.wajo-login-frame .login-main:has(#field-login) {
+  display: block;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+.wajo-login-frame .login-main:has(#field-login) #content {
+  padding: 0;
+}
+.wajo-login-frame .login-main:has(#field-login) .toolbar {
+  display: none;
+}
+.wajo-login-frame .login-main:has(#field-login) .login-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.wajo-login-frame
+  .login-main:has(#field-login)
+  .login-wrapper
+  > .login-container,
+.wajo-login-frame .login-main:has(#field-login) .login-wrapper > .login-form {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-inline: 0;
+}
+.wajo-login-frame .login-main:has(#field-login) .login-container {
+  padding-top: 0;
+  padding-bottom: 0.4rem;
+}
+.wajo-login-frame .login-main:has(#field-login) .login-container .page-heading {
+  margin: 0;
+  color: var(--wajo-color-ink);
+  font-size: 1.65rem;
+  font-weight: 760;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}
+.wajo-login-frame .login-main:has(#field-login) .login-form {
+  padding-top: 0.75rem;
+  padding-bottom: 0;
+}
+.wajo-login-frame .login-main:has(#field-login) :where(label, .control-label) {
+  margin-bottom: 0.4rem;
+  color: #354b5b;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+.wajo-login-frame .login-main:has(#field-login) .form-control {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--wajo-color-border-strong);
+  border-radius: 0.68rem;
+  padding: 0.65rem 0.8rem;
+  background: #fff;
+  color: var(--wajo-color-ink);
+  font-size: 1rem;
+  box-shadow: none;
+}
+.wajo-login-frame .login-main:has(#field-login) .form-control:focus {
+  border-color: var(--wajo-color-primary);
+  box-shadow: none;
+}
+.wajo-login-frame .login-main:has(#field-login) .control-group {
+  margin-bottom: 1rem;
+}
+.wajo-login-frame .login-main:has(#field-login) .form-actions {
+  display: grid;
+  margin-top: 1.15rem;
+  padding: 0;
+}
+.wajo-login-frame .login-main:has(#field-login) .btn-primary {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--wajo-color-primary);
+  border-radius: 0.68rem;
+  background: var(--wajo-color-primary);
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  box-shadow: 0 5px 12px rgb(29 95 167 / 15%);
+}
+.wajo-login-frame .login-main:has(#field-login) .btn-primary:hover {
+  border-color: var(--wajo-color-primary-hover);
+  background: var(--wajo-color-primary-hover);
+  color: #fff;
+}
+.wajo-login-frame .login-main:has(#field-login) .alert,
+.wajo-login-frame .login-main:has(#field-login) .error-block {
+  border-radius: 0.65rem;
+  font-size: 0.82rem;
+}
+.wajo-login-footnote {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 1.4rem 0 0;
+  border-top: 1px solid #e8edf1;
+  padding-top: 1rem;
+  color: var(--wajo-color-muted);
+  text-align: left;
+}
+.wajo-login-footnote > span {
+  color: var(--wajo-color-primary);
+  font-size: 0.7rem;
+}
+.wajo-login-footnote p {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+.wajo-login-copyright {
+  margin: 1.1rem 0 0;
+  color: var(--wajo-color-subtle);
+  font-size: 0.68rem;
+  text-align: center;
+}
+@media (max-width: 860px) {
+  .main:has(.wajo-login-frame) {
+    padding: 1rem;
+  }
+  .wajo-login-frame {
+    width: min(100%, 560px);
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wajo-login-identity {
+    min-height: 230px;
+    padding: 1.5rem;
+  }
+  .wajo-login-identity__content {
+    margin: 2rem 0 0;
+  }
+  .wajo-login-identity__content h1 {
+    max-width: 18ch;
+    font-size: clamp(1.65rem, 5vw, 2.3rem);
+  }
+  .wajo-login-benefits,
+  .wajo-login-identity__status {
+    display: none;
+  }
+  .wajo-login-panel {
+    padding: 1.6rem 1.5rem 1.35rem;
+  }
+}
+@media (max-width: 479.98px) {
+  .main:has(.wajo-login-frame) {
+    padding: 0;
+  }
+  .wajo-login-frame {
+    width: 100%;
+    min-height: 100svh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .wajo-login-identity {
+    min-height: 205px;
+    padding: 1.25rem 1.1rem;
+  }
+  .wajo-login-brand__mark {
+    width: 48px;
+    height: 52px;
+    flex-basis: 48px;
+  }
+  .wajo-login-brand img {
+    width: 36px;
+    height: 44px;
+  }
+  .wajo-login-brand__copy strong {
+    font-size: 0.86rem;
+  }
+  .wajo-login-brand__copy small {
+    font-size: 0.61rem;
+  }
+  .wajo-login-identity__content {
+    margin-top: 1.5rem;
+  }
+  .wajo-login-identity__content h1 {
+    margin-top: 0.7rem;
+    font-size: 1.55rem;
+  }
+  .wajo-login-panel {
+    justify-content: flex-start;
+    padding: 1.5rem 1.15rem 1.25rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wajo-admin-nav__item,
+  .wajo-metric-card {
+    transition: none !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .wajo-admin-sidebar {
+    position: sticky;
+    top: 72px;
+    height: calc(100svh - 72px);
+    max-height: calc(100svh - 72px);
+    overflow-y: auto;
+  }
+}
+@media (max-width: 991.98px) {
+  .wajo-admin-sidebar {
+    position: relative;
+    top: auto;
+    height: auto;
+    max-height: min(70vh, 620px);
+    overflow-y: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--wajo-color-border);
   }
 }

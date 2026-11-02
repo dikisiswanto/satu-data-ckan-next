@@ -101,9 +101,14 @@ for side, icon in faces.items():
         require(bool(re.search(rf'<{icon}(?:\s|>)', match.group(1))),
                 f"Cube {side} face must display its {icon} icon.")
 
-hero = rules.get("body:has(.public-home) .home-hero", {})
-require("92%" in hero.get("background-image", ""),
+hero_overlay = rules.get("body:has(.public-home) .home-hero::before", {})
+hero_image = rules.get(".home-hero-background img", {})
+require("92%" in hero_overlay.get("background-image", ""),
         "Hero copy needs a sufficiently dark overlay for readable white text over the photo.")
+require(hero_image.get("object-fit") == "cover" and "47%" in hero_image.get("object-position", ""),
+        "Hero background image must fill its reserved frame with a stable focal point.")
+require(bool(re.search(r'<Image[\s\S]*?src=\{siteConfig\.heroImage\}[\s\S]*?fill[\s\S]*?preload', jsx)),
+        "Homepage hero image must be server-rendered and preloaded for LCP.")
 heading = rules.get(".home-hero h1", {})
 paragraph = rules.get(".home-hero-description", {})
 require(heading.get("color") == "#fff", "Hero heading must retain a high-contrast foreground.")

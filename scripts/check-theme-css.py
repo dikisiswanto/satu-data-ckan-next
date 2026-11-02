@@ -255,10 +255,18 @@ def main() -> int:
     require(has_selector(base_rules, ".login-wrapper > .login-container"), "Login must retain the native login container layout.")
     require(has_selector(base_rules, ".login-wrapper > .login-form"), "Login must retain the native login form layout.")
     require(has_decl(design_rules, ".wajo-login-frame .login-main:has(#field-login) .form-control", "font-size", "1rem"), "Login input font size must remain readable.")
+    require(has_decl(design_rules, ".wajo-login-frame", "display", "grid"), "Login must use the split-panel layout grid.")
+    require(has_decl(design_rules, ".wajo-login-frame", "grid-template-columns", "minmax(0, 1.05fr) minmax(390px, 0.95fr)"), "Login identity and form panels must retain a balanced desktop split.")
+    require(has_selector(design_rules, ".wajo-login-identity") and has_selector(design_rules, ".wajo-login-panel"), "Both branded identity and authentication panels must exist.")
+    require(has_decl(design_rules, "body:has(.wajo-login-frame)", "overflow-y", "auto", important=True), "Login must remain scrollable on short viewports so the form is never clipped.")
+    require(has_decl(design_rules, ".wajo-login-frame .login-main:has(#field-login) .btn-primary", "min-height", "48px"), "Login submit action must retain a comfortable touch target.")
+    require(has_decl(design_rules, ".wajo-admin-workspace :where(input, select, textarea, button, a, summary):focus-visible", "outline", "2px solid rgb(29 95 167 / 38%)", important=True), "Keyboard focus must have a single visible outline without a second shadow ring.")
     require(
         has_decl(base_rules, ".wajo-admin-menu-toggle", "display", "inline-flex", media="(max-width: 991.98px)"),
         "Admin menu toggle must be visible at tablet/mobile widths.",
     )
+    require(has_decl(design_rules, ".wajo-admin-sidebar", "position", "sticky", media="(min-width: 992px)"), "Admin sidebar should use a sticky workspace navigation on desktop.")
+    require(has_decl(design_rules, ".wajo-admin-sidebar", "position", "relative", media="(max-width: 991.98px)"), "Admin sidebar must return to normal flow on tablet/mobile.")
     require(has_selector(admin_rules, ".wajo-admin-workspace .btn"), "Admin buttons must retain their common component rule.")
     require(has_decl(design_rules, ".wajo-admin-workspace .btn", "min-height", "var(--wajo-button-height)"), "Admin buttons must use canonical button height.")
     require(
@@ -277,12 +285,36 @@ def main() -> int:
     # Editorial Pages/News form, previews and responsive admin collections.
     for selector in (
         ".wajo-pages-admin-route .wajo-admin-workspace .pages-form",
+        ".wajo-pages-admin-route .wajo-admin-workspace .primary",
+        ".wajo-blog-admin-route .wajo-admin-workspace .secondary",
+        ".wajo-blog-admin-route .wajo-admin-workspace .secondary_content",
         ".wajo-pages-editor", ".wajo-md-preview", ".blog-item",
         "module-content > ul:not(.nav):not(.pagination)",
         ".wajo-pages-admin-list-route", ".table-responsive > table tbody td",
         "ul.list-unstyled:not(.nav):not(.pagination)",
     ):
         require(has_selector(design_rules, selector), f"Pages/News admin CSS is missing selector: {selector}.")
+
+    require(
+        has_decl(design_rules, ".wajo-pages-admin-route .wajo-admin-workspace .primary", "float", "none"),
+        "Pages and News create/edit screens must share a non-floating primary form canvas.",
+    )
+    require(
+        has_decl(design_rules, ".wajo-pages-admin-route .wajo-admin-workspace .primary", "width", "100%"),
+        "Pages and News create/edit screens must use the same full-width primary form canvas.",
+    )
+    require(
+        has_decl(design_rules, ".wajo-blog-admin-route .wajo-admin-workspace .secondary", "display", "none", important=True),
+        "Blog editor contextual sidebar must be hidden without affecting the global Wajo navigation.",
+    )
+    require(
+        has_decl(design_rules, ".wajo-blog-admin-route .wajo-admin-workspace .secondary_content", "display", "none", important=True),
+        "Blog editor secondary content must not reserve a redundant left/right column.",
+    )
+    require(
+        not has_decl(design_rules, ".wajo-blog-admin-route .wajo-admin-sidebar", "display", "none", important=True),
+        "Removing the Blog contextual sidebar must not hide the global Wajo admin navigation.",
+    )
 
     # Native CKAN resource format sprite/status markup must never be overridden.
     resource_overrides = sorted({

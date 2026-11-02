@@ -2762,3 +2762,64 @@ msgstr "Konten yang diterbitkan setiap organisasi akan muncul di sini."
 
 msgid "Publishing analytics are temporarily unavailable. The catalog overview remains available."
 msgstr "Analitik penerbitan sementara tidak tersedia. Ringkasan katalog tetap dapat digunakan."
+
+
+msgid "Wajo Regency One Data Portal"
+msgstr "Portal Satu Data Kabupaten Wajo"
+
+msgid "Wajo Regency One Data Portal — Dashboard"
+msgstr "Portal Satu Data Kabupaten Wajo — Ringkasan"
+
+msgid "Wajo Regency coat of arms"
+msgstr "Lambang Kabupaten Wajo"
+
+msgid "One Data Portal of Wajo Regency"
+msgstr "Portal Satu Data Kabupaten Wajo"
+
+msgid "Official data portal of Wajo Regency Government"
+msgstr "Portal data resmi Pemerintah Kabupaten Wajo"
+
+msgid "GOVERNMENT DATA MANAGEMENT"
+msgstr "PENGELOLAAN DATA PEMERINTAH"
+
+msgid "A trusted workspace for regional data."
+msgstr "Ruang kerja tepercaya untuk pengelolaan data daerah."
+
+msgid "Manage catalogue records, publications, and portal information in one secure workspace."
+msgstr "Kelola katalog data, publikasi, dan informasi portal dalam satu ruang kerja yang aman."
+
+msgid "Organize official datasets and metadata."
+msgstr "Atur dataset resmi beserta metadatanya."
+
+msgid "Maintain publications and public information."
+msgstr "Kelola publikasi dan informasi untuk masyarakat."
+
+msgid "Support accountable, data-driven decisions."
+msgstr "Dukung pengambilan keputusan berbasis data yang akuntabel."
+
+msgid "Official management workspace"
+msgstr "Ruang kerja resmi pengelola data"
+
+msgid "Administrator access"
+msgstr "Akses administrator"
+
+msgid "ADMINISTRATOR ACCESS"
+msgstr "AKSES PENGELOLA"
+
+msgid "Sign in with your CKAN account to continue."
+msgstr "Masuk menggunakan akun CKAN Anda untuk melanjutkan."
+
+msgid "Access is limited to authorized data managers."
+msgstr "Akses hanya diberikan kepada pengelola data yang berwenang."
+
+msgid "One Data Portal · Wajo Regency Government"
+msgstr "Portal Satu Data · Pemerintah Kabupaten Wajo"
+
+msgid "Open navigation"
+msgstr "Buka navigasi"
+
+msgid "Data manager"
+msgstr "Pengelola data"
+
+msgid "Welcome back"
+msgstr "Selamat datang kembali"

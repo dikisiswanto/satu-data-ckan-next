@@ -13,8 +13,8 @@ export default function manifest() {
     display: "standalone",
     display_override: ["standalone", "minimal-ui"],
     orientation: "any",
-    background_color: "#f4f6f8",
-    theme_color: "#174566",
+    background_color: siteConfig.backgroundColor,
+    theme_color: siteConfig.themeColor,
     categories: ["government", "education", "utilities"],
     icons: [
       {

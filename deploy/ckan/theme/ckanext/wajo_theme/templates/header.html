@@ -5,40 +5,40 @@
 {% block header_wrapper %}
   <header class="wajo-admin-topbar">
     <div class="wajo-admin-topbar__inner">
-      <a class="wajo-admin-brand" href="{{ h.url_for('wajo_admin.index') }}" aria-label="Portal Satu Data Kabupaten Wajo — Ringkasan">
+      <a class="wajo-admin-brand" href="{{ h.url_for('wajo_admin.index') }}" aria-label="{{ _('Wajo Regency One Data Portal — Dashboard') }}">
         <span class="wajo-admin-brand__mark">
-          <img src="/logo-kabupaten-wajo.webp" alt="Lambang Kabupaten Wajo" width="42" height="48" fetchpriority="high" />
+          <img src="/logo-kabupaten-wajo.webp" alt="{{ _('Wajo Regency coat of arms') }}" width="42" height="48" fetchpriority="high" />
         </span>
         <span class="wajo-admin-brand__copy">
-          <strong>Portal Satu Data Kabupaten Wajo</strong>
-          <small>PORTAL DATA RESMI PEMERINTAH KABUPATEN WAJO</small>
+          <strong>{{ _('One Data Portal of Wajo Regency') }}</strong>
+          <small>{{ _('Official data portal of Wajo Regency Government') }}</small>
         </span>
       </a>
 
       <div class="wajo-admin-topbar__actions">
-        <button class="wajo-admin-menu-toggle btn" type="button" data-bs-toggle="collapse" data-bs-target="#wajo-admin-sidebar" aria-controls="wajo-admin-sidebar" aria-expanded="false" aria-label="Buka navigasi">
+        <button class="wajo-admin-menu-toggle btn" type="button" data-bs-toggle="collapse" data-bs-target="#wajo-admin-sidebar" aria-controls="wajo-admin-sidebar" aria-expanded="false" aria-label="{{ _('Open navigation') }}">
           {{ wajo_icon('menu') }}
         </button>
         <a class="wajo-admin-public-link" href="{{ g.site_url }}" target="_blank" rel="noopener noreferrer">
           {{ wajo_icon('external-link') }}
-          <span>Lihat portal publik</span>
+          <span>{{ _('Open public portal') }}</span>
         </a>
         {% if c.userobj %}
           <div class="wajo-admin-user">
             <span class="wajo-admin-user__avatar">{{ h.user_image((c.user if c and c.user else ''), size=30) }}</span>
             <span class="wajo-admin-user__identity">
               <strong>{{ c.userobj.display_name or c.userobj.name }}</strong>
-              <small>{{ 'Administrator sistem' if c.userobj.sysadmin else 'Pengelola data' }}</small>
+              <small>{{ _('System Administrator') if c.userobj.sysadmin else _('Data manager') }}</small>
             </span>
           </div>
           {% if c.userobj.sysadmin %}
-            <a class="wajo-admin-icon-button" href="{{ h.url_for('admin.index') }}" aria-label="Pengaturan sistem" title="Pengaturan sistem">
+            <a class="wajo-admin-icon-button" href="{{ h.url_for('admin.index') }}" aria-label="{{ _('System settings') }}" title="{{ _('System settings') }}">
               {{ wajo_icon('sliders') }}
             </a>
           {% endif %}
           <form class="wajo-admin-logout" action="{{ h.url_for('user.logout') }}" method="post">
             {{ h.csrf_input() }}
-            <button class="wajo-admin-icon-button" type="submit" aria-label="Keluar" title="Keluar">
+            <button class="wajo-admin-icon-button" type="submit" aria-label="{{ _('Log out') }}" title="{{ _('Log out') }}">
               {{ wajo_icon('log-out') }}
             </button>
           </form>

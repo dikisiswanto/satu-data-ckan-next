@@ -72,6 +72,14 @@ export const metadata = {
     },
   },
 };
+
+export const viewport = {
+  themeColor: siteConfig.themeColor,
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang={siteConfig.locale} data-scroll-behavior="smooth">

@@ -129,6 +129,25 @@ def main() -> None:
     absent = sorted(required - message_ids)
     if absent:
         ERRORS.append(f"Required CKAN core admin translation keys are missing: {', '.join(absent)}")
+
+    # Verify every literal gettext key used by our own Jinja templates against
+    # the correct domain. CKAN core templates use ckan; Pages/Blog templates
+    # use ckanext-pages. This catches regressions that catalog-only checks miss.
+    template_root = ROOT / "deploy/ckan/theme/ckanext/wajo_theme/templates"
+    template_key_pattern = re.compile(r"_\(\s*(['\"])(.*?)\1\s*\)")
+    for template_path in sorted(template_root.rglob("*.html")):
+        domain = "ckanext-pages" if "ckanext_pages" in template_path.parts else "ckan"
+        domain_catalog = parsed_catalogs.get(domain)
+        template_source = template_path.read_text(encoding="utf-8")
+        for match in template_key_pattern.finditer(template_source):
+            msgid = match.group(2)
+            message = domain_catalog.get(msgid) if domain_catalog else None
+            if message is None or not message.string:
+                line_number = template_source.count("\n", 0, match.start()) + 1
+                ERRORS.append(
+                    f"{domain}: gettext key {msgid!r} is missing or untranslated in "
+                    f"{template_path.relative_to(ROOT)}:{line_number}."
+                )
     required_plural_pairs = {
         (
             '{number} dataset found for "{query}"',
@@ -183,12 +202,40 @@ def main() -> None:
             "Manage public data visuals": "Kelola visualisasi data publik",
             "Page actions": "Aksi halaman",
             "Revisions": "Revisi",
+            "Wajo Regency One Data Portal": "Portal Satu Data Kabupaten Wajo",
+            "Wajo Regency One Data Portal — Dashboard": "Portal Satu Data Kabupaten Wajo — Ringkasan",
+            "Wajo Regency coat of arms": "Lambang Kabupaten Wajo",
+            "One Data Portal of Wajo Regency": "Portal Satu Data Kabupaten Wajo",
+            "Official data portal of Wajo Regency Government": "Portal data resmi Pemerintah Kabupaten Wajo",
+            "GOVERNMENT DATA MANAGEMENT": "PENGELOLAAN DATA PEMERINTAH",
+            "A trusted workspace for regional data.": "Ruang kerja tepercaya untuk pengelolaan data daerah.",
+            "Manage catalogue records, publications, and portal information in one secure workspace.": "Kelola katalog data, publikasi, dan informasi portal dalam satu ruang kerja yang aman.",
+            "Organize official datasets and metadata.": "Atur dataset resmi beserta metadatanya.",
+            "Maintain publications and public information.": "Kelola publikasi dan informasi untuk masyarakat.",
+            "Support accountable, data-driven decisions.": "Dukung pengambilan keputusan berbasis data yang akuntabel.",
+            "Official management workspace": "Ruang kerja resmi pengelola data",
+            "Administrator access": "Akses administrator",
+            "ADMINISTRATOR ACCESS": "AKSES PENGELOLA",
+            "Sign in with your CKAN account to continue.": "Masuk menggunakan akun CKAN Anda untuk melanjutkan.",
+            "Access is limited to authorized data managers.": "Akses hanya diberikan kepada pengelola data yang berwenang.",
+            "One Data Portal · Wajo Regency Government": "Portal Satu Data · Pemerintah Kabupaten Wajo",
+            "Open navigation": "Buka navigasi",
+            "System settings": "Pengaturan sistem",
+            "System Administrator": "Administrator sistem",
+            "Data manager": "Pengelola data",
+            "Log out": "Keluar",
+            "Manage": "Kelola",
+            "Welcome back": "Selamat datang kembali",
         },
         "ckanext-pages": {
             "Blog": "Berita dan artikel",
             "Add Blog Article": "Tambah artikel berita",
             "Edit Blog Article": "Ubah artikel berita",
             "This page currently has no content": "Halaman ini belum memiliki konten.",
+            "Landing page": "Halaman utama",
+            "Page actions": "Aksi halaman",
+            "Revisions": "Revisi",
+            "Content blocks JSON": "Blok konten JSON",
         },
     }
     for domain, expected in expected_translations.items():

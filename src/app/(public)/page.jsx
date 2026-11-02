@@ -215,9 +215,22 @@ function HomeHeroContent({
   return (
     <section
       className={`home-hero${loading ? " home-hero--loading" : ""}`}
-      style={{ "--home-hero-image": `url("${siteConfig.heroImage}")` }}
       aria-busy={loading ? "true" : undefined}
     >
+      <div className="home-hero-background" aria-hidden="true">
+        <Image
+          src={siteConfig.heroImage}
+          alt=""
+          fill
+          preload
+          sizes="100vw"
+          unoptimized={
+            !siteConfig.heroImage.startsWith("/") ||
+            siteConfig.heroImage.startsWith("//")
+          }
+          className="object-cover"
+        />
+      </div>
       <div className="home-hero-pattern" aria-hidden="true" />
       <div className="page-container home-hero-inner">
         <div className="home-hero-copy">

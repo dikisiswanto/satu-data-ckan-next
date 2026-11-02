@@ -163,6 +163,8 @@ requirePattern(
 for (const relativePath of [
   "tests/e2e/public-accessibility.spec.js",
   "tests/e2e/public-performance.spec.js",
+  "scripts/check-pwa.mjs",
+  "scripts/test-service-worker.mjs",
 ]) {
   if (!fs.existsSync(path.join(root, relativePath)))
     errors.push(`Missing extended quality test: ${relativePath}`);

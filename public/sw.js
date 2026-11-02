@@ -1,7 +1,12 @@
-const CACHE_NAME = "portal-satu-data-static-v4";
+const CACHE_NAME = "portal-satu-data-static-v5";
 const OFFLINE_URL = "/offline.html";
 const STATIC_PREFIXES = ["/icons/", "/_next/static/"];
-const MAX_CACHED_ASSETS = 120;
+const PUBLIC_IMAGE_ASSETS = new Set([
+  "/logo-kabupaten-wajo.webp",
+  "/wajo-hero-panorama.webp",
+  "/portal-social.svg",
+]);
+const MAX_CACHED_ASSETS = 140;
 const MAX_CACHEABLE_ASSET_BYTES = 2 * 1024 * 1024;
 
 self.addEventListener("install", (event) => {
@@ -22,7 +27,9 @@ self.addEventListener("activate", (event) => {
           keys
             .filter(
               (key) =>
-                (key.startsWith("satu-data-wajo-") || key.startsWith("satu-data-static-") || key.startsWith("portal-satu-data-static-")) &&
+                (key.startsWith("satu-data-wajo-") ||
+                  key.startsWith("satu-data-static-") ||
+                  key.startsWith("portal-satu-data-static-")) &&
                 key !== CACHE_NAME,
             )
             .map((key) => caches.delete(key)),
@@ -32,20 +39,70 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+function isPublicAsset(url) {
+  return (
+    STATIC_PREFIXES.some((prefix) => url.pathname.startsWith(prefix)) ||
+    PUBLIC_IMAGE_ASSETS.has(url.pathname)
+  );
+}
+
+function isImmutableChunk(url) {
+  return url.pathname.startsWith("/_next/static/");
+}
+
 async function trimStaticCache(cache) {
   const requests = await cache.keys();
   const assetRequests = requests.filter((request) => {
     const pathname = new URL(request.url).pathname;
-    return STATIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+    return isPublicAsset(new URL(request.url)) && pathname !== OFFLINE_URL;
   });
   const excess = assetRequests.length - MAX_CACHED_ASSETS;
   if (excess > 0) {
     // Cache.keys() preserves insertion order in supported browsers; remove the
-    // oldest cached chunks first. Hashed Next.js asset URLs are immutable.
+    // oldest entries first. Hashed Next.js chunks are immutable and safe to reuse.
     await Promise.all(
       assetRequests.slice(0, excess).map((request) => cache.delete(request)),
     );
   }
+}
+
+async function fetchAndCacheAsset(request, { requireImmutable = false } = {}) {
+  const response = await fetch(request);
+  if (!response.ok || response.type !== "basic") return response;
+
+  const cacheControl = (
+    response.headers.get("cache-control") || ""
+  ).toLowerCase();
+  const contentType = (
+    response.headers.get("content-type") || ""
+  ).toLowerCase();
+  const responseLengthHeader = response.headers.get("content-length");
+  const responseLength =
+    responseLengthHeader === null ? NaN : Number(responseLengthHeader);
+  const immutable = cacheControl.includes("immutable");
+  const supportedType =
+    /^(?:image\/(?:avif|gif|jpeg|png|svg\+xml|webp)|text\/(?:css|javascript)|application\/(?:javascript|font-woff2?))/.test(
+      contentType,
+    ) || /^(?:font\/|application\/font-)/.test(contentType);
+  const storable =
+    supportedType &&
+    !cacheControl.includes("no-store") &&
+    !cacheControl.includes("private") &&
+    Number.isSafeInteger(responseLength) &&
+    responseLength > 0 &&
+    responseLength <= MAX_CACHEABLE_ASSET_BYTES &&
+    (!requireImmutable || immutable);
+
+  if (storable) {
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, response.clone());
+      await trimStaticCache(cache);
+    } catch {
+      // Storage/quota failures must not break a successful asset request.
+    }
+  }
+  return response;
 }
 
 self.addEventListener("fetch", (event) => {
@@ -70,56 +127,40 @@ self.addEventListener("fetch", (event) => {
         } catch {
           // Storage failures should not disguise the original connection issue.
         }
-        // Do not synthesize an HTTP 503 for an offline/cancelled navigation:
-        // it looks like an application or rate-limit error in DevTools. If the
-        // offline document is unavailable, let the browser report a network
-        // failure rather than inventing an HTTP status the server never sent.
         return Response.error();
       }),
     );
     return;
   }
 
-  const isStaticAsset = STATIC_PREFIXES.some((prefix) =>
-    url.pathname.startsWith(prefix),
-  );
-  if (!isStaticAsset) return;
+  if (!isPublicAsset(url)) return;
 
+  if (isImmutableChunk(url)) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        const cached = await cache.match(request);
+        if (cached) return cached;
+        try {
+          return await fetchAndCacheAsset(request, { requireImmutable: true });
+        } catch {
+          return Response.error();
+        }
+      }),
+    );
+    return;
+  }
+
+  // Small public images use stale-while-revalidate: show a cached image
+  // immediately, but refresh it in the background while online. API routes,
+  // CKAN file proxy endpoints, and editorial upload URLs are deliberately not
+  // part of this allowlist.
+  const refresh = fetchAndCacheAsset(request).catch(() => Response.error());
+  event.waitUntil(refresh.then(() => undefined));
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
       const cached = await cache.match(request);
       if (cached) return cached;
-
-      try {
-        const response = await fetch(request);
-        const cacheControl = (
-          response.headers.get("cache-control") || ""
-        ).toLowerCase();
-        const responseLengthHeader = response.headers.get("content-length");
-        const responseLength =
-          responseLengthHeader === null ? NaN : Number(responseLengthHeader);
-        const immutable = cacheControl.includes("immutable");
-        const storable =
-          response.ok &&
-          response.type === "basic" &&
-          immutable &&
-          !cacheControl.includes("no-store") &&
-          Number.isSafeInteger(responseLength) &&
-          responseLength > 0 &&
-          responseLength <= MAX_CACHEABLE_ASSET_BYTES;
-
-        if (storable) {
-          try {
-            await cache.put(request, response.clone());
-            await trimStaticCache(cache);
-          } catch {
-            // Storage/quota failures must not break a successful asset request.
-          }
-        }
-        return response;
-      } catch {
-        return Response.error();
-      }
+      return refresh;
     }),
   );
 });

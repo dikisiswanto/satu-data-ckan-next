@@ -65,8 +65,62 @@ test("public homepage exposes measurable LCP, CLS, and bounded first-party resou
     };
   });
 
+  const heroImage = await page
+    .locator(".home-hero-background img")
+    .evaluate((image) => ({
+      loading: image.loading,
+      complete: image.complete,
+      naturalWidth: image.naturalWidth,
+      hasPreloadHint: Boolean(
+        document.querySelector('link[rel="preload"][as="image"]'),
+      ),
+    }));
+  expect(heroImage.hasPreloadHint).toBeTruthy();
+  expect(heroImage.loading).not.toBe("lazy");
+  expect(heroImage.complete).toBeTruthy();
+  expect(heroImage.naturalWidth).toBeGreaterThan(0);
+
   expect(result.firstPartyScriptCount).toBeGreaterThan(0);
   expect(result.cls).toBeLessThanOrEqual(0.1);
   // This smoke budget catches accidental blocking scripts without pretending to replace Lighthouse.
   expect(result.firstPartyScriptDuration).toBeLessThan(15_000);
+});
+
+test("PWA manifest, install icons, offline page, and service worker are served", async ({
+  request,
+}) => {
+  const manifestResponse = await request.get("/manifest.webmanifest");
+  expect(manifestResponse.ok()).toBeTruthy();
+  const manifest = await manifestResponse.json();
+  expect(manifest.display).toBe("standalone");
+  expect(manifest.scope).toBe("/");
+  expect(manifest.start_url).toBe("/");
+  expect(typeof manifest.theme_color).toBe("string");
+  expect(manifest.theme_color.length).toBeGreaterThan(0);
+  expect(typeof manifest.background_color).toBe("string");
+  expect(manifest.background_color.length).toBeGreaterThan(0);
+  expect(manifest.icons.length).toBeGreaterThanOrEqual(2);
+
+  for (const size of ["192x192", "512x512"]) {
+    const icon = manifest.icons.find(
+      (entry) => entry.sizes === size || entry.sizes === "any",
+    );
+    expect(
+      icon,
+      `PWA manifest must include ${size} or a scalable SVG`,
+    ).toBeTruthy();
+    const iconResponse = await request.get(icon.src);
+    expect(
+      iconResponse.ok(),
+      `${icon.src} must be publicly accessible`,
+    ).toBeTruthy();
+  }
+
+  const [offlineResponse, workerResponse] = await Promise.all([
+    request.get("/offline.html"),
+    request.get("/sw.js"),
+  ]);
+  expect(offlineResponse.ok()).toBeTruthy();
+  expect(workerResponse.ok()).toBeTruthy();
+  expect(await workerResponse.text()).toContain("portal-satu-data-static-v5");
 });

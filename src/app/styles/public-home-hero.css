@@ -103,6 +103,26 @@ body:has(.public-home) .home-hero {
   padding: clamp(5.1rem, 6.5vw, 5.8rem) 0 1rem;
   color: #fff;
   background-color: #123650;
+  background-image: none;
+}
+
+.home-hero-background {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  overflow: hidden;
+  background: #123650;
+}
+.home-hero-background img {
+  object-fit: cover;
+  object-position: center 47%;
+}
+body:has(.public-home) .home-hero::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
   background-image:
     linear-gradient(
       90deg,
@@ -110,14 +130,7 @@ body:has(.public-home) .home-hero {
       rgb(8 35 55 / 84%) 54%,
       rgb(8 35 55 / 58%) 100%
     ),
-    linear-gradient(0deg, rgb(6 28 46 / 30%), rgb(6 28 46 / 5%)),
-    var(--home-hero-image, url("/portal-social.svg"));
-  background-position:
-    center,
-    center,
-    center 47%;
-  background-size: cover;
-  background-repeat: no-repeat;
+    linear-gradient(0deg, rgb(6 28 46 / 30%), rgb(6 28 46 / 5%));
 }
 
 body:has(.public-home) .home-hero-pattern {
@@ -711,10 +724,9 @@ body:has(.public-home) .home-hero-pattern {
   body:has(.public-home) .home-hero {
     padding-top: 4.9rem;
     padding-bottom: 0.9rem;
-    background-position:
-      center,
-      center,
-      60% center;
+  }
+  .home-hero-background img {
+    object-position: 60% center;
   }
   .home-hero-inner {
     grid-template-columns: minmax(0, 1fr);
