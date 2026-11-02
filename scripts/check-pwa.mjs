@@ -16,6 +16,13 @@ const siteConfig = read("src/lib/site-config.js");
 const registration = read("src/components/service-worker-registration.jsx");
 const worker = read("public/sw.js");
 const home = read("src/app/(public)/page.jsx");
+const publicLayout = read("src/components/public-layout.jsx");
+const rootLayout = read("src/app/layout.jsx");
+const promotion = read("src/components/pwa-install-promotion.jsx");
+const promotionLogic = read("src/lib/pwa-install-promotion.js");
+const promotionStyles = read("src/app/styles/pwa-install-promotion.css");
+const promotionUnitTests = read("tests/unit/pwa-install-promotion.test.js");
+const promotionE2eTests = read("tests/e2e/public-performance.spec.js");
 
 check(
   /manifest:\s*"\/manifest\.webmanifest"/.test(layout),
@@ -147,6 +154,68 @@ check(
   "Homepage hero image must declare responsive image sizes.",
 );
 
+check(
+  /PwaInstallPromotion/.test(publicLayout) &&
+    !/PwaInstallPromotion/.test(rootLayout),
+  "PWA install promotion must mount only inside the public layout, never in the shared root/admin shell.",
+);
+check(
+  /useSyncExternalStore/.test(promotion) &&
+    /publishPwaSnapshot/.test(promotion) &&
+    !/set(?:Platform|Engagement|Visible)\(/.test(promotion),
+  "PWA browser state must use an external-store subscription instead of synchronous state setters in effects.",
+);
+check(
+  /beforeinstallprompt/.test(promotion) && /appinstalled/.test(promotion),
+  "PWA promotion must use native install lifecycle events when the browser supports them.",
+);
+check(
+  /event\.preventDefault\(\)/.test(promotion) &&
+    /promptEvent\.prompt\(\)/.test(promotion),
+  "The deferred native install prompt must only be invoked from the user's install action.",
+);
+check(
+  /PWA_PROMOTION_MIN_VISITS\s*=\s*2/.test(promotionLogic) &&
+    /PWA_PROMOTION_MIN_PAGE_VIEWS\s*=\s*3/.test(promotionLogic),
+  "PWA install promotion must wait for a second visit and at least three public page views.",
+);
+check(
+  /PWA_PROMOTION_DISMISS_MS\s*=\s*14/.test(promotionLogic) &&
+    /PWA_PROMOTION_PROMPT_DISMISS_MS\s*=\s*30/.test(promotionLogic),
+  "Manual and native-prompt dismissals must be snoozed for their configured intervals.",
+);
+check(
+  /classifyPwaInstallPlatform/.test(promotionLogic) &&
+    /getPwaInstallInstructions/.test(promotionLogic) &&
+    /Tambahkan ke Layar Utama/.test(promotionLogic),
+  "PWA promotion must provide platform-aware manual install instructions, including iOS.",
+);
+check(
+  /displayMode/.test(promotionLogic) &&
+    /navigatorStandalone/.test(promotionLogic) &&
+    /markPwaInstalled/.test(promotion),
+  "PWA promotion must stop when the app is already installed or running standalone.",
+);
+check(
+  /focusin/.test(promotion) &&
+    /a\[download\]/.test(promotion) &&
+    /a\[target=\'_blank\']/.test(promotion) &&
+    /form/.test(promotion),
+  "PWA promotion must get out of the way during form entry and download interactions.",
+);
+check(
+  /safe-area-inset-bottom/.test(promotionStyles) &&
+    /prefers-reduced-motion/.test(promotionStyles) &&
+    /max-height/.test(promotionStyles),
+  "PWA promotion must respect mobile safe areas, reduced motion, and small viewports.",
+);
+check(
+  /PWA install promotion waits for engagement/.test(promotionE2eTests) &&
+    /already installed/.test(promotionE2eTests) &&
+    /counts visits once per tab session/.test(promotionUnitTests),
+  "PWA promotion must have engagement, installed-state, and browser-storage regression tests.",
+);
+
 if (errors.length) {
   process.stderr.write(
     `PWA checks failed (${errors.length}):\n${errors
@@ -156,5 +225,5 @@ if (errors.length) {
   process.exit(1);
 }
 process.stdout.write(
-  "PWA checks passed: install metadata, icon dimensions, production registration, offline fallback, safe asset caching, and LCP image preload.\n",
+  "PWA checks passed: install metadata, safe cache boundaries, public-only soft install promotion, engagement/dismissal lifecycle, platform instructions, and responsive install UI.\n",
 );

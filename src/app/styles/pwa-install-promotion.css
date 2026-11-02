@@ -1,0 +1,224 @@
+.pwa-install-promotion {
+  position: fixed;
+  z-index: 45;
+  inset-inline-end: max(1rem, env(safe-area-inset-right));
+  inset-block-end: max(1rem, env(safe-area-inset-bottom));
+  display: grid;
+  width: min(25rem, calc(100vw - 2rem));
+  max-height: min(82svh, 34rem);
+  gap: 0.8rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem;
+  border: 1px solid rgb(193 210 218 / 90%);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 97%);
+  box-shadow:
+    0 16px 44px rgb(15 43 57 / 17%),
+    0 2px 8px rgb(15 43 57 / 7%);
+  color: #1b3440;
+  animation: pwa-promotion-enter 220ms ease-out both;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.pwa-install-promotion__header {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.pwa-install-promotion__app-icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #d5e4ed;
+  border-radius: 0.85rem;
+  background: linear-gradient(145deg, #edf5fa, #e4f0f6);
+  color: #174f72;
+}
+
+.pwa-install-promotion__copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.pwa-install-promotion__eyebrow {
+  margin: 0 0 0.15rem;
+  color: #527080;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.075em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.pwa-install-promotion__copy h2 {
+  margin: 0;
+  color: #183d52;
+  font-size: 0.98rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.pwa-install-promotion__description {
+  margin: 0.25rem 0 0;
+  color: #5a6f79;
+  font-size: 0.79rem;
+  line-height: 1.5;
+}
+
+.pwa-install-promotion__close {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: #607782;
+  cursor: pointer;
+}
+
+.pwa-install-promotion__close:hover {
+  border-color: #dce6ea;
+  background: #f2f6f8;
+  color: #1c4053;
+}
+
+.pwa-install-promotion__action {
+  display: inline-flex;
+  min-height: 2.65rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 1px solid #174f72;
+  border-radius: 0.72rem;
+  background: #174f72;
+  padding: 0.65rem 0.9rem;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.25;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
+}
+
+.pwa-install-promotion__action:hover:not(:disabled) {
+  border-color: #103d5b;
+  background: #103d5b;
+}
+
+.pwa-install-promotion__action:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.pwa-install-promotion__action:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.pwa-install-promotion__chevron {
+  margin-left: auto;
+  transition: transform 140ms ease;
+}
+
+.pwa-install-promotion__chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.pwa-install-promotion__instructions {
+  border: 1px solid #e1e9ed;
+  border-radius: 0.75rem;
+  background: #f7fafb;
+  padding: 0.75rem 0.85rem;
+  color: #405762;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.pwa-install-promotion__instructions ol {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.pwa-install-promotion__instructions li {
+  padding-left: 0.1rem;
+}
+
+.pwa-install-promotion__instructions li::marker {
+  color: #286585;
+  font-weight: 750;
+}
+
+.pwa-install-promotion__note {
+  margin: 0.65rem 0 0;
+  border-top: 1px solid #e1e9ed;
+  padding-top: 0.6rem;
+  color: #647983;
+  font-size: 0.74rem;
+}
+
+.pwa-install-promotion__footnote {
+  margin: -0.2rem 0 0;
+  color: #74858d;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+@keyframes pwa-promotion-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.45rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (max-width: 639px) {
+  .pwa-install-promotion {
+    inset-inline: max(0.75rem, env(safe-area-inset-left))
+      max(0.75rem, env(safe-area-inset-right));
+    inset-block-end: max(0.7rem, env(safe-area-inset-bottom));
+    width: auto;
+    max-height: min(76svh, 30rem);
+    gap: 0.7rem;
+    padding: 0.85rem;
+    border-radius: 0.9rem;
+  }
+
+  .pwa-install-promotion__app-icon {
+    width: 2.55rem;
+    height: 2.55rem;
+  }
+
+  .pwa-install-promotion__copy h2 {
+    font-size: 0.93rem;
+  }
+
+  .pwa-install-promotion__description {
+    font-size: 0.76rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwa-install-promotion,
+  .pwa-install-promotion__action,
+  .pwa-install-promotion__chevron {
+    animation: none;
+    transition: none;
+  }
+}

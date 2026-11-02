@@ -3,6 +3,7 @@ import { PublicScrollManager } from "@/components/public-scroll-manager";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PublicBreadcrumbs } from "@/components/public-breadcrumbs";
+import { PwaInstallPromotion } from "@/components/pwa-install-promotion";
 
 export function PublicLayout({ children }) {
   return (
@@ -16,6 +17,9 @@ export function PublicLayout({ children }) {
         {children}
       </div>
       <SiteFooter />
+      <Suspense fallback={null}>
+        <PwaInstallPromotion />
+      </Suspense>
     </div>
   );
 }

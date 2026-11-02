@@ -124,6 +124,7 @@ const orderedImports = [
   "public-responsive.css",
   "public-layout-stability.css",
   "public-home-hero.css",
+  "pwa-install-promotion.css",
 ];
 const actualImports = [
   ...globalCss.matchAll(/@import\s+["']\.\/styles\/([^"']+\.css)["']/g),

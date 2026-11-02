@@ -124,3 +124,77 @@ test("PWA manifest, install icons, offline page, and service worker are served",
   expect(workerResponse.ok()).toBeTruthy();
   expect(await workerResponse.text()).toContain("portal-satu-data-static-v5");
 });
+
+test("PWA install promotion waits for a second visit and multiple public pages", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const promotion = page.locator('[data-pwa-install-promotion="true"]');
+  await expect(promotion).toHaveCount(0);
+
+  await page.goto("/dataset", { waitUntil: "domcontentloaded" });
+  await page.goto("/organisasi", { waitUntil: "domcontentloaded" });
+  await expect(promotion).toHaveCount(0);
+
+  const secondVisit = await context.newPage();
+  await secondVisit.goto("/statistik", { waitUntil: "domcontentloaded" });
+  await expect(
+    secondVisit.locator('[data-pwa-install-promotion="true"]'),
+  ).toBeVisible();
+  await secondVisit.close();
+});
+
+test("PWA install promotion waits for engagement and respects a manual dismissal", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const key = "wajo:pwa-install-promotion:v1";
+    if (!localStorage.getItem(key)) {
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          visitCount: 2,
+          pageViews: 3,
+          dismissedUntil: 0,
+          installed: false,
+        }),
+      );
+    }
+  });
+
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const promotion = page.locator('[data-pwa-install-promotion="true"]');
+  await expect(promotion).toBeVisible();
+  await expect(promotion).toContainText("Akses lebih praktis");
+  await expect(promotion).toContainText("Buka katalog dan informasi data");
+
+  await promotion
+    .getByRole("button", { name: "Tutup promosi pemasangan aplikasi" })
+    .click();
+  await expect(promotion).toHaveCount(0);
+
+  await page.goto("/dataset", { waitUntil: "domcontentloaded" });
+  await expect(promotion).toHaveCount(0);
+});
+
+test("PWA install promotion stays hidden when the app is already installed", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "wajo:pwa-install-promotion:v1",
+      JSON.stringify({
+        visitCount: 8,
+        pageViews: 24,
+        dismissedUntil: 0,
+        installed: true,
+      }),
+    );
+  });
+
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-pwa-install-promotion="true"]')).toHaveCount(
+    0,
+  );
+});
