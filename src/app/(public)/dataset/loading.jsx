@@ -71,10 +71,10 @@ export default async function DatasetCatalogLoading() {
 
   return (
     <main aria-busy="true" aria-label="Memuat hasil katalog dataset">
-      <section className="relative z-10 [overflow:visible] border-b border-[#d9e1dc] bg-[#f4f7f8]">
+      <section className="relative z-10 [overflow:visible] border-b border-line bg-canvas">
         <div className="page-container py-10 sm:py-14">
           <PageHeading {...publicPageCopy.dataset} />
-          <div className="mt-8 rounded-2xl border border-[#d5e0e8] bg-white p-3 shadow-[0_8px_28px_rgb(20_55_60_/_0.07)] sm:p-4">
+          <div className="mt-8 rounded-2xl border border-line bg-white p-3 shadow-[0_8px_28px_rgb(20_55_60_/_0.07)] sm:p-4">
             <div className="flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:items-start">
               <div className="min-w-0 flex-1">
                 <p className="mb-2 block text-sm font-semibold">Kata kunci</p>

@@ -284,8 +284,8 @@ body:has(.public-home) .home-hero::before {
 .home-visual-chip-top-right,
 .home-visual-chip-bottom-left,
 .home-visual-chip-bottom-right {
-  --chip-bg: #eaf2ff;
-  --chip-border: #c9dced;
+  --chip-bg: #eaf3ff;
+  --chip-border: #bfd5f2;
   --chip-ink: #19476f;
   --chip-muted: #49647d;
 }
@@ -414,18 +414,18 @@ body:has(.public-home) .home-hero::before {
   right: auto;
   bottom: 5.4rem;
   left: 0.1rem;
-  --chip-bg: #eaf3ff;
-  --chip-border: #bfd5f2;
-  --chip-ink: #19476f;
-  --chip-muted: #49647d;
+  --chip-bg: #f0edff;
+  --chip-border: #d4cdf5;
+  --chip-ink: #4d3e82;
+  --chip-muted: #655d83;
 }
 .home-visual-chip-bottom-right {
   right: 0.1rem;
   bottom: 5.4rem;
-  --chip-bg: #e5f6f1;
-  --chip-border: #bce3d8;
-  --chip-ink: #185b50;
-  --chip-muted: #456e67;
+  --chip-bg: #fff4e3;
+  --chip-border: #ecd9b7;
+  --chip-ink: #805516;
+  --chip-muted: #765f3c;
 }
 .home-visual-chip {
   border-color: var(--chip-border, #d5e3ed);

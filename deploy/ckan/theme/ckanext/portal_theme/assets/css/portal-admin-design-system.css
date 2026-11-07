@@ -4,11 +4,12 @@
   color-scheme: light;
   --portal-color-navy: #123650;
   --portal-color-blue: #1d5fa7;
+  --portal-color-blue-hover: #174f8c;
   --portal-color-teal: #23785f;
   --portal-color-ochre: #91621f;
   --portal-atlas-pattern: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgNDIwIiBmaWxsPSJub25lIj48ZyBzdHJva2U9IiNkOGVmZjQiIHN0cm9rZS1vcGFjaXR5PSIuMzAiIHN0cm9rZS13aWR0aD0iMS4yNSI+PHBhdGggZD0iTS0zMCA4MkM2NCAxOCAxMjMgMzMgMTk0IDc4czEzMiA3MyAyMTAgMTkgMTM1LTU0IDIzMS02Ii8+PHBhdGggZD0iTS0yNiAxMTBDNjMgNDggMTMyIDYxIDIwMSAxMDRzMTMwIDY5IDIxMSAxNyAxMzEtNTIgMjI3LTQiLz48cGF0aCBkPSJNLTIyIDE0MUM2NCA4NCAxMzkgODggMjEwIDEzMnMxMjggNjUgMjExIDE1IDEyOC01MCAyMjItMiIvPjxwYXRoIGQ9Ik0tMjAgMjg4Yzk4LTY4IDE2Ny03MCAyNDMtMjQgNzAgNDIgMTI2IDU1IDE5OCAxNCA2Ny0zOSAxMTYtNDUgMjAyLTgiLz48cGF0aCBkPSJNLTEyIDMxOWMxMDItNjQgMTY5LTYyIDI0NC0xOCA3MiA0MiAxMjcgNTMgMjAxIDEzIDY4LTM3IDExMy00MSAxOTYtNCIvPjxwYXRoIGQ9Ik0tOCAzNTBjMTAzLTU5IDE3MS01NyAyNDctMTMgNzIgNDEgMTI2IDQ5IDE5OCAxMSA2Ni0zNSAxMTEtMzggMTkxLTIiLz48L2c+PGcgc3Ryb2tlPSIjOTJkOWNlIiBzdHJva2Utb3BhY2l0eT0iLjU1IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iNCA4Ij48cGF0aCBkPSJNMTEyIDgwIDIzMCAxNTcgMzYwIDEwOCA0NjggMTk2Ii8+PHBhdGggZD0iTTIzMCAxNTcgMjY5IDI3NiAzOTAgMzA3IDQ2OCAxOTYiLz48cGF0aCBkPSJNMzYwIDEwOCAzOTAgMzA3Ii8+PC9nPjxnIGZpbGw9IiNhOWU2ZDYiIHN0cm9rZT0iIzEyMzY1MCIgc3Ryb2tlLXdpZHRoPSIzIj48Y2lyY2xlIGN4PSIxMTIiIGN5PSI4MCIgcj0iNSIvPjxjaXJjbGUgY3g9IjIzMCIgY3k9IjE1NyIgcj0iNiIvPjxjaXJjbGUgY3g9IjM2MCIgY3k9IjEwOCIgcj0iNSIvPjxjaXJjbGUgY3g9IjQ2OCIgY3k9IjE5NiIgcj0iNiIvPjxjaXJjbGUgY3g9IjI2OSIgY3k9IjI3NiIgcj0iNSIvPjxjaXJjbGUgY3g9IjM5MCIgY3k9IjMwNyIgcj0iNSIvPjwvZz48L3N2Zz4=");
   --portal-color-primary: var(--portal-color-blue);
-  --portal-color-primary-hover: #174f8c;
+  --portal-color-primary-hover: var(--portal-color-blue-hover);
   --portal-color-primary-active: #123f70;
   --portal-color-primary-soft: #eaf2ff;
   --portal-color-primary-tint: #f4f8ff;
@@ -3696,7 +3697,7 @@ body:has(.portal-login-frame) {
 .portal-metric-card--green,
 .portal-metric-card--gold,
 .portal-metric-card--blue,
-.portal-metric-card--purple {
+.portal-metric-card--slate {
   --metric-color: var(--portal-color-primary);
   --metric-soft: var(--portal-color-primary-soft);
   --metric-border: var(--portal-color-border);
@@ -4617,7 +4618,7 @@ body:has(.portal-login-frame) {
   --metric-color: var(--portal-color-ochre);
   --metric-soft: #f7f0e4;
 }
-.portal-metric-card--purple {
+.portal-metric-card--slate {
   --metric-color: #3f6f83;
   --metric-soft: #edf4f6;
 }

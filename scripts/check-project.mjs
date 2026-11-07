@@ -922,12 +922,22 @@ const homepageSource = await readFile(
   "utf8",
 );
 if (
-  /home-data-art|home-scene-cube|home-scene-grid|home-scene-spark/.test(
+  /home-scene-cube|home-scene-grid|home-scene-spark|home-orbit/.test(
     homepageSource,
   )
 ) {
   errors.push(
-    "Homepage tidak boleh memakai grafik kuantitatif fiktif atau ornamen teknologi generik; motif atlas/jaringan data yang abstrak tetap diperbolehkan sebagai identitas visual.",
+    "Homepage tidak boleh memakai kubus 3D, grid teknologi generik, spark dekoratif, atau orbit; ilustrasi atlas dan artefak data yang relevan diperbolehkan.",
+  );
+}
+if (
+  homepageSource.includes("home-data-art") &&
+  (!homepageSource.includes("home-data-art-tile-dataset") ||
+    !homepageSource.includes("home-data-art-tile-statistic") ||
+    !homepageSource.includes("home-data-art-tile-map"))
+) {
+  errors.push(
+    "Ilustrasi layanan homepage harus tetap berupa artefak dataset, statistik, dan wilayah yang bermakna, bukan grafik angka rekaan.",
   );
 }
 if (

@@ -828,7 +828,7 @@ textarea {
   --metric-soft: #eaf2f8;
   --metric-border: #cbdce9;
 }
-.portal-metric-card--purple {
+.portal-metric-card--slate {
   --metric-color: #7460a0;
   --metric-soft: #f0edf7;
   --metric-border: #dcd4ec;
@@ -1743,7 +1743,7 @@ body {
 .portal-metric-card--green,
 .portal-metric-card--gold,
 .portal-metric-card--blue,
-.portal-metric-card--purple {
+.portal-metric-card--slate {
   --metric-color: #34734f;
   --metric-soft: #f0f6f2;
   --metric-border: #cddbd2;

@@ -369,7 +369,7 @@ export default function ApiDocsPage() {
             </nav>
           </aside>
 
-          <div className="min-w-0 bg-white px-0 py-6 sm:py-8">
+          <div className="api-doc-content min-w-0 rounded-2xl border border-line bg-white p-4 shadow-[0_2px_12px_rgb(20_55_75_/_0.035)] sm:p-6 lg:p-8">
             <ApiSection
               id="respons"
               number="01"

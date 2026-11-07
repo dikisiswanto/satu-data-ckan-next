@@ -22,6 +22,7 @@ run_check python3 scripts/check-base.py
 run_check python3 scripts/check-theme.py
 run_check python3 scripts/check-theme-css.py
 run_check python3 scripts/check-public-hero.py
+run_check node scripts/check-shared-theme.mjs
 run_check python3 scripts/test-theme-css-formatting.py
 run_check node scripts/check-admin-forms.mjs
 run_check node scripts/check-admin-navigation-progress.mjs

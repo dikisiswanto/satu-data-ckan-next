@@ -65,7 +65,7 @@ export async function SiteFooter() {
             href="https://data.go.id"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex w-fit items-center gap-2 rounded-lg border border-line bg-white px-2.5 py-2 transition hover:border-[#c4d5df] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
+            className="inline-flex w-fit items-center gap-2 rounded-lg border border-line bg-white px-2.5 py-2 transition hover:border-primary/35 hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
             aria-label="Kunjungi Portal Satu Data Indonesia di data.go.id (tab baru)"
           >
             <Image

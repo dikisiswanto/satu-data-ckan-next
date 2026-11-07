@@ -23,7 +23,11 @@
   --app-border: #d8e2e4;
   --app-brand-navy: #123650;
   --app-brand-blue: #1d5fa7;
+  --app-brand-blue-hover: #174f8c;
   --app-brand-teal: #23785f;
+  --app-brand-teal-soft: #edf6f2;
+  --app-brand-teal-border: #d2e2dd;
+  --app-brand-teal-ink: #285c54;
   --app-brand-ochre: #91621f;
   --app-primary: var(--app-brand-blue);
   --app-primary-foreground: #ffffff;

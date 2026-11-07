@@ -122,14 +122,47 @@ for selector in (".home-visual-chip-top-left", ".home-visual-chip-top-right", ".
                 f"{selector} must preserve WCAG AA contrast for {key}.")
 require("civic data atlas" in design_direction and "standout, modern, clean" in design_direction,
         "Public visual identity must stay specific to a regional data portal and avoid sterile minimalism.")
+api_page = (ROOT / "src/app/(public)/api-data/page.jsx").read_text(encoding="utf-8")
+component_styles = (ROOT / "src/app/styles/component-styles.css").read_text(encoding="utf-8")
+responsive_styles = (ROOT / "src/app/styles/public-responsive.css").read_text(encoding="utf-8")
+scroll_manager = (ROOT / "src/components/public-scroll-manager.jsx").read_text(encoding="utf-8")
+motion_styles = (ROOT / "src/app/styles/public-pages-motion.css").read_text(encoding="utf-8")
+require("api-doc-content" in api_page,
+        "API docs content must sit inside a padded panel instead of letting endpoint cards touch the page container.")
+require("p-4 shadow-[0_2px_12px" in api_page and "lg:p-8" in api_page,
+        "API documentation panel must retain responsive inner spacing at every breakpoint.")
+require("home-dataset-art-grid" in jsx and "home-dataset-art-icon" in jsx and "home-dataset-index" in jsx,
+        "Dataset preview cards must retain the formal illustrated art panel and sequence marker.")
+require("home-data-art" in jsx and "home-format-art" in jsx,
+        "The closing two-column service panels must retain their data and resource illustrations.")
+require("home-dataset-art-emerald" in component_styles and "home-dataset-art-rose" in component_styles
+        and "home-dataset-art-violet" in component_styles and "home-dataset-art-amber" in component_styles,
+        "Dataset art must use restrained semantic color variants instead of a single flat color.")
+require('.home-topic-card .home-topic-icon[data-category-icon="sprout"]' in component_styles
+        and '.home-topic-card .home-topic-icon[data-category-icon="chart"]' in component_styles
+        and '.home-topic-card .home-topic-icon[data-category-icon="heart-pulse"]' in component_styles,
+        "Category icon color rules must have enough selector specificity to beat the base icon rule.")
+require(".home-feature-visualization .home-data-art" in responsive_styles
+        and "position: relative;" in responsive_styles
+        and ".home-feature-formats .home-format-art" in responsive_styles,
+        "Mobile illustrations must flow beneath their copy without overlap.")
+require("PUBLIC_HOME_SECTION_SELECTOR" in scroll_manager
+        and "is-home-section-visible" in scroll_manager
+        and "public-home-section-enter" in motion_styles
+        and "prefers-reduced-motion" in motion_styles,
+        "Homepage sections must have a subtle one-time reveal that respects reduced-motion.")
 require("ENERGY: **2 / 3**" in design_direction and "RHYTHM: **2 / 3**" in design_direction and "MOTION: **1 / 3**" in design_direction,
         "Public visual direction must document the selected energy, rhythm, and motion dials.")
 require(rules.get(".home-atlas-visual", {}).get("pointer-events", "").strip() == "none",
         "The abstract atlas/network motif must remain non-interactive and not intercept controls.")
 
 feature_styles = (ROOT / "src/app/styles/component-styles.css").read_text(encoding="utf-8")
-require("background: #173d57;" in feature_styles,
-        "The data-format feature must retain a distinct navy surface to prevent a flat all-white page rhythm.")
+foundation_styles = (ROOT / "src/app/styles/foundation.css").read_text(encoding="utf-8")
+require(
+    "background: linear-gradient(135deg, #123650 0%, #17445d 100%);" in feature_styles
+    and bool(re.search(r"--app-brand-navy:\s*#123650\s*;", foundation_styles)),
+    "The data-format feature must retain the shared navy brand surface to prevent a flat all-white page rhythm.",
+)
 require("hover:-translate-y-0/**/.5" in feature_styles and "hover:shadow-[0_12px_24px" in feature_styles,
         "Category links must retain a restrained interactive depth cue.")
 

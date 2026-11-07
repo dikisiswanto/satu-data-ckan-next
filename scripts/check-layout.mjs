@@ -327,18 +327,23 @@ requireText(
 requireText(
   "src/app/styles/public-responsive.css",
   ".public-app-shell .home-feature-visualization .home-feature-copy",
-  "mobile data-service copy must use the full available width",
+  "mobile data-service copy must use the full available width above its illustration",
 );
 requireText(
   "src/app/styles/public-responsive.css",
-  "max-width: 100%;",
-  "mobile data-service copy must not reserve space for removed decorative artwork",
+  ".public-app-shell .home-feature-visualization .home-data-art",
+  "mobile data-service illustration must move into normal flow below the copy",
 );
-if (/home-data-art/.test(read("src/app/styles/public-responsive.css"))) {
-  failures.push(
-    "mobile layout must not retain styles for the removed decorative data illustration",
-  );
-}
+requireText(
+  "src/app/styles/public-responsive.css",
+  "position: relative;",
+  "mobile data-service illustration must not overlap the copy",
+);
+requireText(
+  "src/app/(public)/page.jsx",
+  "home-format-art",
+  "the final two-column service panel must include a complementary resource-format illustration",
+);
 
 requireText(
   "src/app/(public)/page.jsx",
@@ -483,16 +488,28 @@ requireText(
   '[data-public-list-item="true"]',
   "scroll reveal must target only explicit content-list items",
 );
+const publicScrollManager = read("src/components/public-scroll-manager.jsx");
 if (
-  read("src/components/public-scroll-manager.jsx").includes(
-    "main:not(.public-home) > *",
+  publicScrollManager.includes("main:not(.public-home) > *") ||
+  !publicScrollManager.includes(
+    'const PUBLIC_HOME_SECTION_SELECTOR =\n  ".public-home .home-section, .public-home .home-feature-row";',
   ) ||
-  read("src/components/public-scroll-manager.jsx").includes("home-section")
+  publicScrollManager.includes(".public-app-shell > *")
 ) {
   failures.push(
-    "public scroll reveal must not animate page shells, section wrappers, or route content as a whole",
+    "scroll reveal may target explicit homepage sections only; page shells and route content must stay static",
   );
 }
+requireText(
+  "src/app/styles/public-pages-motion.css",
+  ".public-home .home-section.is-home-section-visible",
+  "homepage section transitions must stay scoped to homepage sections",
+);
+requireText(
+  "src/app/styles/public-pages-motion.css",
+  "@media (prefers-reduced-motion: reduce)",
+  "homepage section transitions must respect reduced-motion preferences",
+);
 requireText(
   "src/components/public-scroll-manager.jsx",
   'target.classList.contains("is-scroll-visible")',

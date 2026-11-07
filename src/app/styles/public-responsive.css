@@ -139,9 +139,42 @@
     white-space: normal;
   }
 
-  .public-app-shell .home-feature-visualization .home-feature-copy {
+  .public-app-shell .home-feature-visualization .home-feature-copy,
+  .public-app-shell .home-feature-formats .home-feature-copy {
     max-width: 100%;
     padding-bottom: 0;
+  }
+
+  .public-app-shell .home-feature-visualization .home-data-art {
+    position: relative;
+    inset: auto;
+    width: min(100%, 19rem);
+    margin: 1.15rem auto 0;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    gap: 0.55rem;
+    opacity: 1;
+    transform: none;
+  }
+
+  .public-app-shell .home-feature-visualization .home-data-art-tile {
+    min-height: 4.15rem;
+    padding: 0.7rem;
+    border-radius: 0.8rem;
+  }
+
+  .public-app-shell .home-feature-visualization .home-data-art-tile-dataset {
+    min-height: 8.85rem;
+    grid-row: span 2;
+  }
+
+  .public-app-shell .home-feature-formats .home-format-art {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: min(100%, 12rem);
+    height: 8.5rem;
+    margin: 1.1rem auto 0;
+    transform: none;
   }
 
   .public-app-shell .public-search-form {

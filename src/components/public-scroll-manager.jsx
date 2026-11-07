@@ -11,9 +11,11 @@ const PAGINATED_PUBLIC_LISTS = {
   "/publikasi": "publication-list",
 };
 
-// Only individual content-list items reveal on scroll. Page shells, headings,
-// hero sections, and route transitions stay static to avoid flashing.
+// Content-list items and homepage sections reveal once when they enter view.
+// Page shells, headings, hero sections, and route transitions stay static.
 const PUBLIC_REVEAL_SELECTOR = '[data-public-list-item="true"]';
+const PUBLIC_HOME_SECTION_SELECTOR =
+  ".public-home .home-section, .public-home .home-feature-row";
 
 /**
  * Public route changes start at the top. Query pagination is the exception:
@@ -30,6 +32,7 @@ export function PublicScrollManager() {
     if (!("IntersectionObserver" in window)) return;
 
     const observed = new WeakSet();
+    const observedSections = new WeakSet();
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -40,6 +43,16 @@ export function PublicScrollManager() {
       },
       { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
     );
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-home-section-visible");
+          sectionObserver.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -6% 0px", threshold: 0.04 },
+    );
     const register = (target) => {
       if (
         observed.has(target) ||
@@ -47,16 +60,30 @@ export function PublicScrollManager() {
         target.closest('[aria-busy="true"]')
       )
         return;
-      // Re-register a still-hidden node if the observer is recreated during a
-      // route transition, but never animate an already revealed node again.
       target.classList.add("has-scroll-reveal");
       observed.add(target);
       observer.observe(target);
     };
+    const registerSection = (target) => {
+      if (
+        observedSections.has(target) ||
+        target.classList.contains("is-home-section-visible") ||
+        target.closest('[aria-busy="true"]')
+      )
+        return;
+      target.classList.add("has-home-section-reveal");
+      observedSections.add(target);
+      sectionObserver.observe(target);
+    };
     const scan = (root) => {
-      if (root instanceof Element && root.matches(PUBLIC_REVEAL_SELECTOR))
-        register(root);
+      if (root instanceof Element) {
+        if (root.matches(PUBLIC_REVEAL_SELECTOR)) register(root);
+        if (root.matches(PUBLIC_HOME_SECTION_SELECTOR)) registerSection(root);
+      }
       root.querySelectorAll?.(PUBLIC_REVEAL_SELECTOR).forEach(register);
+      root
+        .querySelectorAll?.(PUBLIC_HOME_SECTION_SELECTOR)
+        .forEach(registerSection);
     };
 
     scan(document);
@@ -71,6 +98,7 @@ export function PublicScrollManager() {
     return () => {
       mutations.disconnect();
       observer.disconnect();
+      sectionObserver.disconnect();
     };
   }, [pathname]);
 

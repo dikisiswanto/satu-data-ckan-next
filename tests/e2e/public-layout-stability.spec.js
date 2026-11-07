@@ -109,7 +109,7 @@ test.describe("public route layout stability", () => {
   });
 });
 
-test("data-service copy uses the available mobile width without decorative chart artwork", async ({
+test("homepage service panels retain illustrations without overlapping mobile copy", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -117,16 +117,69 @@ test("data-service copy uses the available mobile width without decorative chart
   await page.goto("/", { waitUntil: "networkidle" });
   const card = page.locator(".home-feature-visualization");
   const copy = card.locator(".home-feature-copy");
+  const art = card.locator(".home-data-art");
+  const formatArt = page.locator(".home-format-art");
   await expect(card).toBeVisible();
   await expect(copy).toBeVisible();
-  await expect(card.locator(".home-data-art")).toHaveCount(0);
-  const [cardBox, copyBox] = await Promise.all([
+  await expect(art).toBeVisible();
+  await expect(formatArt).toBeVisible();
+  const [cardBox, copyBox, artBox] = await Promise.all([
     card.boundingBox(),
     copy.boundingBox(),
+    art.boundingBox(),
   ]);
   expect(cardBox, "feature card must have a measurable frame").not.toBeNull();
   expect(copyBox, "feature copy must have a measurable frame").not.toBeNull();
+  expect(
+    artBox,
+    "feature illustration must have a measurable frame",
+  ).not.toBeNull();
   expect(copyBox.width).toBeGreaterThan(cardBox.width * 0.8);
+  expect(artBox.y).toBeGreaterThanOrEqual(copyBox.y + copyBox.height - 3);
+});
+
+test("API documentation cards stay inset inside the content panel", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/api-data", { waitUntil: "networkidle" });
+  const panel = page.locator(".api-doc-content");
+  const endpointCard = page.locator("#endpoint article").first();
+  await expect(panel).toBeVisible();
+  await expect(endpointCard).toBeVisible();
+  const [panelBox, cardBox, paddingLeft] = await Promise.all([
+    panel.boundingBox(),
+    endpointCard.boundingBox(),
+    panel.evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).paddingLeft),
+    ),
+  ]);
+  expect(
+    panelBox,
+    "API content panel must have a measurable frame",
+  ).not.toBeNull();
+  expect(
+    cardBox,
+    "first endpoint card must have a measurable frame",
+  ).not.toBeNull();
+  expect(paddingLeft).toBeGreaterThanOrEqual(16);
+  expect(cardBox.x).toBeGreaterThan(panelBox.x + 8);
+  expect(cardBox.right).toBeLessThan(panelBox.right - 8);
+});
+
+test("desktop hero metric cards keep their separate accent colors", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 960 });
+  await page.goto("/", { waitUntil: "networkidle" });
+  const cards = page.locator(
+    ".home-visual-chip-top-left, .home-visual-chip-top-right, .home-visual-chip-bottom-left, .home-visual-chip-bottom-right",
+  );
+  await expect(cards).toHaveCount(4);
+  const colors = await cards.evaluateAll((elements) =>
+    elements.map((element) => getComputedStyle(element).backgroundColor),
+  );
+  expect(new Set(colors).size).toBe(4);
 });
 
 test("public interior pages receive a subtle one-time scroll reveal", async ({

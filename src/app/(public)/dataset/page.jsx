@@ -202,11 +202,11 @@ export default async function DatasetCatalogPage({ searchParams }) {
 
   return (
     <main>
-      <section className="relative z-10 [overflow:visible] border-b border-[#d9e1dc] bg-[#f4f7f8] has-[details[open]]:z-40">
+      <section className="relative z-10 [overflow:visible] border-b border-line bg-canvas has-[details[open]]:z-40">
         <div className="page-container py-10 sm:py-14">
           <PageHeading {...publicPageCopy.dataset} />
           <form action="/dataset" method="get" role="search" className="mt-8">
-            <div className="relative flex min-w-0 flex-col items-stretch gap-3 rounded-2xl border border-[#d5e0e8] bg-white p-3 shadow-[0_8px_28px_rgb(20_55_60_/_0.07)] sm:flex-row sm:items-start sm:p-4">
+            <div className="relative flex min-w-0 flex-col items-stretch gap-3 rounded-2xl border border-line bg-white p-3 shadow-[0_8px_28px_rgb(20_55_60_/_0.07)] sm:flex-row sm:items-start sm:p-4">
               <div className="min-w-0 flex-1">
                 <label
                   htmlFor="catalog-q"
@@ -245,7 +245,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
               <details className="relative z-10 w-full min-w-0 shrink-0 sm:mt-7 sm:w-auto open:z-[41]">
                 <summary
                   aria-label="Buka filter katalog"
-                  className="flex h-12 cursor-pointer list-none items-center justify-center gap-2 rounded-control border border-line bg-surface px-4 text-sm font-semibold text-ink transition-colors hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus [&::-webkit-details-marker]:hidden [details[open]_&]:border-primary [details[open]_&]:bg-[#f0f7ff] [details[open]_&]:text-primary"
+                  className="flex h-12 cursor-pointer list-none items-center justify-center gap-2 rounded-control border border-line bg-surface px-4 text-sm font-semibold text-ink transition-colors hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus [&::-webkit-details-marker]:hidden [details[open]_&]:border-primary [details[open]_&]:bg-accent [details[open]_&]:text-primary"
                 >
                   <SlidersHorizontal
                     className="shrink-0 text-current"
@@ -497,14 +497,14 @@ export default async function DatasetCatalogPage({ searchParams }) {
             {activeFilters.map((item) => (
               <span
                 key={item.key}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[#d2e2dd] bg-[#f0f7f3] py-1 pl-3 pr-1 text-xs font-medium text-[#285c54]"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[#d2e2dd] bg-[#f0f7f3] py-1 pl-3 pr-1 text-xs font-medium text-[var(--app-brand-teal-ink)]"
               >
                 {item.label}
                 <Link
                   href={hrefWithoutFilter(item.key)}
                   aria-label={`Hapus ${item.label}`}
                   title={`Hapus ${item.label}`}
-                  className="inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#285c54] transition-colors hover:bg-[#dcece5]"
+                  className="inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-[var(--app-brand-teal-ink)] transition-colors hover:bg-[var(--app-brand-teal-soft)]"
                 >
                   <X size={13} aria-hidden="true" />
                 </Link>
@@ -526,7 +526,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
             <h2 className="mt-4 text-lg font-semibold">
               Katalog data sementara tidak dapat ditampilkan
             </h2>
-            <p className="mx-auto mt-2 w-full max-w-xl text-sm leading-6 text-[#526777]">
+            <p className="mx-auto mt-2 w-full max-w-xl text-sm leading-6 text-muted">
               Katalog data sedang mengalami kendala. Silakan coba kembali
               beberapa saat lagi. Hanya dataset yang telah dipublikasikan untuk
               umum yang ditampilkan.
@@ -553,18 +553,18 @@ export default async function DatasetCatalogPage({ searchParams }) {
             </div>
           )
         ) : (
-          <div className="public-empty-panel min-h-64 w-full max-w-none justify-center rounded-2xl border border-[#d7e2ea] bg-white p-8 text-center sm:p-12">
+          <div className="public-empty-panel min-h-64 w-full max-w-none justify-center rounded-2xl border border-line bg-white p-8 text-center sm:p-12">
             <span className="public-empty-icon mx-auto">
               <Search size={22} aria-hidden="true" />
             </span>
-            <h2 className="mt-4 text-xl font-semibold tracking-tight text-[#17364f]">
+            <h2 className="mt-4 text-xl font-semibold tracking-tight text-ink">
               {page > 1
                 ? "Tidak ada dataset pada halaman ini"
                 : hasFilters
                   ? "Data yang sesuai belum ditemukan"
                   : "Belum ada dataset yang dipublikasikan"}
             </h2>
-            <p className="mx-auto mt-2 w-full max-w-xl text-sm leading-6 text-[#526777]">
+            <p className="mx-auto mt-2 w-full max-w-xl text-sm leading-6 text-muted">
               {hasFilters
                 ? "Coba gunakan kata kunci yang lebih singkat, periksa ejaan, atau ubah pilihan filter. Anda juga dapat menghapus semua filter untuk melihat seluruh katalog."
                 : "Dataset akan tampil setelah informasinya diperiksa dan dipublikasikan oleh perangkat daerah."}

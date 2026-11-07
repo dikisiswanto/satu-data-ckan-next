@@ -66,47 +66,56 @@ const topics = [
     label: "Kependudukan",
     query: "kependudukan penduduk",
     icon: UsersRound,
+    tone: "blue",
   },
   {
     label: "Pendidikan",
     query: "pendidikan sekolah",
     icon: GraduationCap,
+    tone: "green",
   },
-  { label: "Kesehatan", query: "kesehatan", icon: HeartPulse },
+  { label: "Kesehatan", query: "kesehatan", icon: HeartPulse, tone: "rose" },
   {
     label: "Ekonomi",
     query: "ekonomi perdagangan",
     icon: BarChart3,
+    tone: "violet",
   },
   {
     label: "Pertanian",
     query: "pertanian perikanan",
     icon: Sprout,
+    tone: "emerald",
   },
   {
     label: "Infrastruktur",
     query: "infrastruktur jalan",
     icon: Network,
+    tone: "cyan",
   },
   {
     label: "Wilayah & Geospasial",
     query: "wilayah geospasial",
     icon: MapPinned,
+    tone: "amber",
   },
   {
     label: "Lingkungan Hidup",
     query: "lingkungan hidup",
     icon: Leaf,
+    tone: "emerald",
   },
   {
     label: "Sosial",
     query: "sosial kesejahteraan",
     icon: UsersRound,
+    tone: "violet",
   },
   {
     label: "Pemerintahan",
     query: "pemerintahan",
     icon: Building2,
+    tone: "blue",
   },
 ];
 
@@ -116,21 +125,27 @@ function displayStat(value) {
     : new Intl.NumberFormat("id-ID").format(value);
 }
 
-function DatasetPreviewCard({ dataset }) {
+function DatasetPreviewCard({ dataset, index }) {
   const topic = topics.find((item) =>
     `${ckanPackageCategory(dataset)} ${dataset.title || ""} ${dataset.notes || ""}`
       .toLowerCase()
       .includes(item.label.toLowerCase()),
   );
   const Icon = topic?.icon || FileText;
+  const tone = topic?.tone || "blue";
   return (
     <article data-public-list-item="true" className="home-dataset-card group">
       <div
-        className="home-dataset-art"
-        data-category-topic={topic?.label || "umum"}
+        className={`home-dataset-art home-dataset-art-${tone}`}
         aria-hidden="true"
       >
-        <Icon size={29} strokeWidth={1.7} />
+        <span className="home-dataset-art-grid" />
+        <span className="home-dataset-art-icon">
+          <Icon size={26} strokeWidth={1.8} />
+        </span>
+        <span className="home-dataset-index">
+          {String(index + 1).padStart(2, "0")}
+        </span>
       </div>
       <div className="home-dataset-body">
         <p className="home-dataset-category">{ckanPackageCategory(dataset)}</p>
@@ -847,8 +862,12 @@ async function HomeLatestDatasetsSection() {
         </div>
       ) : datasets.length ? (
         <div className="home-dataset-grid">
-          {datasets.map((dataset) => (
-            <DatasetPreviewCard key={dataset.id} dataset={dataset} />
+          {datasets.map((dataset, index) => (
+            <DatasetPreviewCard
+              key={dataset.id}
+              dataset={dataset}
+              index={index}
+            />
           ))}
         </div>
       ) : (
@@ -867,13 +886,13 @@ async function HomeLatestDatasetsSection() {
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Link
                 href="/organisasi"
-                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#1d5fa7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#174f8b]"
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--app-brand-blue-hover)]"
               >
                 Jelajahi perangkat daerah
               </Link>
               <Link
                 href="/bantuan"
-                className="inline-flex min-h-10 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-[#174f8b] transition hover:bg-[#eaf2ff]"
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-primary transition hover:bg-accent"
               >
                 Panduan penggunaan <ArrowUpRight size={15} aria-hidden="true" />
               </Link>
@@ -1374,7 +1393,7 @@ function HomeLatestDatasetsSkeleton() {
             key={index}
             aria-hidden="true"
           >
-            <div className="home-dataset-art">
+            <div className="home-dataset-art home-dataset-art-blue">
               <span className="loading-skeleton home-dataset-art-skeleton" />
             </div>
             <div className="home-dataset-body">
@@ -1440,25 +1459,60 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
+            <div className="home-data-art" aria-hidden="true">
+              <div className="home-data-art-tile home-data-art-tile-dataset">
+                <Database size={22} strokeWidth={1.8} />
+                <span className="home-data-art-line home-data-art-line-long" />
+                <span className="home-data-art-line" />
+              </div>
+              <div className="home-data-art-tile home-data-art-tile-statistic">
+                <FileChartColumn size={22} strokeWidth={1.8} />
+                <span className="home-data-art-dots">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+              </div>
+              <div className="home-data-art-tile home-data-art-tile-map">
+                <MapPinned size={22} strokeWidth={1.8} />
+                <span className="home-data-art-line home-data-art-line-long" />
+              </div>
+            </div>
           </article>
           <article className="home-feature home-feature-formats">
-            <span className="home-feature-icon">
-              <FileText size={21} aria-hidden="true" />
-            </span>
-            <p className="eyebrow">Katalog data</p>
-            <h2>Unduh data sesuai format.</h2>
-            <p>
-              Setiap dataset memuat metadata, periode, sumber, dan berkas yang
-              tersedia. Periksa cakupannya sebelum digunakan.
-            </p>
-            <Link href="/dataset" className="home-format-link">
-              Telusuri berkas dataset
-            </Link>
-            <div className="home-format-badges" aria-label="Contoh format data">
-              <span>CSV</span>
-              <span>XLSX</span>
-              <span>JSON</span>
-              <span>GeoJSON</span>
+            <div className="home-feature-copy">
+              <span className="home-feature-icon">
+                <FileText size={21} aria-hidden="true" />
+              </span>
+              <p className="eyebrow">Katalog data</p>
+              <h2>Unduh data sesuai format.</h2>
+              <p>
+                Setiap dataset memuat metadata, periode, sumber, dan berkas yang
+                tersedia. Periksa cakupannya sebelum digunakan.
+              </p>
+              <Link href="/dataset" className="home-format-link">
+                Telusuri berkas dataset
+              </Link>
+              <div
+                className="home-format-badges"
+                aria-label="Contoh format data"
+              >
+                <span>CSV</span>
+                <span>XLSX</span>
+                <span>JSON</span>
+                <span>GeoJSON</span>
+              </div>
+            </div>
+            <div className="home-format-art" aria-hidden="true">
+              <div className="home-format-art-sheet home-format-art-sheet-back">
+                <MapPinned size={22} strokeWidth={1.8} />
+                <span>GEOJSON</span>
+              </div>
+              <div className="home-format-art-sheet home-format-art-sheet-front">
+                <Database size={26} strokeWidth={1.8} />
+                <span>DATASET</span>
+                <small>CSV · XLSX · JSON</small>
+              </div>
             </div>
           </article>
         </section>

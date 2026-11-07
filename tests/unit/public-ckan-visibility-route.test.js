@@ -77,7 +77,7 @@ describe("CKAN visibility facade: public vs session-authorized", () => {
   });
 
   it("allows an authorized CKAN session to read a private dataset and strips unsupported resource-private markers", async () => {
-    ckanAction.mockImplementation(async (action, params, options) => {
+    ckanAction.mockImplementation(async (action, _params, options) => {
       expect(options.sessionCookie).toBe("signed-admin-session");
       expect(action).toBe("package_show");
       expect(params.id).toBe("dataset-private");
@@ -108,7 +108,7 @@ describe("CKAN visibility facade: public vs session-authorized", () => {
   });
 
   it("allows resource metadata for a CKAN-authorized private parent dataset only when no unsupported resource-private marker is set", async () => {
-    ckanAction.mockImplementation(async (action, params, options) => {
+    ckanAction.mockImplementation(async (action, _params, options) => {
       expect(options.sessionCookie).toBe("signed-member-session");
       if (action === "resource_show")
         return {

@@ -31,7 +31,7 @@ function OrganizationMark({ organization }) {
   const [failed, setFailed] = useState(false);
   const imageUrl = getPublicOrganizationImageUrl(organization);
   return (
-    <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-[#d7e7f2] bg-[#edf5fb] text-[#245e83]">
+    <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-line bg-accent text-primary">
       {imageUrl && !failed ? (
         <Image
           src={imageUrl}
@@ -433,7 +433,7 @@ export function OrganizationDirectory({ organizations = [] }) {
                 <article
                   data-public-list-item="true"
                   key={organization.id || organization.name}
-                  className="organization-directory-card group flex min-w-0 flex-col rounded-2xl border border-line bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-[#b9cfdd] hover:shadow-[0_12px_28px_rgb(23_55_78_/_0.08)] motion-reduce:transform-none motion-reduce:transition-none"
+                  className="organization-directory-card group flex min-w-0 flex-col rounded-2xl border border-line bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-[0_12px_28px_rgb(23_55_78_/_0.08)] motion-reduce:transform-none motion-reduce:transition-none"
                 >
                   <div className="organization-directory-card-top flex items-center justify-between gap-3">
                     <OrganizationMark organization={organization} />

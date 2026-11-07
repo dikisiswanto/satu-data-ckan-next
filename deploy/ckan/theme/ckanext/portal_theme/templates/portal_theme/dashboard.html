@@ -35,7 +35,7 @@
         <strong>{{ portal_admin_stats.indicators if portal_admin_stats.indicators is not none else '—' }}</strong>
         <small>{{ _('View indicators') }}</small>
       </a>
-      <a class="portal-metric-card portal-metric-card--purple" href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.infographics) }}">
+      <a class="portal-metric-card portal-metric-card--slate" href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.infographics) }}">
         <span class="portal-metric-card__icon">{{ portal_icon('image') }}</span>
         <span class="portal-metric-card__label">{{ _('Infographics') }}</span>
         <strong>{{ portal_admin_stats.infographics if portal_admin_stats.infographics is not none else '—' }}</strong>
@@ -59,7 +59,7 @@
         <strong>{{ portal_admin_stats.groups if portal_admin_stats.groups is not none else '—' }}</strong>
         <small>{{ _('View categories') }}</small>
       </a>
-      <a class="portal-metric-card portal-metric-card--purple" href="{{ h.url_for('dashboard.datasets') }}">
+      <a class="portal-metric-card portal-metric-card--slate" href="{{ h.url_for('dashboard.datasets') }}">
         <span class="portal-metric-card__icon">{{ portal_icon('folder') }}</span>
         <span class="portal-metric-card__label">{{ _('My datasets') }}</span>
         <strong>{{ portal_admin_stats.my_datasets if portal_admin_stats.my_datasets is not none else '—' }}</strong>
