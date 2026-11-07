@@ -1,6 +1,6 @@
-# Kualitas FE Publik: Navigasi, Aksesibilitas, dan Performa
+# Kualitas Frontend Publik
 
-Dokumen ini adalah panduan kanonis untuk menjaga pengalaman portal publik Next.js. Untuk perubahan katalog dan sumber data, gunakan [kontrak API publik](API.md), [pratinjau DataStore](PRATINJAU-DATASTORE-DAN-SINKRONISASI.md), dan [pratinjau media](PRATINJAU-MEDIA-DAN-KATALOG.md). Untuk proses penerapan, lihat [panduan operasi CKAN](../deploy/ckan/README.md).
+Dokumen ini adalah panduan kanonis untuk menjaga pengalaman portal publik Next.js. Untuk perubahan katalog dan sumber data, gunakan [kontrak API publik](API.md), [pratinjau DataStore](PRATINJAU-DATASTORE-DAN-SINKRONISASI.md), dan [konten dan media](KONTEN-CMS-MEDIA.md). Untuk proses penerapan, lihat [panduan deployment](OPERASIONAL-DEPLOYMENT.md).
 
 ## Pagination katalog
 
@@ -85,3 +85,15 @@ npm run build
 ```
 
 `npm run fix` menjalankan perapian format lalu perbaikan otomatis ESLint. `npm run check` tetap menjadi quality gate utama (static checks dan ESLint). `npm run test:e2e` memerlukan browser Playwright yang sudah dipasang. Jalankan `npm run format:check` pada CI bila ingin memastikan file sudah diformat tanpa mengubah source.
+
+## Promosi pemasangan PWA
+
+Promosi PWA berada di `PublicLayout`, bukan root layout, sehingga tidak tampil pada CKAN Admin atau shell autentikasi. Bentuknya kartu kecil yang dapat ditutup; tidak ada dialog otomatis.
+
+- Baru memenuhi syarat setelah kunjungan kedua pada session berbeda dan tiga path publik unik dibuka. Maksimum satu tawaran per session.
+- Tutup manual menyembunyikan promosi 14 hari; penolakan prompt native 30 hari. Mode standalone atau event `appinstalled` menghentikan promosi. State engagement hanya disimpan di storage browser.
+- Chromium memakai `beforeinstallprompt` setelah klik pengguna. iOS mengarahkan ke Add to Home Screen melalui Safari; Android dan desktop mendapat panduan menu browser yang sesuai. Browser tanpa jalur instalasi yang andal tidak diberi janji instalasi.
+- Komponen tidak mengambil fokus otomatis, memiliki nama aksesibel, menghormati safe area/reduced motion, dan disembunyikan saat pengguna mengisi form, membuka dialog, mengunduh, atau membuka tab baru.
+- Tidak ada API web universal untuk mendeteksi status instalasi pada semua browser; deteksi memakai `display-mode`, `navigator.standalone`, dan `appinstalled` bila tersedia.
+
+Regression check: `node scripts/check-pwa.mjs`, `node scripts/test-service-worker.mjs`, unit test `tests/unit/pwa-install-promotion.test.js`, dan E2E `tests/e2e/public-performance.spec.js`.

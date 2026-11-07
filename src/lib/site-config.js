@@ -73,12 +73,12 @@ export const siteConfig = Object.freeze({
   logoPath: configuredLogoPath,
   logoAlt: (process.env.NEXT_PUBLIC_LOGO_ALT || "Logo Portal Satu Data").trim(),
   heroImage: configuredHeroImage,
-  iconPath: (process.env.NEXT_PUBLIC_ICON_PATH || "/icons/portal.svg").trim(),
+  iconPath: (process.env.NEXT_PUBLIC_ICON_PATH || "/icons/icon.svg").trim(),
   pwaIcon192: (
-    process.env.NEXT_PUBLIC_PWA_ICON_192 || "/icons/portal.svg"
+    process.env.NEXT_PUBLIC_PWA_ICON_192 || "/icons/icon-192.png"
   ).trim(),
   pwaIcon512: (
-    process.env.NEXT_PUBLIC_PWA_ICON_512 || "/icons/portal.svg"
+    process.env.NEXT_PUBLIC_PWA_ICON_512 || "/icons/icon-512.png"
   ).trim(),
   ppidName: configuredPpidName,
   ppidUrl: configuredPpidUrl,

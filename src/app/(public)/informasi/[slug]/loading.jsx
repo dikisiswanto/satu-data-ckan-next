@@ -22,10 +22,8 @@ export default function InformasiDetailLoading() {
       <PageHeading
         className="public-dynamic-heading"
         reserveTitle
-        reserveDescription
         eyebrow="Informasi"
         title="Memuat informasi"
-        description="Menyiapkan informasi halaman."
       />
       <p className="public-publish-date mt-3 inline-flex min-h-5 items-center gap-2 text-xs text-muted">
         <Skeleton className="h-3 w-40" />

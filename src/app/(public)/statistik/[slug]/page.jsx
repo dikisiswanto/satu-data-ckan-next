@@ -91,13 +91,8 @@ export default async function IndicatorDetailPage({ params }) {
       <PageHeading
         className="public-dynamic-heading"
         reserveTitle
-        reserveDescription
         eyebrow="Indikator statistik"
         title={indicator.title}
-        description={
-          indicator.metadata.definition ||
-          "Definisi indikator belum dicantumkan."
-        }
       />
 
       <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

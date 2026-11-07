@@ -120,10 +120,8 @@ export default async function InformasiDetailPage({ params }) {
       <PageHeading
         className="public-dynamic-heading"
         reserveTitle
-        reserveDescription
         eyebrow={page.category || "Informasi"}
         title={page.title}
-        description={page.excerpt || "Ringkasan informasi belum tersedia."}
       />
       <p className="public-publish-date mt-3 inline-flex min-h-5 items-center gap-2 text-xs text-muted">
         {page.publishDate ? (

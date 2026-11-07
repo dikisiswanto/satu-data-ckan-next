@@ -62,6 +62,11 @@ for (const relativePath of [
   "public/sw.js",
   "public/icons/icon-192.png",
   "public/icons/icon-512.png",
+  "public/icons/icon.svg",
+  "public/icons/portal.svg",
+  "src/app/favicon.ico",
+  "src/app/icon.png",
+  "src/app/apple-icon.png",
 ]) {
   check(
     fs.existsSync(path.join(root, relativePath)),
@@ -71,6 +76,8 @@ for (const relativePath of [
 for (const [relativePath, expectedSize] of [
   ["public/icons/icon-192.png", 192],
   ["public/icons/icon-512.png", 512],
+  ["src/app/icon.png", 64],
+  ["src/app/apple-icon.png", 180],
 ]) {
   try {
     const buffer = fs.readFileSync(path.join(root, relativePath));
@@ -87,6 +94,49 @@ for (const [relativePath, expectedSize] of [
     // The missing-file check above gives the actionable failure.
   }
 }
+
+const favicon = fs.readFileSync(path.join(root, "src/app/favicon.ico"));
+check(
+  favicon.length > 22 &&
+    favicon.readUInt16LE(0) === 0 &&
+    favicon.readUInt16LE(2) === 1,
+  "Browser favicon must be a valid ICO file.",
+);
+check(
+  /url: "\/favicon\.ico"/.test(layout) &&
+    /shortcut: "\/favicon\.ico"/.test(layout),
+  "Browser tab and shortcut icons must retain a local favicon fallback.",
+);
+check(
+  /apple: \[\{ url: "\/apple-icon\.png", sizes: "180x180", type: "image\/png" \}\]/.test(
+    layout,
+  ),
+  "Apple touch icon must point to the local 180x180 PNG asset.",
+);
+check(
+  /NEXT_PUBLIC_ICON_PATH \|\| "\/icons\/icon\.svg"/.test(siteConfig) &&
+    /NEXT_PUBLIC_LOGO_PATH \|\| "\/icons\/portal\.svg"/.test(siteConfig) &&
+    /NEXT_PUBLIC_PWA_ICON_192 \|\| "\/icons\/icon-192\.png"/.test(siteConfig) &&
+    /NEXT_PUBLIC_PWA_ICON_512 \|\| "\/icons\/icon-512\.png"/.test(siteConfig),
+  "Default browser and PWA icon paths must resolve to committed local assets.",
+);
+const browserIconSvg = read("public/icons/icon.svg");
+const brandLogoSvg = read("public/icons/portal.svg");
+check(
+  /<svg\b[^>]*viewBox="0 0 64 64"/.test(browserIconSvg) &&
+    /<path\b/.test(browserIconSvg),
+  "Default browser SVG icon must be a complete 64x64 vector asset.",
+);
+check(
+  /<svg\b[^>]*viewBox="0 0 64 64"/.test(brandLogoSvg) &&
+    /<path\b/.test(brandLogoSvg),
+  "Default portal logo must remain a complete 64x64 vector asset.",
+);
+check(
+  /portal-satu-data-static-v6/.test(worker) &&
+    /portal-satu-data-static-v6/.test(promotionE2eTests),
+  "PWA runtime tests and service worker cache version must stay synchronized.",
+);
 
 check(
   /if \(process\.env\.NODE_ENV !== "production"\) return/.test(registration),

@@ -117,13 +117,29 @@ test("PWA manifest, install icons, offline page, and service worker are served",
     ).toBeTruthy();
   }
 
+  for (const iconPath of [
+    "/favicon.ico",
+    "/icons/icon.svg",
+    "/icons/portal.svg",
+    "/icons/icon-192.png",
+    "/icons/icon-512.png",
+    "/apple-icon.png",
+    "/icon.png",
+  ]) {
+    const iconResponse = await request.get(iconPath);
+    expect(
+      iconResponse.ok(),
+      `${iconPath} must be served as a browser/app icon`,
+    ).toBeTruthy();
+  }
+
   const [offlineResponse, workerResponse] = await Promise.all([
     request.get("/offline.html"),
     request.get("/sw.js"),
   ]);
   expect(offlineResponse.ok()).toBeTruthy();
   expect(workerResponse.ok()).toBeTruthy();
-  expect(await workerResponse.text()).toContain("portal-satu-data-static-v5");
+  expect(await workerResponse.text()).toContain("portal-satu-data-static-v6");
 });
 
 test("PWA install promotion waits for a second visit and multiple public pages", async ({

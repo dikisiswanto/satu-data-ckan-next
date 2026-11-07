@@ -15,7 +15,7 @@ Identitas instansi dipusatkan pada blok `PORTAL_*` di `.env.ckan`. Nilai bawaan 
 5. Tempatkan file logo/gambar pada direktori aset publik Next.js dan/atau aset publik extension CKAN sesuai pemakaiannya. Pastikan path `PORTAL_LOGO_PATH` dan `PORTAL_HERO_IMAGE` menunjuk ke aset yang benar.
 6. Isi kontak dan endpoint PPID milik instansi pada `PORTAL_PPID_NAME`, `PORTAL_PPID_URL`, `PORTAL_PPID_CONTACT_URL`, `PORTAL_PPID_ADDRESS`, `PORTAL_PPID_EMAIL`, dan `PORTAL_PPID_PHONE`. Nilai di `.env.ckan.example` adalah contoh konfigurasi deployment; ganti semua kontak sebelum deployment ke instansi lain.
 7. Sesuaikan `CKAN_SYSADMIN_EMAIL`, locale/timezone, map tile, dan kredensial integrasi bila diperlukan.
-8. Jalankan bootstrap/build ulang sesuai [Panduan Operasional CKAN](../deploy/ckan/README.md). `sync-env.py` dijalankan oleh bootstrap dan wrapper Compose; tidak perlu mengedit nilai turunan `NEXT_PUBLIC_*` atau `CKAN__SITE_*` secara manual.
+8. Jalankan bootstrap/build ulang sesuai [Panduan Operasional CKAN](OPERASIONAL-DEPLOYMENT.md). `sync-env.py` dijalankan oleh bootstrap dan wrapper Compose; tidak perlu mengedit nilai turunan `NEXT_PUBLIC_*` atau `CKAN__SITE_*` secara manual.
 
 ## Konfigurasi visual dan komponen
 

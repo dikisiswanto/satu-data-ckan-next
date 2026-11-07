@@ -59,20 +59,24 @@ def contrast_ratio(background: str, foreground: str) -> float | None:
 
 css = CSS_PATH.read_text(encoding="utf-8")
 jsx = JSX_PATH.read_text(encoding="utf-8")
-design_direction = (ROOT / "DESIGN.md").read_text(encoding="utf-8")
+design_direction = (ROOT / "docs/DESAIN-SISTEM.md").read_text(encoding="utf-8")
 rules = css_rules(css)
 
-mark = rules.get(".home-visual-mark", {})
-require(mark.get("width") == "8rem" and mark.get("height") == "8rem",
-        "Hero data mark must reserve a stable square frame.")
-require("linear-gradient" in mark.get("background", "") and mark.get("color") == "#163c56",
-        "Hero data mark must use a deliberate branded surface with a readable foreground.")
-require(bool(re.search(r'<div className="home-visual-mark"[^>]*>\s*<span className="home-visual-mark-icon">\s*<Database', jsx)),
-        "Hero visual must use a clearly framed database identity mark.")
-require("home-atlas-contours" in jsx and "home-atlas-connections" in jsx and "home-atlas-nodes" in jsx,
-        "Hero must include the purposeful atlas/network motif used to express connected regional data.")
-for selector in (".home-atlas-contours path", ".home-atlas-connections path", ".home-atlas-nodes circle"):
-    require(selector in rules, f"Atlas/network motif must define a visual treatment for {selector}.")
+board = rules.get(".home-data-board", {})
+require(board.get("border-radius") == "1.2rem" and board.get("background") == "#f5f8f5",
+        "Hero must use a distinct, editorial folio surface rather than a generic glowing network scene.")
+require("home-data-board" in jsx and "home-data-map-svg" in jsx and "home-data-map-regions" in jsx and "home-data-map-locations" in jsx,
+        "Hero artwork must communicate regional data through a structured thematic map, boundaries, and location markers.")
+require("ILUSTRASI LAPISAN DATA" in jsx and "home-data-board-legend" in jsx,
+        "Illustrative geography must be identified as illustrative and include a meaningful legend.")
+require(len(re.findall(r'className="home-data-map-region home-data-map-region-', jsx)) == 8,
+        "The thematic map must keep its eight intentional color regions for visual hierarchy.")
+for selector in (".home-data-map-svg", ".home-data-map-grid path", ".home-data-map-outline", ".home-data-map-locations circle"):
+    require(selector in rules, f"Editorial map must define a visual treatment for {selector}.")
+require("home-atlas-contours" not in jsx and "home-atlas-connections" not in jsx and "home-atlas-nodes" not in jsx,
+        "Generic network-node artwork must not return to the homepage hero.")
+require("home-visual-mark" not in jsx and "home-visual-caption" not in jsx,
+        "The previous isolated database-logo ornament and floating caption must remain retired.")
 for retired_visual in ("home-scene-cube", "home-scene-grid", "home-scene-spark", "home-orbit"):
     require(retired_visual not in jsx, f"Decorative hero element {retired_visual} must not be rendered.")
 
@@ -153,8 +157,8 @@ require("PUBLIC_HOME_SECTION_SELECTOR" in scroll_manager
         "Homepage sections must have a subtle one-time reveal that respects reduced-motion.")
 require("ENERGY: **2 / 3**" in design_direction and "RHYTHM: **2 / 3**" in design_direction and "MOTION: **1 / 3**" in design_direction,
         "Public visual direction must document the selected energy, rhythm, and motion dials.")
-require(rules.get(".home-atlas-visual", {}).get("pointer-events", "").strip() == "none",
-        "The abstract atlas/network motif must remain non-interactive and not intercept controls.")
+require(board.get("pointer-events", "").strip() == "none",
+        "The editorial map board must remain decorative and not intercept the live metric links.")
 
 feature_styles = (ROOT / "src/app/styles/component-styles.css").read_text(encoding="utf-8")
 foundation_styles = (ROOT / "src/app/styles/foundation.css").read_text(encoding="utf-8")
@@ -172,4 +176,4 @@ if ERRORS:
         print(f"- {error}")
     raise SystemExit(1)
 
-print("Public hero visual contract passed: branded atlas/network motif, no generic 3D/grid/orbit artwork, dark image overlay, semantic metric palettes, and WCAG AA text contrast.")
+print("Public hero visual contract passed: editorial thematic-map folio, no generic network-node artwork, dark image overlay, semantic metric palettes, and WCAG AA text contrast.")

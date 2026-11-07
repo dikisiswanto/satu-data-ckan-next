@@ -105,16 +105,17 @@ test("hero artwork and summary counts never duplicate each other across breakpoi
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
   await expect(page.locator(".home-hero-visual")).toBeVisible();
-  await expect(page.locator(".home-atlas-visual svg")).toBeVisible();
-  await expect(page.locator(".home-atlas-visual")).toHaveAttribute(
-    "aria-hidden",
-    "true",
+  const dataBoard = page.locator(".home-data-board");
+  await expect(dataBoard).toBeVisible();
+  await expect(dataBoard).toHaveAttribute("aria-hidden", "true");
+  await expect(dataBoard).toContainText("SEBARAN WILAYAH");
+  await expect(dataBoard).toContainText("ILUSTRASI LAPISAN DATA");
+  await expect(page.locator(".home-data-map-region")).toHaveCount(8);
+  await expect(page.locator(".home-data-map-locations circle")).toHaveCount(3);
+  await expect(page.locator(".home-data-board-legend")).toContainText(
+    "Titik data",
   );
-  await expect(page.locator(".home-atlas-contours path")).toHaveCount(5);
-  await expect(page.locator(".home-atlas-nodes circle")).toHaveCount(9);
-  await expect(page.locator(".home-visual-mark-label")).toHaveText(
-    "DATA TERPADU",
-  );
+  await expect(page.locator(".home-atlas-visual")).toHaveCount(0);
   await expect(page.locator(".home-stats-wrap")).toBeHidden();
 
   await page.setViewportSize({ width: 900, height: 900 });

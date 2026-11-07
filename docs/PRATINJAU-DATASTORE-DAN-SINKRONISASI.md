@@ -36,7 +36,7 @@ bash ./deploy/ckan/compose.sh cloudflare ps
 bash ./deploy/ckan/compose.sh cloudflare logs --tail=120 ckan
 
 # 4. Setelah CKAN sehat, siapkan DataStore dan XLoader
-bash ./deploy/ckan/apply-datastore-hak aksess.sh
+bash ./deploy/ckan/apply-datastore-permissions.sh
 bash ./deploy/ckan/enable-xloader.sh cloudflare
 
 # 5. Mulai Next.js setelah backend dan worker siap
@@ -108,7 +108,7 @@ Jika detail dataset tetap HTTP 500, periksa nilai aktif `scheming.dataset_schema
 Sysadmin dapat memakai menu **Integrasi Data → DataStore & pratinjau** (`/admin/data-preview`) tanpa harus menghafal urutan komponen. Halaman ini menjalankan pemeriksaan konfigurasi saat dibuka atau saat tombol **Periksa ulang** dipilih. Urutannya:
 
 1. Pastikan plugin `datastore` dan `xloader` aktif, `ckan.datastore.read_url` dan `write_url` tersedia, action `xloader_submit` terdaftar, token internal tersedia, serta `ckanext.xloader.jobs_db.uri` terisi. Nilai rahasia tidak pernah dirender ke browser.
-2. Bila hak akses DataStore gagal, gunakan tombol **Salin perintah** untuk `apply-datastore-hak aksess.sh`, jalankan pada terminal server, lalu kembali dan klik **Periksa ulang**.
+2. Bila hak akses DataStore gagal, gunakan tombol **Salin perintah** untuk `apply-datastore-permissions.sh`, jalankan pada terminal server, lalu kembali dan klik **Periksa ulang**.
 3. Periksa container dengan perintah `docker compose ps xloader-worker`; jika belum berjalan, lihat log worker dari tombol salin perintah di halaman. UI tidak menjalankan shell di server karena itu akan memperbesar permukaan serangan.
 4. Setelah konfigurasi dan worker siap, gunakan tombol **Antrekan hingga 25 resource** untuk backfill bertahap dari browser. Form memakai CSRF dan hanya tersedia untuk sysadmin. Resource harus publik serta memiliki format tabular yang didukung.
 5. Buka tautan dataset pada daftar status siap/menunggu. Selesai diproses, `datastore_active` menjadi benar dan panel pratinjau DataStore/API tampil. Jika tidak, periksa log XLoader, konektivitas worker ke URL file, izin database, dan kesesuaian format.
@@ -118,6 +118,5 @@ UI hanya memindai hingga 100 dataset publik terbaru dan membatasi pengiriman per
 ## Rujukan terkait
 
 - [Kontrak API publik](API.md)
-- [Pratinjau gambar dan katalog](PRATINJAU-MEDIA-DAN-KATALOG.md)
+- [Konten, CMS, dan media](KONTEN-CMS-MEDIA.md)
 - [Akses unduhan dataset privat](AKSES-UNDUHAN-DATASET-PRIVAT.md)
-- [Indeks dokumentasi](INDEX.md)

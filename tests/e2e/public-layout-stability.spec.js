@@ -109,6 +109,50 @@ test.describe("public route layout stability", () => {
   });
 });
 
+test("detail headings stay compact and infographic metadata sits close on mobile", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of [
+    "/infografik/infografik-stunting-sample",
+    "/informasi/panduan-portal",
+    "/publikasi/publikasi-portal-dalam-angka",
+    "/statistik/indikator-ipm",
+    "/organisasi/bappeda-sample",
+  ]) {
+    await page.goto(route, { waitUntil: "networkidle" });
+    const heading = page.locator("header.public-dynamic-heading");
+    await expect(heading).toBeVisible();
+    await expect(heading.locator("p:not(.eyebrow)")).toHaveCount(0);
+  }
+
+  await page.goto("/infografik/infografik-stunting-sample", {
+    waitUntil: "networkidle",
+  });
+  const gallery = page.locator(".public-infographic-gallery");
+  const detail = page.locator(".public-infographic-gallery + aside");
+  const [galleryBox, detailBox] = await Promise.all([
+    gallery.boundingBox(),
+    detail.boundingBox(),
+  ]);
+  expect(galleryBox).not.toBeNull();
+  expect(detailBox).not.toBeNull();
+  expect(detailBox.y - (galleryBox.y + galleryBox.height)).toBeLessThanOrEqual(
+    20,
+  );
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const [desktopGalleryBox, desktopDetailBox] = await Promise.all([
+    gallery.boundingBox(),
+    detail.boundingBox(),
+  ]);
+  expect(desktopGalleryBox).not.toBeNull();
+  expect(desktopDetailBox).not.toBeNull();
+  expect(desktopDetailBox.x).toBeGreaterThan(
+    desktopGalleryBox.x + desktopGalleryBox.width - 8,
+  );
+});
+
 test("homepage service panels retain illustrations without overlapping mobile copy", async ({
   page,
 }) => {

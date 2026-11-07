@@ -186,13 +186,8 @@ export default async function OrganizationDetailPage({ params }) {
               <PageHeading
                 className="public-dynamic-heading mb-4 sm:mb-4"
                 reserveTitle
-                reserveDescription
                 eyebrow="Profil perangkat daerah"
                 title={org.title || org.name}
-                description={
-                  org.description ||
-                  "Profil perangkat daerah belum dilengkapi. Bagian di bawah menampilkan dataset umum, indikator, infografik, dan publikasi yang telah diterbitkan serta dapat diakses publik."
-                }
               />
             </div>
           </div>

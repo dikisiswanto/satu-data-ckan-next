@@ -269,43 +269,83 @@ function HomeHeroContent({
           role="group"
           aria-label="Akses cepat ke data publik"
         >
-          <div className="home-atlas-visual" aria-hidden="true">
-            <svg viewBox="0 0 480 400" focusable="false">
-              <g className="home-atlas-contours">
-                <path d="M38 210C74 118 155 70 239 76c76 5 149 52 196 116" />
-                <path d="M26 240C72 151 143 106 224 108c86 2 163 48 221 116" />
-                <path d="M40 273C95 190 154 151 229 148c89-4 154 31 205 89" />
-                <path d="M76 306c50-65 104-99 164-105 71-7 125 17 165 61" />
-                <path d="M112 337c38-44 81-68 129-72 52-4 93 10 125 39" />
-              </g>
-              <g className="home-atlas-connections">
-                <path d="M105 120 190 164 286 116 373 178 330 274 220 302 134 246 190 164 220 302" />
-                <path d="M286 116 278 218 373 178M105 120 134 246 58 282" />
-              </g>
-              <g className="home-atlas-nodes">
-                <circle cx="105" cy="120" r="6" />
-                <circle cx="190" cy="164" r="7" />
-                <circle cx="286" cy="116" r="6" />
-                <circle cx="373" cy="178" r="7" />
-                <circle cx="278" cy="218" r="5" />
-                <circle cx="330" cy="274" r="6" />
-                <circle cx="220" cy="302" r="7" />
-                <circle cx="134" cy="246" r="5" />
-                <circle cx="58" cy="282" r="4" />
-              </g>
-            </svg>
-          </div>
-          <div className="home-visual-mark" aria-hidden="true">
-            <span className="home-visual-mark-icon">
-              <Database size={38} strokeWidth={1.7} aria-hidden="true" />
-            </span>
-            <span className="home-visual-mark-label">DATA TERPADU</span>
-          </div>
-          <div className="home-visual-caption">
-            <span>
-              <strong>{siteConfig.shortName}</strong>
-              <small>Katalog data resmi daerah</small>
-            </span>
+          <div className="home-data-board" aria-hidden="true">
+            <div className="home-data-board-map-frame">
+              <div className="home-data-board-map-heading">
+                <span>SEBARAN WILAYAH</span>
+                <small>ILUSTRASI LAPISAN DATA</small>
+              </div>
+              <svg
+                className="home-data-map-svg"
+                viewBox="0 0 320 210"
+                focusable="false"
+              >
+                <g className="home-data-map-grid">
+                  <path d="M20 35H300M20 75H300M20 115H300M20 155H300M20 195H300" />
+                  <path d="M40 18V198M90 18V198M140 18V198M190 18V198M240 18V198M290 18V198" />
+                </g>
+                <g className="home-data-map-regions">
+                  <path
+                    className="home-data-map-region home-data-map-region-blue"
+                    d="M45 53 84 24 121 38 106 78 60 82 47 88 28 68Z"
+                  />
+                  <path
+                    className="home-data-map-region home-data-map-region-teal"
+                    d="M121 38 157 19 197 35 183 78 139 88 106 78Z"
+                  />
+                  <path
+                    className="home-data-map-region home-data-map-region-ochre"
+                    d="M197 35 222 28 256 66 241 103 198 98 183 78Z"
+                  />
+                  <path
+                    className="home-data-map-region home-data-map-region-slate"
+                    d="M47 88 60 82 106 78 139 88 130 130 82 140 34 119Z"
+                  />
+                  <path
+                    className="home-data-map-region home-data-map-region-blue-soft"
+                    d="M139 88 183 78 198 98 214 128 168 151 130 130Z"
+                  />
+                  <path
+                    className="home-data-map-region home-data-map-region-green"
+                    d="M34 119 82 140 84 176 64 140Z"
+                  />
+                  <path
+                    className="home-data-map-region home-data-map-region-teal-soft"
+                    d="M82 140 130 130 168 151 158 184 119 165 84 176Z"
+                  />
+                  <path
+                    className="home-data-map-region home-data-map-region-ochre-soft"
+                    d="M168 151 214 128 270 134 230 166 194 158 158 184Z"
+                  />
+                  <path
+                    className="home-data-map-outline"
+                    d="M45 53 84 24 121 38 157 19 197 35 222 28 256 66 241 103 270 134 230 166 194 158 158 184 119 165 84 176 64 140 34 119 47 88 28 68Z"
+                  />
+                </g>
+                <g className="home-data-map-locations">
+                  <circle cx="111" cy="72" r="5.5" />
+                  <circle cx="188" cy="102" r="5.5" />
+                  <circle cx="157" cy="151" r="5.5" />
+                </g>
+              </svg>
+              <div className="home-data-board-legend">
+                <span>
+                  <i className="home-data-legend-region" /> Wilayah tematik
+                </span>
+                <span>
+                  <i className="home-data-legend-point" /> Titik data
+                </span>
+              </div>
+            </div>
+            <div className="home-data-board-footer">
+              <span>DATASET</span>
+              <i />
+              <span>GEOSPASIAL</span>
+              <i />
+              <span>STATISTIK</span>
+              <i />
+              <span>PUBLIKASI</span>
+            </div>
           </div>
           <div
             className="home-visual-metrics"

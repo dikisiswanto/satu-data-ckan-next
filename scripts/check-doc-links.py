@@ -10,6 +10,29 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 SKIP_DIRS = {".git", "node_modules", ".next", "out", "dist", "build", "coverage"}
+CANONICAL_DOCS = {
+    "ADMIN-CKAN.md",
+    "AKSES-UNDUHAN-DATASET-PRIVAT.md",
+    "API.md",
+    "CONFIGURASI-INSTANSI.md",
+    "DESAIN-SISTEM.md",
+    "KONTEN-CMS-MEDIA.md",
+    "KUALITAS-FE-PUBLIK.md",
+    "OPERASIONAL-DEPLOYMENT.md",
+    "PRATINJAU-DATASTORE-DAN-SINKRONISASI.md",
+}
+RETIRED_DOCS = {
+    "DESIGN.md",
+    "docs/INDEX.md",
+    "docs/PANDUAN-ADMIN.md",
+    "docs/SISTEM-DESAIN-ADMIN.md",
+    "docs/FORM-CKAN-KONTEKSTUAL.md",
+    "docs/LOKALISASI-ADMIN-CKAN.md",
+    "docs/PWA-INSTALL-PROMOTION.md",
+    "docs/PRATINJAU-MEDIA-DAN-KATALOG.md",
+    "docs/CMS.md",
+    "deploy/ckan/README.md",
+}
 
 
 def markdown_files() -> list[Path]:
@@ -35,6 +58,21 @@ def targets_in(path: Path):
 
 def main() -> int:
     errors: list[str] = []
+    actual_docs = {path.name for path in (ROOT / "docs").glob("*.md")}
+    if actual_docs != CANONICAL_DOCS:
+        missing = sorted(CANONICAL_DOCS - actual_docs)
+        unexpected = sorted(actual_docs - CANONICAL_DOCS)
+        if missing:
+            errors.append(f"Dokumentasi kanonis hilang: {', '.join(missing)}")
+        if unexpected:
+            errors.append(f"Dokumentasi belum terdaftar/duplikat: {', '.join(unexpected)}")
+    for retired in RETIRED_DOCS:
+        if (ROOT / retired).exists():
+            errors.append(f"Dokumentasi lama yang sudah digabung masih ada: {retired}")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    for doc in sorted(CANONICAL_DOCS):
+        if f"docs/{doc}" not in readme:
+            errors.append(f"README tidak menautkan dokumen kanonis: docs/{doc}")
     for source in markdown_files():
         for line_number, target in targets_in(source):
             parsed = urlsplit(target)
@@ -56,7 +94,7 @@ def main() -> int:
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    print(f"Pemeriksaan tautan dokumentasi lulus: {len(markdown_files())} file Markdown diperiksa.")
+    print(f"Pemeriksaan dokumentasi lulus: {len(actual_docs)} dokumen kanonis, {len(markdown_files())} file Markdown, dan seluruh tautan internal valid.")
     return 0
 
 

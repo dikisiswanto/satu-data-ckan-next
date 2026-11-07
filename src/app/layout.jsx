@@ -27,7 +27,13 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: siteConfig.iconPath, type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "16x16 32x32" },
+      {
+        url: siteConfig.iconPath,
+        type: siteConfig.iconPath.endsWith(".svg")
+          ? "image/svg+xml"
+          : "image/png",
+      },
       {
         url: siteConfig.pwaIcon192,
         sizes: siteConfig.pwaIcon192.endsWith(".svg") ? "any" : "192x192",
@@ -36,7 +42,8 @@ export const metadata = {
           : "image/png",
       },
     ],
-    apple: siteConfig.pwaIcon192,
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
   category: "government",
   openGraph: {

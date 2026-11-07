@@ -22,12 +22,10 @@ export default function InfographicDetailLoading() {
       <PageHeading
         className="public-dynamic-heading"
         reserveTitle
-        reserveDescription
         eyebrow="Infografik"
         title="Memuat infografik"
-        description="Menyiapkan informasi dan gambar infografik."
       />
-      <div className="mt-7 grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mt-7 grid items-start gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-7">
         <section
           className="public-infographic-gallery space-y-5"
           aria-hidden="true"

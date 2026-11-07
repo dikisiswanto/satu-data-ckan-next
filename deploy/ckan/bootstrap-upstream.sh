@@ -411,7 +411,7 @@ cat <<MSG
 Bootstrap prepared for CKAN 2.12.
 
 Next steps:
-1) Review deploy/ckan/README.md for Cloudflare Tunnel or manual DNS deployment.
+1) Review docs/OPERASIONAL-DEPLOYMENT.md for Cloudflare Tunnel or manual DNS deployment.
 2) Edit only .env.ckan. deploy/ckan/upstream/.env.generated is filtered and automatically regenerated.
 3) Start one ingress profile only: manual, cloudflare, OR cloudflare-access (after Cloudflare Access policy is configured).
 4) After CKAN is healthy, apply DataStore permissions and create the XLoader token:

@@ -165,7 +165,6 @@ export default function PublicIndicatorDetailLoading() {
         <div className="max-w-3xl space-y-3">
           <Skeleton className="h-3 w-40" />
           <Skeleton className="public-heading-title-reserved h-10 w-4/5 max-w-3xl sm:h-12" />
-          <Skeleton className="public-heading-description-reserved h-4 w-full max-w-2xl" />
         </div>
       </header>
 

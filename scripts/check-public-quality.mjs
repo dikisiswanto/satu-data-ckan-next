@@ -121,16 +121,28 @@ requirePattern(
   "indicator detail must present methodology cautions as a subdued note",
 );
 
-const docsIndex = read("docs/INDEX.md");
+const readme = read("README.md");
+for (const guide of [
+  "API.md",
+  "KUALITAS-FE-PUBLIK.md",
+  "DESAIN-SISTEM.md",
+  "ADMIN-CKAN.md",
+  "KONTEN-CMS-MEDIA.md",
+  "CONFIGURASI-INSTANSI.md",
+  "PRATINJAU-DATASTORE-DAN-SINKRONISASI.md",
+  "AKSES-UNDUHAN-DATASET-PRIVAT.md",
+  "OPERASIONAL-DEPLOYMENT.md",
+]) {
+  requirePattern(
+    readme,
+    new RegExp(`docs/${guide.replaceAll(".", "\\.")}`),
+    `README utama harus menautkan panduan kanonis ${guide}`,
+  );
+}
 requirePattern(
-  docsIndex,
-  /KUALITAS-FE-PUBLIK\.md/,
-  "Indeks dokumentasi harus menautkan panduan kualitas FE kanonis",
-);
-requirePattern(
-  read("README.md"),
-  /docs\/INDEX\.md/,
-  "README utama harus menautkan indeks dokumentasi kanonis",
+  readme,
+  /Dokumentasi teknis disimpan di `docs\/`/,
+  "README harus menjelaskan bahwa docs/ adalah lokasi dokumentasi kanonis",
 );
 const qualityGuide = read("docs/KUALITAS-FE-PUBLIK.md");
 requirePattern(
@@ -142,6 +154,11 @@ requirePattern(
   qualityGuide,
   /axe|accessibility/i,
   "FE quality guide must document the accessibility audit",
+);
+requirePattern(
+  qualityGuide,
+  /Promosi pemasangan PWA[\s\S]*14 hari[\s\S]*30 hari[\s\S]*beforeinstallprompt/i,
+  "FE quality guide must preserve PWA engagement, snooze, and browser behavior rules",
 );
 
 const pkg = JSON.parse(read("package.json"));

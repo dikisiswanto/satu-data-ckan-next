@@ -168,7 +168,7 @@ Portal disiapkan untuk kemungkinan diambil oleh harvester CKAN lain, tanpa membu
 https://data.example.go.id
 ```
 
-Jangan menggunakan `CKAN_HOST` (misalnya `https://ckan.silirdev.com`); hostname tersebut khusus administrasi. Gunakan `PUBLIC_HOST` (misalnya `https://data.silirdev.com`) sebagai alamat harvesting publik. Harvester CKAN standar memanggil `package_search` dengan `rows`, `start`, `sort=id asc`, lalu memakai filter `fq` untuk membatasi organisasi/grup atau mengambil metadata yang berubah sejak proses sebelumnya. Facade publik kini mendukung subset parameter tersebut secara terbatas. Action baca seperti `package_show`, `organization_show`, dan `group_show` tetap tersedia untuk metadata yang bersifat publik.
+Jangan menggunakan `CKAN_HOST` (misalnya `https://ckan.example.go.id`); hostname tersebut khusus administrasi. Gunakan `PUBLIC_HOST` (misalnya `https://data.example.go.id`) sebagai alamat harvesting publik. Harvester CKAN standar memanggil `package_search` dengan `rows`, `start`, `sort=id asc`, lalu memakai filter `fq` untuk membatasi organisasi/grup atau mengambil metadata yang berubah sejak proses sebelumnya. Facade publik kini mendukung subset parameter tersebut secara terbatas. Action baca seperti `package_show`, `organization_show`, dan `group_show` tetap tersedia untuk metadata yang bersifat publik.
 
 Contoh request awal:
 
@@ -233,7 +233,6 @@ Untuk CSV/TSV lokal yang belum selesai diproses XLoader, halaman detail dapat me
 ## Rujukan terkait
 
 - [Pratinjau DataStore dan Sinkronisasi](PRATINJAU-DATASTORE-DAN-SINKRONISASI.md) — pemrosesan resource tabular.
-- [Pratinjau Media dan Katalog](PRATINJAU-MEDIA-DAN-KATALOG.md) — pratinjau gambar dan pemisahan katalog.
+- [Konten, CMS, dan Media](KONTEN-CMS-MEDIA.md) — Pages/Blog, gambar, lightbox, dan klasifikasi katalog.
 - [Akses Unduhan Dataset Privat](AKSES-UNDUHAN-DATASET-PRIVAT.md) — sesi dan otorisasi CKAN.
-- [Kualitas FE Publik](KUALITAS-FE-PUBLIK.md) — pagination, aksesibilitas, pratinjau PDF, dan performa.
-- [Indeks Dokumentasi](INDEX.md) — daftar seluruh panduan kanonis.
+- [Kualitas Frontend Publik](KUALITAS-FE-PUBLIK.md) — pagination, aksesibilitas, PWA, dan performa.

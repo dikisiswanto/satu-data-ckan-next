@@ -22,10 +22,8 @@ export default function PublicationDetailLoading() {
       <PageHeading
         className="public-dynamic-heading"
         reserveTitle
-        reserveDescription
         eyebrow="Publikasi resmi"
         title="Memuat publikasi"
-        description="Menyiapkan informasi publikasi dan berkas dokumen."
       />
       <div className="mt-7 grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_340px]">
         <section className="space-y-5" aria-hidden="true">

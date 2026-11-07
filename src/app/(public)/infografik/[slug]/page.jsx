@@ -103,12 +103,10 @@ export default async function InfographicDetailPage({ params }) {
       <PageHeading
         className="public-dynamic-heading"
         reserveTitle
-        reserveDescription
         eyebrow={item.category || "Infografik"}
         title={item.title}
-        description={item.notes || "Deskripsi infografik belum tersedia."}
       />
-      <div className="mt-7 grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mt-7 grid items-start gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-7">
         <section className="public-infographic-gallery space-y-5">
           {images.length ? (
             images.map((resource) => (
@@ -140,7 +138,7 @@ export default async function InfographicDetailPage({ params }) {
               </figure>
             ))
           ) : (
-            <div className="public-empty-panel infographic-preview-empty flex min-h-[24rem] flex-col items-center justify-center">
+            <div className="public-empty-panel infographic-preview-empty flex flex-col items-center justify-center">
               <Images
                 size={30}
                 className="mx-auto text-muted"

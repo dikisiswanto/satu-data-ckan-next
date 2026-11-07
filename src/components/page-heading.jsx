@@ -7,7 +7,6 @@ export function PageHeading({
   children,
   className,
   reserveTitle = false,
-  reserveDescription = false,
   compact = false,
 }) {
   return (
@@ -29,12 +28,7 @@ export function PageHeading({
           {title}
         </h1>
         {description ? (
-          <p
-            className={cn(
-              "max-w-2xl text-base leading-7 text-muted",
-              reserveDescription && "public-heading-description-reserved",
-            )}
-          >
+          <p className="max-w-2xl text-base leading-7 text-muted">
             {description}
           </p>
         ) : null}

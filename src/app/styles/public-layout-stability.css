@@ -52,14 +52,6 @@
   line-clamp: unset;
 }
 
-.public-heading-description-reserved {
-  display: -webkit-box;
-  min-block-size: 5.25rem;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-
 .public-dynamic-heading .eyebrow {
   display: -webkit-box;
   min-block-size: 1.2em;
@@ -249,8 +241,14 @@
 }
 
 .infographic-preview-empty {
-  min-block-size: 24rem;
+  min-block-size: 14rem;
   aspect-ratio: 4 / 3;
+}
+
+@media (min-width: 640px) {
+  .infographic-preview-empty {
+    min-block-size: 24rem;
+  }
 }
 
 /* Only skeletons that can appear in the first grid row are needed. */
@@ -303,10 +301,6 @@
 }
 
 @media (max-width: 639px) {
-  .public-heading-description-reserved {
-    min-block-size: 5.25rem;
-  }
-
   .public-cms-cover {
     min-block-size: 9rem;
   }
@@ -369,12 +363,7 @@
   min-block-size: 9rem;
 }
 
-.public-infographic-gallery {
-  min-block-size: 24rem;
-}
-
 .public-infographic-download-list {
-  min-block-size: 6rem;
   max-block-size: 18rem;
   overflow: auto;
 }

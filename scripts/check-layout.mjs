@@ -80,12 +80,6 @@ for (const route of ["berita", "informasi"]) {
     "<CmsPageBody page={page} />",
     `${route}/[slug] must render the original CMS body without a decorative wrapper`,
   );
-  if (route === "informasi")
-    requireText(
-      page,
-      "reserveDescription",
-      "information detail may reserve its configured excerpt",
-    );
   if (route === "berita") {
     if (
       read(page).includes("reserveDescription") ||
@@ -185,12 +179,47 @@ requireText(
   "Diperbarui",
   "Dataset detail fallback must use the resolved publication-date wording",
 );
-requireText(
-  "src/app/(public)/statistik/[slug]/loading.jsx",
-  "public-heading-description-reserved",
-  "indicator detail fallback must reserve its real heading copy",
-);
+if (
+  read("src/app/(public)/statistik/[slug]/loading.jsx").includes(
+    "public-heading-description-reserved",
+  )
+) {
+  failures.push(
+    "indicator detail fallback must not reserve blank description height",
+  );
+}
 const titleLayoutCss = read("src/app/styles/public-layout-stability.css");
+
+for (const route of [
+  "infografik",
+  "informasi",
+  "publikasi",
+  "statistik",
+  "organisasi",
+]) {
+  const detail = read(`src/app/(public)/${route}/[slug]/page.jsx`);
+  if (detail.includes("reserveDescription") || /description=\{/.test(detail)) {
+    failures.push(
+      `${route}/[slug]: detail heading must not render a reserved or redundant description block`,
+    );
+  }
+}
+for (const route of ["infografik"]) {
+  const detail = read(`src/app/(public)/${route}/[slug]/page.jsx`);
+  const loading = read(`src/app/(public)/${route}/[slug]/loading.jsx`);
+  const compactGap =
+    "gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-7";
+  if (!detail.includes(compactGap) || !loading.includes(compactGap)) {
+    failures.push(
+      "infographic detail/gallery gap must be compact on mobile and unchanged on desktop",
+    );
+  }
+}
+if (titleLayoutCss.includes("public-heading-description-reserved")) {
+  failures.push(
+    "detail pages must not retain a fixed-height description reservation rule",
+  );
+}
 const heroMobileCss = read("src/app/styles/public-home-hero.css");
 const heroMobileBlock = heroMobileCss.slice(
   heroMobileCss.indexOf("@media (max-width: 767px)"),
@@ -408,7 +437,7 @@ for (const token of [
   "Cari dataset, tema, atau kata kunci…",
   'submitLabel="Cari"',
   "Coba cari",
-  "Katalog data resmi daerah",
+  "SEBARAN WILAYAH",
   "Organisasi aktif",
   "Indikator publik",
   "Dataset terbuka",
@@ -840,8 +869,28 @@ for (const route of ["infografik", "publikasi"]) {
     requireText(
       page,
       "public-infographic-gallery",
-      "infographic gallery must reserve image/empty-state geometry",
+      "infographic gallery must retain its layout hook",
     );
+    const galleryStyles = read("src/app/styles/public-layout-stability.css");
+    if (
+      /\.public-infographic-gallery\s*\{[^}]*min-block-size/i.test(
+        galleryStyles,
+      )
+    ) {
+      failures.push(
+        "infographic gallery must not reserve a large blank column on mobile",
+      );
+    }
+    if (
+      !galleryStyles.includes(
+        ".infographic-preview-empty {\n  min-block-size: 14rem;",
+      ) ||
+      !galleryStyles.includes("@media (min-width: 640px)")
+    ) {
+      failures.push(
+        "infographic empty state must use a compact mobile height and retain the desktop frame",
+      );
+    }
     requireText(
       loading,
       "public-infographic-gallery",
@@ -900,5 +949,5 @@ if (failures.length) {
 }
 
 process.stdout.write(
-  `Layout stability checks passed (${sharedCopyRoutes.length} shared-copy routes, CMS detail reserves, homepage fallbacks, and CLS E2E coverage).\n`,
+  `Layout stability checks passed (${sharedCopyRoutes.length} shared-copy routes, compact detail headings, homepage fallbacks, and CLS E2E coverage).\n`,
 );

@@ -35,7 +35,7 @@ Proxy media editorial terpisah dan memakai owner tetap, pemeriksaan MIME, batas 
 
 ## Persyaratan sesi dan domain
 
-Browser dapat mengirim cookie sesi CKAN ke Admin dan portal hanya jika `PUBLIC_HOST` serta `CKAN_HOST` merupakan subdomain dalam domain registrable yang sama dan cookie dikonfigurasi untuk domain induk tersebut. Contoh yang sesuai: `data.silirdev.com` dan `ckan.silirdev.com`. Contoh yang tidak sesuai: `data.silirdev.com` dan `ckan.instansi.example.go.id`.
+Browser dapat mengirim cookie sesi CKAN ke Admin dan portal hanya jika `PUBLIC_HOST` serta `CKAN_HOST` merupakan subdomain dalam domain registrable yang sama dan cookie dikonfigurasi untuk domain induk tersebut. Contoh yang sesuai: `data.example.go.id` dan `ckan.example.go.id`. Contoh yang tidak sesuai: `data.example.go.id` dan `ckan.other-example.net`.
 
 Setelah mengubah domain cookie atau hostname, buat ulang container CKAN dan Next.js, logout dari Admin CKAN, lalu login kembali. Pada DevTools → Network, pastikan request portal menyertakan nama cookie `portal_ckan_session`; jangan menyalin atau membagikan nilainya. `sync-env.py` sengaja menolak domain induk yang tidak cocok.
 

@@ -1,4 +1,4 @@
-# Panduan Operasional CKAN dan Cloudflare
+# Operasional Deployment CKAN
 
 CKAN 2.12.1 adalah backend otoritatif untuk dataset, resource, organisasi, DataStore, autentikasi, dan CMS. Next.js menyajikan portal publik. Source runtime dibangun dari `ckan/ckan-docker-base`; stack service berasal dari `ckan/ckan-docker`.
 
@@ -24,7 +24,7 @@ bash ./deploy/ckan/compose.sh cloudflare ps
 
 Ingress manual/Caddy: ganti `cloudflare` dengan `manual`. Profil `cloudflare-basic-auth` dan `manual-basic-auth` tersedia untuk lapisan autentikasi tambahan. Jangan arahkan hostname admin langsung ke container CKAN; semua hostname masuk melalui Caddy sesuai profil.
 
-Hostname publik dan admin idealnya berada pada domain induk yang sama, misalnya `data.silirdev.com` dan `ckan.silirdev.com`, agar sesi CKAN dapat dibagikan secara aman bila konfigurasi cookie mengizinkan. `PUBLIC_HOST` tetap menjadi origin tautan publik; `CKAN_HOST` khusus login/admin. Perbarui hostname pada Cloudflare Tunnel secara terpisah dari `.env.ckan`.
+Hostname publik dan admin idealnya berada pada domain induk yang sama, misalnya `data.example.go.id` dan `ckan.example.go.id`, agar sesi CKAN dapat dibagikan secara aman bila konfigurasi cookie mengizinkan. `PUBLIC_HOST` tetap menjadi origin tautan publik; `CKAN_HOST` khusus login/admin. Perbarui hostname pada Cloudflare Tunnel secara terpisah dari `.env.ckan`.
 
 ## Build ulang sesuai perubahan
 
@@ -53,7 +53,7 @@ Jika CKAN unhealthy, lihat log CKAN dan health history sebelum restart: `docker 
 ## DataStore, resource, dan GeoView
 
 - Plugin view CKAN 2.12 yang digunakan: `datatables_view`, `geo_view`, `geojson_view`, `wmts_view`, `shp_view`, `image_view`, dan `text_view`. Jangan mengaktifkan plugin Recline atau nama plugin shapefile lama.
-- Bootstrap menyiapkan hak akses DataStore dan worker XLoader/Harvest sesuai konfigurasi. Pemrosesan ulang resource lama dan sinkronisasi pratinjau mengikuti [`docs/PRATINJAU-DATASTORE-DAN-SINKRONISASI.md`](../../docs/PRATINJAU-DATASTORE-DAN-SINKRONISASI.md).
+- Bootstrap menyiapkan hak akses DataStore dan worker XLoader/Harvest sesuai konfigurasi. Pemrosesan ulang resource lama dan sinkronisasi pratinjau mengikuti [panduan DataStore](PRATINJAU-DATASTORE-DAN-SINKRONISASI.md).
 - Basemap, batas ukuran GeoJSON, dan ResourceView dikelola konfigurasi aplikasi; periksa resource aktif serta view CKAN saat pratinjau kosong.
 - `ckan.site_url` tetap menunjuk `PUBLIC_HOST` agar URL media publik dan ResourceView lama tetap konsisten. Karena host publik dilayani Next.js, Caddy meneruskan endpoint CKAN `/api/i18n/*` dan `resource_proxy` secara terbatas ke CKAN. CORS hanya mengizinkan origin `https://CKAN_HOST`; jangan menggantinya dengan wildcard atau membuka seluruh `/api/*`.
 
@@ -76,21 +76,21 @@ Gunakan profil yang sama dengan deployment aktif. Uji endpoint terjemahan dari o
 
 ```bash
 curl -i \
-  -H 'Origin: https://ckan.silirdev.com' \
-  'https://data.silirdev.com/api/i18n/id'
+  -H 'Origin: https://ckan.example.go.id' \
+  'https://data.example.go.id/api/i18n/id'
 
 curl -i -X OPTIONS \
-  -H 'Origin: https://ckan.silirdev.com' \
+  -H 'Origin: https://ckan.example.go.id' \
   -H 'Access-Control-Request-Method: GET' \
   -H 'Access-Control-Request-Headers: x-requested-with' \
-  'https://data.silirdev.com/api/i18n/id'
+  'https://data.example.go.id/api/i18n/id'
 ```
 
-Respons GET seharusnya bukan 404 Next.js dan harus memiliki `Access-Control-Allow-Origin: https://ckan.silirdev.com`. Respons preflight seharusnya `204` dengan origin yang sama. Setelah itu, periksa Network browser: `/api/3/action/resource_proxy`, `/webassets/*`, tile OpenStreetMap, dan permintaan berkas GeoJSON juga harus berhasil. Jika i18n sudah 200 tetapi peta tetap kosong, kegagalannya berada pada request sumber data/viewer berikutnya—catat URL, status, dan responsnya sebelum mengubah konfigurasi CORS lagi.
+Respons GET seharusnya bukan 404 Next.js dan harus memiliki `Access-Control-Allow-Origin: https://ckan.example.go.id`. Respons preflight seharusnya `204` dengan origin yang sama. Setelah itu, periksa Network browser: `/api/3/action/resource_proxy`, `/webassets/*`, tile OpenStreetMap, dan permintaan berkas GeoJSON juga harus berhasil. Jika i18n sudah 200 tetapi peta tetap kosong, kegagalannya berada pada request sumber data/viewer berikutnya—catat URL, status, dan responsnya sebelum mengubah konfigurasi CORS lagi.
 
 ## CMS dan unduhan dataset privat
 
-Pages/Blog mendukung Markdown dan media editorial. Upload media harus memakai endpoint bertanda akses; jangan membuka FileStore internal. Dataset privat tetap diotorisasi oleh sesi CKAN per pengguna. Host publik/admin yang tidak berbagi registrable domain tidak dapat berbagi cookie browser. Lihat [`docs/CMS.md`](../../docs/CMS.md), [`docs/LOKALISASI-ADMIN-CKAN.md`](../../docs/LOKALISASI-ADMIN-CKAN.md), dan [`docs/AKSES-UNDUHAN-DATASET-PRIVAT.md`](../../docs/AKSES-UNDUHAN-DATASET-PRIVAT.md).
+Pages/Blog mendukung Markdown dan media editorial. Upload media harus memakai endpoint bertanda akses; jangan membuka FileStore internal. Dataset privat tetap diotorisasi oleh sesi CKAN per pengguna. Host publik/admin yang tidak berbagi registrable domain tidak dapat berbagi cookie browser. Lihat [panduan konten dan CMS](KONTEN-CMS-MEDIA.md), [panduan admin CKAN](ADMIN-CKAN.md), dan [panduan akses dataset privat](AKSES-UNDUHAN-DATASET-PRIVAT.md).
 
 ## Keamanan operasional
 
