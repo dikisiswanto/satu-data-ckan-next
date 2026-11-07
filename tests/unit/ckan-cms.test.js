@@ -25,7 +25,7 @@ afterEach(() => {
 describe("CKAN Pages CMS normalization", () => {
   it("accepts safe CMS slugs and rejects path-like identifiers", () => {
     expect(normalizeCmsSlug("tentang-satu-data")).toBe("tentang-satu-data");
-    expect(normalizeCmsSlug("wajo_2026")).toBe("wajo_2026");
+    expect(normalizeCmsSlug("region_2026")).toBe("region_2026");
     expect(normalizeCmsSlug("a".repeat(100))).toBe("a".repeat(100));
     for (const value of [
       "",
@@ -50,7 +50,11 @@ describe("CKAN Pages CMS normalization", () => {
 
   it("excludes private, incomplete, invalid-slug and future-published records", () => {
     process.env.NEXT_PUBLIC_TIME_ZONE = "Asia/Makassar";
-    const base = { name: "profil-wajo", title: "Profil Wajo", private: false };
+    const base = {
+      name: "profil-sample",
+      title: "Profil Contoh",
+      private: false,
+    };
     expect(isCmsRecordPublished(base, Date.parse("2026-10-30T00:00:00Z"))).toBe(
       true,
     );
@@ -115,14 +119,14 @@ describe("CKAN Pages CMS normalization", () => {
     process.env.CKAN_ADMIN_URL = "https://ckan.example.go.id";
     const origin = "https://data.example.go.id";
     expect(
-      publicCmsImageUrl("/uploads/page_images/wajo-cover.webp", origin),
-    ).toBe("/api/cms/media/wajo-cover.webp");
+      publicCmsImageUrl("/uploads/page_images/portal-cover.webp", origin),
+    ).toBe("/api/cms/media/portal-cover.webp");
     expect(
       publicCmsImageUrl(
-        "https://ckan.example.go.id/uploads/page_images/wajo-cover.webp",
+        "https://ckan.example.go.id/uploads/page_images/portal-cover.webp",
         origin,
       ),
-    ).toBe("/api/cms/media/wajo-cover.webp");
+    ).toBe("/api/cms/media/portal-cover.webp");
     expect(
       publicCmsImageUrl(
         "https://ckan.example.go.id/file/3c2e4f10-6c61-4a2c-a3db-b96db879889c",
@@ -140,10 +144,10 @@ describe("CKAN Pages CMS normalization", () => {
     ).toBe("/api/public/ckan-file/3c2e4f10-6c61-4a2c-a3db-b96db879889c");
     expect(
       publicCmsImageUrl(
-        "https://ckan.example.go.id/file/public-download/groups/logo-wajo.png",
+        "https://ckan.example.go.id/file/public-download/groups/logo-sample.png",
         origin,
       ),
-    ).toBe("/file/public-download/groups/logo-wajo.png");
+    ).toBe("/file/public-download/groups/logo-sample.png");
     expect(
       publicCmsImageUrl(
         "https://ckan.example.go.id/uploads/group/logo-lama.png",
@@ -151,13 +155,13 @@ describe("CKAN Pages CMS normalization", () => {
       ),
     ).toBe("/uploads/group/logo-lama.png");
     expect(
-      publicCmsImageUrl("https://cdn.example.test/wajo.webp", origin),
-    ).toBe("https://cdn.example.test/wajo.webp");
+      publicCmsImageUrl("https://cdn.example.test/sample.webp", origin),
+    ).toBe("https://cdn.example.test/sample.webp");
     expect(publicCmsImageUrl("javascript:alert(1)", origin)).toBe("");
-    expect(publicCmsImageUrl("http://cdn.example.test/wajo.webp", origin)).toBe(
-      "",
-    );
-    expect(publicCmsImageUrl("//evil.example/wajo.webp", origin)).toBe("");
+    expect(
+      publicCmsImageUrl("http://cdn.example.test/sample.webp", origin),
+    ).toBe("");
+    expect(publicCmsImageUrl("//evil.example/sample.webp", origin)).toBe("");
     expect(
       publicCmsImageUrl("/api/3/action/package_show?id=secret", origin),
     ).toBe("");
@@ -209,16 +213,16 @@ describe("CKAN Pages CMS normalization", () => {
           contentBlocks: [
             {
               type: "hero",
-              image: "/uploads/page_images/hero-wajo.webp",
-              imageAlt: "Hero Wajo",
+              image: "/uploads/page_images/hero-sample.webp",
+              imageAlt: "Hero Contoh",
             },
           ],
         },
         "https://data.example.go.id",
       ),
     ).toEqual({
-      src: "/api/cms/media/hero-wajo.webp",
-      alt: "Hero Wajo",
+      src: "/api/cms/media/hero-sample.webp",
+      alt: "Hero Contoh",
     });
     expect(
       getCmsFeatureImage(
@@ -230,8 +234,8 @@ describe("CKAN Pages CMS normalization", () => {
               type: "gallery",
               items: [
                 {
-                  src: "/uploads/page_images/galeri-wajo.webp",
-                  alt: "Galeri Wajo",
+                  src: "/uploads/page_images/galeri-sample.webp",
+                  alt: "Galeri Contoh",
                 },
               ],
             },
@@ -240,8 +244,8 @@ describe("CKAN Pages CMS normalization", () => {
         "https://data.example.go.id",
       ),
     ).toEqual({
-      src: "/api/cms/media/galeri-wajo.webp",
-      alt: "Galeri Wajo",
+      src: "/api/cms/media/galeri-sample.webp",
+      alt: "Galeri Contoh",
     });
     expect(
       getCmsFeatureImage(
@@ -397,13 +401,13 @@ describe("CKAN Pages CMS normalization", () => {
   it("uses the first safe Markdown image as an article cover", () => {
     process.env.CKAN_ADMIN_URL = "https://ckan.example.go.id";
     const page = {
-      title: "Berita Wajo",
+      title: "Berita Contoh",
       content:
-        "Teks pembuka\n\n![Kegiatan Wajo](https://ckan.example.go.id/uploads/page_images/kegiatan.webp)",
+        "Teks pembuka\n\n![Kegiatan Contoh](https://ckan.example.go.id/uploads/page_images/kegiatan.webp)",
     };
     expect(getCmsMarkdownImage(page, "https://data.example.go.id")).toEqual({
       src: "/api/cms/media/kegiatan.webp",
-      alt: "Kegiatan Wajo",
+      alt: "Kegiatan Contoh",
     });
     expect(
       getCmsMarkdownImage(
@@ -421,14 +425,14 @@ describe("CKAN Pages CMS normalization", () => {
 
   it("provides only absolute HTTPS image URLs to JSON-LD", () => {
     const origin = "https://data.example.go.id";
-    expect(getAbsoluteCmsImageUrl("/images/wajo.webp", origin)).toBe(
-      "https://data.example.go.id/images/wajo.webp",
+    expect(getAbsoluteCmsImageUrl("/images/sample.webp", origin)).toBe(
+      "https://data.example.go.id/images/sample.webp",
     );
     expect(
-      getAbsoluteCmsImageUrl("https://cdn.example.test/wajo.webp", origin),
-    ).toBe("https://cdn.example.test/wajo.webp");
+      getAbsoluteCmsImageUrl("https://cdn.example.test/sample.webp", origin),
+    ).toBe("https://cdn.example.test/sample.webp");
     expect(
-      getAbsoluteCmsImageUrl("/images/wajo.webp", "http://localhost:3000"),
+      getAbsoluteCmsImageUrl("/images/sample.webp", "http://localhost:3000"),
     ).toBe("");
   });
 

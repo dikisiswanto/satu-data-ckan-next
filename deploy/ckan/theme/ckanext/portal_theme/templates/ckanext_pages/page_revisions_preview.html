@@ -1,0 +1,19 @@
+{% extends 'ckanext_pages/page.html' %}
+{% from "portal_theme/icon.html" import portal_icon %}
+{% block ckanext_pages_actions %}
+  {% if h.check_access('ckanext_pages_update') %}
+    {% asset 'pages/main-css' %}
+    <div class="portal-cms-actions" role="group" aria-label="{{ _('Page actions') }}">
+      <a class="btn btn-primary" href="{{ h.url_for('pages.pages_revisions', page=g.page.name) }}">{{ portal_icon('eye') }}<span>{{ _('Revisions') }}</span></a>
+    </div>
+  {% endif %}
+{% endblock %}
+{% block ckanext_pages_content %}
+  {% if revision.content %}
+    <div class="ckanext-pages-content portal-admin-cms-content">
+      {{ h.portal_render_markdown(revision.content) }}
+    </div>
+  {% else %}
+    <p class="empty">{{ _('This page currently has no content') }}</p>
+  {% endif %}
+{% endblock %}

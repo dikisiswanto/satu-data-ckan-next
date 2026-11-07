@@ -9,9 +9,9 @@ const now = "2026-10-29T00:00:00Z";
 const packages = [
   {
     id: "package-sekolah",
-    name: "data-sekolah-wajo",
-    title: "Data Sekolah Kabupaten Wajo",
-    notes: "Daftar sekolah dan satuan pendidikan di Kabupaten Wajo.",
+    name: "data-sekolah-sample",
+    title: "Data Sekolah Kabupaten Contoh",
+    notes: "Daftar sekolah dan satuan pendidikan di Kabupaten Contoh.",
     state: "active",
     private: false,
     metadata_created: "2026-01-01T00:00:00Z",
@@ -21,8 +21,8 @@ const packages = [
     groups: [{ name: "pendidikan", title: "Pendidikan" }],
     organization: {
       id: "org-bappeda",
-      name: "bappeda-wajo",
-      title: "Bappeda Wajo",
+      name: "bappeda-sample",
+      title: "Bappeda Contoh",
     },
     resources: [
       {
@@ -45,7 +45,7 @@ const packages = [
           "Contoh resource tabular yang baru ditambahkan dan belum selesai dimuat ke DataStore",
         format: "CSV",
         mimetype: "text/csv",
-        url: "http://127.0.0.1:8010/dataset/data-sekolah-wajo/resource/resource-sekolah-pending/download/data-sekolah-pending.csv",
+        url: "http://127.0.0.1:8010/dataset/data-sekolah-sample/resource/resource-sekolah-pending/download/data-sekolah-pending.csv",
         state: "active",
         private: false,
         datastore_active: false,
@@ -54,7 +54,7 @@ const packages = [
         id: "resource-sekolah-image",
         package_id: "package-sekolah",
         name: "Denah Sekolah PNG",
-        description: "Denah titik sekolah Kabupaten Wajo",
+        description: "Denah titik sekolah Kabupaten Contoh",
         format: "PNG",
         mimetype: "image/png",
         url: "https://images.example.test/denah-sekolah.png",
@@ -82,7 +82,7 @@ const packages = [
     name: "indikator-ipm",
     title: "Indeks Pembangunan Manusia",
     notes:
-      "Indeks pembangunan manusia Kabupaten Wajo berdasarkan sumber statistik yang dikelola resmi.",
+      "Indeks pembangunan manusia Kabupaten Contoh berdasarkan sumber statistik yang dikelola resmi.",
     state: "active",
     private: false,
     metadata_created: "2024-01-01T00:00:00Z",
@@ -93,8 +93,8 @@ const packages = [
     groups: [{ name: "sosial", title: "Sosial dan Kesejahteraan" }],
     organization: {
       id: "org-bappeda",
-      name: "bappeda-wajo",
-      title: "Bappeda Wajo",
+      name: "bappeda-sample",
+      title: "Bappeda Contoh",
     },
     extras: [
       { key: "portal_type", value: "indikator" },
@@ -106,8 +106,8 @@ const packages = [
           "Indeks gabungan untuk menggambarkan capaian pembangunan manusia.",
       },
       { key: "portal_formula", value: "Metodologi resmi penghitungan IPM." },
-      { key: "portal_source", value: "BPS Kabupaten Wajo" },
-      { key: "portal_geography", value: "Kabupaten Wajo" },
+      { key: "portal_source", value: "BPS Kabupaten Contoh" },
+      { key: "portal_geography", value: "Kabupaten Contoh" },
       { key: "portal_reference_period", value: "2024" },
     ],
     resources: [
@@ -127,10 +127,10 @@ const packages = [
   },
   {
     id: "package-publikasi",
-    name: "publikasi-wajo-dalam-angka",
-    title: "Kabupaten Wajo Dalam Angka 2025",
+    name: "publikasi-portal-dalam-angka",
+    title: "Kabupaten Contoh Dalam Angka 2025",
     notes:
-      "Publikasi statistik tahunan Kabupaten Wajo dengan tabel indikator dan metodologi sumber.",
+      "Publikasi statistik tahunan Kabupaten Contoh dengan tabel indikator dan metodologi sumber.",
     state: "active",
     private: false,
     metadata_created: "2025-03-01T00:00:00Z",
@@ -140,8 +140,8 @@ const packages = [
     groups: [{ name: "publikasi", title: "Publikasi Statistik" }],
     organization: {
       id: "org-bappeda",
-      name: "bappeda-wajo",
-      title: "Bappeda Wajo",
+      name: "bappeda-sample",
+      title: "Bappeda Contoh",
     },
     extras: [
       { key: "portal_type", value: "publikasi" },
@@ -157,17 +157,17 @@ const packages = [
         key: "portal_methodology",
         value: "Kompilasi data sektoral terverifikasi.",
       },
-      { key: "portal_attribution", value: "Pemerintah Kabupaten Wajo" },
+      { key: "portal_attribution", value: "Pemerintah Kabupaten Contoh" },
     ],
     resources: [
       {
         id: "resource-publikasi-pdf",
         package_id: "package-publikasi",
-        name: "Wajo Dalam Angka 2025 PDF",
+        name: "Contoh Dalam Angka 2025 PDF",
         description: "Buku statistik tahunan",
         format: "PDF",
         mimetype: "application/pdf",
-        url: "https://files.example.test/wajo-dalam-angka-2025.pdf",
+        url: "https://files.example.test/portal-dalam-angka-2025.pdf",
         state: "active",
         private: false,
         datastore_active: false,
@@ -176,9 +176,9 @@ const packages = [
   },
   {
     id: "package-infografik",
-    name: "infografik-stunting-wajo",
-    title: "Infografik Stunting Kabupaten Wajo",
-    notes: "Ringkasan visual data stunting Kabupaten Wajo.",
+    name: "infografik-stunting-sample",
+    title: "Infografik Stunting Kabupaten Contoh",
+    notes: "Ringkasan visual data stunting Kabupaten Contoh.",
     state: "active",
     private: false,
     metadata_created: "2025-01-01T00:00:00Z",
@@ -188,13 +188,13 @@ const packages = [
     organization: {
       id: "org-dinkes",
       name: "dinas-kesehatan",
-      title: "Dinas Kesehatan Kabupaten Wajo",
+      title: "Dinas Kesehatan Kabupaten Contoh",
     },
     extras: [
       { key: "portal_type", value: "infografik" },
       { key: "portal_category", value: "Kesehatan" },
       { key: "portal_period", value: "2025" },
-      { key: "portal_attribution", value: "Dinas Kesehatan Kabupaten Wajo" },
+      { key: "portal_attribution", value: "Dinas Kesehatan Kabupaten Contoh" },
     ],
     resources: [
       {
@@ -204,7 +204,7 @@ const packages = [
         description: "Infografik utama stunting",
         format: "PNG",
         mimetype: "image/png",
-        url: "https://images.example.test/stunting-wajo.png",
+        url: "https://images.example.test/stunting-sample.png",
         state: "active",
         private: false,
         datastore_active: false,
@@ -216,7 +216,7 @@ const packages = [
         description: "Dokumen pendukung",
         format: "PDF",
         mimetype: "application/pdf",
-        url: "https://files.example.test/stunting-wajo.pdf",
+        url: "https://files.example.test/stunting-sample.pdf",
         state: "active",
         private: false,
         datastore_active: false,
@@ -236,8 +236,8 @@ const packages = [
     groups: [{ name: "internal", title: "Internal" }],
     organization: {
       id: "org-bappeda",
-      name: "bappeda-wajo",
-      title: "Bappeda Wajo",
+      name: "bappeda-sample",
+      title: "Bappeda Contoh",
     },
     resources: [
       {
@@ -256,8 +256,8 @@ const packages = [
 const orgs = [
   {
     id: "org-bappeda",
-    name: "bappeda-wajo",
-    title: "Bappeda Wajo",
+    name: "bappeda-sample",
+    title: "Bappeda Contoh",
     description:
       "Perencanaan pembangunan dan pengelolaan data pembangunan daerah.",
     state: "active",
@@ -268,7 +268,7 @@ const orgs = [
   {
     id: "org-dinkes",
     name: "dinas-kesehatan",
-    title: "Dinas Kesehatan Kabupaten Wajo",
+    title: "Dinas Kesehatan Kabupaten Contoh",
     description: "Informasi kesehatan masyarakat dan layanan kesehatan daerah.",
     state: "active",
     package_count: 1,
@@ -276,7 +276,7 @@ const orgs = [
   {
     id: "org-setda",
     name: "sekretariat-daerah",
-    title: "Sekretariat Daerah Kabupaten Wajo",
+    title: "Sekretariat Daerah Kabupaten Contoh",
     description: "Koordinasi penyelenggaraan pemerintahan daerah.",
     state: "active",
     package_count: 0,
@@ -299,34 +299,34 @@ const indicatorRecords = [
   {
     _id: 1,
     period: "2021",
-    region: "Kabupaten Wajo",
+    region: "Kabupaten Contoh",
     value: 71.25,
     unit: "poin",
-    source: "BPS Kabupaten Wajo",
+    source: "BPS Kabupaten Contoh",
   },
   {
     _id: 2,
     period: "2022",
-    region: "Kabupaten Wajo",
+    region: "Kabupaten Contoh",
     value: 72.01,
     unit: "poin",
-    source: "BPS Kabupaten Wajo",
+    source: "BPS Kabupaten Contoh",
   },
   {
     _id: 3,
     period: "2023",
-    region: "Kabupaten Wajo",
+    region: "Kabupaten Contoh",
     value: 73.1,
     unit: "poin",
-    source: "BPS Kabupaten Wajo",
+    source: "BPS Kabupaten Contoh",
   },
   {
     _id: 4,
     period: "2024",
-    region: "Kabupaten Wajo",
+    region: "Kabupaten Contoh",
     value: 74.02,
     unit: "poin",
-    source: "BPS Kabupaten Wajo",
+    source: "BPS Kabupaten Contoh",
   },
 ];
 const cmsPages = [
@@ -367,21 +367,21 @@ const cmsPages = [
   },
   {
     name: "tentang-satu-data",
-    title: "Tentang Satu Data Wajo",
+    title: "Tentang Satu Data Contoh",
     page_type: "page",
     private: false,
     publish_date: "2026-10-01",
     content:
-      "# Satu Data Wajo\n\nPortal ini menyediakan data resmi yang dapat ditemukan dan digunakan kembali.",
-    excerpt: "Mengenal Portal Satu Data Kabupaten Wajo.",
+      "# Satu Data Contoh\n\nPortal ini menyediakan data resmi yang dapat ditemukan dan digunakan kembali.",
+    excerpt: "Mengenal Portal Satu Data Kabupaten Contoh.",
     category: "Profil portal",
     template_type: "landing",
     featured: true,
     show_in_menu: true,
     menu_label: "Tentang",
     menu_order: "1",
-    seo_title: "Tentang Portal Satu Data Wajo",
-    seo_description: "Profil dan tujuan Portal Satu Data Kabupaten Wajo.",
+    seo_title: "Tentang Portal Satu Data Contoh",
+    seo_description: "Profil dan tujuan Portal Satu Data Kabupaten Contoh.",
     content_blocks: JSON.stringify([
       {
         type: "stats",
@@ -393,12 +393,14 @@ const cmsPages = [
       {
         type: "dataset_links",
         title: "Dataset contoh",
-        items: [{ slug: "data-sekolah-wajo", label: "Lihat dataset sekolah" }],
+        items: [
+          { slug: "data-sekolah-sample", label: "Lihat dataset sekolah" },
+        ],
       },
       {
         type: "cta",
         title: "Jelajahi katalog",
-        description: "Temukan data publik Kabupaten Wajo.",
+        description: "Temukan data publik Kabupaten Contoh.",
         label: "Buka katalog",
         href: "/dataset",
       },
@@ -407,40 +409,40 @@ const cmsPages = [
   {
     name: "panduan-portal",
     title:
-      "Panduan Lengkap Menggunakan Portal Satu Data Kabupaten Wajo untuk Menemukan, Memahami, dan Memanfaatkan Data Terbuka",
+      "Panduan Lengkap Menggunakan Portal Satu Data Kabupaten Contoh untuk Menemukan, Memahami, dan Memanfaatkan Data Terbuka",
     page_type: "page",
     private: false,
     publish_date: "2026-10-20",
     content:
-      "# Panduan Portal\n\nPetunjuk menemukan dan menggunakan data publik Kabupaten Wajo.\n\nPengguna dapat menelusuri katalog berdasarkan topik, perangkat daerah, periode, dan kata kunci. Periksa metadata, definisi, satuan, serta sumber sebelum mengolah data.\n\nSetiap dataset menyediakan informasi berkas, format, tanggal pemutakhiran, dan keterangan lisensi jika tersedia.",
+      "# Panduan Portal\n\nPetunjuk menemukan dan menggunakan data publik Kabupaten Contoh.\n\nPengguna dapat menelusuri katalog berdasarkan topik, perangkat daerah, periode, dan kata kunci. Periksa metadata, definisi, satuan, serta sumber sebelum mengolah data.\n\nSetiap dataset menyediakan informasi berkas, format, tanggal pemutakhiran, dan keterangan lisensi jika tersedia.",
     excerpt:
-      "Panduan lengkap untuk menelusuri katalog, memahami metadata, memeriksa sumber dan periode, mengunduh berkas, serta memanfaatkan data resmi Kabupaten Wajo secara tepat.",
+      "Panduan lengkap untuk menelusuri katalog, memahami metadata, memeriksa sumber dan periode, mengunduh berkas, serta memanfaatkan data resmi Kabupaten Contoh secara tepat.",
     category: "Panduan",
     template_type: "landing",
     featured: true,
     show_in_menu: true,
     menu_label: "Panduan",
     menu_order: "2",
-    seo_title: "Panduan Portal Satu Data Wajo",
+    seo_title: "Panduan Portal Satu Data Contoh",
     seo_description: "Panduan penggunaan portal data daerah.",
   },
   {
     name: "kebijakan-satu-data",
-    title: "Kebijakan Satu Data Kabupaten Wajo",
+    title: "Kebijakan Satu Data Kabupaten Contoh",
     page_type: "page",
     private: false,
     publish_date: "2026-10-18",
     content:
       "# Kebijakan Satu Data\n\nPrinsip tata kelola data pemerintah daerah.",
     excerpt:
-      "Prinsip, standar, dan tata kelola penyelenggaraan Satu Data Kabupaten Wajo.",
+      "Prinsip, standar, dan tata kelola penyelenggaraan Satu Data Kabupaten Contoh.",
     category: "Kebijakan",
     template_type: "landing",
     featured: true,
     show_in_menu: true,
     menu_label: "Kebijakan",
     menu_order: "3",
-    seo_title: "Kebijakan Satu Data Wajo",
+    seo_title: "Kebijakan Satu Data Contoh",
     seo_description: "Kebijakan tata kelola data daerah.",
   },
   {
@@ -477,7 +479,7 @@ const cmsPages = [
   },
   {
     name: "kamus-data",
-    title: "Kamus Data Kabupaten Wajo",
+    title: "Kamus Data Kabupaten Contoh",
     page_type: "page",
     private: false,
     publish_date: "2026-10-10",
@@ -491,22 +493,22 @@ const cmsPages = [
     menu_order: "12",
   },
   {
-    name: "warta-data-wajo",
-    title: "Warta Data Wajo",
+    name: "warta-data-sample",
+    title: "Warta Data Contoh",
     page_type: "blog",
     private: false,
     publish_date: "2026-10-28",
     content:
-      "# Warta Data Wajo\n\nPengelola memperkenalkan pembaruan portal data daerah.\n\n![Ilustrasi berita Warta Data Wajo](/uploads/page_images/cms-cover.png)",
-    excerpt: "Pembaruan dan publikasi terbaru Portal Satu Data Wajo.",
+      "# Warta Data Contoh\n\nPengelola memperkenalkan pembaruan portal data daerah.\n\n![Ilustrasi berita Warta Data Contoh](/uploads/page_images/cms-cover.png)",
+    excerpt: "Pembaruan dan publikasi terbaru Portal Satu Data Contoh.",
     category: "Kabar portal",
     template_type: "article",
     featured: true,
     show_in_menu: false,
     menu_order: "99",
     og_image: "",
-    seo_title: "Warta Data Wajo",
-    seo_description: "Berita dan pembaruan data Kabupaten Wajo.",
+    seo_title: "Warta Data Contoh",
+    seo_description: "Berita dan pembaruan data Kabupaten Contoh.",
     content_blocks: JSON.stringify([
       {
         type: "rich_text",
@@ -533,8 +535,8 @@ const cmsPages = [
     menu_order: "20",
   },
   {
-    name: "rilis-statistik-wajo",
-    title: "Rilis Indikator Statistik Kabupaten Wajo",
+    name: "rilis-statistik-sample",
+    title: "Rilis Indikator Statistik Kabupaten Contoh",
     page_type: "blog",
     private: false,
     publish_date: "2026-10-24",

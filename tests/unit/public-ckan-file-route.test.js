@@ -20,7 +20,7 @@ function fixtures({
     if (action === "file_show")
       return {
         id: fileId,
-        name: "data-menara-wajo.xlsx",
+        name: "data-menara-sample.xlsx",
         content_type: mime,
         private: privateFile,
         owner_info: { owner_type: "resource", owner_id: resourceId },
@@ -114,7 +114,7 @@ describe("public CKAN File API proxy", () => {
     fixtures({ privateDataset: true });
     const fetcher = vi.fn(async (_url, options) => {
       expect(options.headers.get("cookie")).toBe(
-        "wajo_ckan_session=signed-editor-session",
+        "portal_ckan_session=signed-editor-session",
       );
       return new Response("private-file", {
         status: 200,
@@ -127,7 +127,7 @@ describe("public CKAN File API proxy", () => {
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
       new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+        headers: { Cookie: "portal_ckan_session=signed-editor-session" },
       }),
       params,
     );
@@ -146,7 +146,7 @@ describe("public CKAN File API proxy", () => {
       if (action === "file_show")
         return {
           id: fileId,
-          name: "data-menara-wajo.xlsx",
+          name: "data-menara-sample.xlsx",
           content_type:
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
           owner_info: { owner_type: "resource", owner_id: resourceId },
@@ -167,7 +167,7 @@ describe("public CKAN File API proxy", () => {
 
     const response = await GET(
       new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
-        headers: { Cookie: "wajo_ckan_session=forged-or-expired-session" },
+        headers: { Cookie: "portal_ckan_session=forged-or-expired-session" },
       }),
       params,
     );
@@ -187,7 +187,7 @@ describe("public CKAN File API proxy", () => {
       if (action === "file_show")
         return {
           id: fileId,
-          name: "data-menara-wajo.xlsx",
+          name: "data-menara-sample.xlsx",
           content_type:
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
           owner_info: { owner_type: "resource", owner_id: resourceId },
@@ -209,7 +209,7 @@ describe("public CKAN File API proxy", () => {
     });
     const fetcher = vi.fn(async (_url, options) => {
       expect(options.headers.get("cookie")).toBe(
-        "wajo_ckan_session=signed-editor-session",
+        "portal_ckan_session=signed-editor-session",
       );
       return new Response("private-file", {
         status: 200,
@@ -222,7 +222,7 @@ describe("public CKAN File API proxy", () => {
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
       new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+        headers: { Cookie: "portal_ckan_session=signed-editor-session" },
       }),
       params,
     );
@@ -251,7 +251,7 @@ describe("public CKAN File API proxy", () => {
     });
     const fetcher = vi.fn(async (_url, options) => {
       expect(options.headers.get("cookie")).toBe(
-        "wajo_ckan_session=signed-editor-session",
+        "portal_ckan_session=signed-editor-session",
       );
       return new Response("package-file", {
         status: 200,
@@ -261,7 +261,7 @@ describe("public CKAN File API proxy", () => {
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
       new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+        headers: { Cookie: "portal_ckan_session=signed-editor-session" },
       }),
       params,
     );
@@ -299,7 +299,7 @@ describe("public CKAN File API proxy", () => {
       id: fileId,
       content_type: "image/svg+xml",
       owner_info: {
-        owner_type: "wajo_media",
+        owner_type: "portal_media",
         owner_id: "public-editorial-media",
       },
     });
@@ -323,7 +323,7 @@ describe("public CKAN File API proxy", () => {
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
       new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+        headers: { Cookie: "portal_ckan_session=signed-editor-session" },
       }),
       params,
     );
@@ -337,7 +337,7 @@ describe("public CKAN File API proxy", () => {
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
       new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+        headers: { Cookie: "portal_ckan_session=signed-editor-session" },
       }),
       params,
     );
@@ -361,7 +361,7 @@ describe("public CKAN File API proxy", () => {
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
       new Request(`https://data.silirdev.com/api/public/ckan-file/${fileId}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+        headers: { Cookie: "portal_ckan_session=signed-editor-session" },
       }),
       params,
     );
@@ -420,7 +420,7 @@ describe("public CKAN File API proxy", () => {
         new Request(
           `https://data.silirdev.com/api/public/ckan-file/${fileId}`,
           {
-            headers: { Cookie: "wajo_ckan_session=signed-editor-session" },
+            headers: { Cookie: "portal_ckan_session=signed-editor-session" },
           },
         ),
         params,

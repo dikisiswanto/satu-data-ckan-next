@@ -12,6 +12,10 @@ const ALLOWED_TYPES = new Set([
 ]);
 const MAX_BYTES = 8 * 1024 * 1024;
 const TIMEOUT_MS = 10_000;
+const MEDIA_OWNER_TYPE =
+  process.env.CKAN_EDITORIAL_MEDIA_OWNER_TYPE || "portal_media";
+const MEDIA_OWNER_ID =
+  process.env.CKAN_EDITORIAL_MEDIA_OWNER_ID || "public-editorial-media";
 
 function empty(status) {
   return new Response(null, {
@@ -83,8 +87,8 @@ async function handle(request, context) {
   const ownerId = owner.owner_id || file?.owner_id;
   if (
     file?.id !== fileId ||
-    ownerType !== "wajo_media" ||
-    ownerId !== "public-editorial-media"
+    ownerType !== MEDIA_OWNER_TYPE ||
+    ownerId !== MEDIA_OWNER_ID
   )
     return empty(404);
   const mime = String(file.content_type || file.mimetype || "")

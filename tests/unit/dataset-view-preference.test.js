@@ -25,13 +25,20 @@ describe("dataset view preference", () => {
       },
     };
     expect(getDatasetViewPreference(cookieStore)).toBe("list");
+    expect(
+      getDatasetViewPreference({
+        get() {
+          return undefined;
+        },
+      }),
+    ).toBe("cards");
     expect(getDatasetViewPreference({ get: () => undefined })).toBe("cards");
     expect(DATASET_VIEW_COOKIE_MAX_AGE).toBe(31_536_000);
   });
 
   it("only returns same-origin dataset paths and preserves their query state", () => {
     const origin =
-      "https://data.wajokab.go.id/api/public/preferences/dataset-view";
+      "https://data.instansi.example.go.id/api/public/preferences/dataset-view";
     expect(
       getSafeDatasetReturnPath(
         "/dataset?q=sekolah&tampilan=list&kategori=pendidikan",

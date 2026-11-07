@@ -1,0 +1,11 @@
+{% set intro = g.site_intro_text %}
+<div class="module-promotion card box">
+  <div>
+    {% if intro %}
+      {{ h.portal_render_markdown(intro) }}
+    {% else %}
+      <h1 class="page-heading">{{ g.site_title }}</h1>
+      <p>{{ g.site_description }}</p>
+    {% endif %}
+  </div>
+</div>

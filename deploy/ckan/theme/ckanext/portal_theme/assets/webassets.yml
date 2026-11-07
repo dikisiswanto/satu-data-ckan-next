@@ -1,0 +1,5 @@
+portal_theme:
+  output: portal-theme/%(version)s-portal-theme.css
+  contents:
+    - css/portal-theme.css
+    - css/portal-admin-design-system.css

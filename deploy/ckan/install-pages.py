@@ -157,7 +157,7 @@ def build_and_install(source: Path, work: Path) -> None:
     # Import the actual plugin class. This exercises CKAN's blanket config
     # declaration loader and catches the exact FileNotFoundError from runtime.
     importlib.import_module("ckanext.pages.plugin")
-    importlib.import_module("ckanext.wajo_theme.plugin")
+    importlib.import_module("ckanext.portal_theme.plugin")
     print(
         f"Installed ckanext-pages {installed_version} from pinned commit {PAGES_REF}; "
         "config declaration and Alembic assets verified."
@@ -165,7 +165,7 @@ def build_and_install(source: Path, work: Path) -> None:
 
 
 def main() -> None:
-    request = urllib.request.Request(PAGES_URL, headers={"User-Agent": "satu-data-wajo-build/1.0"})
+    request = urllib.request.Request(PAGES_URL, headers={"User-Agent": "satu-data-portal-build/1.0"})
     with urllib.request.urlopen(request, timeout=90) as response:
         archive_bytes = response.read()
     if not archive_bytes:

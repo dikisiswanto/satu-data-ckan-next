@@ -10,7 +10,7 @@ cp .env.ckan.example .env.ckan
 bash ./deploy/ckan/bootstrap-upstream.sh
 ```
 
-`.env.ckan` adalah satu-satunya konfigurasi lingkungan lokal dan tidak boleh dikomit. Bootstrap menyinkronkan source resmi, memverifikasi CKAN 2.12.1, menyusun environment backend, memasang extension terpin, theme Wajo, dan katalog Bahasa Indonesia. Image dasar dibangun dari source upstream sebelum Compose dijalankan.
+`.env.ckan` adalah satu-satunya konfigurasi lingkungan lokal dan tidak boleh dikomit. Bootstrap menyinkronkan source resmi, memverifikasi CKAN 2.12.1, menyusun environment backend, memasang extension terpin, ekstensi tema portal, dan katalog Bahasa Indonesia. Image dasar dibangun dari source upstream sebelum Compose dijalankan.
 
 ## Menjalankan dan memperbarui layanan
 

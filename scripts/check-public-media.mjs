@@ -7,12 +7,12 @@ const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
 const target = createCkanGroupMediaTarget(
-  ["group", "logo-wajo_20261030.webp"],
+  ["group", "logo-region_20261030.webp"],
   "http://ckan:5000/api/3/action",
 );
 assert.equal(
   target?.href,
-  "http://ckan:5000/uploads/group/logo-wajo_20261030.webp",
+  "http://ckan:5000/uploads/group/logo-region_20261030.webp",
 );
 assert.equal(
   createCkanGroupMediaTarget(["group", "../secret.png"], "http://ckan:5000"),
@@ -58,8 +58,8 @@ assert.equal(
 );
 
 assert.equal(
-  getPublicOrganizationImageUrl({ image_url: "logo-wajo.webp" }),
-  "/uploads/group/logo-wajo.webp",
+  getPublicOrganizationImageUrl({ image_url: "logo-sample.webp" }),
+  "/uploads/group/logo-sample.webp",
 );
 assert.equal(
   getPublicOrganizationImageUrl({
@@ -77,9 +77,9 @@ assert.equal(
 );
 assert.equal(
   getPublicOrganizationImageUrl({
-    image_url: "/file/public-download/groups/logo-wajo.webp",
+    image_url: "/file/public-download/groups/logo-sample.webp",
   }),
-  "/file/public-download/groups/logo-wajo.webp",
+  "/file/public-download/groups/logo-sample.webp",
 );
 assert.equal(
   getPublicOrganizationImageUrl({ image_url: "/uploads/group/logo.jpg" }),
@@ -110,10 +110,10 @@ assert.equal(
 );
 
 const organizationSchema = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/schemas/organization.yaml",
+  "deploy/ckan/theme/ckanext/portal_theme/schemas/organization.yaml",
 );
 const groupSchema = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/schemas/group.yaml",
+  "deploy/ckan/theme/ckanext/portal_theme/schemas/group.yaml",
 );
 const organizationPage = await read(
   "src/app/(public)/organisasi/[slug]/page.jsx",
@@ -124,7 +124,7 @@ const organizationCard = await read(
 const mediaRoute = await read("src/app/uploads/[...path]/route.js");
 const nativeFileRoute = await read("src/app/file/[...path]/route.js");
 const errorCss = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
 );
 
 assert.match(
@@ -154,7 +154,7 @@ assert.match(
 assert.match(errorCss, /#fff4f4[\s\S]*#7f1d1d/);
 assert.match(
   errorCss,
-  /input\[type="file"\]\.wajo-file-input:not\(\[hidden\]\)/,
+  /input\[type="file"\]\.portal-file-input:not\(\[hidden\]\)/,
   "Hidden media file pickers must remain hidden; only visible controls get file input styling.",
 );
 

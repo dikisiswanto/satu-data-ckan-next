@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 
 const files = {
   plugin: await readFile(
-    "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
+    "deploy/ckan/theme/ckanext/portal_theme/plugin.py",
     "utf8",
   ),
   bootstrap: await readFile("deploy/ckan/bootstrap-upstream.sh", "utf8"),
@@ -14,15 +14,15 @@ const files = {
   ),
   cmsPages: await readFile("src/lib/cms/pages.js", "utf8"),
   editor: await readFile(
-    "deploy/ckan/theme/ckanext/wajo_theme/public/wajo-markdown-editor.js",
+    "deploy/ckan/theme/ckanext/portal_theme/public/portal-markdown-editor.js",
     "utf8",
   ),
   base: await readFile(
-    "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
+    "deploy/ckan/theme/ckanext/portal_theme/templates/base.html",
     "utf8",
   ),
   forms: await readFile(
-    "deploy/ckan/theme/ckanext/wajo_theme/public/wajo-admin-forms.js",
+    "deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-forms.js",
     "utf8",
   ),
 };
@@ -36,29 +36,42 @@ assert.match(
   files.plugin,
   /def files_file_allows\(self, context, file, operation\)/,
 );
-assert.match(files.plugin, /owner_id == "public-editorial-media"/);
-assert.match(files.plugin, /wajo_media_show/);
+assert.match(files.plugin, /configured_owner_id = str\([\s\S]*?media_owner_id/);
+assert.match(files.plugin, /owner_id == configured_owner_id/);
+assert.match(
+  files.plugin,
+  /return \{f"\{owner_type\}_show": editorial_media_show\}/,
+);
 assert.match(files.plugin, /file_create/);
 assert.match(files.plugin, /file_ownership_transfer/);
-assert.match(files.plugin, /owner_type["']?:\s*["']wajo_media/);
+assert.match(files.plugin, /"owner_type": media_owner_type/);
+assert.match(
+  files.bootstrap,
+  /PORTAL_MEDIA_OWNER_TYPE|CKANEXT__PORTAL_THEME__MEDIA_OWNER_TYPE/,
+);
+assert.match(files.env, /PORTAL_MEDIA_OWNER_TYPE=portal_media/);
 assert.match(files.plugin, /@blueprint\.post\("\/media\/upload"\)/);
 assert.match(files.plugin, /getattr\(current_user, "sysadmin"/);
 assert.match(files.plugin, /8 \* 1024 \* 1024/);
 assert.match(files.bootstrap, /CKAN__FILES__OWNER__CASCADE_ACCESS/);
 assert.match(files.env, /CKAN__FILES__OWNER__CASCADE_ACCESS/);
 assert.match(files.mediaRoute, /file_show/);
-assert.match(files.mediaRoute, /ownerType !== "wajo_media"/);
+assert.match(
+  files.mediaRoute,
+  /const MEDIA_OWNER_TYPE = process\.env\.CKAN_EDITORIAL_MEDIA_OWNER_TYPE \\|\| "portal_media"/,
+);
+assert.match(files.mediaRoute, /ownerType !== MEDIA_OWNER_TYPE/);
 assert.match(files.mediaRoute, /validSignature/);
 assert.match(files.mediaRoute, /redirect:\s*"manual"/);
 assert.match(files.cmsPages, /isEditorialMedia/);
 assert.match(files.editor, /fetch\("\/admin\/media\/upload"/);
 assert.match(files.editor, /X-CSRFToken/);
-assert.match(files.editor, /data-wajo-image-upload-for/);
-assert.match(files.editor, /data-wajo-image-upload-to-json/);
+assert.match(files.editor, /data-portal-image-upload-for/);
+assert.match(files.editor, /data-portal-image-upload-to-json/);
 assert.match(files.editor, /X-CSRFToken/);
 assert.match(files.editor, /status\.dataset\.state = "error"/);
 assert.match(files.editor, /![[]/);
-assert.match(files.base, /wajo-media-csrf[\s\S]*csrf_input/);
+assert.match(files.base, /portal-media-csrf[\s\S]*csrf_input/);
 assert.match(files.forms, /enhanceFileInputs/);
 assert.match(files.forms, /URL\.createObjectURL/);
 

@@ -177,10 +177,7 @@ export function SiteHeader() {
           </Link>
 
           <a
-            href={
-              process.env.NEXT_PUBLIC_CKAN_ADMIN_URL ||
-              "https://ckan.wajokab.go.id"
-            }
+            href={siteConfig.adminUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden min-h-10 items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 xl:inline-flex sm:px-4"
@@ -247,10 +244,7 @@ export function SiteHeader() {
 
               <div className="my-2.5 border-t border-line/70" />
               <a
-                href={
-                  process.env.NEXT_PUBLIC_CKAN_ADMIN_URL ||
-                  "https://ckan.wajokab.go.id"
-                }
+                href={siteConfig.adminUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={closeMobileMenu}

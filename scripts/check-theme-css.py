@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Wajo CSS contracts from parsed CSS rules, not formatted source text.
+"""Validate Contoh CSS contracts from parsed CSS rules, not formatted source text.
 
 The checker intentionally treats whitespace, selector line wrapping, declaration
 ordering, comments, and equivalent leading-zero numeric notation as formatting.
@@ -106,10 +106,10 @@ def main() -> int:
     args = parser.parse_args()
     root = args.root.resolve()
 
-    theme_root = root / "deploy/ckan/theme/ckanext/wajo_theme/assets/css"
+    theme_root = root / "deploy/ckan/theme/ckanext/portal_theme/assets/css"
     paths = {
-        "base": theme_root / "wajo-theme.css",
-        "design": theme_root / "wajo-admin-design-system.css",
+        "base": theme_root / "portal-theme.css",
+        "design": theme_root / "portal-admin-design-system.css",
         "motion": root / "src/app/styles/public-pages-motion.css",
     }
     errors: list[str] = []
@@ -174,23 +174,23 @@ def main() -> int:
 
     # Core design tokens: compare parsed custom-property values, not punctuation.
     expected_tokens = {
-        "--wajo-color-primary": "#1d5fa7",
-        "--wajo-color-ink": "#1b3440",
-        "--wajo-color-muted": "#586d76",
-        "--wajo-color-canvas": "#f5f7f6",
-        "--wajo-color-border": "#d8e2e4",
-        "--wajo-content-max": "1480px",
-        "--wajo-dashboard-max": "var(--wajo-content-max)",
-        "--wajo-form-max": "960px",
-        "--wajo-login-max": "448px",
-        "--wajo-sidebar-width": "264px",
-        "--wajo-radius-control": "0.625rem",
-        "--wajo-control-height": "42px",
-        "--wajo-button-height": "40px",
-        "--wajo-heading-1": "clamp(1.75rem, 2.2vw, 2rem)",
-        "--wajo-text-base": "0.9375rem",
-        "--wajo-color-success": "#28784f",
-        "--wajo-color-danger": "#b33d46",
+        "--portal-color-primary": "#1d5fa7",
+        "--portal-color-ink": "#1b3440",
+        "--portal-color-muted": "#586d76",
+        "--portal-color-canvas": "#f5f7f6",
+        "--portal-color-border": "#d8e2e4",
+        "--portal-content-max": "1480px",
+        "--portal-dashboard-max": "var(--portal-content-max)",
+        "--portal-form-max": "960px",
+        "--portal-login-max": "448px",
+        "--portal-sidebar-width": "264px",
+        "--portal-radius-control": "0.625rem",
+        "--portal-control-height": "42px",
+        "--portal-button-height": "40px",
+        "--portal-heading-1": "clamp(1.75rem, 2.2vw, 2rem)",
+        "--portal-text-base": "0.9375rem",
+        "--portal-color-success": "#28784f",
+        "--portal-color-danger": "#b33d46",
     }
     for property_name, expected in expected_tokens.items():
         values = [value for rule in admin_rules for value, _ in rule.declarations.get(property_name, [])]
@@ -198,7 +198,7 @@ def main() -> int:
             normalized_value(expected) in values,
             f"Missing/changed design token {property_name}: expected {expected}.",
         )
-    for property_name in ("--wajo-font-sans", "--wajo-font-mono", "--wajo-shadow-sm", "--wajo-heading-2"):
+    for property_name in ("--portal-font-sans", "--portal-font-mono", "--portal-shadow-sm", "--portal-heading-2"):
         require(
             any(property_name in rule.declarations for rule in admin_rules),
             f"Required design token {property_name} is missing.",
@@ -206,37 +206,37 @@ def main() -> int:
 
     # Shell, workspace, dashboard, tables, forms and responsive selectors.
     for selector in (
-        ".wajo-admin-topbar__inner", ".wajo-admin-shell", ".wajo-admin-workspace #content",
-        ".wajo-admin-workspace .module", ".wajo-admin-workspace .table",
-        ".wajo-admin-workspace :where(input.form-control", ".wajo-dashboard__metrics",
-        ".wajo-login-frame", ".wajo-login-frame .login-main:has(#field-login)",
-        ".wajo-admin-workspace .form-actions", ".wajo-admin-workspace .pagination",
-        ".wajo-admin-workspace .page-header .page-heading",
-        ".wajo-admin-workspace .table tbody td",
-        ".wajo-login-frame .login-main:has(#field-login) .form-control",
-        ".wajo-admin-workspace .secondary #user-info",
-        ".wajo-admin-workspace .secondary #user-info > .module-content",
+        ".portal-admin-topbar__inner", ".portal-admin-shell", ".portal-admin-workspace #content",
+        ".portal-admin-workspace .module", ".portal-admin-workspace .table",
+        ".portal-admin-workspace :where(input.form-control", ".portal-dashboard__metrics",
+        ".portal-login-frame", ".portal-login-frame .login-main:has(#field-login)",
+        ".portal-admin-workspace .form-actions", ".portal-admin-workspace .pagination",
+        ".portal-admin-workspace .page-header .page-heading",
+        ".portal-admin-workspace .table tbody td",
+        ".portal-login-frame .login-main:has(#field-login) .form-control",
+        ".portal-admin-workspace .secondary #user-info",
+        ".portal-admin-workspace .secondary #user-info > .module-content",
         ".secondary #user-info .nums", ".secondary #user-info .info",
-        ".wajo-admin-topbar", ".wajo-admin-sidebar", ".wajo-dashboard__metrics",
-        ".table tbody tr:hover", ".wajo-datastore__layout", ".wajo-admin-shell .fa",
+        ".portal-admin-topbar", ".portal-admin-sidebar", ".portal-dashboard__metrics",
+        ".table tbody tr:hover", ".portal-datastore__layout", ".portal-admin-shell .fa",
     ):
         require(has_selector(admin_rules, selector), f"Required CSS selector is missing: {selector}.")
 
     # Dashboard sizing must remain full width and aligned with the design token.
-    require(has_decl(admin_rules, ".wajo-dashboard", "width", "100%"), "Dashboard must remain full width.")
-    require(has_decl(admin_rules, ".wajo-dashboard", "max-width", "var(--wajo-dashboard-max)"), "Dashboard must use --wajo-dashboard-max.")
+    require(has_decl(admin_rules, ".portal-dashboard", "width", "100%"), "Dashboard must remain full width.")
+    require(has_decl(admin_rules, ".portal-dashboard", "max-width", "var(--portal-dashboard-max)"), "Dashboard must use --portal-dashboard-max.")
 
     # Form controls, including the CKAN tag autocomplete, must retain canonical geometry.
-    require(has_decl(design_rules, ".wajo-admin-workspace .form-actions .btn.btn-danger", "background", "var(--wajo-color-danger)"), "CKAN delete button must retain its danger background.")
-    require(has_decl(design_rules, ".wajo-admin-workspace .form-actions .btn.btn-danger", "color", "#fff"), "CKAN delete button must retain white text.")
-    require(has_selector(design_rules, ".wajo-admin-workspace .form-actions .btn:not(.btn-primary):not(.btn-danger)"), "Secondary form action buttons must retain their dedicated styling.")
-    require(has_selector(design_rules, ".wajo-admin-workspace .control-group:has(#field-tags) .select2-selection--multiple"), "CKAN Select2 tag chips must retain their wrapper styling.")
+    require(has_decl(design_rules, ".portal-admin-workspace .form-actions .btn.btn-danger", "background", "var(--portal-color-danger)"), "CKAN delete button must retain its danger background.")
+    require(has_decl(design_rules, ".portal-admin-workspace .form-actions .btn.btn-danger", "color", "#fff"), "CKAN delete button must retain white text.")
+    require(has_selector(design_rules, ".portal-admin-workspace .form-actions .btn:not(.btn-primary):not(.btn-danger)"), "Secondary form action buttons must retain their dedicated styling.")
+    require(has_selector(design_rules, ".portal-admin-workspace .control-group:has(#field-tags) .select2-selection--multiple"), "CKAN Select2 tag chips must retain their wrapper styling.")
     require(has_selector(design_rules, ".chosen-choices"), "Chosen tag autocomplete must retain its styling.")
 
-    tag_selector = ".wajo-admin-workspace :is(#field-tags, [name=\"tag_string\"])"
+    tag_selector = ".portal-admin-workspace :is(#field-tags, [name=\"tag_string\"])"
     for prop, value in (
         ("width", "100%"),
-        ("min-height", "var(--wajo-control-height)"),
+        ("min-height", "var(--portal-control-height)"),
     ):
         require(has_decl(design_rules, tag_selector, prop, value), f"CKAN keyword field must keep {prop}: {value}.")
     tag_borders = declarations_for(design_rules, tag_selector, "border")
@@ -246,7 +246,7 @@ def main() -> int:
     tag_transitions = [value for value, _ in declarations_for(design_rules, tag_selector, "transition")]
     require(any("border-color" in value for value in tag_transitions), "CKAN keyword field must transition its border color.")
     require(
-        has_decl(design_rules, ".wajo-admin-workspace .secondary #user-info > .module-content", "padding", "1.15rem", important=True),
+        has_decl(design_rules, ".portal-admin-workspace .secondary #user-info > .module-content", "padding", "1.15rem", important=True),
         "CKAN profile sidebar content must retain explicit padding.",
     )
 
@@ -254,70 +254,70 @@ def main() -> int:
     require(has_selector(base_rules, ".login-main:has(#field-login)"), "Login must target the CKAN 2.12 login wrapper.")
     require(has_selector(base_rules, ".login-wrapper > .login-container"), "Login must retain the native login container layout.")
     require(has_selector(base_rules, ".login-wrapper > .login-form"), "Login must retain the native login form layout.")
-    require(has_decl(design_rules, ".wajo-login-frame .login-main:has(#field-login) .form-control", "font-size", "1rem"), "Login input font size must remain readable.")
-    require(has_decl(design_rules, ".wajo-login-frame", "display", "grid"), "Login must use the split-panel layout grid.")
-    require(has_decl(design_rules, ".wajo-login-frame", "grid-template-columns", "minmax(0, 1.05fr) minmax(390px, 0.95fr)"), "Login identity and form panels must retain a balanced desktop split.")
-    require(has_selector(design_rules, ".wajo-login-identity") and has_selector(design_rules, ".wajo-login-panel"), "Both branded identity and authentication panels must exist.")
-    require(has_decl(design_rules, "body:has(.wajo-login-frame)", "overflow-y", "auto", important=True), "Login must remain scrollable on short viewports so the form is never clipped.")
-    require(has_decl(design_rules, ".wajo-login-frame .login-main:has(#field-login) .btn-primary", "min-height", "48px"), "Login submit action must retain a comfortable touch target.")
-    require(has_decl(design_rules, ".wajo-login-frame .login-form :is(.input-prepend, .input-append, .input-group):has(#field-login)", "position", "relative", important=True), "Login field wrapper must establish the positioning context for its icon.")
-    require(has_decl(design_rules, ".wajo-login-frame .login-form :is(.input-prepend, .input-append, .input-group) :is(.add-on, .input-group-addon, .input-group-text)", "position", "absolute", important=True), "Login icon must be absolutely positioned inside the input wrapper.")
-    require(has_decl(design_rules, ".wajo-login-frame .login-form #field-login", "padding-inline", "3.25rem 2.9rem", important=True), "Login text must reserve left icon space and right credential-manager space.")
-    require(has_decl(design_rules, ".main:has(.wajo-login-frame)", "min-height", "100svh"), "Login main area must fill the small viewport height for vertical centering.")
-    require(has_decl(design_rules, ".wajo-admin-workspace :where(input, select, textarea, button, a, summary):focus-visible", "outline", "2px solid rgb(29 95 167 / 38%)", important=True), "Keyboard focus must have a single visible outline without a second shadow ring.")
+    require(has_decl(design_rules, ".portal-login-frame .login-main:has(#field-login) .form-control", "font-size", "1rem"), "Login input font size must remain readable.")
+    require(has_decl(design_rules, ".portal-login-frame", "display", "grid"), "Login must use the split-panel layout grid.")
+    require(has_decl(design_rules, ".portal-login-frame", "grid-template-columns", "minmax(0, 1.05fr) minmax(390px, 0.95fr)"), "Login identity and form panels must retain a balanced desktop split.")
+    require(has_selector(design_rules, ".portal-login-identity") and has_selector(design_rules, ".portal-login-panel"), "Both branded identity and authentication panels must exist.")
+    require(has_decl(design_rules, "body:has(.portal-login-frame)", "overflow-y", "auto", important=True), "Login must remain scrollable on short viewports so the form is never clipped.")
+    require(has_decl(design_rules, ".portal-login-frame .login-main:has(#field-login) .btn-primary", "min-height", "48px"), "Login submit action must retain a comfortable touch target.")
+    require(has_decl(design_rules, ".portal-login-frame .login-form :is(.input-prepend, .input-append, .input-group):has(#field-login)", "position", "relative", important=True), "Login field wrapper must establish the positioning context for its icon.")
+    require(has_decl(design_rules, ".portal-login-frame .login-form :is(.input-prepend, .input-append, .input-group) :is(.add-on, .input-group-addon, .input-group-text)", "position", "absolute", important=True), "Login icon must be absolutely positioned inside the input wrapper.")
+    require(has_decl(design_rules, ".portal-login-frame .login-form #field-login", "padding-inline", "3.25rem 2.9rem", important=True), "Login text must reserve left icon space and right credential-manager space.")
+    require(has_decl(design_rules, ".main:has(.portal-login-frame)", "min-height", "100svh"), "Login main area must fill the small viewport height for vertical centering.")
+    require(has_decl(design_rules, ".portal-admin-workspace :where(input, select, textarea, button, a, summary):focus-visible", "outline", "2px solid rgb(29 95 167 / 38%)", important=True), "Keyboard focus must have a single visible outline without a second shadow ring.")
     require(
-        has_decl(base_rules, ".wajo-admin-menu-toggle", "display", "inline-flex", media="(max-width: 991.98px)"),
+        has_decl(base_rules, ".portal-admin-menu-toggle", "display", "inline-flex", media="(max-width: 991.98px)"),
         "Admin menu toggle must be visible at tablet/mobile widths.",
     )
-    require(has_decl(design_rules, ".wajo-admin-sidebar", "position", "sticky", media="(min-width: 992px)"), "Admin sidebar should use a sticky workspace navigation on desktop.")
-    require(has_decl(design_rules, ".wajo-admin-sidebar", "position", "relative", media="(max-width: 991.98px)"), "Admin sidebar must return to normal flow on tablet/mobile.")
-    require(has_selector(admin_rules, ".wajo-admin-workspace .btn"), "Admin buttons must retain their common component rule.")
-    require(has_decl(design_rules, ".wajo-admin-workspace .btn", "min-height", "var(--wajo-button-height)"), "Admin buttons must use canonical button height.")
+    require(has_decl(design_rules, ".portal-admin-sidebar", "position", "sticky", media="(min-width: 992px)"), "Admin sidebar should use a sticky workspace navigation on desktop.")
+    require(has_decl(design_rules, ".portal-admin-sidebar", "position", "relative", media="(max-width: 991.98px)"), "Admin sidebar must return to normal flow on tablet/mobile.")
+    require(has_selector(admin_rules, ".portal-admin-workspace .btn"), "Admin buttons must retain their common component rule.")
+    require(has_decl(design_rules, ".portal-admin-workspace .btn", "min-height", "var(--portal-button-height)"), "Admin buttons must use canonical button height.")
     require(
-        has_decl(design_rules, ".wajo-admin-workspace .btn", "min-height", "44px", media="(max-width: 767.98px)"),
+        has_decl(design_rules, ".portal-admin-workspace .btn", "min-height", "44px", media="(max-width: 767.98px)"),
         "Mobile admin buttons must have at least a 44px touch target.",
     )
     require(
-        has_decl(design_rules, ".wajo-admin-workspace .pagination .page-link", "min-width", "44px", media="(max-width: 767.98px)"),
+        has_decl(design_rules, ".portal-admin-workspace .pagination .page-link", "min-width", "44px", media="(max-width: 767.98px)"),
         "Mobile pagination must have at least a 44px width.",
     )
     require(
-        has_decl(design_rules, ".wajo-admin-workspace .pagination .page-link", "min-height", "44px", media="(max-width: 767.98px)"),
+        has_decl(design_rules, ".portal-admin-workspace .pagination .page-link", "min-height", "44px", media="(max-width: 767.98px)"),
         "Mobile pagination must have at least a 44px height.",
     )
 
     # Editorial Pages/News form, previews and responsive admin collections.
     for selector in (
-        ".wajo-pages-admin-route .wajo-admin-workspace .pages-form",
-        ".wajo-pages-admin-route .wajo-admin-workspace .primary",
-        ".wajo-blog-admin-route .wajo-admin-workspace .secondary",
-        ".wajo-blog-admin-route .wajo-admin-workspace .secondary_content",
-        ".wajo-pages-editor", ".wajo-md-preview", ".blog-item",
+        ".portal-pages-admin-route .portal-admin-workspace .pages-form",
+        ".portal-pages-admin-route .portal-admin-workspace .primary",
+        ".portal-blog-admin-route .portal-admin-workspace .secondary",
+        ".portal-blog-admin-route .portal-admin-workspace .secondary_content",
+        ".portal-pages-editor", ".portal-md-preview", ".blog-item",
         "module-content > ul:not(.nav):not(.pagination)",
-        ".wajo-pages-admin-list-route", ".table-responsive > table tbody td",
+        ".portal-pages-admin-list-route", ".table-responsive > table tbody td",
         "ul.list-unstyled:not(.nav):not(.pagination)",
     ):
         require(has_selector(design_rules, selector), f"Pages/News admin CSS is missing selector: {selector}.")
 
     require(
-        has_decl(design_rules, ".wajo-pages-admin-route .wajo-admin-workspace .primary", "float", "none"),
+        has_decl(design_rules, ".portal-pages-admin-route .portal-admin-workspace .primary", "float", "none"),
         "Pages and News create/edit screens must share a non-floating primary form canvas.",
     )
     require(
-        has_decl(design_rules, ".wajo-pages-admin-route .wajo-admin-workspace .primary", "width", "100%"),
+        has_decl(design_rules, ".portal-pages-admin-route .portal-admin-workspace .primary", "width", "100%"),
         "Pages and News create/edit screens must use the same full-width primary form canvas.",
     )
     require(
-        has_decl(design_rules, ".wajo-blog-admin-route .wajo-admin-workspace .secondary", "display", "none", important=True),
-        "Blog editor contextual sidebar must be hidden without affecting the global Wajo navigation.",
+        has_decl(design_rules, ".portal-blog-admin-route .portal-admin-workspace .secondary", "display", "none", important=True),
+        "Blog editor contextual sidebar must be hidden without affecting the global Contoh navigation.",
     )
     require(
-        has_decl(design_rules, ".wajo-blog-admin-route .wajo-admin-workspace .secondary_content", "display", "none", important=True),
+        has_decl(design_rules, ".portal-blog-admin-route .portal-admin-workspace .secondary_content", "display", "none", important=True),
         "Blog editor secondary content must not reserve a redundant left/right column.",
     )
     require(
-        not has_decl(design_rules, ".wajo-blog-admin-route .wajo-admin-sidebar", "display", "none", important=True),
-        "Removing the Blog contextual sidebar must not hide the global Wajo admin navigation.",
+        not has_decl(design_rules, ".portal-blog-admin-route .portal-admin-sidebar", "display", "none", important=True),
+        "Removing the Blog contextual sidebar must not hide the global Contoh admin navigation.",
     )
 
     # Native CKAN resource format sprite/status markup must never be overridden.
@@ -326,7 +326,7 @@ def main() -> int:
     })
     require(not resource_overrides, "Do not override CKAN native .resource-item/.format-label selectors: " + "; ".join(resource_overrides))
     require(has_selector(design_rules, ".dataset-resources a.label[data-format]"), "Dataset resource format chips must retain a neutral shared style.")
-    geojson_selector = '.wajo-admin-shell .wajo-admin-workspace .badge[data-format="geojson"]'
+    geojson_selector = '.portal-admin-shell .portal-admin-workspace .badge[data-format="geojson"]'
     require(
         has_decl(design_rules, geojson_selector, "background", "transparent", important=True),
         "GeoJSON format badge must override the injected background with transparent !important.",
@@ -341,8 +341,8 @@ def main() -> int:
             f"GeoJSON-only badge override must not alter {property_name}.",
         )
 
-    cms_toolbar = ".wajo-admin-workspace .wajo-admin-cms-page .wajo-cms-actions"
-    cms_buttons = ".wajo-admin-workspace .wajo-admin-cms-page .wajo-cms-actions .btn"
+    cms_toolbar = ".portal-admin-workspace .portal-admin-cms-page .portal-cms-actions"
+    cms_buttons = ".portal-admin-workspace .portal-admin-cms-page .portal-cms-actions .btn"
     require(has_selector(design_rules, cms_toolbar), "Pages/Blog detail actions must use a dedicated toolbar.")
     require(has_decl(design_rules, cms_toolbar, "gap", ".75rem"), "Pages/Blog action toolbar needs a consistent button gap.")
     require(has_decl(design_rules, cms_toolbar, "margin", "0 0 1.75rem"), "Pages/Blog action toolbar must separate buttons from the detail heading.")
@@ -351,23 +351,23 @@ def main() -> int:
 
     # CKAN shell-wide button contrast must be explicit and survive formatter reflow.
     for selector, value in (
-        (".wajo-admin-shell .btn-primary", "#176b52"),
-        (".wajo-admin-shell .btn-success", "#176b3a"),
-        (".wajo-admin-shell .btn-danger", "#b42318"),
-        (".wajo-admin-shell .btn-info", "#145b78"),
-        (".wajo-admin-shell .btn-dark", "#243b32"),
+        (".portal-admin-shell .btn-primary", "#176b52"),
+        (".portal-admin-shell .btn-success", "#176b3a"),
+        (".portal-admin-shell .btn-danger", "#b42318"),
+        (".portal-admin-shell .btn-info", "#145b78"),
+        (".portal-admin-shell .btn-dark", "#243b32"),
     ):
         require(has_decl(design_rules, selector, "background-color", value, important=True), f"CKAN shell button {selector} must have an explicit filled background.")
-    light_selector = ".wajo-admin-shell :is(.btn-light, .btn-white"
+    light_selector = ".portal-admin-shell :is(.btn-light, .btn-white"
     require(has_selector(design_rules, light_selector), "CKAN shell light/outline buttons need an explicit shell-wide style.")
     require(has_decl(design_rules, light_selector, "background", "#f7faf8", important=True), "CKAN shell light/outline buttons need a readable light background.")
     require(has_decl(design_rules, light_selector, "color", "#29483a", important=True), "CKAN shell light/outline buttons need dark text.")
     require(has_decl(design_rules, light_selector, "-webkit-text-fill-color", "#29483a", important=True), "CKAN shell light/outline buttons need dark text fill for extension overrides.")
-    filled_selector = ".wajo-admin-shell :is(.btn-primary, .btn-success, .btn-danger, .btn-info, .btn-dark)"
+    filled_selector = ".portal-admin-shell :is(.btn-primary, .btn-success, .btn-danger, .btn-info, .btn-dark)"
     require(has_decl(design_rules, filled_selector, "color", "#fff", important=True), "CKAN shell filled buttons need white foreground text.")
     require(has_decl(design_rules, filled_selector, "-webkit-text-fill-color", "#fff", important=True), "CKAN shell filled buttons need white text fill for extension overrides.")
 
-    map_selector = ".wajo-admin-shell .wajo-create-type--geo .wajo-create-type__icon .fa-map-location-dot"
+    map_selector = ".portal-admin-shell .portal-create-type--geo .portal-create-type__icon .fa-map-location-dot"
     require(has_selector(design_rules, map_selector), "Geospatial quick action must use Font Awesome map-location-dot.")
     require(has_decl(design_rules, map_selector, "font-size", "1.9rem", important=True), "Geospatial map icon must remain visibly larger than body text.")
 
@@ -386,10 +386,10 @@ def main() -> int:
     # Remaining shell safety rules are validated from parsed declarations/selectors.
     require(has_selector(base_rules, ":focus-visible"), "Keyboard focus indicator selector is missing.")
     require(not any(value == "fixed" for rule in base_rules for value, _ in rule.declarations.get("position", [])), "Theme must not create a global fixed overlay that covers CKAN controls.")
-    require(not has_selector(base_rules, ".wajo-admin-footer__brand img"), "Removed Wajo admin footer brand image styling must not return.")
-    require(not has_selector(design_rules, ".wajo-admin-footer"), "Removed Wajo admin footer styling must not return.")
-    require(not has_selector(design_rules, ".wajo-admin-sidebar__context"), "Removed Wajo admin sidebar context styling must not return.")
-    require(not has_selector(base_rules, ".wajo-icon"), "Custom SVG icon sizing must not replace CKAN Font Awesome icons.")
+    require(not has_selector(base_rules, ".portal-admin-footer__brand img"), "Removed Contoh admin footer brand image styling must not return.")
+    require(not has_selector(design_rules, ".portal-admin-footer"), "Removed Contoh admin footer styling must not return.")
+    require(not has_selector(design_rules, ".portal-admin-sidebar__context"), "Removed Contoh admin sidebar context styling must not return.")
+    require(not has_selector(base_rules, ".portal-icon"), "Custom SVG icon sizing must not replace CKAN Font Awesome icons.")
 
     if errors:
         print(f"CKAN CSS semantic regression check failed ({len(errors)}):", file=sys.stderr)

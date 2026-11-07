@@ -10,8 +10,8 @@ import {
 
 const organizations = [
   {
-    name: "bappeda-wajo",
-    title: "Bappeda Wajo",
+    name: "bappeda-sample",
+    title: "Bappeda Contoh",
     description: "Perencanaan pembangunan",
     package_count: 9,
     public_dataset_count: 1,
@@ -24,7 +24,7 @@ const organizations = [
   },
   {
     name: "dinas-kesehatan",
-    title: "Dinas Kesehatan Kabupaten Wajo",
+    title: "Dinas Kesehatan Kabupaten Contoh",
     description: "Layanan kesehatan masyarakat",
     package_count: 4,
     public_dataset_count: 0,
@@ -104,9 +104,9 @@ describe("public organization directory", () => {
     ).toEqual(["dinas-kesehatan"]);
     expect(
       filterAndSortPublicOrganizations(organizations, {
-        query: "Wajo perencanaan",
+        query: "Contoh perencanaan",
       }).map((item) => item.name),
-    ).toEqual(["bappeda-wajo"]);
+    ).toEqual(["bappeda-sample"]);
   });
 
   it("does not match a query fragment inside an unrelated word", () => {
@@ -122,7 +122,7 @@ describe("public organization directory", () => {
       filterAndSortPublicOrganizations(organizations, {
         contentState: "with-content",
       }).map((item) => item.name),
-    ).toEqual(["bappeda-wajo", "dinas-kesehatan"]);
+    ).toEqual(["bappeda-sample", "dinas-kesehatan"]);
     expect(
       filterAndSortPublicOrganizations(organizations, {
         contentState: "without-content",
@@ -132,7 +132,7 @@ describe("public organization directory", () => {
       filterAndSortPublicOrganizations(organizations, {
         contentType: "publications",
       }).map((item) => item.name),
-    ).toEqual(["bappeda-wajo", "dinas-kesehatan"]);
+    ).toEqual(["bappeda-sample", "dinas-kesehatan"]);
   });
 
   it("sorts by total public content without mutating the source list", () => {
@@ -140,12 +140,12 @@ describe("public organization directory", () => {
       sort: "content-desc",
     });
     expect(sorted.map((item) => item.name)).toEqual([
-      "bappeda-wajo",
+      "bappeda-sample",
       "dinas-kesehatan",
       "sekretariat-daerah",
     ]);
     expect(organizations.map((item) => item.name)).toEqual([
-      "bappeda-wajo",
+      "bappeda-sample",
       "dinas-kesehatan",
       "sekretariat-daerah",
     ]);
@@ -172,8 +172,8 @@ describe("public organization directory", () => {
 
 describe("public content organization filter", () => {
   it("creates an exact CKAN organization filter for a valid slug", () => {
-    expect(buildOrganizationFilter("dinas-kesehatan-wajo")).toBe(
-      "organization:dinas-kesehatan-wajo",
+    expect(buildOrganizationFilter("dinas-kesehatan-sample")).toBe(
+      "organization:dinas-kesehatan-sample",
     );
   });
 

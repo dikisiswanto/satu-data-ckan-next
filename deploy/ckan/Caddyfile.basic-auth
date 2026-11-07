@@ -171,7 +171,7 @@
       {$CKAN_ADMIN_BASIC_AUTH_USER} {$CKAN_ADMIN_BASIC_AUTH_HASH}
     }
     # Proxy every route, including core catalogue views and all installed
-    # extensions. WajoThemePlugin enforces login for this hostname and CKAN's
+    # extensions. PortalThemePlugin enforces login for this hostname and CKAN's
     # own permission checks remain authoritative after authentication.
     reverse_proxy https://nginx:443 {
       header_up Host {http.request.host}

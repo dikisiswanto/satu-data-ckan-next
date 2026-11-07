@@ -1,6 +1,6 @@
-# Portal Satu Data Kabupaten Wajo
+# Portal Satu Data
 
-Portal publik dibangun dengan **Next.js** dan menggunakan **CKAN 2.12.1** sebagai sumber utama dataset, resource, organisasi, pengguna, DataStore, dan CMS.
+Portal ini dibangun dengan **Next.js** dan menggunakan **CKAN 2.12.1** sebagai sumber utama dataset, resource, organisasi, pengguna, DataStore, dan CMS.
 
 ## Menjalankan proyek
 
@@ -28,7 +28,9 @@ npm run build
 
 `npm run fix` menjalankan Prettier dan ESLint autofix. `npm run check` menjalankan pemeriksaan statis serta ESLint. `npm run test:e2e` memerlukan browser Playwright.
 
-## Dokumentasi
+## Identitas instansi dan dokumentasi
+
+Konfigurasi identitas institusi dipusatkan pada blok `PORTAL_*` di `.env.ckan`. Nilai bawaan deployment disediakan melalui `.env.ckan.example`; source code menggunakan fallback netral dan tidak mengunci identitas instansi. Panduan lengkap tersedia di [Konfigurasi Identitas Instansi](docs/CONFIGURASI-INSTANSI.md).
 
 Mulai dari [Indeks Dokumentasi](docs/INDEX.md). Semua panduan operasional dan teknis disimpan pada satu lokasi kanonis di `docs/`; jangan menambahkan salinan panduan atau catatan perubahan sementara ke root repository.
 

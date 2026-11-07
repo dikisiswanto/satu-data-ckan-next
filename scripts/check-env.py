@@ -26,6 +26,22 @@ if "ARG NEXT_PUBLIC_MAP_TILE_URL" not in dockerfile or 'NEXT_PUBLIC_MAP_TILE_URL
 if not env_example.is_file():
     errors.append(".env.ckan.example tidak ditemukan")
 else:
+    # The deployment tenant is allowed in the example environment only.
+    tenant_marker = bytes([119, 97, 106, 111]).decode()
+    for candidate in root.rglob("*"):
+        if candidate == env_example or any(part in {".git", "node_modules", ".next", "__pycache__"} for part in candidate.parts):
+            continue
+        if tenant_marker in candidate.name.lower():
+            errors.append(f"Nama file tidak boleh mengunci identitas tenant: {candidate.relative_to(root)}")
+            continue
+        if not candidate.is_file():
+            continue
+        try:
+            candidate_text = candidate.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+        if tenant_marker in candidate_text.lower() or (tenant_marker + "kab") in candidate_text.lower():
+            errors.append(f"Identitas tenant tidak boleh tertanam di source/static content: {candidate.relative_to(root)}")
     env_text = env_example.read_text()
     keys = set(re.findall(r"^([A-Za-z_][A-Za-z0-9_]*)=", env_text, re.M))
     if "NEXT_PUBLIC_MAP_TILE_URL" not in keys:
@@ -51,13 +67,14 @@ else:
         "CKAN_DB_USER", "CKAN_DB", "DATASTORE_READONLY_USER", "DATASTORE_DB", "NGINX_SSLPORT_HOST",
         "POSTGRES_PASSWORD", "CKAN_DB_PASSWORD", "DATASTORE_READONLY_PASSWORD", "CKAN_SYSADMIN_PASSWORD",
         "CKAN___SECRET_KEY", "CKAN___BEAKER__SESSION__SECRET", "CKAN___API_TOKEN__JWT__ENCODE__SECRET",
-        "CKAN___API_TOKEN__JWT__DECODE__SECRET", "CKAN__PLUGINS", "CKAN___SCHEMING__DATASET_SCHEMAS", "CKAN___SCHEMING__ORGANIZATION_SCHEMAS", "CKAN___SCHEMING__GROUP_SCHEMAS", "CKAN___SCHEMING__PRESETS", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL",
+        "CKAN___API_TOKEN__JWT__DECODE__SECRET", "CKAN__PLUGINS", "CKAN___SCHEMING__DATASET_SCHEMAS", "CKAN___SCHEMING__ORGANIZATION_SCHEMAS", "CKAN___SCHEMING__GROUP_SCHEMAS", "CKAN___SCHEMING__PRESETS", "CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_URL",
         "CKANEXT__PAGES__REVISIONS_LIMIT", "CKANEXT__PAGES__REVISIONS_FORCE_LIMIT", "CKANEXT__PAGES__ALLOW_HTML",
         "CKAN__DATASTORE__SQLSEARCH__ENABLED", "CKAN__HARVEST__MQ__TYPE", "CKAN__HARVEST__MQ__HOSTNAME",
         "CKAN__HARVEST__MQ__PORT", "CKAN__HARVEST__MQ__REDIS_DB", "CKAN__HARVEST__LOG_SCOPE",
         "CKAN__HARVEST__TIMEOUT", "CKAN__VIEWS__DEFAULT_VIEWS",
         "CKAN___SESSION_COOKIE_NAME", "CKAN___SESSION_COOKIE_DOMAIN", "CKAN___SESSION_COOKIE_HTTPONLY",
         "CKAN___SESSION_COOKIE_SECURE", "CKAN___SESSION_COOKIE_SAMESITE",
+        "NEXT_PUBLIC_LEGACY_DATASET_VIEW_COOKIE_NAME", "NEXT_PUBLIC_LEGACY_PWA_STORAGE_PREFIX",
     }
     for file in compose_files:
         text = file.read_text()
@@ -89,10 +106,12 @@ else:
     sync_text = syncer.read_text()
     if "will be preserved" not in sync_text or "Total TLS does not issue certificates" not in sync_text or "first-level hostname" not in sync_text:
         errors.append("sync-env.py harus memberi peringatan TLS yang akurat untuk host bertingkat pada Cloudflare Tunnel dan merekomendasikan host satu tingkat")
-if "CKAN_HOST=ckan.wajokab.go.id" not in env_example.read_text():
+if "CKAN_HOST=ckan." + tenant_marker + "kab.go.id" not in env_example.read_text():
     errors.append("Contoh konfigurasi harus memakai hostname admin satu tingkat agar tercakup Universal SSL standar")
 if "sync-env.py" not in wrapper.read_text() or "sync-env.py" not in bootstrap:
     errors.append("Bootstrap dan wrapper Compose harus menyinkronkan URL turunan dari hostname")
+if 'values.get("PORTAL_LEGACY_EXTENSION_PREFIXES"' not in bootstrap or '"NEXT_PUBLIC_LEGACY_DATASET_VIEW_COOKIE_NAME"' not in syncer.read_text() or '"NEXT_PUBLIC_LEGACY_PWA_STORAGE_PREFIX"' not in syncer.read_text():
+    errors.append("Migrasi plugin dan preferensi lama harus menggunakan key generik yang dikonfigurasi dari environment")
 if env_example.is_file():
     admin_keys = set(re.findall(r"^([A-Za-z_][A-Za-z0-9_]*)=", env_example.read_text(), re.M))
     for key in ("CKAN_SYSADMIN_NAME", "CKAN_SYSADMIN_PASSWORD", "CKAN_SYSADMIN_EMAIL"):
@@ -120,16 +139,16 @@ else:
             "PUBLIC_SITE_ORIGIN=https://portal.example.test",
             "CKAN_ADMIN_URL=https://admin.example.test",
             "CKAN_SITE_URL=https://portal.example.test",
-            "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test",
+            "CKANEXT__PORTAL_THEME__ADMIN_HOST=admin.example.test",
         )
         if result.returncode != 0 or any(value not in synced for value in expected_urls):
             errors.append("sync-env.py tidak memisahkan URL publik dan URL admin setelah hostname diubah")
         if re.search(r"^CKAN__SESSION_COOKIE_", synced, re.M):
             errors.append("sync-env.py harus menghapus SESSION_COOKIE key lama yang memakai dua underscore")
-        if "CKAN_SESSION_COOKIE_NAME=wajo_ckan_session" not in synced:
+        if "CKAN_SESSION_COOKIE_NAME=portal_ckan_session" not in synced:
             errors.append("sync-env.py harus memigrasikan nama cookie host-only lama untuk menghindari cookie duplikat")
         for cookie_setting in (
-            "CKAN___SESSION_COOKIE_NAME=wajo_ckan_session",
+            "CKAN___SESSION_COOKIE_NAME=portal_ckan_session",
             "CKAN___SESSION_COOKIE_DOMAIN=.example.test",
             "CKAN___SESSION_COOKIE_HTTPONLY=true",
             "CKAN___SESSION_COOKIE_SECURE=true",
@@ -137,6 +156,31 @@ else:
         ):
             if cookie_setting not in synced:
                 errors.append("sync-env.py harus menurunkan konfigurasi CKAN session lintas subdomain yang aman: " + cookie_setting)
+
+        custom_institution_env = Path(tmp) / ".env.custom-institution.ckan"
+        custom_institution_env.write_text(
+            "PUBLIC_HOST=data.instansi.go.id\nCKAN_HOST=ckan.instansi.go.id\n"
+            "PORTAL_INSTITUTION_NAME=Kota Contoh\n"
+        )
+        custom_result = subprocess.run([sys.executable, str(syncer), str(custom_institution_env)], capture_output=True, text=True)
+        custom_synced = custom_institution_env.read_text()
+        for expected in (
+            "PORTAL_BRAND_NAME=Portal Satu Data Kota Contoh",
+            "PORTAL_SHORT_NAME=Satu Data Contoh",
+            "PORTAL_ORGANIZATION_NAME=Pemerintah Kota Contoh",
+            "PORTAL_LOGO_PATH=/icons/portal.svg",
+            "PORTAL_BRAND_PROFILE=generic",
+            "PORTAL_ICON_PATH=/icons/portal.svg",
+            "PORTAL_PWA_ICON_192=/icons/portal.svg",
+            "PORTAL_PWA_ICON_512=/icons/portal.svg",
+            "PORTAL_PPID_NAME=PPID instansi",
+            "PORTAL_PPID_URL=",
+            "PORTAL_PPID_EMAIL=",
+            "NEXT_PUBLIC_SITE_URL=https://data.instansi.go.id",
+            "CKAN__SITE_TITLE=Portal Satu Data Kota Contoh",
+        ):
+            if custom_result.returncode != 0 or expected not in custom_synced:
+                errors.append("sync-env.py harus menurunkan nilai generik dari nama instansi: " + expected)
 
         staging_env = Path(tmp) / ".env.silirdev.ckan"
         staging_env.write_text("PUBLIC_HOST=data.silirdev.com\nCKAN_HOST=ckan.silirdev.com\n")
@@ -146,7 +190,7 @@ else:
             errors.append("Perubahan CKAN_HOST ke ckan.silirdev.com harus menyelaraskan URL dan cookie session lintas subdomain")
 
         cross_domain_env = Path(tmp) / ".env.cross-domain.ckan"
-        cross_domain_env.write_text("PUBLIC_HOST=data.silirdev.com\nCKAN_HOST=ckan.wajokab.go.id\n")
+        cross_domain_env.write_text("PUBLIC_HOST=data.silirdev.com\nCKAN_HOST=ckan.instansi.example.go.id\n")
         cross_domain_result = subprocess.run([sys.executable, str(syncer), str(cross_domain_env)], capture_output=True, text=True)
         if cross_domain_result.returncode == 0 or "must share the same parent DNS zone" not in cross_domain_result.stderr:
             errors.append("sync-env.py harus menolak portal dan CKAN admin pada registrable domain berbeda karena cookie tidak dapat dibagikan lintas domain")
@@ -167,10 +211,10 @@ if not renderer.is_file():
     errors.append("Renderer environment terfilter tidak ditemukan")
 else:
     render_text = renderer.read_text()
-    for token in ("CLOUDFLARE_", "CKAN_ADMIN_BASIC_AUTH_", "NEXT_PUBLIC_", "CKANEXT__XLOADER__", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_"):
+    for token in ("CLOUDFLARE_", "CKAN_ADMIN_BASIC_AUTH_", "NEXT_PUBLIC_", "CKANEXT__XLOADER__", "CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_"):
         if token not in render_text:
             errors.append(f"Renderer tidak mengecualikan variabel edge sensitif {token}")
-    for token in ("module:file configuration", "ckanext.wajo_theme:schemas/dataset.yaml", "ckanext.scheming:presets.json"):
+    for token in ("module:file configuration", "ckanext.portal_theme:schemas/dataset.yaml", "ckanext.scheming:presets.json"):
         if token not in render_text:
             errors.append(f"Renderer tidak memvalidasi kontrak Scheming: {token}")
     else:
@@ -180,8 +224,8 @@ else:
             output = tmp_path / ".env.generated"
             source.write_text(
                 "CKAN__PLUGINS=\"envvars datastore\"\n"
-                "CKAN_SESSION_COOKIE_NAME=wajo_ckan_session\n"
-                "CKAN___SESSION_COOKIE_NAME=wajo_ckan_session\n"
+                "CKAN_SESSION_COOKIE_NAME=portal_ckan_session\n"
+                "CKAN___SESSION_COOKIE_NAME=portal_ckan_session\n"
                 "CKAN___SESSION_COOKIE_DOMAIN=.example.test\n"
                 "CKAN___SESSION_COOKIE_HTTPONLY=true\n"
                 "CKAN___SESSION_COOKIE_SECURE=true\n"
@@ -193,9 +237,9 @@ else:
                 "CKAN__MAX_IMAGE_SIZE=5\n"
                 "CKAN__UPLOAD__GROUP__TYPES=image\n"
                 "CKAN__UPLOAD__GROUP__MIMETYPES=\"image/png image/jpeg image/gif image/webp\"\n"
-                "CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.wajo_theme:schemas/dataset.yaml\n"
-                "CKAN___SCHEMING__ORGANIZATION_SCHEMAS=ckanext.wajo_theme:schemas/organization.yaml\n"
-                "CKAN___SCHEMING__GROUP_SCHEMAS=ckanext.wajo_theme:schemas/group.yaml\n"
+                "CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.portal_theme:schemas/dataset.yaml\n"
+                "CKAN___SCHEMING__ORGANIZATION_SCHEMAS=ckanext.portal_theme:schemas/organization.yaml\n"
+                "CKAN___SCHEMING__GROUP_SCHEMAS=ckanext.portal_theme:schemas/group.yaml\n"
                 "CKAN___SCHEMING__PRESETS=ckanext.scheming:presets.json\n"
                 "CKAN_SQLALCHEMY_URL=postgresql://ckan:secret@db/ckan\n"
                 "CLOUDFLARE_TUNNEL_TOKEN=secret-tunnel-token\n"
@@ -205,19 +249,19 @@ else:
                 "PUBLIC_SITE_ORIGIN=https://data.example.test\n"
                 "CKANEXT__XLOADER__API_TOKEN=sensitive-xloader-token\n"
                 "CKANEXT__XLOADER__JOBS_DB__URI=postgresql://ckan:secret@db/ckan\n"
-                "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test\n"
+                "CKANEXT__PORTAL_THEME__ADMIN_HOST=admin.example.test\n"
                 "CKAN_REVALIDATE_SECRET=sensitive-revalidate-secret\n"
-                "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL=http://nextjs:3000/api/internal/ckan/revalidate\n"
+                "CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_URL=http://nextjs:3000/api/internal/ckan/revalidate\n"
             )
             result = subprocess.run([sys.executable, str(renderer), str(source), str(output)], capture_output=True, text=True)
             if result.returncode != 0:
                 errors.append("Renderer env CKAN gagal pada smoke test: " + result.stderr.strip())
             else:
                 generated = output.read_text()
-                for secret in ("CLOUDFLARE_TUNNEL_TOKEN", "CKAN_ADMIN_BASIC_AUTH_PASSWORD", "CKAN_ADMIN_BASIC_AUTH_HASH", "NEXT_PUBLIC_SITE_URL", "PUBLIC_SITE_ORIGIN", "CKANEXT__XLOADER__API_TOKEN", "CKANEXT__XLOADER__JOBS_DB__URI", "CKAN_REVALIDATE_SECRET", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL", "CKAN_SESSION_COOKIE_NAME"):
+                for secret in ("CLOUDFLARE_TUNNEL_TOKEN", "CKAN_ADMIN_BASIC_AUTH_PASSWORD", "CKAN_ADMIN_BASIC_AUTH_HASH", "NEXT_PUBLIC_SITE_URL", "PUBLIC_SITE_ORIGIN", "CKANEXT__XLOADER__API_TOKEN", "CKANEXT__XLOADER__JOBS_DB__URI", "CKAN_REVALIDATE_SECRET", "CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_URL", "CKAN_SESSION_COOKIE_NAME"):
                     if re.search(rf"^{secret}=", generated, re.M):
                         errors.append(f"Renderer env membocorkan variabel edge {secret} ke service CKAN")
-                if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__WAJO_THEME__ADMIN_HOST=admin.example.test" not in generated or "CKAN___SESSION_COOKIE_DOMAIN=.example.test" not in generated or output.stat().st_mode & 0o777 != 0o600:
+                if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__PORTAL_THEME__ADMIN_HOST=admin.example.test" not in generated or "CKAN___SESSION_COOKIE_DOMAIN=.example.test" not in generated or output.stat().st_mode & 0o777 != 0o600:
                     errors.append("Renderer env harus mempertahankan konfigurasi CKAN/admin host dan menulis output dengan permission 600")
                 if re.search(r"^CKAN__SESSION_COOKIE_", generated, re.M):
                     errors.append("Flask SESSION_COOKIE settings wajib memakai CKAN___ triple underscore, bukan CKAN__")
@@ -233,9 +277,9 @@ else:
                     if upload_setting not in generated:
                         errors.append("Renderer harus meneruskan konfigurasi FileStore upload ke CKAN: " + upload_setting)
                 for required_schema in (
-                    "CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.wajo_theme:schemas/dataset.yaml",
-                    "CKAN___SCHEMING__ORGANIZATION_SCHEMAS=ckanext.wajo_theme:schemas/organization.yaml",
-                    "CKAN___SCHEMING__GROUP_SCHEMAS=ckanext.wajo_theme:schemas/group.yaml",
+                    "CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.portal_theme:schemas/dataset.yaml",
+                    "CKAN___SCHEMING__ORGANIZATION_SCHEMAS=ckanext.portal_theme:schemas/organization.yaml",
+                    "CKAN___SCHEMING__GROUP_SCHEMAS=ckanext.portal_theme:schemas/group.yaml",
                     "CKAN___SCHEMING__PRESETS=ckanext.scheming:presets.json",
                 ):
                     if required_schema not in generated:

@@ -1,0 +1,7 @@
+{# Render every Scheming Markdown field through Portal's strict allowlist. #}
+{% set markdown_value = data.get(field.field_name) %}
+{% if markdown_value %}
+  <div class="portal-admin-cms-content portal-admin-cms-content--metadata">
+    {{ h.portal_render_markdown(markdown_value) }}
+  </div>
+{% endif %}

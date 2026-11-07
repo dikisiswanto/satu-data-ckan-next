@@ -45,8 +45,8 @@ describe("public markdown link normalization", () => {
     expect(normalizeMarkdownHref("https://example.test/publikasi.pdf")).toBe(
       "https://example.test/publikasi.pdf",
     );
-    expect(normalizeMarkdownHref("/informasi/profil-wajo")).toBe(
-      "/informasi/profil-wajo",
+    expect(normalizeMarkdownHref("/informasi/profil-sample")).toBe(
+      "/informasi/profil-sample",
     );
     expect(
       normalizeMarkdownHref("/api/3/action/package_show?id=private"),

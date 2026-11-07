@@ -1,38 +1,38 @@
-# Sistem Desain Admin — Portal Satu Data Kabupaten Wajo
+# Sistem Desain Admin Portal
 
 ## Tujuan dan prinsip
 
-Wajo Admin menggunakan bahasa visual yang sama dengan portal publik, dengan kepadatan yang sedikit lebih tinggi karena pekerjaan administrasi melibatkan tabel, metadata, dan formulir. Desain harus terasa modern, bersih, tenang, mudah dipindai, dan tidak mengubah alur CKAN.
+Portal Admin menggunakan bahasa visual yang sama dengan portal publik, dengan kepadatan yang sedikit lebih tinggi karena pekerjaan administrasi melibatkan tabel, metadata, dan formulir. Desain harus terasa modern, bersih, tenang, mudah dipindai, dan tidak mengubah alur CKAN.
 
 Prinsip implementasi:
 
-- **Satu sumber token:** nilai visual kanonis berada di `deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css`.
+- **Satu sumber token:** nilai visual kanonis berada di `deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css`.
 - **Paritas publik/admin:** warna utama, canvas, permukaan, teks, border, radius, dan font stack mengikuti `src/app/styles/foundation.css`.
 - **Native-first:** route, struktur form, `name`, `id`, action, method, CSRF, validasi, hak akses, upload, widget, dan JavaScript CKAN tetap native.
-- **Additive styling:** design layer dimuat setelah `wajo-theme.css` melalui WebAssets; tidak memodifikasi CKAN core.
+- **Additive styling:** design layer dimuat setelah `portal-theme.css` melalui WebAssets; tidak memodifikasi CKAN core.
 - **Use-case typography:** ukuran judul, body, label, tabel, metadata, kode, dan angka disesuaikan dengan fungsi masing-masing, bukan dipaksa seragam.
 - **Responsive and accessible:** navigasi, form, tabel, dashboard, DataStore wizard, footer, dan login mendukung tablet/mobile; focus-visible dan reduced motion dipertahankan.
 
 ## 1. Tema warna
 
-| Token                         | Nilai     | Fungsi                             |
-| ----------------------------- | --------- | ---------------------------------- |
-| `--wajo-color-primary`        | `#1d5fa7` | Aksi utama, link, navigasi aktif   |
-| `--wajo-color-primary-hover`  | `#174f8c` | Hover/focus lanjutan               |
-| `--wajo-color-primary-active` | `#123f70` | State ditekan                      |
-| `--wajo-color-primary-soft`   | `#eaf2ff` | Highlight lembut dan item aktif    |
-| `--wajo-color-primary-tint`   | `#f4f8ff` | Hover permukaan sekunder           |
-| `--wajo-color-ink`            | `#1b3440` | Teks utama                         |
-| `--wajo-color-muted`          | `#586d76` | Deskripsi dan helper               |
-| `--wajo-color-subtle`         | `#7b8b94` | Metadata dan label sekunder        |
-| `--wajo-color-canvas`         | `#f5f7f6` | Latar aplikasi, sama dengan publik |
-| `--wajo-color-surface`        | `#ffffff` | Kartu, panel, form, tabel          |
-| `--wajo-color-border`         | `#d8e2e4` | Border standar, sama dengan publik |
-| `--wajo-color-border-strong`  | `#c5d3d9` | Border kontrol dan pemisah penting |
-| `--wajo-color-success`        | `#28784f` | Sukses                             |
-| `--wajo-color-warning`        | `#95651d` | Peringatan                         |
-| `--wajo-color-danger`         | `#b33d46` | Error dan aksi destruktif          |
-| `--wajo-color-info`           | `#286b99` | Informasi                          |
+| Token                           | Nilai     | Fungsi                             |
+| ------------------------------- | --------- | ---------------------------------- |
+| `--portal-color-primary`        | `#1d5fa7` | Aksi utama, link, navigasi aktif   |
+| `--portal-color-primary-hover`  | `#174f8c` | Hover/focus lanjutan               |
+| `--portal-color-primary-active` | `#123f70` | State ditekan                      |
+| `--portal-color-primary-soft`   | `#eaf2ff` | Highlight lembut dan item aktif    |
+| `--portal-color-primary-tint`   | `#f4f8ff` | Hover permukaan sekunder           |
+| `--portal-color-ink`            | `#1b3440` | Teks utama                         |
+| `--portal-color-muted`          | `#586d76` | Deskripsi dan helper               |
+| `--portal-color-subtle`         | `#7b8b94` | Metadata dan label sekunder        |
+| `--portal-color-canvas`         | `#f5f7f6` | Latar aplikasi, sama dengan publik |
+| `--portal-color-surface`        | `#ffffff` | Kartu, panel, form, tabel          |
+| `--portal-color-border`         | `#d8e2e4` | Border standar, sama dengan publik |
+| `--portal-color-border-strong`  | `#c5d3d9` | Border kontrol dan pemisah penting |
+| `--portal-color-success`        | `#28784f` | Sukses                             |
+| `--portal-color-warning`        | `#95651d` | Peringatan                         |
+| `--portal-color-danger`         | `#b33d46` | Error dan aksi destruktif          |
+| `--portal-color-info`           | `#286b99` | Informasi                          |
 
 Warna status hanya digunakan secara semantik. Status juga harus memiliki teks atau ikon; warna bukan satu-satunya pembeda.
 
@@ -135,7 +135,7 @@ Jangan menyamarkan select sebagai input teks biasa. Jangan menampilkan upload se
 
 ## 6. Ikon
 
-Sidebar/topbar memakai satu macro `wajo_icon` dan paket Font Awesome Free bawaan CKAN 2.12.1. Macro memetakan nama semantik ke glyph modern (`building`, `image`, `file-lines`, `newspaper`, `folder`, `chart-line`, dan seterusnya) serta memakai kelas `fa-solid`; hindari alias lama seperti `building-o`, `file-text-o`, `picture-o`, dan `newspaper-o`.
+Sidebar/topbar memakai satu macro `portal_icon` dan paket Font Awesome Free bawaan CKAN 2.12.1. Macro memetakan nama semantik ke glyph modern (`building`, `image`, `file-lines`, `newspaper`, `folder`, `chart-line`, dan seterusnya) serta memakai kelas `fa-solid`; hindari alias lama seperti `building-o`, `file-text-o`, `picture-o`, dan `newspaper-o`.
 
 ## 7. Batas perubahan
 
@@ -154,6 +154,6 @@ Design system tidak boleh mengganti route/action CKAN, struktur input, CSRF, val
 
 ## Rujukan terkait
 
-- [Panduan Wajo Admin](PANDUAN-ADMIN-WAJO.md)
+- [Panduan Portal Admin](PANDUAN-ADMIN.md)
 - [Form Scheming kontekstual](FORM-CKAN-KONTEKSTUAL.md)
 - [Indeks dokumentasi](INDEX.md)

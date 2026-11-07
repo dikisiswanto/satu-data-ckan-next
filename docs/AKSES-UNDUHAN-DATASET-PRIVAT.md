@@ -16,7 +16,7 @@ Jika privasi per-resource benar-benar dibutuhkan, implementasikan field skema re
 
 ### Unduhan native dataset/resource
 
-1. Next.js hanya membaca cookie `wajo_ckan_session` yang dikonfigurasi dari request masuk.
+1. Next.js hanya membaca cookie `portal_ckan_session` yang dikonfigurasi dari request masuk.
 2. Next.js memanggil CKAN `resource_show` dan memvalidasi ID resource, status aktif, serta `resource.package_id`.
 3. Next.js memanggil `package_show` dengan sesi yang sama dan memvalidasi package induk serta slug/ID yang diminta. Dataset privat hanya diterima jika CKAN mengizinkannya untuk sesi tersebut.
 4. Path URL resource divalidasi terhadap pola unduhan dataset/resource CKAN. Host dari URL asli tidak pernah di-fetch; path tervalidasi diminta melalui `CKAN_API_INTERNAL_URL`.
@@ -31,13 +31,13 @@ Array `package_show.result.resources` adalah metadata, bukan gerbang otorisasi t
 3. Pemeriksaan `resource_show`/`package_show` menentukan akses ke dataset pemilik. Konfigurasi penerapan menetapkan `ckan.files.owner.cascade_access` untuk `resource` dan `package`, sehingga otorisasi FileStore mengikuti hak akses entitas CKAN terkait. `file_show` saja tidak pernah dianggap bukti izin unduh.
 4. Next.js meminta `/file/download/<id>` dari CKAN dengan cookie sesi yang sama. CKAN melakukan pemeriksaan akhir `permission_download_file`. Respons 401/403/404/410 dinormalisasi menjadi 404.
 
-Proxy media editorial terpisah dan memakai owner tetap, pemeriksaan MIME, batas byte, serta signature gambar. Hook `IFiles` Wajo hanya memberi akses `show` publik kepada owner `wajo_media/public-editorial-media`; hook tersebut tidak memberi izin tulis/hapus dan tidak melonggarkan akses owner resource/package.
+Proxy media editorial terpisah dan memakai owner tetap, pemeriksaan MIME, batas byte, serta signature gambar. Hook `IFiles` portal hanya memberi akses `show` publik kepada owner `portal_media/public-editorial-media`; hook tersebut tidak memberi izin tulis/hapus dan tidak melonggarkan akses owner resource/package.
 
 ## Persyaratan sesi dan domain
 
-Browser dapat mengirim cookie sesi CKAN ke Admin dan portal hanya jika `PUBLIC_HOST` serta `CKAN_HOST` merupakan subdomain dalam domain registrable yang sama dan cookie dikonfigurasi untuk domain induk tersebut. Contoh yang sesuai: `data.silirdev.com` dan `ckan.silirdev.com`. Contoh yang tidak sesuai: `data.silirdev.com` dan `ckan.wajokab.go.id`.
+Browser dapat mengirim cookie sesi CKAN ke Admin dan portal hanya jika `PUBLIC_HOST` serta `CKAN_HOST` merupakan subdomain dalam domain registrable yang sama dan cookie dikonfigurasi untuk domain induk tersebut. Contoh yang sesuai: `data.silirdev.com` dan `ckan.silirdev.com`. Contoh yang tidak sesuai: `data.silirdev.com` dan `ckan.instansi.example.go.id`.
 
-Setelah mengubah domain cookie atau hostname, buat ulang container CKAN dan Next.js, logout dari Admin CKAN, lalu login kembali. Pada DevTools → Network, pastikan request portal menyertakan nama cookie `wajo_ckan_session`; jangan menyalin atau membagikan nilainya. `sync-env.py` sengaja menolak domain induk yang tidak cocok.
+Setelah mengubah domain cookie atau hostname, buat ulang container CKAN dan Next.js, logout dari Admin CKAN, lalu login kembali. Pada DevTools → Network, pastikan request portal menyertakan nama cookie `portal_ckan_session`; jangan menyalin atau membagikan nilainya. `sync-env.py` sengaja menolak domain induk yang tidak cocok.
 
 Cookie domain induk dikirim ke semua subdomain pada domain tersebut. Semua subdomain harus dipercaya dan dikelola dengan kontrol keamanan setara. Portal hanya meneruskan cookie sesi CKAN yang dikonfigurasi ke origin CKAN internal; cookie browser lain, API token, dan nilai sesi tidak diteruskan ke origin eksternal.
 

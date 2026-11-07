@@ -7,7 +7,7 @@ import sys
 root = Path(__file__).resolve().parents[1]
 errors: list[str] = []
 bootstrap = (root / "deploy/ckan/bootstrap-upstream.sh").read_text()
-plugin = (root / "deploy/ckan/theme/ckanext/wajo_theme/plugin.py").read_text()
+plugin = (root / "deploy/ckan/theme/ckanext/portal_theme/plugin.py").read_text()
 compose = (root / "deploy/ckan/docker-compose.override.yml").read_text()
 renderer = (root / "deploy/ckan/render-upstream-env.py").read_text()
 client = (root / "src/lib/ckan/client.js").read_text()
@@ -16,11 +16,11 @@ public_route = (root / "src/app/api/3/action/[...action]/route.js").read_text()
 detail = (root / "src/app/(public)/dataset/[slug]/page.jsx").read_text()
 preview = (root / "src/components/dataset-resource-preview.jsx").read_text()
 
-if 'values["CKAN___SCHEMING__DATASET_SCHEMAS"] = "ckanext.wajo_theme:schemas/dataset.yaml"' not in bootstrap or 'values["CKAN___SCHEMING__PRESETS"]' not in bootstrap:
+if 'values["CKAN___SCHEMING__DATASET_SCHEMAS"] = "ckanext.portal_theme:schemas/dataset.yaml"' not in bootstrap or 'values["CKAN___SCHEMING__PRESETS"]' not in bootstrap:
     errors.append("Scheming harus memakai CKAN___SCHEMING__... (konfigurasi extension tanpa prefix ckan.)")
 if '"CKAN__SCHEMING__DATASET_SCHEMAS"' not in bootstrap or '"CKAN__SCHEMING__PRESETS"' not in bootstrap:
     errors.append("Bootstrap harus membersihkan environment Scheming lama yang salah prefix-nya.")
-if 'dataset_type: dataset' not in (root / "deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml").read_text():
+if 'dataset_type: dataset' not in (root / "deploy/ckan/theme/ckanext/portal_theme/schemas/dataset.yaml").read_text():
     errors.append("Schema dataset CKAN harus tetap mendaftarkan type dataset.")
 if '"activity"' not in bootstrap or "db upgrade -p activity" not in (root / "deploy/ckan/initialize-extensions.sh").read_text():
     errors.append("Activity plugin/migrasi harus aktif agar package_activity_list terdaftar.")
@@ -48,21 +48,21 @@ if not revalidate.is_file():
     errors.append("Signed Next.js cache invalidation route tidak ditemukan.")
 else:
     route = revalidate.read_text()
-    for token in ("createHmac", "timingSafeEqual", "x-wajo-timestamp", "x-wajo-signature", "MAX_CLOCK_SKEW_SECONDS", 'revalidateTag("ckan-public", { expire: 0 })', '"manual.revalidate"'):
+    for token in ("createHmac", "timingSafeEqual", "x-portal-timestamp", "x-portal-signature", "MAX_CLOCK_SKEW_SECONDS", 'revalidateTag("ckan-public", { expire: 0 })', '"manual.revalidate"'):
         if token not in route:
             errors.append(f"Webhook revalidation tidak memvalidasi atau menginvalidasi dengan benar: {token}")
 if 'tags: ["ckan-public", `ckan-action:${action}`]' not in client:
     errors.append("Setiap fetch CKAN server-side harus membawa tag invalidasi ckan-public.")
-for token in ("CKAN_REVALIDATE_SECRET", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_SECRET"):
+for token in ("CKAN_REVALIDATE_SECRET", "CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_URL", "CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_SECRET"):
     if token not in compose:
         errors.append(f"Compose tidak meneruskan rahasia/URL webhook ke service yang benar: {token}")
-if "CKAN_REVALIDATE_SECRET" not in renderer or "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_" not in renderer:
+if "CKAN_REVALIDATE_SECRET" not in renderer or "CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_" not in renderer:
     errors.append("Renderer upstream harus mengecualikan rahasia dan URL webhook dari env_file CKAN umum.")
 backfill = root / "deploy/ckan/backfill-datastore-previews.sh"
 if not backfill.is_file() or "xloader submit" not in backfill.read_text():
     errors.append("Skrip backfill DataStore untuk resource lama harus tersedia.")
 manual_revalidate = root / "deploy/ckan/revalidate-public-cache.sh"
-if not manual_revalidate.is_file() or "manual.revalidate" not in manual_revalidate.read_text() or "X-Wajo-Signature" not in manual_revalidate.read_text():
+if not manual_revalidate.is_file() or "manual.revalidate" not in manual_revalidate.read_text() or "X-Portal-Signature" not in manual_revalidate.read_text():
     errors.append("Skrip validasi dan invalidasi cache publik manual harus tersedia dan memakai HMAC.")
 if 's-maxage=5, stale-while-revalidate=5' not in public_route:
     errors.append("Cache facade API publik harus memiliki TTL fallback singkat setelah invalidasi event.")

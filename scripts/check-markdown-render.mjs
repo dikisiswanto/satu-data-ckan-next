@@ -40,10 +40,10 @@ assert.equal(
 
 const renderer = await read("src/components/cms/markdown-content.jsx");
 const editor = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/public/wajo-markdown-editor.js",
+  "deploy/ckan/theme/ckanext/portal_theme/public/portal-markdown-editor.js",
 );
 const pagesForm = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/base_form.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/ckanext_pages/base_form.html",
 );
 assert.match(
   renderer,
@@ -108,52 +108,52 @@ assert.match(
 assert.match(
   pagesForm,
   /{% block scripts %}\s*{{ super\(\) }}/,
-  "CKAN Pages must preserve the inherited Wajo editor scripts while keeping upstream CKEditor assets.",
+  "CKAN Pages must preserve the inherited Contoh editor scripts while keeping upstream CKEditor assets.",
 );
 assert.equal(
   editor.split('startsWith("=") ? "h1" : "h2"').length - 1,
   1,
   "Setext heading detection must not be duplicated.",
 );
-assert.match(pagesForm, /data-wajo-image-upload-for="field-og-image"/);
+assert.match(pagesForm, /data-portal-image-upload-for="field-og-image"/);
 assert.match(
   pagesForm,
-  /data-wajo-image-upload-to-json="field-content-blocks"/,
+  /data-portal-image-upload-to-json="field-content-blocks"/,
 );
 
 const schemingMarkdownDisplay = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/scheming/display_snippets/markdown.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/scheming/display_snippets/markdown.html",
 );
 assert.match(
   schemingMarkdownDisplay,
-  /data\.get\(field\.field_name\)[\s\S]*h\.wajo_render_markdown\(markdown_value\)/,
-  "Scheming Markdown-enabled metadata fields must use the shared allowlisted Wajo renderer on detail pages.",
+  /data\.get\(field\.field_name\)[\s\S]*h\.portal_render_markdown\(markdown_value\)/,
+  "Scheming Markdown-enabled metadata fields must use the shared allowlisted Contoh renderer on detail pages.",
 );
 for (const schemaPath of [
-  "deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml",
-  "deploy/ckan/theme/ckanext/wajo_theme/schemas/organization.yaml",
-  "deploy/ckan/theme/ckanext/wajo_theme/schemas/group.yaml",
+  "deploy/ckan/theme/ckanext/portal_theme/schemas/dataset.yaml",
+  "deploy/ckan/theme/ckanext/portal_theme/schemas/organization.yaml",
+  "deploy/ckan/theme/ckanext/portal_theme/schemas/group.yaml",
 ]) {
   const schema = await read(schemaPath);
   assert.match(
     schema,
     /form_snippet: markdown\.html[\s\S]{0,80}display_snippet: markdown\.html/,
-    `${schemaPath} must render all Markdown-enabled metadata fields with the Wajo display snippet.`,
+    `${schemaPath} must render all Markdown-enabled metadata fields with the Contoh display snippet.`,
   );
 }
 const adminPluginSource = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
+  "deploy/ckan/theme/ckanext/portal_theme/plugin.py",
 );
 const bootstrapSource = await read("deploy/ckan/bootstrap-upstream.sh");
 assert.match(
   adminPluginSource,
   /toolkit\.add_template_directory\(config, ["']templates["']\)/,
-  "Wajo templates must be registered through CKAN's plugin template loader.",
+  "Contoh templates must be registered through CKAN's plugin template loader.",
 );
 assert.doesNotMatch(
   adminPluginSource,
   /config\s*\[\s*["']extra_template_paths["']\s*\]/,
-  "Do not duplicate the Wajo template directory in CKAN extra-template configuration; it can loop with Midnight Blue during ckan_extends.",
+  "Do not duplicate the Contoh template directory in CKAN extra-template configuration; it can loop with Midnight Blue during ckan_extends.",
 );
 const pluginOrderMatch = bootstrapSource.match(
   /for plugin in \(\s*([\s\S]*?)\s*\):/,
@@ -164,18 +164,18 @@ const configuredPluginOrder = pluginOrderMatch
     )
   : [];
 assert.ok(
-  configuredPluginOrder.indexOf("wajo_theme") >= 0 &&
-    configuredPluginOrder.indexOf("wajo_theme") <
+  configuredPluginOrder.indexOf("portal_theme") >= 0 &&
+    configuredPluginOrder.indexOf("portal_theme") <
       configuredPluginOrder.indexOf("pages") &&
-    configuredPluginOrder.indexOf("wajo_theme") <
+    configuredPluginOrder.indexOf("portal_theme") <
       configuredPluginOrder.indexOf("activity"),
-  "Wajo theme must load before Pages and Activity: CKAN's reversed ITemplateHelpers/IConfigurer iteration gives earlier plugins override precedence.",
+  "Portal theme must load before Pages and Activity: CKAN's reversed ITemplateHelpers/IConfigurer iteration gives earlier plugins override precedence.",
 );
 const setupSource = await read("deploy/ckan/theme/setup.py");
 assert.match(
   setupSource,
   /templates\/scheming\/display_snippets\/\*\.html/,
-  "The custom Markdown display snippet must be included in the installed Wajo theme wheel.",
+  "The custom Markdown display snippet must be included in the installed Portal theme wheel.",
 );
 assert.doesNotMatch(
   bootstrapSource,
@@ -189,19 +189,19 @@ assert.match(
 );
 
 const pagesDetail = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/page.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/ckanext_pages/page.html",
 );
 const blogDetail = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/blog.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/ckanext_pages/blog.html",
 );
 const pagesRevision = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/page_revisions_preview.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/ckanext_pages/page_revisions_preview.html",
 );
 const blogRevision = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/ckanext_pages/blog_revisions_preview.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/ckanext_pages/blog_revisions_preview.html",
 );
 const adminMarkdown = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/markdown.py",
+  "deploy/ckan/theme/ckanext/portal_theme/markdown.py",
 );
 const ckanRuntimeSmoke = await read("scripts/check-plugins.py");
 assert.match(
@@ -215,10 +215,10 @@ assert.match(
   "The real CKAN renderer smoke test must assert nested unordered and ordered list output.",
 );
 const adminPlugin = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/plugin.py",
+  "deploy/ckan/theme/ckanext/portal_theme/plugin.py",
 );
 const promotedIntro = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/home/snippets/promoted.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/home/snippets/promoted.html",
 );
 for (const [name, template] of [
   ["Pages", pagesDetail],
@@ -228,7 +228,7 @@ for (const [name, template] of [
 ]) {
   assert.match(
     template,
-    /h\.wajo_render_markdown\(/,
+    /h\.portal_render_markdown\(/,
     `${name} detail must render Markdown in CKAN admin.`,
   );
   assert.doesNotMatch(
@@ -244,13 +244,13 @@ assert.match(
 );
 assert.match(
   adminPlugin,
-  /ITemplateHelpers[\s\S]*wajo_render_markdown/,
-  "CKAN must expose the safe Wajo Markdown helper to Jinja templates.",
+  /ITemplateHelpers[\s\S]*portal_render_markdown/,
+  "CKAN must expose the safe Portal Markdown helper to Jinja templates.",
 );
 assert.match(
   adminPlugin,
-  /"render_content": render_wajo_markdown[\s\S]*"pages_get_wysiwyg_editor": self\._markdown_only_pages_editor/,
-  "Wajo must override the two ckanext-pages helpers used by upstream Pages/Blog detail templates, not only register a new helper name.",
+  /"render_content": render_portal_markdown[\s\S]*"pages_get_wysiwyg_editor": self\._markdown_only_pages_editor/,
+  "Contoh must override the two ckanext-pages helpers used by upstream Pages/Blog detail templates, not only register a new helper name.",
 );
 assert.match(
   adminPlugin,
@@ -259,7 +259,7 @@ assert.match(
 );
 assert.match(
   adminMarkdown,
-  /extensions=\["extra", "sane_lists", _WajoMarkdownExtension\(\)\]/,
+  /extensions=\["extra", "sane_lists", _PortalMarkdownExtension\(\)\]/,
   "CKAN admin must render tables, fenced code, and sane lists.",
 );
 assert.match(
@@ -305,13 +305,13 @@ for (const tag of [
 }
 assert.match(
   promotedIntro,
-  /h\.wajo_render_markdown\(intro\)/,
+  /h\.portal_render_markdown\(intro\)/,
   "CKAN homepage introduction must use the same allowlisted Markdown renderer as Pages and Blog.",
 );
 assert.doesNotMatch(
   promotedIntro,
   /h\.render_markdown\(intro\)/,
-  "CKAN homepage introduction must not bypass the shared Wajo Markdown policy.",
+  "CKAN homepage introduction must not bypass the shared Portal Markdown policy.",
 );
 
 const newsDetail = await read("src/app/(public)/berita/[slug]/page.jsx");

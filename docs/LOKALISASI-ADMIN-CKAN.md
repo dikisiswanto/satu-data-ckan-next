@@ -14,16 +14,16 @@ CKAN__LOCALE_ORDER="id en"
 
 CKAN dan extension dapat memakai domain gettext terpisah. Karena itu setiap katalog diletakkan pada domain yang benar, bukan hanya mengganti teks melalui CSS atau template.
 
-| Domain            | Pemakaian                                                                                              | Sumber katalog                           |
-| ----------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| `ckan`            | CKAN core, shell Wajo Admin, label umum, form dan pesan validasi yang menggunakan `_()`/`gettext` core | `i18n/id/LC_MESSAGES/ckan.po`            |
-| `ckanext-harvest` | Halaman sumber pengambilan data, tugas, status, jadwal, dan tindakan Harvest                           | `i18n/id/LC_MESSAGES/ckanext-harvest.po` |
-| `ckanext-pages`   | Pengelolaan Pages/CMS, form halaman, status publikasi, dan tindakan Pages                              | `i18n/id/LC_MESSAGES/ckanext-pages.po`   |
-| `ckanext-dcat`    | Label metadata DCAT/RDF, penerbit, kontak, lisensi, ruang/waktu, dan URL distribusi                    | `i18n/id/LC_MESSAGES/ckanext-dcat.po`    |
+| Domain            | Pemakaian                                                                                                | Sumber katalog                           |
+| ----------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `ckan`            | CKAN core, shell Portal Admin, label umum, form dan pesan validasi yang menggunakan `_()`/`gettext` core | `i18n/id/LC_MESSAGES/ckan.po`            |
+| `ckanext-harvest` | Halaman sumber pengambilan data, tugas, status, jadwal, dan tindakan Harvest                             | `i18n/id/LC_MESSAGES/ckanext-harvest.po` |
+| `ckanext-pages`   | Pengelolaan Pages/CMS, form halaman, status publikasi, dan tindakan Pages                                | `i18n/id/LC_MESSAGES/ckanext-pages.po`   |
+| `ckanext-dcat`    | Label metadata DCAT/RDF, penerbit, kontak, lisensi, ruang/waktu, dan URL distribusi                      | `i18n/id/LC_MESSAGES/ckanext-dcat.po`    |
 
-`WajoHarvestTranslationPlugin`, `WajoPagesTranslationPlugin`, dan `WajoDcatTranslationPlugin` mendaftarkan domain extension melalui `ITranslation`. Lokasi katalog dan locale mengikuti mekanisme resmi CKAN `DefaultTranslation`; domain di-override agar sesuai nama gettext extension. Plugin tersebut hanya menyediakan lokalisasi dan tidak mengganti route, hak akses, validasi, ataupun flow native extension.
+`PortalHarvestTranslationPlugin`, `PortalPagesTranslationPlugin`, dan `PortalDcatTranslationPlugin` mendaftarkan domain extension melalui `ITranslation`. Lokasi katalog dan locale mengikuti mekanisme resmi CKAN `DefaultTranslation`; domain di-override agar sesuai nama gettext extension. Plugin tersebut hanya menyediakan lokalisasi dan tidak mengganti route, hak akses, validasi, ataupun flow native extension.
 
-Katalog `ckan.po` digabung dengan katalog bawaan CKAN yang sudah ada: terjemahan Wajo menang untuk `msgid` yang sama, sedangkan pesan upstream yang tidak dimiliki katalog Wajo tetap dipertahankan. Katalog Harvest, Pages, dan DCAT dikompilasi ke direktori i18n extension Wajo agar dapat ditemukan oleh plugin `ITranslation` pada startup. Setelah seluruh plugin terpasang, `initialize-extensions.sh` juga menjalankan `ckan translation js` untuk membangun ulang katalog JavaScript yang dipakai widget/komponen browser CKAN.
+Katalog `ckan.po` digabung dengan katalog bawaan CKAN yang sudah ada: terjemahan portal menang untuk `msgid` yang sama, sedangkan pesan upstream yang tidak dimiliki katalog portal tetap dipertahankan. Katalog Harvest, Pages, dan DCAT dikompilasi ke direktori i18n extension portal agar dapat ditemukan oleh plugin `ITranslation` pada startup. Setelah seluruh plugin terpasang, `initialize-extensions.sh` juga menjalankan `ckan translation js` untuk membangun ulang katalog JavaScript yang dipakai widget/komponen browser CKAN.
 
 ## Aturan pemeliharaan
 
@@ -43,11 +43,11 @@ Katalog `ckan.po` digabung dengan katalog bawaan CKAN yang sudah ada: terjemahan
 - string wajib core, Harvest, Pages, dan DCAT tersedia;
 - placeholder sumber dan terjemahan cocok;
 - merge katalog core tidak menghapus terjemahan upstream;
-- compiler menggabungkan katalog upstream extension `.mo` maupun `.po`, lalu membiarkan terjemahan Wajo meng-override pesan yang sama;
+- compiler menggabungkan katalog upstream extension `.mo` maupun `.po`, lalu membiarkan terjemahan portal meng-override pesan yang sama;
 - entri lokal berstatus `fuzzy` tidak boleh menimpa terjemahan upstream yang valid;
 - compiler menghasilkan file `.mo` untuk domain Harvest, Pages, dan DCAT.
 
-Label sidebar, pintasan pembuatan konten, judul dan helper dasbor Wajo Admin juga menggunakan gettext sehingga tetap konsisten dengan katalog Bahasa Indonesia. Katalog inti dan domain extension dikompilasi di Docker build melalui `deploy/ckan/compile-id-translations.py`. Katalog JavaScript dibangun setelah aktivasi plugin melalui `ckan translation js`. File `.mo`/bundle hasil kompilasi bersifat artefak build dan tidak perlu dikomit.
+Label sidebar, pintasan pembuatan konten, judul dan helper dasbor Portal Admin juga menggunakan gettext sehingga tetap konsisten dengan katalog Bahasa Indonesia. Katalog inti dan domain extension dikompilasi di Docker build melalui `deploy/ckan/compile-id-translations.py`. Katalog JavaScript dibangun setelah aktivasi plugin melalui `ckan translation js`. File `.mo`/bundle hasil kompilasi bersifat artefak build dan tidak perlu dikomit.
 
 ## Cakupan yang sudah diuji dan batas yang perlu diperhatikan
 
@@ -59,7 +59,7 @@ Istilah teknis, nama format berkas, dan konten yang dimasukkan administrator (mi
 
 ## Teks bawaan CKAN dan beranda portal
 
-Katalog inti mencakup label administrasi, dataset/resource, organisasi/kategori, anggota/kolaborator, formulir, validasi, pencarian, aktivitas, DataStore, token API, statistik, serta label komponen tabel yang menggunakan gettext. Dua snippet beranda upstream yang berisi promosi/placeholder berbahasa Inggris (`home/snippets/about_text.html` dan `home/snippets/promoted.html`) diganti dengan informasi resmi Portal Satu Data Kabupaten Wajo. Template lain tetap mengikuti CKAN native agar route dan alur CRUD tidak bercabang.
+Katalog inti mencakup label administrasi, dataset/resource, organisasi/kategori, anggota/kolaborator, formulir, validasi, pencarian, aktivitas, DataStore, token API, statistik, serta label komponen tabel yang menggunakan gettext. Dua snippet beranda upstream yang berisi promosi/placeholder berbahasa Inggris (`home/snippets/about_text.html` dan `home/snippets/promoted.html`) diganti dengan konten informasi portal yang dikonfigurasi oleh instansi. Template lain tetap mengikuti CKAN native agar route dan alur CRUD tidak bercabang.
 
 ## Bangun ulang
 

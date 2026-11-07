@@ -17,7 +17,7 @@ source, destination = map(Path, sys.argv[1:])
 if not source.is_file():
     raise SystemExit(f"Canonical environment file is missing: {source}")
 
-excluded_prefixes = ("NEXT_PUBLIC_", "CKAN_ADMIN_BASIC_AUTH_", "CLOUDFLARE_", "CKANEXT__XLOADER__", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_")
+excluded_prefixes = ("NEXT_PUBLIC_", "PORTAL_", "CKAN_ADMIN_BASIC_AUTH_", "CLOUDFLARE_", "CKANEXT__XLOADER__", "CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_")
 excluded_keys = {
     "PUBLIC_HOST", "CKAN_HOST", "PUBLIC_SITE_ORIGIN", "CKAN_ADMIN_URL",
     "CKAN_API_INTERNAL_URL", "CKAN_API_TIMEOUT_MS", "CKAN_INDICATOR_TAG", "CKAN_SESSION_COOKIE_NAME",
@@ -46,9 +46,9 @@ if not any(line.startswith("CKAN__PLUGINS=") for line in rendered):
 # filesystem path (the former /srv/app/ckanext-schemas/dataset.yaml value)
 # makes CKAN crash while loading plugins, before the health check can pass.
 required_scheming = {
-    "CKAN___SCHEMING__DATASET_SCHEMAS": "ckanext.wajo_theme:schemas/dataset.yaml",
-    "CKAN___SCHEMING__ORGANIZATION_SCHEMAS": "ckanext.wajo_theme:schemas/organization.yaml",
-    "CKAN___SCHEMING__GROUP_SCHEMAS": "ckanext.wajo_theme:schemas/group.yaml",
+    "CKAN___SCHEMING__DATASET_SCHEMAS": "ckanext.portal_theme:schemas/dataset.yaml",
+    "CKAN___SCHEMING__ORGANIZATION_SCHEMAS": "ckanext.portal_theme:schemas/organization.yaml",
+    "CKAN___SCHEMING__GROUP_SCHEMAS": "ckanext.portal_theme:schemas/group.yaml",
     "CKAN___SCHEMING__PRESETS": "ckanext.scheming:presets.json",
 }
 for key, expected in required_scheming.items():
@@ -70,7 +70,7 @@ for obsolete_key in (
             "run bootstrap-upstream.sh to remove it."
         )
 if any(line.startswith(prefix) for line in rendered for prefix in (
-    "CLOUDFLARE_TUNNEL_TOKEN=", "CKAN_ADMIN_BASIC_AUTH_PASSWORD=", "CKAN_ADMIN_BASIC_AUTH_HASH=", "NEXT_PUBLIC_", "CKANEXT__XLOADER__", "CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_", "CKAN_REVALIDATE_SECRET="
+    "CLOUDFLARE_TUNNEL_TOKEN=", "CKAN_ADMIN_BASIC_AUTH_PASSWORD=", "CKAN_ADMIN_BASIC_AUTH_HASH=", "NEXT_PUBLIC_", "PORTAL_", "CKANEXT__XLOADER__", "CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_", "CKAN_REVALIDATE_SECRET="
 )):
     raise SystemExit("Edge credentials or Next.js public variables must not enter CKAN service environment.")
 

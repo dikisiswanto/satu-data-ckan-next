@@ -65,7 +65,7 @@ Perintah `all` mengirim resource yang formatnya cocok; XLoader sendiri menolak f
 ## Alur resource baru dan perubahan
 
 1. Editor membuat atau memperbarui resource CKAN.
-2. `WajoThemePlugin.after_resource_create/update` mengirim action internal `xloader_submit` untuk format yang didukung. Hook tidak menunggu proses parsing; kegagalan antrean dicatat dan tidak membatalkan penyimpanan metadata.
+2. `PortalThemePlugin.after_resource_create/update` mengirim action internal `xloader_submit` untuk format yang didukung. Hook tidak menunggu proses parsing; kegagalan antrean dicatat dan tidak membatalkan penyimpanan metadata.
 3. XLoader worker memuat resource ke DataStore. XLoader mengelola status pekerjaan dan membuat resource views bawaan setelah berhasil.
 4. `IXloader.after_upload` mengirim event `resource.indexed`; portal menginvalidasi ulang cache agar status `datastore_active` yang terbaru terbaca.
 5. Halaman detail Next.js menampilkan preview jika DataStore aktif. Jika pemrosesan belum selesai, panel status muncul dan memeriksa `resource_show` secara terbatas selama sekitar 84 detik.
@@ -101,9 +101,9 @@ bash ./deploy/ckan/compose.sh cloudflare logs --tail=200 ckan xloader-worker nex
 bash ./deploy/ckan/compose.sh cloudflare exec -T ckan ckan -c /srv/app/ckan.ini xloader status
 ```
 
-Jika detail dataset tetap HTTP 500, periksa nilai aktif `scheming.dataset_schemas` dan pastikan `dataset.yaml` ikut terpasang sebagai package data di `ckanext.wajo_theme:schemas/dataset.yaml` dan nilai `scheming.dataset_schemas` memakai format `module:file`. Jika preview tetap belum aktif, periksa format resource, akses unduh dari worker, token XLoader, worker Redis/RQ, hak akses DataStore, dan log job XLoader.
+Jika detail dataset tetap HTTP 500, periksa nilai aktif `scheming.dataset_schemas` dan pastikan `dataset.yaml` ikut terpasang sebagai package data di `ckanext.portal_theme:schemas/dataset.yaml` dan nilai `scheming.dataset_schemas` memakai format `module:file`. Jika preview tetap belum aktif, periksa format resource, akses unduh dari worker, token XLoader, worker Redis/RQ, hak akses DataStore, dan log job XLoader.
 
-## Panduan admin melalui Wajo Admin
+## Panduan admin melalui Portal Admin
 
 Sysadmin dapat memakai menu **Integrasi Data → DataStore & pratinjau** (`/admin/data-preview`) tanpa harus menghafal urutan komponen. Halaman ini menjalankan pemeriksaan konfigurasi saat dibuka atau saat tombol **Periksa ulang** dipilih. Urutannya:
 

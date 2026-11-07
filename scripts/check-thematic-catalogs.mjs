@@ -93,11 +93,11 @@ requireMatch(
 );
 
 const adminDashboard = await source(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/portal_theme/dashboard.html",
 );
 requireMatch(
   adminDashboard,
-  /h\.url_for\(dataset_type ~ '\.search', q=wajo_admin_general_dataset_fq\)[\s\S]*q=wajo_admin_portal_fqs\.indicators[\s\S]*q=wajo_admin_portal_fqs\.infographics[\s\S]*q=wajo_admin_portal_fqs\.publications/,
+  /h\.url_for\(dataset_type ~ '\.search', q=portal_admin_general_dataset_fq\)[\s\S]*q=portal_admin_portal_fqs\.indicators[\s\S]*q=portal_admin_portal_fqs\.infographics[\s\S]*q=portal_admin_portal_fqs\.publications/,
   "Tautan kartu dashboard CKAN harus meneruskan ekspresi Solr melalui q, bukan fq yang akan dianggap sebagai nama field pencarian.",
 );
 if (/\.search',\s*fq=/.test(adminDashboard)) {
@@ -202,7 +202,7 @@ requireMatch(
 const e2e = await source("tests/e2e/public-portal.spec.js");
 requireMatch(
   e2e,
-  /1 Dataset dari Bappeda Wajo[\s\S]*1 Indikator dari Bappeda Wajo[\s\S]*0 Dataset dari Dinas Kesehatan[\s\S]*1 Infografik dari Dinas Kesehatan/,
+  /1 Dataset dari Bappeda Contoh[\s\S]*1 Indikator dari Bappeda Contoh[\s\S]*0 Dataset dari Dinas Kesehatan[\s\S]*1 Infografik dari Dinas Kesehatan/,
   "E2E harus membuktikan OPD dengan infografik saja tidak ditampilkan sebagai pemilik dataset umum.",
 );
 requireMatch(

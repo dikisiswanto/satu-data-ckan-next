@@ -66,8 +66,8 @@ export async function POST(request) {
     );
   }
 
-  const timestamp = request.headers.get("x-wajo-timestamp") || "";
-  const suppliedSignature = request.headers.get("x-wajo-signature") || "";
+  const timestamp = request.headers.get("x-portal-timestamp") || "";
+  const suppliedSignature = request.headers.get("x-portal-signature") || "";
   if (
     !/^\d{10}$/.test(timestamp) ||
     !/^sha256=[a-f0-9]{64}$/.test(suppliedSignature)

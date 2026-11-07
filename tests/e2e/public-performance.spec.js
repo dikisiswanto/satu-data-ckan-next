@@ -149,7 +149,7 @@ test("PWA install promotion waits for engagement and respects a manual dismissal
   page,
 }) => {
   await page.addInitScript(() => {
-    const key = "wajo:pwa-install-promotion:v1";
+    const key = "portal:pwa-install-promotion:v1";
     if (!localStorage.getItem(key)) {
       localStorage.setItem(
         key,
@@ -183,7 +183,7 @@ test("PWA install promotion stays hidden when the app is already installed", asy
 }) => {
   await page.addInitScript(() => {
     localStorage.setItem(
-      "wajo:pwa-install-promotion:v1",
+      "portal:pwa-install-promotion:v1",
       JSON.stringify({
         visitCount: 8,
         pageViews: 24,

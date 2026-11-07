@@ -41,7 +41,7 @@ def main() -> None:
         assert result.count("COPY --chown=ckan:ckan extensions/requirements.txt") == 1
         assert result.count("RUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt") == 1
         assert "/srv/app/ckanext-schemas/dataset.yaml" not in result, "Scheming must not point at a bare filesystem path that cannot be imported as module:file"
-        assert "ckanext.wajo_theme:schemas/dataset.yaml" in (ROOT / "deploy/ckan/bootstrap-upstream.sh").read_text()
+        assert "ckanext.portal_theme:schemas/dataset.yaml" in (ROOT / "deploy/ckan/bootstrap-upstream.sh").read_text()
         assert "COPY --chown=ckan:ckan install-pages.py /tmp/portal-install-pages.py" in result
         assert "COPY --chown=ckan:ckan compile-id-translations.py /tmp/portal-compile-id-translations.py" in result
         assert "&& python /tmp/portal-install-pages.py" in result
@@ -73,7 +73,7 @@ def main() -> None:
         compiler = importlib.util.module_from_spec(compiler_spec)
         compiler_spec.loader.exec_module(compiler)
         with tempfile.TemporaryDirectory(prefix="portal-ckan-i18n-check-") as locale_dir:
-            catalog_path = ROOT / "deploy/ckan/theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po"
+            catalog_path = ROOT / "deploy/ckan/theme/ckanext/portal_theme/i18n/id/LC_MESSAGES/ckan.po"
             from babel.messages.catalog import Catalog
             from babel.messages.mofile import write_mo
             locale_root = Path(locale_dir)
@@ -86,7 +86,7 @@ def main() -> None:
                 write_mo(handle, base_catalog)
             compiled = compiler.compile_catalog(catalog_path, locale_root)
             assert compiled.is_file() and compiled.stat().st_size > 0
-            extension_output = locale_root / "wajo-theme-i18n"
+            extension_output = locale_root / "portal-theme-i18n"
             compiled_domains = compiler.compile_extension_catalogs(catalog_path, extension_output)
             assert {path.name for path in compiled_domains} == {"ckanext-dcat.mo", "ckanext-harvest.mo", "ckanext-pages.mo"}
             import gettext
@@ -101,10 +101,10 @@ def main() -> None:
             import gettext
             with compiled.open("rb") as mo_file:
                 translated = gettext.GNUTranslations(mo_file)
-            assert translated.gettext("Dashboard") == "Dasbor", "Wajo custom translations must override upstream strings"
+            assert translated.gettext("Dashboard") == "Dasbor", "Contoh custom translations must override upstream strings"
             assert translated.gettext("Log in") == "Masuk"
             assert translated.gettext("Organizations") == "Organisasi"
-            assert translated.gettext("Core-only label") == "Label inti", "upstream Indonesian strings absent from Wajo PO must be preserved"
+            assert translated.gettext("Core-only label") == "Label inti", "upstream Indonesian strings absent from Contoh PO must be preserved"
         installer_path = ROOT / "deploy/ckan/install-pages.py"
         spec = importlib.util.spec_from_file_location("portal_install_pages", installer_path)
         assert spec and spec.loader
@@ -147,15 +147,15 @@ def main() -> None:
         assert "ckanext-harvest==1.6.3" in (ckan / "extensions/requirements.txt").read_text()
         assert "theme/ /tmp/portal-ckan-theme/" in result, "custom theme source must be copied into the build"
         assert "USER root\nRUN python -m pip install --no-cache-dir -r /tmp/portal-ckan-extensions.txt /tmp/portal-ckan-theme" in result
-        assert "wajo_theme = ckanext.wajo_theme.plugin:WajoThemePlugin" in (ckan / "theme/setup.py").read_text()
-        assert "wajo_harvest_i18n = ckanext.wajo_theme.plugin:WajoHarvestTranslationPlugin" in (ckan / "theme/setup.py").read_text()
-        assert "wajo_pages_i18n = ckanext.wajo_theme.plugin:WajoPagesTranslationPlugin" in (ckan / "theme/setup.py").read_text()
-        assert "wajo_dcat_i18n = ckanext.wajo_theme.plugin:WajoDcatTranslationPlugin" in (ckan / "theme/setup.py").read_text()
-        assert (ckan / "theme/ckanext/wajo_theme/templates/base.html").is_file()
-        assert (ckan / "theme/ckanext/wajo_theme/templates/header.html").is_file()
-        assert (ckan / "theme/ckanext/wajo_theme/assets/css/wajo-theme.css").is_file()
-        assert (ckan / "theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css").is_file()
-        assert (ckan / "theme/ckanext/wajo_theme/public/logo-kabupaten-wajo.webp").is_file()
+        assert "portal_theme = ckanext.portal_theme.plugin:PortalThemePlugin" in (ckan / "theme/setup.py").read_text()
+        assert "portal_harvest_i18n = ckanext.portal_theme.plugin:PortalHarvestTranslationPlugin" in (ckan / "theme/setup.py").read_text()
+        assert "portal_pages_i18n = ckanext.portal_theme.plugin:PortalPagesTranslationPlugin" in (ckan / "theme/setup.py").read_text()
+        assert "portal_dcat_i18n = ckanext.portal_theme.plugin:PortalDcatTranslationPlugin" in (ckan / "theme/setup.py").read_text()
+        assert (ckan / "theme/ckanext/portal_theme/templates/base.html").is_file()
+        assert (ckan / "theme/ckanext/portal_theme/templates/header.html").is_file()
+        assert (ckan / "theme/ckanext/portal_theme/assets/css/portal-theme.css").is_file()
+        assert (ckan / "theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css").is_file()
+        assert (ckan / "theme/ckanext/portal_theme/public/institution-logo-default.webp").is_file()
         for schema_name in ("dataset.yaml", "organization.yaml", "group.yaml"):
             assert (ckan / "schemas" / schema_name).is_file(), f"generated CKAN context must include {schema_name}"
         assert "2.12.1" in result, "generated Dockerfile should use the patch-pinned official base image"
@@ -181,10 +181,10 @@ def main() -> None:
         assert 'CKAN_HEALTH' in datastore_permissions and '"$CKAN_HEALTH" != "healthy"' in datastore_permissions, "DataStore permissions must require a healthy CKAN container"
         assert 'CKAN_HEALTH' in xloader_enable and '"$CKAN_HEALTH" != "healthy"' in xloader_enable, "XLoader token creation must require a healthy CKAN container"
 
-        # Build the actual Wajo theme wheel in a temporary directory and verify
+        # Build the actual Portal theme wheel in a temporary directory and verify
         # that every shell/dashboard asset is present in the installable artifact.
         theme_dir = ROOT / "deploy/ckan/theme"
-        with tempfile.TemporaryDirectory(prefix="portal-wajo-theme-wheel-") as wheel_tmp:
+        with tempfile.TemporaryDirectory(prefix="portal-portal-theme-wheel-") as wheel_tmp:
             wheel_root = Path(wheel_tmp)
             # Build from an isolated source copy. setuptools otherwise leaves
             # build/, dist/ and *.egg-info in the checked-out theme directory,
@@ -209,7 +209,7 @@ def main() -> None:
                 text=True,
             )
             assert build_tool_probe.returncode == 0, (
-                "Wajo theme wheel build requires the pinned setuptools package from "
+                "Portal theme wheel build requires the pinned setuptools package from "
                 "requirements-ci.txt; install it before running static checks.\n"
                 + build_tool_probe.stderr
             )
@@ -226,47 +226,47 @@ def main() -> None:
                 text=True,
             )
             assert build_result.returncode == 0, (
-                "Wajo theme wheel packaging failed. Command: "
+                "Portal theme wheel packaging failed. Command: "
                 + " ".join(build_command)
                 + f"\nExit code: {build_result.returncode}\n"
                 + "\n--- stdout ---\n" + build_result.stdout
                 + "\n--- stderr ---\n" + build_result.stderr
             )
-            wheels = list((wheel_root / "dist").glob("ckanext_wajo_theme-*.whl"))
-            assert len(wheels) == 1, "Wajo theme build must produce exactly one wheel"
+            wheels = list((wheel_root / "dist").glob("ckanext_portal_theme-*.whl"))
+            assert len(wheels) == 1, "Portal theme build must produce exactly one wheel"
             with zipfile.ZipFile(wheels[0]) as wheel:
                 wheel_files = set(wheel.namelist())
             required_theme_files = {
-                "ckanext/wajo_theme/plugin.py",
-                "ckanext/wajo_theme/config_declaration.yaml",
-                "ckanext/wajo_theme/templates/base.html",
-                "ckanext/wajo_theme/templates/header.html",
-                "ckanext/wajo_theme/templates/page.html",
-                "ckanext/wajo_theme/templates/ckanext_pages/page.html",
-                "ckanext/wajo_theme/templates/ckanext_pages/blog.html",
-                "ckanext/wajo_theme/templates/ckanext_pages/page_revisions_preview.html",
-                "ckanext/wajo_theme/templates/ckanext_pages/blog_revisions_preview.html",
-                "ckanext/wajo_theme/templates/scheming/display_snippets/markdown.html",
-                "ckanext/wajo_theme/templates/wajo_theme/dashboard.html",
-                "ckanext/wajo_theme/templates/wajo_theme/data_preview.html",
-                "ckanext/wajo_theme/templates/wajo_theme/icon.html",
-                "ckanext/wajo_theme/templates/wajo_theme/sidebar.html",
-                "ckanext/wajo_theme/assets/css/wajo-theme.css",
-                "ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-                "ckanext/wajo_theme/assets/webassets.yml",
-                "ckanext/wajo_theme/schemas/dataset.yaml",
-                "ckanext/wajo_theme/schemas/organization.yaml",
-                "ckanext/wajo_theme/schemas/group.yaml",
-                "ckanext/wajo_theme/public/wajo-admin-forms.js",
-                "ckanext/wajo_theme/public/wajo-admin-navigation-progress.js",
-                "ckanext/wajo_theme/public/logo-kabupaten-wajo.webp",
-                "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckan.po",
-                "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-harvest.po",
-                "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-pages.po",
-                "ckanext/wajo_theme/i18n/id/LC_MESSAGES/ckanext-dcat.po",
+                "ckanext/portal_theme/plugin.py",
+                "ckanext/portal_theme/config_declaration.yaml",
+                "ckanext/portal_theme/templates/base.html",
+                "ckanext/portal_theme/templates/header.html",
+                "ckanext/portal_theme/templates/page.html",
+                "ckanext/portal_theme/templates/ckanext_pages/page.html",
+                "ckanext/portal_theme/templates/ckanext_pages/blog.html",
+                "ckanext/portal_theme/templates/ckanext_pages/page_revisions_preview.html",
+                "ckanext/portal_theme/templates/ckanext_pages/blog_revisions_preview.html",
+                "ckanext/portal_theme/templates/scheming/display_snippets/markdown.html",
+                "ckanext/portal_theme/templates/portal_theme/dashboard.html",
+                "ckanext/portal_theme/templates/portal_theme/data_preview.html",
+                "ckanext/portal_theme/templates/portal_theme/icon.html",
+                "ckanext/portal_theme/templates/portal_theme/sidebar.html",
+                "ckanext/portal_theme/assets/css/portal-theme.css",
+                "ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+                "ckanext/portal_theme/assets/webassets.yml",
+                "ckanext/portal_theme/schemas/dataset.yaml",
+                "ckanext/portal_theme/schemas/organization.yaml",
+                "ckanext/portal_theme/schemas/group.yaml",
+                "ckanext/portal_theme/public/portal-admin-forms.js",
+                "ckanext/portal_theme/public/portal-admin-navigation-progress.js",
+                "ckanext/portal_theme/public/institution-logo-default.webp",
+                "ckanext/portal_theme/i18n/id/LC_MESSAGES/ckan.po",
+                "ckanext/portal_theme/i18n/id/LC_MESSAGES/ckanext-harvest.po",
+                "ckanext/portal_theme/i18n/id/LC_MESSAGES/ckanext-pages.po",
+                "ckanext/portal_theme/i18n/id/LC_MESSAGES/ckanext-dcat.po",
             }
             missing_theme_files = required_theme_files - wheel_files
-            assert not missing_theme_files, f"Wajo theme wheel is missing files: {sorted(missing_theme_files)}"
+            assert not missing_theme_files, f"Portal theme wheel is missing files: {sorted(missing_theme_files)}"
 
         # Scheming resolves the configured `module:file` reference from the
         # installed extension package, not from an arbitrary filesystem path.
@@ -274,12 +274,12 @@ def main() -> None:
             [
                 "python3", "-c",
                 "from importlib import resources; "
-                "base = resources.files('ckanext.wajo_theme'); "
+                "base = resources.files('ckanext.portal_theme'); "
                 "dataset = base.joinpath('schemas/dataset.yaml'); "
                 "organization = base.joinpath('schemas/organization.yaml'); "
                 "group = base.joinpath('schemas/group.yaml'); "
-                "forms_js = base.joinpath('public/wajo-admin-forms.js'); "
-                "navigation_js = base.joinpath('public/wajo-admin-navigation-progress.js'); "
+                "forms_js = base.joinpath('public/portal-admin-forms.js'); "
+                "navigation_js = base.joinpath('public/portal-admin-navigation-progress.js'); "
                 "assert dataset.is_file() and dataset.read_text().startswith('dataset_type: dataset'); "
                 "assert organization.is_file() and organization.read_text().startswith('organization_type: organization'); "
                 "assert group.is_file() and group.read_text().startswith('group_type: group'); "
@@ -290,9 +290,9 @@ def main() -> None:
             capture_output=True,
             text=True,
         )
-        assert resource_probe.returncode == 0, "Scheming module:file resource must resolve from ckanext.wajo_theme package data: " + resource_probe.stderr
+        assert resource_probe.returncode == 0, "Scheming module:file resource must resolve from ckanext.portal_theme package data: " + resource_probe.stderr
 
-    print("CKAN Docker overlay, Wajo Admin wheel packaging, Scheming package-resource resolution, and ckanext-pages package-data fixtures passed.")
+    print("CKAN Docker overlay, Portal Admin wheel packaging, Scheming package-resource resolution, and ckanext-pages package-data fixtures passed.")
 
 
 if __name__ == "__main__":

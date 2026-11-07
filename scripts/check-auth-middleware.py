@@ -2,7 +2,7 @@
 """Exercise the CKAN admin-host auth middleware with small dependency stubs.
 
 The project CI image need not install CKAN/Flask: this test verifies the
-request/redirect policy implemented by WajoThemePlugin.make_middleware.
+request/redirect policy implemented by PortalThemePlugin.make_middleware.
 """
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import types
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_PATH = ROOT / "deploy/ckan/theme/ckanext/wajo_theme/plugin.py"
+PLUGIN_PATH = ROOT / "deploy/ckan/theme/ckanext/portal_theme/plugin.py"
 
 
 def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.ModuleType]:
@@ -101,11 +101,11 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
 
     ckanext = types.ModuleType("ckanext")
     ckanext.__path__ = []
-    theme_package = types.ModuleType("ckanext.wajo_theme")
+    theme_package = types.ModuleType("ckanext.portal_theme")
     theme_package.__path__ = [str(PLUGIN_PATH.parent)]
-    markdown_stub = types.ModuleType("ckanext.wajo_theme.markdown")
-    markdown_stub.render_wajo_markdown = lambda content: content
-    ckanext.wajo_theme = theme_package
+    markdown_stub = types.ModuleType("ckanext.portal_theme.markdown")
+    markdown_stub.render_portal_markdown = lambda content: content
+    ckanext.portal_theme = theme_package
     theme_package.markdown = markdown_stub
     pages = types.ModuleType("ckanext.pages")
     pages.__path__ = []
@@ -125,8 +125,8 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
     xloader_interfaces.IXloader = IXloader
     sys.modules.update({
         "ckanext": ckanext,
-        "ckanext.wajo_theme": theme_package,
-        "ckanext.wajo_theme.markdown": markdown_stub,
+        "ckanext.portal_theme": theme_package,
+        "ckanext.portal_theme.markdown": markdown_stub,
         "ckanext.pages": pages,
         "ckanext.pages.interfaces": interfaces,
         "ckanext.xloader": xloader,
@@ -144,7 +144,7 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
 
     class User:
         is_authenticated = False
-        name = "wajo_admin"
+        name = "portal_admin"
         id = "user-001"
 
     user = User()
@@ -180,7 +180,7 @@ def install_module_stubs() -> tuple[types.ModuleType, types.ModuleType, types.Mo
             return "/user/logout"
         if endpoint == "dashboard.datasets":
             return "/dashboard/datasets"
-        if endpoint == "wajo_admin.index":
+        if endpoint == "portal_admin.index":
             return "/admin/"
         raise AssertionError(f"Unexpected url_for endpoint in test: {endpoint}")
 
@@ -213,15 +213,15 @@ class FakeApp:
 
 def main() -> None:
     request, user, _flask = install_module_stubs()
-    spec = importlib.util.spec_from_file_location("ckanext.wajo_theme.plugin", PLUGIN_PATH)
+    spec = importlib.util.spec_from_file_location("ckanext.portal_theme.plugin", PLUGIN_PATH)
     if spec is None or spec.loader is None:
-        raise SystemExit("Tidak dapat memuat plugin Wajo untuk smoke test.")
+        raise SystemExit("Tidak dapat memuat plugin Contoh untuk smoke test.")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
 
     app = FakeApp()
-    plugin = module.WajoThemePlugin()
+    plugin = module.PortalThemePlugin()
     wrapped_app = object()
     if plugin.make_error_log_middleware(wrapped_app, {}) is not wrapped_app:
         raise AssertionError("CKAN make_error_log_middleware must preserve the wrapped WSGI app.")
@@ -247,7 +247,7 @@ def main() -> None:
 
     # Updating an old GeoJSON resource should invoke CKAN's default-view action
     # so missing geojson_view/geo_view records can be created without duplicates.
-    geo_plugin = module.WajoThemePlugin()
+    geo_plugin = module.PortalThemePlugin()
     geo_plugin._notify_public_portal = lambda *args, **kwargs: None
     geo_plugin._enqueue_resource_preview = lambda *args, **kwargs: None
     default_view_calls = []
@@ -267,7 +267,7 @@ def main() -> None:
     print("PASS legacy GeoJSON updates backfill missing CKAN resource views via the standard Action API")
     print("PASS GeoJSON resources receive canonical format before CKAN default-view generation")
 
-    media_auth = plugin.get_auth_functions().get("wajo_media_show")
+    media_auth = plugin.get_auth_functions().get("portal_media_show")
     if not callable(media_auth) or media_auth({}, {"id": "public-editorial-media"}).get("success") is not True:
         raise AssertionError("Owner media editorial harus dapat dibaca melalui auth function khusus.")
     if media_auth({}, {"id": "arbitrary-owner"}).get("success") is not False:
@@ -278,13 +278,13 @@ def main() -> None:
     # transferred editorial owner and leaves all other owners to CKAN defaults.
     from types import SimpleNamespace
     allow_media = SimpleNamespace(owner_info=SimpleNamespace(
-        owner_type="wajo_media", id="public-editorial-media"
+        owner_type="portal_media", id="public-editorial-media"
     ))
     allow_media_orm = SimpleNamespace(owner=SimpleNamespace(
-        owner_type="wajo_media", owner_id="public-editorial-media"
+        owner_type="portal_media", owner_id="public-editorial-media"
     ))
     reject_other_media = SimpleNamespace(owner=SimpleNamespace(
-        owner_type="wajo_media", owner_id="another-owner"
+        owner_type="portal_media", owner_id="another-owner"
     ))
     preserve_resource_permissions = SimpleNamespace(owner=SimpleNamespace(
         owner_type="resource", owner_id="resource-123"
@@ -304,8 +304,9 @@ def main() -> None:
     print("PASS CKAN IFiles grants public editorial-media reads only; other owner policies remain unchanged")
 
     plugin.make_middleware(app, {
-        "ckanext.wajo_theme.admin_host": "admin.example.test",
+        "ckanext.portal_theme.admin_host": "admin.example.test",
         "ckan.site_url": "https://data.example.test",
+        "ckan.site_logo": "/institution-logo-default.webp",
     })
     if len(app.before_hooks) != 1 or len(app.after_hooks) != 1:
         raise SystemExit("Middleware harus mendaftarkan satu before_request dan satu after_request hook.")
@@ -349,9 +350,9 @@ def main() -> None:
         path="/user/logged_out_redirect",
     )
     run_case("anonymous visitor may load CKAN base assets", None, path="/base/css/main.css")
-    run_case("anonymous visitor may load Wajo logo", None, path="/logo-kabupaten-wajo.webp")
+    run_case("anonymous visitor may load default logo", None, path="/institution-logo-default.webp")
     run_case(
-        "anonymous admin root opens login with Wajo overview return target",
+        "anonymous admin root opens login with portal overview return target",
         ("REDIRECT", "/user/login?came_from=/admin/"),
         path="/",
     )
@@ -379,22 +380,22 @@ def main() -> None:
     )
     run_case("login POST remains available for form submission", None, path="/user/login", method="POST")
     run_case("authenticated dataset view is available", None, path="/dataset/example", authenticated=True)
-    run_case("authenticated organization view is available", None, path="/organization/wajo", authenticated=True)
+    run_case("authenticated organization view is available", None, path="/organization/sample", authenticated=True)
     run_case("authenticated extension route is available", None, path="/harvest", authenticated=True)
     run_case(
-        "authenticated root opens Wajo Admin overview",
+        "authenticated root opens Portal Admin overview",
         ("REDIRECT", "/admin/"),
         path="/",
         authenticated=True,
     )
     run_case(
-        "authenticated login route opens Wajo Admin overview",
+        "authenticated login route opens Portal Admin overview",
         ("REDIRECT", "/admin/"),
         path="/user/login",
         authenticated=True,
     )
     run_case(
-        "authenticated logout confirmation opens the Wajo Admin overview",
+        "authenticated logout confirmation opens the Portal Admin overview",
         ("REDIRECT", "/admin/"),
         path="/user/logged_out_redirect",
         authenticated=True,
@@ -418,8 +419,8 @@ def main() -> None:
             if action_name == "package_search":
                 return {"count": 7, "results": []}
             if action_name == "organization_list":
-                return [{"name": "org-wajo"}]
-            return [{"name": "kategori-wajo"}]
+                return [{"name": "org-sample"}]
+            return [{"name": "kategori-sample"}]
         return invoke
 
     toolkit.get_action = fake_action
@@ -431,14 +432,14 @@ def main() -> None:
     ckan_lib.base = base_module
     sys.modules.update({"ckan.lib": ckan_lib, "ckan.lib.base": base_module})
     user.is_authenticated = True
-    blueprint = module.WajoThemePlugin().get_blueprint()
-    if blueprint.name != "wajo_admin" or blueprint.url_prefix != "/admin" or "/" not in blueprint.routes:
-        raise AssertionError("Blueprint Wajo Admin harus mendaftarkan route /admin/.")
+    blueprint = module.PortalThemePlugin().get_blueprint()
+    if blueprint.name != "portal_admin" or blueprint.url_prefix != "/admin" or "/" not in blueprint.routes:
+        raise AssertionError("Blueprint Portal Admin harus mendaftarkan route /admin/.")
     if "/media/upload" not in blueprint.routes:
-        raise AssertionError("Blueprint Wajo Admin harus mendaftarkan endpoint upload media editorial.")
+        raise AssertionError("Blueprint Portal Admin harus mendaftarkan endpoint upload media editorial.")
     dashboard_response = blueprint.routes["/"]()
-    if dashboard_response != "RENDERED" or dashboard_render.get("template") != "wajo_theme/dashboard.html":
-        raise AssertionError("Route Wajo Admin tidak merender dashboard custom.")
+    if dashboard_response != "RENDERED" or dashboard_render.get("template") != "portal_theme/dashboard.html":
+        raise AssertionError("Route Portal Admin tidak merender dashboard custom.")
     dashboard_vars = dashboard_render.get("vars", {})
     expected_stats = {
         "datasets": 42,
@@ -449,25 +450,25 @@ def main() -> None:
         "groups": 1,
         "my_datasets": 7,
     }
-    if dashboard_vars.get("wajo_admin_stats") != expected_stats:
-        raise AssertionError(f"Statistik dashboard tidak sesuai: {dashboard_vars.get('wajo_admin_stats')!r}")
-    general_fq = dashboard_vars.get("wajo_admin_general_dataset_fq", "")
+    if dashboard_vars.get("portal_admin_stats") != expected_stats:
+        raise AssertionError(f"Statistik dashboard tidak sesuai: {dashboard_vars.get('portal_admin_stats')!r}")
+    general_fq = dashboard_vars.get("portal_admin_general_dataset_fq", "")
     if not all(marker in general_fq for marker in ("portal-indikator", "portal-infografik", "portal-publikasi")):
         raise AssertionError("Hitungan dataset umum wajib mengecualikan seluruh tipe konten portal tematik.")
     mine_query = next((call for call in dashboard_action_calls if "creator_user_id:" in str(call.get("fq", ""))), None)
     if not mine_query or not all(marker in mine_query["fq"] for marker in ("portal-indikator", "portal-infografik", "portal-publikasi")):
         raise AssertionError("Hitungan dataset milik pengguna harus memakai filter dataset umum yang sama.")
-    if dashboard_vars.get("wajo_admin_portal_tags") != {
+    if dashboard_vars.get("portal_admin_portal_tags") != {
         "indicators": "portal-indikator",
         "infographics": "portal-infografik",
         "publications": "portal-publikasi",
     }:
         raise AssertionError("Dashboard harus menyediakan tag aktual untuk masing-masing katalog portal.")
-    portal_fqs = dashboard_vars.get("wajo_admin_portal_fqs", {})
-    dashboard_template = (ROOT / "deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/dashboard.html").read_text(encoding="utf-8")
-    if "fq=wajo_admin_" in dashboard_template:
+    portal_fqs = dashboard_vars.get("portal_admin_portal_fqs", {})
+    dashboard_template = (ROOT / "deploy/ckan/theme/ckanext/portal_theme/templates/portal_theme/dashboard.html").read_text(encoding="utf-8")
+    if "fq=portal_admin_" in dashboard_template:
         raise AssertionError("Kartu dashboard tidak boleh meneruskan filter Solr melalui URL fq; CKAN dataset.search memperlakukan argumen non-q sebagai field filter biasa.")
-    if "q=wajo_admin_general_dataset_fq" not in dashboard_template or not all(f"q=wajo_admin_portal_fqs.{key}" in dashboard_template for key in ("indicators", "infographics", "publications")):
+    if "q=portal_admin_general_dataset_fq" not in dashboard_template or not all(f"q=portal_admin_portal_fqs.{key}" in dashboard_template for key in ("indicators", "infographics", "publications")):
         raise AssertionError("Kartu kategori dashboard harus meneruskan ekspresi Solr melalui parameter q yang dibaca langsung oleh CKAN dataset.search.")
     for key, tag, content_type in (
         ("indicators", "portal-indikator", "indikator"),
@@ -477,14 +478,14 @@ def main() -> None:
         content_fq = portal_fqs.get(key, "")
         if not all(marker in content_fq for marker in (tag, content_type, "extras_portal_type", "dataset_type")):
             raise AssertionError(f"Filter hitungan dashboard {key} harus mencakup tag, portal_type, dan dataset_type.")
-        if f"wajo_admin_portal_fqs.{key}" not in dashboard_template:
+        if f"portal_admin_portal_fqs.{key}" not in dashboard_template:
             raise AssertionError(f"Tautan dashboard {key} harus memakai filter yang sama dengan hitungan.")
-    if not dashboard_vars.get("wajo_admin_recent_datasets") or dashboard_vars["wajo_admin_recent_datasets"][0]["name"] != "dataset-terbaru":
+    if not dashboard_vars.get("portal_admin_recent_datasets") or dashboard_vars["portal_admin_recent_datasets"][0]["name"] != "dataset-terbaru":
         raise AssertionError("Dashboard harus menampilkan dataset terbaru dari Action API CKAN.")
-    print("PASS Wajo Admin overview loads metrics and recent datasets from CKAN actions")
+    print("PASS Portal Admin overview loads metrics and recent datasets from CKAN actions")
 
     if plugin.can_upload("resource-tabular") is not True:
-        raise AssertionError("Wajo theme harus mengizinkan XLoader melanjutkan validasi format bawaannya.")
+        raise AssertionError("Portal theme harus mengizinkan XLoader melanjutkan validasi format bawaannya.")
     plugin._enqueue_resource_preview({"user": "editor"}, {"id": "resource-tabular", "format": "CSV"})
     plugin._enqueue_resource_preview({"user": "editor"}, {"id": "resource-document", "format": "PDF"})
     if len(xloader_calls) != 1 or xloader_calls[0][1] != {"resource_id": "resource-tabular"}:
@@ -539,7 +540,7 @@ def main() -> None:
 
 
 # Logout must finish with a clean login redirect and prevent cached auth screens.
-plugin_source = (ROOT / "deploy/ckan/theme/ckanext/wajo_theme/plugin.py").read_text()
+plugin_source = (ROOT / "deploy/ckan/theme/ckanext/portal_theme/plugin.py").read_text()
 assert 'path in {"/user/logout", "/user/logged_out_redirect"}' in plugin_source
 assert 'stale_logout_target' in plugin_source
 assert 'response.status_code = 303' in plugin_source

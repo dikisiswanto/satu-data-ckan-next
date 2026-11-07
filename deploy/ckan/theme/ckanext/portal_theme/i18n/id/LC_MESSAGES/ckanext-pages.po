@@ -1,0 +1,385 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Portal Satu Data\n"
+"Report-Msgid-Bugs-To: portal-admin@example.org\n"
+"POT-Creation-Date: 2026-11-01 00:00+0800\n"
+"PO-Revision-Date: 2026-11-01 00:00+0800\n"
+"Last-Translator: Administrator Portal <portal-admin@example.org>\n"
+"Language: id\n"
+"Language-Team: Bahasa Indonesia\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid " <p>Add blog articles to CKAN here.</p> "
+msgstr " <p>Kelola berita dan artikel portal melalui halaman ini.</p> "
+
+msgid ""
+" <p>Pages are are simple way to add extra pages to your ckan instance. You can assign an order to"
+" them.</p> "
+msgstr ""
+" <p>Halaman merupakan cara sederhana untuk menambahkan halaman ke portal CKAN. Anda dapat "
+"mengatur urutannya.</p> "
+
+msgid "2005-01-01"
+msgstr "2005-01-01"
+
+msgid "Actions"
+msgstr "Tindakan"
+
+msgid "Add"
+msgstr "Tambah"
+
+msgid "Add Article"
+msgstr "Tambah artikel"
+
+msgid "Add Blog Article"
+msgstr "Tambah artikel berita"
+
+msgid "Add Page"
+msgstr "Tambah halaman"
+
+msgid "Add page"
+msgstr "Tambah halaman"
+
+msgid "Add to menu"
+msgstr "Tambahkan ke menu"
+
+msgid "Apply"
+msgstr "Terapkan"
+
+#, python-brace-format
+msgid "Are you sure you want to delete page - {name}?"
+msgstr "Apakah Anda yakin ingin menghapus halaman {name}?"
+
+msgid "Are you sure you want to delete this Page?"
+msgstr "Apakah Anda yakin ingin menghapus halaman ini?"
+
+msgid "Are you sure you want to delete this page?"
+msgstr "Yakin ingin menghapus halaman ini?"
+
+msgid "Author"
+msgstr "Penulis"
+
+msgid "Back"
+msgstr "Kembali"
+
+msgid "Blog"
+msgstr "Berita dan artikel"
+
+msgid "Blog Articles"
+msgstr "Berita dan artikel"
+
+msgid "Blog post"
+msgstr "Artikel berita"
+
+msgid "Blog posts"
+msgstr "Artikel berita"
+
+msgid "Cancel"
+msgstr "Batal"
+
+msgid "Category"
+msgstr "Kategori"
+
+msgid "Clear"
+msgstr "Hapus pilihan"
+
+msgid "Confirm Delete"
+msgstr "Konfirmasi penghapusan"
+
+msgid "Content"
+msgstr "Konten"
+
+msgid "Create"
+msgstr "Buat"
+
+msgid "Create Page"
+msgstr "Buat halaman"
+
+msgid "Create a blog post"
+msgstr "Buat artikel berita"
+
+msgid "Create a page"
+msgstr "Buat halaman baru"
+
+msgid "Created"
+msgstr "Dibuat"
+
+msgid "Created on"
+msgstr "Dibuat pada"
+
+msgid "Delete"
+msgstr "Hapus"
+
+msgid "Delete Page"
+msgstr "Hapus halaman"
+
+msgid "Description"
+msgstr "Deskripsi"
+
+msgid "Display in navigation"
+msgstr "Tampilkan pada navigasi"
+
+msgid "Draft"
+msgstr "Draf"
+
+#, python-brace-format
+msgid "ERROR: View not found {view_id}"
+msgstr "KESALAHAN: Tampilan {view_id} tidak ditemukan."
+
+msgid "Edit"
+msgstr "Ubah"
+
+msgid "Edit Article"
+msgstr "Ubah artikel"
+
+msgid "Edit Blog Article"
+msgstr "Ubah artikel berita"
+
+msgid "Edit Page"
+msgstr "Ubah halaman"
+
+msgid "Edit page"
+msgstr "Ubah halaman"
+
+msgid "Enter content here"
+msgstr "Masukkan konten di sini"
+
+msgid "Excerpt"
+msgstr "Ringkasan"
+
+msgid "Featured"
+msgstr "Unggulan"
+
+msgid "Filter"
+msgstr "Saring"
+
+msgid "Group not found"
+msgstr "Grup tidak ditemukan."
+
+msgid "Manage content"
+msgstr "Kelola konten"
+
+msgid "Manage pages"
+msgstr "Kelola halaman"
+
+msgid "Menu Order"
+msgstr "Urutan menu"
+
+msgid "Menu label"
+msgstr "Label menu"
+
+msgid "Menu order"
+msgstr "Urutan menu"
+
+msgid "More"
+msgstr "Selengkapnya"
+
+msgid "My content"
+msgstr "Konten saya"
+
+msgid "Name"
+msgstr "Nama"
+
+msgid "New Page"
+msgstr "Halaman baru"
+
+msgid "Next"
+msgstr "Berikutnya"
+
+msgid "No pages available"
+msgstr "Belum ada halaman"
+
+msgid "No pages found"
+msgstr "Tidak ada halaman"
+
+msgid "Not authorized to see this page"
+msgstr "Anda tidak memiliki izin untuk melihat halaman ini."
+
+msgid "Not in Menu"
+msgstr "Tidak ditampilkan di menu"
+
+msgid "Only Posting is availiable"
+msgstr "Hanya metode POST yang tersedia."
+
+msgid "Open Graph image"
+msgstr "Gambar Open Graph"
+
+msgid "Organization not found"
+msgstr "Organisasi tidak ditemukan."
+
+msgid "Page"
+msgstr "Halaman"
+
+msgid "Page Content"
+msgstr "Konten halaman"
+
+msgid "Page Name"
+msgstr "Nama halaman"
+
+msgid "Page Not Found"
+msgstr "Halaman tidak ditemukan."
+
+msgid "Page Title"
+msgstr "Judul halaman"
+
+msgid "Page content"
+msgstr "Konten halaman"
+
+msgid "Page created"
+msgstr "Halaman berhasil dibuat"
+
+msgid "Page deleted"
+msgstr "Halaman berhasil dihapus"
+
+msgid "Page name"
+msgstr "Nama halaman"
+
+msgid "Page name already exists in database"
+msgstr "Nama halaman sudah digunakan."
+
+msgid "Page title"
+msgstr "Judul halaman"
+
+msgid "Page updated"
+msgstr "Halaman berhasil diperbarui"
+
+msgid "Pages"
+msgstr "Halaman"
+
+msgid "Previous"
+msgstr "Sebelumnya"
+
+msgid "Private"
+msgstr "Pribadi"
+
+msgid "Public"
+msgstr "Publik"
+
+msgid "Publication date"
+msgstr "Tanggal publikasi"
+
+msgid "Publish"
+msgstr "Terbitkan"
+
+msgid "Publish Date"
+msgstr "Tanggal terbit"
+
+msgid "Publish date"
+msgstr "Tanggal terbit"
+
+msgid "Published"
+msgstr "Diterbitkan"
+
+msgid "SEO description"
+msgstr "Deskripsi SEO"
+
+msgid "SEO title"
+msgstr "Judul SEO"
+
+msgid "Save"
+msgstr "Simpan"
+
+msgid "Save changes"
+msgstr "Simpan perubahan"
+
+msgid "Search pages..."
+msgstr "Cari halaman..."
+
+msgid "Settings"
+msgstr "Pengaturan"
+
+msgid "Show in menu"
+msgstr "Tampilkan di menu"
+
+msgid "Slug"
+msgstr "Slug"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Template"
+msgstr "Templat"
+
+msgid "Template type"
+msgstr "Jenis templat"
+
+msgid "There are currently no blog articles here"
+msgstr "Belum ada berita atau artikel."
+
+msgid "There are currently no pages here"
+msgstr "Belum ada halaman."
+
+msgid "This page currently has no content"
+msgstr "Halaman ini belum memiliki konten."
+
+msgid "Title"
+msgstr "Judul"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "URL slug"
+msgstr "Slug URL"
+
+msgid "Unauthorized to create or edit a page"
+msgstr "Anda tidak memiliki izin untuk membuat atau mengubah halaman."
+
+msgid "Unauthorized to delete page"
+msgstr "Anda tidak memiliki izin untuk menghapus halaman."
+
+#, python-format
+msgid "Unauthorized to read group %s"
+msgstr "Anda tidak memiliki izin untuk membaca grup %s."
+
+#, python-format
+msgid "Unauthorized to read organization %s"
+msgstr "Anda tidak memiliki izin untuk membaca organisasi %s."
+
+#, python-format
+msgid "Unauthorized to upload file %s"
+msgstr "Anda tidak memiliki izin untuk mengunggah berkas %s."
+
+msgid "Updated"
+msgstr "Diperbarui"
+
+msgid "Updated on"
+msgstr "Diperbarui pada"
+
+#, python-format
+msgid "User %s not authorized to read this page"
+msgstr "Pengguna %s tidak memiliki izin untuk membaca halaman ini."
+
+msgid "View Page"
+msgstr "Lihat halaman"
+
+msgid "Visibility"
+msgstr "Visibilitas"
+
+msgid "What are Pages?"
+msgstr "Apa itu Halaman?"
+
+msgid "Your browser does not support iframes."
+msgstr "Peramban Anda tidak mendukung iframe."
+
+msgid "eg. Blog Article Title"
+msgstr "Contoh: Judul artikel berita"
+
+msgid "eg. Page Title"
+msgstr "Contoh: Judul halaman"
+
+msgid "Content blocks JSON"
+msgstr "Blok konten JSON"
+
+msgid "Landing page"
+msgstr "Halaman utama"
+
+msgid "Page actions"
+msgstr "Aksi halaman"
+
+msgid "Revisions"
+msgstr "Revisi"

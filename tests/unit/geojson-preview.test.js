@@ -12,7 +12,7 @@ const polygon = {
   features: [
     {
       type: "Feature",
-      properties: { name: "Wajo" },
+      properties: { name: "Contoh" },
       geometry: {
         type: "Polygon",
         coordinates: [

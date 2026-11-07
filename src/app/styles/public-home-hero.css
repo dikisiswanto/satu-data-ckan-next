@@ -2,7 +2,7 @@
    resolved server content does not replay a second entrance after hydration. */
 .home-hero-copy > * {
   opacity: 0;
-  animation: wajo-copy-enter 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: portal-copy-enter 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .home-hero-copy > :nth-child(1) {
   animation-delay: 70ms;
@@ -25,15 +25,16 @@
   transform: none;
 }
 .home-hero-visual {
-  animation: wajo-visual-enter 850ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
+  animation: portal-visual-enter 850ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
 }
 .home-visual-mark {
-  animation: wajo-mark-enter 760ms cubic-bezier(0.22, 1, 0.36, 1) 420ms both;
+  animation: portal-mark-enter 760ms cubic-bezier(0.22, 1, 0.36, 1) 420ms both;
 }
 .home-visual-caption {
-  animation: wajo-caption-enter 680ms cubic-bezier(0.22, 1, 0.36, 1) 500ms both;
+  animation: portal-caption-enter 680ms cubic-bezier(0.22, 1, 0.36, 1) 500ms
+    both;
 }
-@keyframes wajo-copy-enter {
+@keyframes portal-copy-enter {
   from {
     opacity: 0;
     transform: translate3d(0, 12px, 0);
@@ -43,7 +44,7 @@
     transform: translate3d(0, 0, 0);
   }
 }
-@keyframes wajo-visual-enter {
+@keyframes portal-visual-enter {
   from {
     opacity: 0;
     transform: translate3d(0, 14px, 0);
@@ -53,7 +54,7 @@
     transform: translate3d(0, 0, 0);
   }
 }
-@keyframes wajo-mark-enter {
+@keyframes portal-mark-enter {
   from {
     opacity: 0;
     transform: translate3d(-50%, calc(-50% + 10px), 0);
@@ -63,7 +64,7 @@
     transform: translate3d(-50%, -50%, 0);
   }
 }
-@keyframes wajo-caption-enter {
+@keyframes portal-caption-enter {
   from {
     opacity: 0;
     transform: translate3d(50%, 8px, 0);
@@ -73,7 +74,7 @@
     transform: translate3d(50%, 0, 0);
   }
 }
-@keyframes wajo-chip-enter {
+@keyframes portal-chip-enter {
   from {
     opacity: 0;
     transform: translate3d(0, 9px, 0);
@@ -308,7 +309,7 @@ body:has(.public-home) .home-hero-pattern {
   width: min(82%, 21rem);
   border-style: solid;
   transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-22deg);
-  animation: wajo-orbit-spin 28s linear infinite;
+  animation: portal-orbit-spin 28s linear infinite;
 }
 
 .home-orbit-two {
@@ -316,7 +317,7 @@ body:has(.public-home) .home-hero-pattern {
   border-color: rgb(207 235 245 / 30%);
   border-style: dashed;
   transform: translate(-50%, -50%) rotateX(68deg) rotateZ(38deg);
-  animation: wajo-orbit-spin-reverse 22s linear infinite;
+  animation: portal-orbit-spin-reverse 22s linear infinite;
 }
 
 .home-scene-grid {
@@ -341,7 +342,7 @@ body:has(.public-home) .home-hero-pattern {
   width: var(--cube-size);
   height: var(--cube-size);
   transform-style: preserve-3d;
-  animation: wajo-cube-drift 15s ease-in-out infinite;
+  animation: portal-cube-drift 15s ease-in-out infinite;
 }
 
 .home-scene-cube__face {
@@ -411,17 +412,17 @@ body:has(.public-home) .home-hero-pattern {
 .home-scene-spark-one {
   top: 22%;
   left: 27%;
-  animation: wajo-spark-float 5.5s ease-in-out infinite;
+  animation: portal-spark-float 5.5s ease-in-out infinite;
 }
 .home-scene-spark-two {
   right: 23%;
   bottom: 27%;
   width: 0.38rem;
   height: 0.38rem;
-  animation: wajo-spark-float 6.8s ease-in-out -2s infinite;
+  animation: portal-spark-float 6.8s ease-in-out -2s infinite;
 }
 
-@keyframes wajo-orbit-spin {
+@keyframes portal-orbit-spin {
   from {
     transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-22deg);
   }
@@ -429,7 +430,7 @@ body:has(.public-home) .home-hero-pattern {
     transform: translate(-50%, -50%) rotateX(68deg) rotateZ(338deg);
   }
 }
-@keyframes wajo-orbit-spin-reverse {
+@keyframes portal-orbit-spin-reverse {
   from {
     transform: translate(-50%, -50%) rotateX(68deg) rotateZ(38deg);
   }
@@ -437,7 +438,7 @@ body:has(.public-home) .home-hero-pattern {
     transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-322deg);
   }
 }
-@keyframes wajo-cube-drift {
+@keyframes portal-cube-drift {
   0%,
   100% {
     transform: rotateX(-16deg) rotateY(-24deg) translateY(0);
@@ -446,7 +447,7 @@ body:has(.public-home) .home-hero-pattern {
     transform: rotateX(18deg) rotateY(26deg) translateY(-0.55rem);
   }
 }
-@keyframes wajo-spark-float {
+@keyframes portal-spark-float {
   0%,
   100% {
     translate: 0 0;
@@ -577,9 +578,9 @@ body:has(.public-home) .home-hero-pattern {
     box-shadow 220ms ease,
     border-color 220ms ease;
   animation:
-    wajo-chip-enter 650ms cubic-bezier(0.22, 1, 0.36, 1)
+    portal-chip-enter 650ms cubic-bezier(0.22, 1, 0.36, 1)
       var(--chip-enter-delay, 560ms) both,
-    wajo-metric-float 6.8s ease-in-out var(--chip-float-delay, 1.45s) infinite
+    portal-metric-float 6.8s ease-in-out var(--chip-float-delay, 1.45s) infinite
       both;
 }
 .home-visual-chip:hover,
@@ -645,7 +646,7 @@ body:has(.public-home) .home-hero-pattern {
 .home-visual-chip small {
   color: var(--chip-muted, #526777);
 }
-@keyframes wajo-metric-float {
+@keyframes portal-metric-float {
   0%,
   100% {
     translate: 0 0;

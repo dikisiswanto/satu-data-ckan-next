@@ -101,7 +101,7 @@ check(
   "Do not force a redundant service-worker update request on every page load.",
 );
 check(
-  /portal-satu-data-static-v5/.test(worker),
+  /portal-satu-data-static-v6/.test(worker),
   "Service worker cache version must be bumped when the cache policy changes.",
 );
 check(
@@ -124,8 +124,10 @@ check(
   "Hashed Next.js chunks must be cached only when the server marks them immutable.",
 );
 check(
-  /PUBLIC_IMAGE_ASSETS/.test(worker) && /stale-while-revalidate/i.test(worker),
-  "Only the explicit public-image allowlist should use stale-while-revalidate caching.",
+  /PUBLIC_IMAGE_ASSETS/.test(worker) &&
+    /PUBLIC_IMAGE_EXTENSION/.test(worker) &&
+    /stale-while-revalidate/i.test(worker),
+  "Same-origin public image assets, including tenant-configured logos, should use bounded stale-while-revalidate caching.",
 );
 check(
   /request\.method !== "GET"/.test(worker) &&

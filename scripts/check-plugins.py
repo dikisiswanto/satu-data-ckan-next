@@ -17,10 +17,10 @@ required = {
     # Installed CKAN extensions.
     "scheming_datasets",
     "pages",
-    "wajo_pages",
-    "wajo_theme",
-    "wajo_harvest_i18n",
-    "wajo_pages_i18n",
+    "portal_pages",
+    "portal_theme",
+    "portal_harvest_i18n",
+    "portal_pages_i18n",
     "dcat",
     "dcat_rdf_harvester",
     "structured_data",
@@ -59,10 +59,10 @@ if not callable(UniversalDetector):
 
 try:
     from pathlib import Path
-    theme_plugin = import_module("ckanext.wajo_theme.plugin")
+    theme_plugin = import_module("ckanext.portal_theme.plugin")
     for class_name, domain in (
-        ("WajoHarvestTranslationPlugin", "ckanext-harvest"),
-        ("WajoPagesTranslationPlugin", "ckanext-pages"),
+        ("PortalHarvestTranslationPlugin", "ckanext-harvest"),
+        ("PortalPagesTranslationPlugin", "ckanext-pages"),
     ):
         plugin_class = getattr(theme_plugin, class_name)
         translation_plugin = plugin_class()
@@ -74,7 +74,7 @@ try:
         if not (i18n_directory / "id/LC_MESSAGES" / f"{domain}.mo").is_file():
             raise RuntimeError(f"Compiled Indonesian catalog is missing for {domain}")
 except Exception as exc:
-    sys.exit(f"Wajo Admin extension translation runtime check failed: {exc}")
+    sys.exit(f"Portal Admin extension translation runtime check failed: {exc}")
 
 # Exercise the real installed CKAN Markdown renderer inside the pinned CKAN
 # image. This catches dependency, extension-registration, rendering, and
@@ -83,8 +83,8 @@ try:
     from ckan.plugins.interfaces import IConfigurer, ITemplateHelpers
     from ckanext.pages.plugin import get_wysiwyg_editor as pages_get_wysiwyg_editor
     from ckanext.pages.plugin import render_content as pages_render_content
-    from ckanext.wajo_theme.markdown import render_wajo_markdown
-    from ckanext.wajo_theme.plugin import WajoThemePlugin
+    from ckanext.portal_theme.markdown import render_portal_markdown
+    from ckanext.portal_theme.plugin import PortalThemePlugin
 
     # This mirrors CKAN 2.12 ckan.lib.helpers.load_plugin_helpers exactly:
     # ITemplateHelpers reverses ckan.plugins order and later dict updates win.
@@ -95,24 +95,24 @@ try:
         raise RuntimeError("Unexpected CKAN IConfigurer iteration semantics")
 
     # add_template_directory prepends plugin_template_paths. With the actual
-    # CKAN IConfigurer reverse iteration, this order leaves Wajo first, then
+    # CKAN IConfigurer reverse iteration, this order leaves Contoh first, then
     # Pages and Activity as the next template providers; ckan_extends can
-    # therefore walk down the chain without returning to Wajo recursively.
-    expected_template_plugin_order = ("wajo_theme", "pages", "activity")
+    # therefore walk down the chain without returning to Contoh recursively.
+    expected_template_plugin_order = ("portal_theme", "pages", "activity")
     template_path_order = []
     for plugin_name in reversed(expected_template_plugin_order):
         template_path_order.insert(0, plugin_name)
     if tuple(template_path_order) != expected_template_plugin_order:
-        raise RuntimeError("Wajo CKAN template path priority is not deterministic")
+        raise RuntimeError("Contoh CKAN template path priority is not deterministic")
 
-    expected_plugin_order = ("wajo_theme", "pages")
+    expected_plugin_order = ("portal_theme", "pages")
     effective_helpers = {}
     helper_sources = {
         "pages": {
             "render_content": pages_render_content,
             "pages_get_wysiwyg_editor": pages_get_wysiwyg_editor,
         },
-        "wajo_theme": WajoThemePlugin().get_helpers(),
+        "portal_theme": PortalThemePlugin().get_helpers(),
     }
     ordered_for_helper_loading = reversed(expected_plugin_order)
     for plugin_name in ordered_for_helper_loading:
@@ -120,9 +120,9 @@ try:
 
     if effective_helpers["pages_get_wysiwyg_editor"]() is not None:
         raise RuntimeError("Effective CKAN helper registry still enables the upstream Pages WYSIWYG branch")
-    if effective_helpers["render_content"] is not render_wajo_markdown:
+    if effective_helpers["render_content"] is not render_portal_markdown:
         raise RuntimeError(
-            "Effective CKAN helper registry still resolves ckanext-pages render_content instead of Wajo Markdown"
+            "Effective CKAN helper registry still resolves ckanext-pages render_content instead of Portal Markdown"
         )
     upstream_rendered = str(effective_helpers["render_content"]("## Judul Markdown\n\n**tebal**\n\n~~*teks miring yang dicoret*~~"))
     if (
@@ -131,8 +131,8 @@ try:
         or "<del><em>teks miring yang dicoret</em></del>" not in upstream_rendered
     ):
         raise RuntimeError("The installed CKAN render_content helper failed Markdown/strikethrough runtime rendering")
-    if effective_helpers["wajo_render_markdown"] is not effective_helpers["render_content"]:
-        raise RuntimeError("Wajo template helper and upstream Pages/Blog render_content must share one renderer")
+    if effective_helpers["portal_render_markdown"] is not effective_helpers["render_content"]:
+        raise RuntimeError("Contoh template helper and upstream Pages/Blog render_content must share one renderer")
 
     markdown_sample = """## teks aaa
 
@@ -168,7 +168,7 @@ alooo <span>teks</span>
 <script>alert(1)</script>
 <img src=x onerror=alert(1)>
 """
-    rendered_markdown = str(render_wajo_markdown(markdown_sample))
+    rendered_markdown = str(render_portal_markdown(markdown_sample))
     required_markdown_fragments = (
         "<h2>teks aaa</h2>",
         "<strong>aku</strong>",
@@ -211,7 +211,7 @@ alooo <span>teks</span>
     if 'rel="opener"' in rendered_markdown:
         raise RuntimeError("Author-supplied link rel must not override nh3's safe noopener/noreferrer policy")
 except Exception as exc:
-    sys.exit(f"Wajo CKAN Markdown renderer runtime check failed: {exc}")
+    sys.exit(f"Contoh CKAN Markdown renderer runtime check failed: {exc}")
 
-print("PASS Wajo CKAN Markdown renderer supports editorial GFM constructs and strips unsafe raw HTML")
+print("PASS Contoh CKAN Markdown renderer supports editorial GFM constructs and strips unsafe raw HTML")
 print("CKAN extension entry points, XLoader imports, Indonesian translation domains, and Markdown renderer verified:", ", ".join(sorted(required)))

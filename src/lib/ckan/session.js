@@ -7,10 +7,10 @@ import "server-only";
  * are deliberately excluded.
  */
 export const CKAN_SESSION_COOKIE_NAME = /^[A-Za-z0-9_-]{1,64}$/.test(
-  process.env.CKAN_SESSION_COOKIE_NAME || "wajo_ckan_session",
+  process.env.CKAN_SESSION_COOKIE_NAME || "portal_ckan_session",
 )
-  ? process.env.CKAN_SESSION_COOKIE_NAME || "wajo_ckan_session"
-  : "wajo_ckan_session";
+  ? process.env.CKAN_SESSION_COOKIE_NAME || "portal_ckan_session"
+  : "portal_ckan_session";
 
 export function normalizeCkanSessionCookieValue(value) {
   if (typeof value !== "string") return null;

@@ -429,12 +429,12 @@ for (const token of [
 }
 requireText(
   "src/app/styles/public-home-hero.css",
-  "wajo-chip-enter 650ms",
+  "portal-chip-enter 650ms",
   "hero metric cards must animate in before floating",
 );
 requireText(
   "src/app/styles/public-home-hero.css",
-  "wajo-metric-float 6.8s",
+  "portal-metric-float 6.8s",
   "hero metric cards must float gently after entrance",
 );
 requireText(
@@ -533,86 +533,86 @@ requireText(
   "public management link must use the shorter Login label",
 );
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-theme.css",
-  ".wajo-admin-brand__copy strong",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-theme.css",
+  ".portal-admin-brand__copy strong",
   "CKAN administrator branding needs a protected, legible title treatment",
 );
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/webassets.yml",
-  "css/wajo-theme.css",
-  "Wajo admin CSS must be registered as a WebAssets source",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/webassets.yml",
+  "css/portal-theme.css",
+  "Contoh admin CSS must be registered as a WebAssets source",
 );
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/webassets.yml",
-  "css/wajo-admin-design-system.css",
-  "The canonical Wajo Admin design system must load after the base theme",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/webassets.yml",
+  "css/portal-admin-design-system.css",
+  "The canonical Portal Admin design system must load after the base theme",
 );
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  "--wajo-color-primary: #1d5fa7",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+  "--portal-color-primary: #1d5fa7",
   "Admin primary color must match the public portal design token",
 );
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  "--wajo-content-max: 1480px",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+  "--portal-content-max: 1480px",
   "Admin content width must use a bounded shared layout token",
 );
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  "--wajo-color-canvas: #f5f7f6",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+  "--portal-color-canvas: #f5f7f6",
   "Admin canvas must match the public portal token exactly",
 );
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  "--wajo-color-border: #d8e2e4",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+  "--portal-color-border: #d8e2e4",
   "Admin border must match the public portal token exactly",
 );
 if (
-  !/--wajo-radius-control:\s*0?\.625rem/.test(
+  !/--portal-radius-control:\s*0?\.625rem/.test(
     read(
-      "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+      "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
     ),
   )
 ) {
   failures.push(
-    "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css: Admin controls must share the public control radius",
+    "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css: Admin controls must share the public control radius",
   );
 }
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  "--wajo-sidebar-width: 264px",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+  "--portal-sidebar-width: 264px",
   "Admin desktop sidebar width must be explicit and consistent",
 );
 if (
-  !/--wajo-font-sans:\s*Inter,\s*ui-sans-serif,\s*system-ui/.test(
+  !/--portal-font-sans:\s*Inter,\s*ui-sans-serif,\s*system-ui/.test(
     read(
-      "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+      "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
     ),
   )
 ) {
   failures.push(
-    "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css: Admin typography must prefer Inter with a robust local fallback stack",
+    "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css: Admin typography must prefer Inter with a robust local fallback stack",
   );
 }
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  "--wajo-control-height: 42px",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+  "--portal-control-height: 42px",
   "Admin fields must use a consistent desktop control height",
 );
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  "--wajo-button-height: 40px",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+  "--portal-button-height: 40px",
   "Admin buttons must use a consistent desktop height",
 );
 if (
-  !/\.wajo-admin-workspace \.pagination \.page-link\s*\{[^}]*min-width:\s*44px;[^}]*min-height:\s*44px;/s.test(
+  !/\.portal-admin-workspace \.pagination \.page-link\s*\{[^}]*min-width:\s*44px;[^}]*min-height:\s*44px;/s.test(
     read(
-      "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+      "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
     ),
   )
 ) {
   failures.push(
-    "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css: Mobile pagination must use comfortable touch targets",
+    "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css: Mobile pagination must use comfortable touch targets",
   );
 }
 if (
@@ -624,7 +624,7 @@ if (
   )
 ) {
   failures.push(
-    "src/app/styles/public-home-hero.css: Wajo panorama crop must use a deliberate object-fit frame and stable focal point",
+    "src/app/styles/public-home-hero.css: Contoh panorama crop must use a deliberate object-fit frame and stable focal point",
   );
 }
 requireText(
@@ -752,7 +752,7 @@ requireText(
 );
 requireText(
   "scripts/e2e-mock-ckan.mjs",
-  "memanfaatkan data resmi Kabupaten Wajo secara tepat",
+  "memanfaatkan data resmi Kabupaten Contoh secara tepat",
   "CKAN mock must exercise long CMS card descriptions",
 );
 
@@ -814,17 +814,17 @@ for (const route of ["infografik", "publikasi"]) {
 }
 
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
-  "--wajo-dashboard-max: var(--wajo-content-max)",
-  "Wajo Admin dashboard must use the same full workspace width as other admin pages",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+  "--portal-dashboard-max: var(--portal-content-max)",
+  "Portal Admin dashboard must use the same full workspace width as other admin pages",
 );
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/icon.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/portal_theme/icon.html",
   "fa-solid",
   "admin navigation icons must use the CKAN 2.12 Font Awesome solid family",
 );
 requireText(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/base.html",
   "fonts.googleapis.com/css2?family=Inter",
   "CKAN admin must load Google Font Inter",
 );

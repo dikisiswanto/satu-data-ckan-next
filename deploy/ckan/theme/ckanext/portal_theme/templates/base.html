@@ -1,0 +1,17 @@
+{% ckan_extends %}
+
+{% block styles %}
+  {{ super() }}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..900&amp;display=swap" rel="stylesheet" />
+  {% asset "portal_theme/portal_theme" %}
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <form id="portal-media-csrf" hidden aria-hidden="true">{{ h.csrf_input() }}</form>
+  <script defer src="/portal-admin-forms.js?v=20261102-1"></script>
+  <script defer src="/portal-admin-navigation-progress.js?v=20261102-1"></script>
+  <script defer src="/portal-markdown-editor.js?v=20261031-3"></script>
+{% endblock %}

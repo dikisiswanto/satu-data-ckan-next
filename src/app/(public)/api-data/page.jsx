@@ -18,9 +18,7 @@ import {
   siteConfig,
 } from "@/lib/site-config";
 
-const apiOrigin = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://data.wajokab.go.id"
-).replace(/\/$/, "");
+const apiOrigin = (siteConfig.publicSiteUrl || "").replace(/\/$/, "");
 const basePath = "/api/3/action";
 const examples = {
   search: `curl -sS '${apiOrigin}${basePath}/package_search?q=pendidikan&rows=20&start=0'`,
@@ -556,12 +554,11 @@ export default function ApiDocsPage() {
                     Integrasi katalog otomatis (harvesting)
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-sky-950">
-                    Jika katalog Wajo akan diambil oleh portal data lain,
-                    gunakan <code>https://data.wajokab.go.id</code> sebagai
-                    alamat sumber CKAN, bukan hostname admin. API publik
-                    mendukung paginasi berukuran 100, urutan stabil{" "}
-                    <code>id asc</code>, dan filter perubahan metadata yang
-                    dibatasi. Tidak perlu API key untuk metadata publik.
+                    Jika katalog data ini akan diambil oleh portal lain, gunakan
+                    alamat publik portal sebagai sumber CKAN, bukan hostname
+                    admin. API publik mendukung paginasi berukuran 100, urutan
+                    stabil <code>id asc</code>, dan filter perubahan metadata
+                    yang dibatasi. Tidak perlu API key untuk metadata publik.
                     Kesesuaian akhir tetap perlu diuji dengan konfigurasi
                     harvester tujuan.
                   </p>

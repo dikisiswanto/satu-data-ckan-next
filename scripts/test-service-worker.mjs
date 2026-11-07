@@ -166,17 +166,17 @@ assert.equal(
   "Private cache-control responses must never be retained, even from an allowlisted path",
 );
 
-responses.set("/wajo-hero-panorama.webp", () =>
+responses.set("/portal-hero-panorama.webp", () =>
   makeResponse("image-v1", {
     "cache-control": "public, max-age=3600",
     "content-length": "8",
     "content-type": "image/webp",
   }),
 );
-const heroRequest = request("/wajo-hero-panorama.webp");
+const heroRequest = request("/portal-hero-panorama.webp");
 const firstHeroResponse = await dispatchFetch(heroRequest);
 assert.equal(await firstHeroResponse.text(), "image-v1");
-responses.set("/wajo-hero-panorama.webp", () =>
+responses.set("/portal-hero-panorama.webp", () =>
   makeResponse("image-v2", {
     "cache-control": "public, max-age=3600",
     "content-length": "8",
@@ -189,7 +189,7 @@ assert.equal(
   "image-v1",
   "Public images should serve the cached response while refreshing in the background",
 );
-const workerCache = await cacheApi.open("portal-satu-data-static-v5");
+const workerCache = await cacheApi.open("portal-satu-data-static-v6");
 const refreshedHero = await workerCache.match(heroRequest);
 assert.equal(await refreshedHero.text(), "image-v2");
 

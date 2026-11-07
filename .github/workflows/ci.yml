@@ -24,7 +24,7 @@ jobs:
       PUBLIC_SITE_ORIGIN: http://127.0.0.1:3100
       NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3100
       NEXT_PUBLIC_CKAN_ADMIN_URL: https://ckan.example.test
-      NEXT_PUBLIC_REGION_NAME: Kabupaten Wajo
+      NEXT_PUBLIC_REGION_NAME: Instansi Uji
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -48,9 +48,9 @@ jobs:
             deploy/ckan/docker-compose.manual.yml \
             deploy/ckan/docker-compose.cloudflare-basic-auth.yml \
             deploy/ckan/docker-compose.manual-basic-auth.yml \
-            deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml \
-            deploy/ckan/theme/ckanext/wajo_theme/schemas/organization.yaml \
-            deploy/ckan/theme/ckanext/wajo_theme/schemas/group.yaml \
+            deploy/ckan/theme/ckanext/portal_theme/schemas/dataset.yaml \
+            deploy/ckan/theme/ckanext/portal_theme/schemas/organization.yaml \
+            deploy/ckan/theme/ckanext/portal_theme/schemas/group.yaml \
             .github/workflows/ci.yml \
             .github/workflows/extended-validation.yml
           bash -n scripts/check-static.sh \

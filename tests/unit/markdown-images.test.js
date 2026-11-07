@@ -17,10 +17,10 @@ describe("Markdown article images", () => {
   it("finds images nested in lists and blockquotes", () => {
     expect(
       findFirstMarkdownImage(
-        "> Foto dokumentasi\n>\n> ![Dokumentasi](https://cdn.example.test/wajo.jpg)",
+        "> Foto dokumentasi\n>\n> ![Dokumentasi](https://cdn.example.test/sample.jpg)",
       ),
     ).toMatchObject({
-      href: "https://cdn.example.test/wajo.jpg",
+      href: "https://cdn.example.test/sample.jpg",
       alt: "Dokumentasi",
     });
     expect(

@@ -68,7 +68,7 @@ Target Core Web Vitals pada persentil ke-75: LCP ≤ 2,5 detik, INP ≤ 200 ms, 
 
 ## Analitik penerbitan OPD pada Admin CKAN
 
-Dashboard Wajo Admin menampilkan peringkat penerbitan organisasi dari empat facet CKAN yang terpisah: dataset umum, indikator, infografik, dan publikasi. Data tidak memakai `organization.package_count`, karena field tersebut menghitung paket lintas tipe. Panel ini hanya tersedia bila keempat query facet berhasil; kegagalan satu sumber tidak disamarkan sebagai nol. Query mengatur `include_private=false`, sehingga angka merepresentasikan konten publik saja dan dapat dibandingkan dengan katalog publik. Filter per tipe dibuat saling eksklusif; item dengan marker kategori yang saling bertentangan tidak dihitung ganda.
+Dashboard Portal Admin menampilkan peringkat penerbitan organisasi dari empat facet CKAN yang terpisah: dataset umum, indikator, infografik, dan publikasi. Data tidak memakai `organization.package_count`, karena field tersebut menghitung paket lintas tipe. Panel ini hanya tersedia bila keempat query facet berhasil; kegagalan satu sumber tidak disamarkan sebagai nol. Query mengatur `include_private=false`, sehingga angka merepresentasikan konten publik saja dan dapat dibandingkan dengan katalog publik. Filter per tipe dibuat saling eksklusif; item dengan marker kategori yang saling bertentangan tidak dihitung ganda.
 
 Perhitungan murni diuji di `scripts/test-publisher-analytics.py`, dengan fixture OPD yang memiliki satu infografik tetapi nol dataset umum.
 

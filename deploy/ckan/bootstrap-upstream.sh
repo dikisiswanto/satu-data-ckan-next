@@ -273,46 +273,58 @@ legacy_view_plugins = {
     "recline_view", "recline_grid_view", "recline_graph_view", "recline_map_view",
     "esri_shapefile_view",
 }
+legacy_extension_prefixes = {
+    prefix.strip()
+    for prefix in re.split(r"[,\s]+", values.get("PORTAL_LEGACY_EXTENSION_PREFIXES", ""))
+    if prefix.strip()
+}
+legacy_institution_plugin_ids = {
+    f"{prefix}_{suffix}"
+    for prefix in legacy_extension_prefixes
+    for suffix in ("pages", "theme", "harvest_i18n", "pages_i18n", "dcat_i18n")
+}
 portal_plugins = {
-    "envvars", "wajo_pages", "wajo_theme", "wajo_harvest_i18n", "wajo_pages_i18n", "wajo_dcat_i18n", "scheming_datasets", "scheming_organizations", "scheming_groups", "pages", "dcat",
+    "envvars", "portal_pages", "portal_theme", "portal_harvest_i18n", "portal_pages_i18n", "portal_dcat_i18n", "scheming_datasets", "scheming_organizations", "scheming_groups", "pages", "dcat",
     "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view",
     "geojson_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
     "datatables_view", "image_view", "text_view", "datastore", "xloader", "activity",
     *legacy_view_plugins,
+    *legacy_institution_plugin_ids,
 }
 plugins = [plugin for plugin in (plugin_raw.split() if plugin_raw else []) if plugin not in portal_plugins and plugin != "datapusher"]
 for plugin in (
     "scheming_datasets", "scheming_organizations", "scheming_groups",
-    "wajo_pages", "wajo_theme", "pages", "dcat", "dcat_rdf_harvester",
+    "portal_pages", "portal_theme", "pages", "dcat", "dcat_rdf_harvester",
     "structured_data", "resource_proxy", "datatables_view", "image_view", "text_view",
     "geojson_view", "geo_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
-    "datastore", "xloader", "activity", "wajo_harvest_i18n", "wajo_pages_i18n", "wajo_dcat_i18n",
+    "datastore", "xloader", "activity", "portal_harvest_i18n", "portal_pages_i18n", "portal_dcat_i18n",
 ):
     if plugin not in plugins:
         plugins.append(plugin)
 # CKAN's ITemplateHelpers and IConfigurer iterate plugins in reverse order:
 # earlier entries override helper names and their template directories take
-# precedence. Keep Wajo before both Pages and Activity. This makes the safe
+# precedence. Keep Portal theme before both Pages and Activity. This makes the safe
 # Markdown render_content helper win over ckanext-pages and prevents the
-# Midnight Blue page.html ckan_extends chain from looping back into Wajo.
+# Midnight Blue page.html ckan_extends chain from looping back into the Portal theme.
 plugins.append("envvars")
 values["CKAN__PLUGINS"] = '"' + " ".join(plugins) + '"'
 # CKAN 2.12 ships the modern Midnight Blue UI; use the supported native theme instead of a prototype theme extension.
 values["CKAN__BASE_PUBLIC_FOLDER"] = "public-midnight-blue"
 values["CKAN__BASE_TEMPLATES_FOLDER"] = "templates-midnight-blue"
-values["CKAN__SITE_TITLE"] = values.get("CKAN__SITE_TITLE", "Portal Satu Data Kabupaten Wajo").strip().strip("\"").strip("\'") or "Portal Satu Data Kabupaten Wajo"
-values["CKAN__SITE_DESCRIPTION"] = values.get("CKAN__SITE_DESCRIPTION", "Portal data resmi Pemerintah Kabupaten Wajo").strip().strip("\"").strip("\'") or "Portal data resmi Pemerintah Kabupaten Wajo"
+values["CKAN__SITE_TITLE"] = values.get("CKAN__SITE_TITLE", values.get("PORTAL_BRAND_NAME", "Portal Satu Data")).strip().strip("\"").strip("\'") or "Portal Satu Data"
+values["CKAN__SITE_DESCRIPTION"] = values.get("CKAN__SITE_DESCRIPTION", values.get("PORTAL_SITE_DESCRIPTION", "Katalog data resmi instansi pengampu.")).strip().strip("\"").strip("\'") or "Katalog data resmi instansi pengampu."
 # Keep the CKAN administrator interface in Indonesian by default. English remains
 # available for support and imported extension screens that have no id catalog.
 values["CKAN__LOCALE_DEFAULT"] = "id"
 values["CKAN__LOCALES_OFFERED"] = "\"id en\""
 values["CKAN__LOCALE_ORDER"] = "\"id en\""
-# Use the Wajo Admin overview as the default post-login landing page.
-values["CKAN__AUTH__ROUTE_AFTER_LOGIN"] = "wajo_admin.index"
-site_logo = values.get("CKAN__SITE_LOGO", "/logo-kabupaten-wajo.webp").strip().strip("\"").strip("\'")
+# Use the Portal Admin overview as the default post-login landing page.
+values["CKAN__AUTH__ROUTE_AFTER_LOGIN"] = "portal_admin.index"
+configured_default_logo = values.get("PORTAL_LOGO_PATH", "/institution-logo-default.webp").strip().strip("\"").strip("\'") or "/icons/portal.svg"
+site_logo = values.get("CKAN__SITE_LOGO", configured_default_logo).strip().strip("\"").strip("\'")
 # Migrate the previous generated path: extension public assets are exposed at the URL root.
-if site_logo in {"", "/base/logo-kabupaten-wajo.webp"}:
-    site_logo = "/logo-kabupaten-wajo.webp"
+if site_logo in {"", "/base/institution-logo-default.webp"}:
+    site_logo = configured_default_logo
 values["CKAN__SITE_LOGO"] = site_logo
 # CKAN 2.12 FileStore. The official upstream compose mounts ckan_storage at
 # /var/lib/ckan, so this initialized default storage survives container rebuilds.
@@ -321,18 +333,22 @@ values["CKAN__UPLOADS_ENABLED"] = "true"
 values["CKAN__FILES__STORAGE__DEFAULT__TYPE"] = "ckan:fs"
 values["CKAN__FILES__STORAGE__DEFAULT__PATH"] = "/var/lib/ckan/default"
 values["CKAN__FILES__STORAGE__DEFAULT__INITIALIZE"] = "true"
-# Editorial media is public only through the custom wajo_media owner auth function.
-values["CKAN__FILES__OWNER__CASCADE_ACCESS"] = "package resource group organization wajo_media"
+# Editorial media is public only through the custom portal_media owner auth function.
+media_owner_type = values.get("CKANEXT__PORTAL_THEME__MEDIA_OWNER_TYPE", "portal_media").strip() or "portal_media"
+media_owner_id = values.get("CKANEXT__PORTAL_THEME__MEDIA_OWNER_ID", "public-editorial-media").strip() or "public-editorial-media"
+values["CKANEXT__PORTAL_THEME__MEDIA_OWNER_TYPE"] = media_owner_type
+values["CKANEXT__PORTAL_THEME__MEDIA_OWNER_ID"] = media_owner_id
+values["CKAN__FILES__OWNER__CASCADE_ACCESS"] = "package resource group organization " + media_owner_type
 values["CKAN__MAX_IMAGE_SIZE"] = "5"
 values["CKAN__UPLOAD__GROUP__TYPES"] = "image"
 values["CKAN__UPLOAD__GROUP__MIMETYPES"] = '"image/png image/jpeg image/gif image/webp"'
 values["CKANEXT__XLOADER__API_TOKEN"] = values.get("CKANEXT__XLOADER__API_TOKEN", "").strip().strip("\"").strip("\'")
 values["CKANEXT__XLOADER__JOBS_DB__URI"] = values["CKAN_SQLALCHEMY_URL"]
 values["CKANEXT__XLOADER__SITE_URL"] = "http://ckan:5000"
-values["CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL"] = "http://nextjs:3000/api/internal/ckan/revalidate"
-values["CKAN___SCHEMING__DATASET_SCHEMAS"] = "ckanext.wajo_theme:schemas/dataset.yaml"
-values["CKAN___SCHEMING__ORGANIZATION_SCHEMAS"] = "ckanext.wajo_theme:schemas/organization.yaml"
-values["CKAN___SCHEMING__GROUP_SCHEMAS"] = "ckanext.wajo_theme:schemas/group.yaml"
+values["CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_URL"] = values.get("CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_URL", "http://nextjs:3000/api/internal/ckan/revalidate").strip() or "http://nextjs:3000/api/internal/ckan/revalidate"
+values["CKAN___SCHEMING__DATASET_SCHEMAS"] = "ckanext.portal_theme:schemas/dataset.yaml"
+values["CKAN___SCHEMING__ORGANIZATION_SCHEMAS"] = "ckanext.portal_theme:schemas/organization.yaml"
+values["CKAN___SCHEMING__GROUP_SCHEMAS"] = "ckanext.portal_theme:schemas/group.yaml"
 values["CKAN___SCHEMING__PRESETS"] = "ckanext.scheming:presets.json"
 values["CKANEXT__PAGES__REVISIONS_LIMIT"] = "5"
 values["CKANEXT__PAGES__REVISIONS_FORCE_LIMIT"] = "true"

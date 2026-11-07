@@ -38,8 +38,8 @@ for action in ("status_show", "package_search?q=%2A%3A%2A&rows=0&start=0"):
     if payload.get("success") is not True:
         raise SystemExit("Validasi CKAN gagal pada action: " + action.split("?", 1)[0])
 
-url = os.environ.get("CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_URL", "").strip()
-secret = os.environ.get("CKANEXT__WAJO_THEME__PUBLIC_REVALIDATE_SECRET", "").strip()
+url = os.environ.get("CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_URL", "").strip()
+secret = os.environ.get("CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_SECRET", "").strip()
 if not url or len(secret) < 32:
     raise SystemExit("URL webhook atau rahasia invalidasi belum dikonfigurasi pada container CKAN.")
 
@@ -55,8 +55,8 @@ request = urllib.request.Request(
     data=body,
     headers={
         "Content-Type": "application/json",
-        "X-Wajo-Timestamp": timestamp,
-        "X-Wajo-Signature": "sha256=" + signature,
+        "X-Portal-Timestamp": timestamp,
+        "X-Portal-Signature": "sha256=" + signature,
     },
     method="POST",
 )

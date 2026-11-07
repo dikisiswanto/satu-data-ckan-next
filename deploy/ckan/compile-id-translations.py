@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Overlay maintained Wajo Indonesian strings on CKAN's existing core catalog.
+"""Overlay maintained portal Indonesian strings on CKAN's existing core catalog.
 
 CKAN ships/installs its own gettext catalog.  Replacing that file with the small
 project-specific catalog would discard upstream Indonesian translations, so
-this compiler merges the two: Wajo overrides take precedence, untranslated
+this compiler merges the two: portal overrides take precedence, untranslated
 custom messages never erase an upstream translation.
 """
 from __future__ import annotations
@@ -30,7 +30,7 @@ def compile_catalog(source: Path, i18n_directory: Path) -> Path:
     translated = [message for message in custom_catalog if message.id and message.string]
     if len(translated) < 60:
         raise SystemExit(
-            f"Indonesian Wajo catalog is unexpectedly small: {len(translated)} translated messages."
+            f"Indonesian portal catalog is unexpectedly small: {len(translated)} translated messages."
         )
 
     destination = i18n_directory / "id" / "LC_MESSAGES" / "ckan.mo"
@@ -86,7 +86,7 @@ EXTENSION_MODULES = {
 def discover_upstream_extension_catalogs(domain: str) -> list[Path]:
     """Find Indonesian catalogs shipped by the corresponding installed extension.
 
-    The Wajo plugins own these gettext domains at runtime, so their compiled
+    The portal plugins own these gettext domains at runtime, so their compiled
     catalogs must contain both upstream extension strings and local overrides.
     Wheels do not always include every locale file; a missing catalog is valid.
     """
@@ -146,7 +146,7 @@ def compile_extension_catalog(
     theme_i18n_directory: Path,
     upstream_catalog_paths: list[Path] | None = None,
 ) -> Path:
-    """Merge installed extension translations with the maintained Wajo overrides."""
+    """Merge installed extension translations with the maintained portal overrides."""
     try:
         from babel.messages.catalog import Catalog
         from babel.messages.mofile import read_mo, write_mo
@@ -196,7 +196,7 @@ def compile_extension_catalog(
         write_mo(handle, merged_catalog, use_fuzzy=False)
     print(
         f"Merged {domain}: {merged_count} upstream message(s) + "
-        f"{len(translated)} Wajo message(s) -> {destination}"
+        f"{len(translated)} portal message(s) -> {destination}"
     )
     return destination
 
@@ -212,7 +212,7 @@ def compile_extension_catalogs(core_source: Path, theme_i18n_directory: Path) ->
 def main() -> None:
     if len(sys.argv) != 4:
         raise SystemExit(
-            "usage: compile-id-translations.py <ckan.po> <ckan-i18n-directory> <wajo-theme-i18n-directory>"
+            "usage: compile-id-translations.py <ckan.po> <ckan-i18n-directory> <portal-theme-i18n-directory>"
         )
     core_source = Path(sys.argv[1])
     destination = compile_catalog(core_source, Path(sys.argv[2]))

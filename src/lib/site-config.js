@@ -1,6 +1,6 @@
 const configuredRegionName =
-  (process.env.NEXT_PUBLIC_REGION_NAME || "Kabupaten Wajo").trim() ||
-  "Kabupaten Wajo";
+  (process.env.NEXT_PUBLIC_REGION_NAME || "Instansi Pengampu").trim() ||
+  "Instansi Pengampu";
 const hasConfiguredRegion = configuredRegionName.length > 0;
 const configuredRegionShortName = (
   process.env.NEXT_PUBLIC_REGION_SHORT_NAME ||
@@ -36,37 +36,29 @@ const configuredDescription = (
     : "Katalog data resmi untuk menemukan, memahami, dan menggunakan data publik dari instansi pengampu.")
 ).trim();
 const configuredBrandProfile = (
-  process.env.NEXT_PUBLIC_BRAND_PROFILE ||
-  (/^kabupaten wajo$/i.test(configuredRegionName) ? "wajo" : "generic")
+  process.env.NEXT_PUBLIC_BRAND_PROFILE || "generic"
 )
   .trim()
   .toLowerCase();
-// Regional assets/contact details must be opt-in. A configured region name is
-// not enough to infer a logo, PPID endpoint, address, or personal contact data.
-const isWajoBrandProfile =
-  configuredBrandProfile === "wajo" &&
-  /^kabupaten wajo$/i.test(configuredRegionName);
+// Institution-specific branding and contact information are supplied only
+// through deployment environment variables. Runtime defaults stay neutral.
 const configuredLogoPath = (
-  process.env.NEXT_PUBLIC_LOGO_PATH ||
-  (isWajoBrandProfile ? "/logo-kabupaten-wajo.webp" : "/icons/portal.svg")
+  process.env.NEXT_PUBLIC_LOGO_PATH || "/icons/portal.svg"
 ).trim();
 const configuredHeroImage = (
-  process.env.NEXT_PUBLIC_HERO_IMAGE ||
-  (isWajoBrandProfile ? "/wajo-hero-panorama.webp" : "/portal-social.svg")
+  process.env.NEXT_PUBLIC_HERO_IMAGE || "/portal-social.svg"
 ).trim();
 const configuredPpidName = (
-  process.env.NEXT_PUBLIC_PPID_NAME ||
-  (isWajoBrandProfile ? "PPID Kabupaten Wajo" : "PPID instansi")
+  process.env.NEXT_PUBLIC_PPID_NAME || "PPID instansi"
 ).trim();
-const configuredPpidUrl = (
-  process.env.NEXT_PUBLIC_PPID_URL ||
-  (isWajoBrandProfile ? "https://e-ppid-utama.wajokab.go.id/" : "")
-).trim();
+const configuredPpidUrl = (process.env.NEXT_PUBLIC_PPID_URL || "").trim();
 
 export const siteConfig = Object.freeze({
   name: configuredAppName,
   title: configuredAppName,
-  brandProfile: isWajoBrandProfile ? "wajo" : "generic",
+  adminUrl: (process.env.NEXT_PUBLIC_CKAN_ADMIN_URL || "").trim(),
+  publicSiteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "").trim(),
+  brandProfile: configuredBrandProfile,
   description: configuredDescription,
   shortName: configuredShortName,
   regionName: configuredRegionName,
@@ -79,45 +71,21 @@ export const siteConfig = Object.freeze({
       : "Katalog Data Terbuka")
   ).trim(),
   logoPath: configuredLogoPath,
-  logoAlt: (
-    process.env.NEXT_PUBLIC_LOGO_ALT ||
-    (isWajoBrandProfile
-      ? `Lambang ${configuredRegionName}`
-      : "Logo Portal Satu Data")
-  ).trim(),
+  logoAlt: (process.env.NEXT_PUBLIC_LOGO_ALT || "Logo Portal Satu Data").trim(),
   heroImage: configuredHeroImage,
-  iconPath: (
-    process.env.NEXT_PUBLIC_ICON_PATH ||
-    (isWajoBrandProfile ? "/icons/icon.svg" : "/icons/portal.svg")
-  ).trim(),
+  iconPath: (process.env.NEXT_PUBLIC_ICON_PATH || "/icons/portal.svg").trim(),
   pwaIcon192: (
-    process.env.NEXT_PUBLIC_PWA_ICON_192 ||
-    (isWajoBrandProfile ? "/icons/icon-192.png" : "/icons/portal.svg")
+    process.env.NEXT_PUBLIC_PWA_ICON_192 || "/icons/portal.svg"
   ).trim(),
   pwaIcon512: (
-    process.env.NEXT_PUBLIC_PWA_ICON_512 ||
-    (isWajoBrandProfile ? "/icons/icon-512.png" : "/icons/portal.svg")
+    process.env.NEXT_PUBLIC_PWA_ICON_512 || "/icons/portal.svg"
   ).trim(),
   ppidName: configuredPpidName,
   ppidUrl: configuredPpidUrl,
-  ppidContactUrl: (
-    process.env.NEXT_PUBLIC_PPID_CONTACT_URL ||
-    (isWajoBrandProfile ? "https://e-ppid-utama.wajokab.go.id/kontak/" : "")
-  ).trim(),
-  ppidAddress: (
-    process.env.NEXT_PUBLIC_PPID_ADDRESS ||
-    (isWajoBrandProfile
-      ? "Jl. Rusa No. 17, Bulu Pabbulu, Kecamatan Tempe, Kabupaten Wajo, Sulawesi Selatan 90911"
-      : "")
-  ).trim(),
-  ppidEmail: (
-    process.env.NEXT_PUBLIC_PPID_EMAIL ||
-    (isWajoBrandProfile ? "ppid@wajokab.go.id" : "")
-  ).trim(),
-  ppidPhone: (
-    process.env.NEXT_PUBLIC_PPID_PHONE ||
-    (isWajoBrandProfile ? "+62 811-4780-6767" : "")
-  ).trim(),
+  ppidContactUrl: (process.env.NEXT_PUBLIC_PPID_CONTACT_URL || "").trim(),
+  ppidAddress: (process.env.NEXT_PUBLIC_PPID_ADDRESS || "").trim(),
+  ppidEmail: (process.env.NEXT_PUBLIC_PPID_EMAIL || "").trim(),
+  ppidPhone: (process.env.NEXT_PUBLIC_PPID_PHONE || "").trim(),
   locale: process.env.NEXT_PUBLIC_LOCALE || "id-ID",
   timeZone: process.env.NEXT_PUBLIC_TIME_ZONE || "Asia/Makassar",
   themeColor: process.env.NEXT_PUBLIC_THEME_COLOR || "#174566",

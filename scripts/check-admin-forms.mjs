@@ -6,23 +6,23 @@ const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
 const schema = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/schemas/dataset.yaml",
+  "deploy/ckan/theme/ckanext/portal_theme/schemas/dataset.yaml",
 );
 const organizationSchema = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/schemas/organization.yaml",
+  "deploy/ckan/theme/ckanext/portal_theme/schemas/organization.yaml",
 );
 const groupSchema = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/schemas/group.yaml",
+  "deploy/ckan/theme/ckanext/portal_theme/schemas/group.yaml",
 );
 const bootstrap = await read("deploy/ckan/bootstrap-upstream.sh");
 const envTemplate = await read(".env.ckan.example");
 const renderer = await read("deploy/ckan/render-upstream-env.py");
 const configure = await read("deploy/ckan/configure-upstream-extensions.py");
 const base = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/base.html",
 );
 const script = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/public/wajo-admin-forms.js",
+  "deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-forms.js",
 );
 const publicIndicatorSource = await read("src/lib/data/public-indicators.js");
 const publicInfographicSource = await read(
@@ -110,7 +110,7 @@ for (const [key, path] of [
   );
   assert.ok(
     envTemplate.includes(
-      `CKAN___SCHEMING__${key}_SCHEMAS=ckanext.wajo_theme:schemas/${path}`,
+      `CKAN___SCHEMING__${key}_SCHEMAS=ckanext.portal_theme:schemas/${path}`,
     ),
     `Canonical environment must declare ${key.toLowerCase()} schema.`,
   );
@@ -135,7 +135,7 @@ for (const plugin of [
 }
 assert.match(
   base,
-  /<script defer src="\/wajo-admin-forms\.js(?:\?v=[^"]+)?"><\/script>/,
+  /<script defer src="\/portal-admin-forms\.js(?:\?v=[^"]+)?"><\/script>/,
   "Admin conditional form script must load from CKAN extension public assets.",
 );
 assert.match(
@@ -170,20 +170,20 @@ assert.match(
 );
 assert.match(
   script,
-  /wajo-file-picker-hint/,
+  /portal-file-picker-hint/,
   "Upload fields must explain how to select a file.",
 );
 
 assert.match(
   script,
-  /function isBlogAdminRoute\(\)[\s\S]*?wajo-blog-admin-route/,
+  /function isBlogAdminRoute\(\)[\s\S]*?portal-blog-admin-route/,
   "Editorial admin UI must distinguish Blog routes from Pages routes.",
 );
 assert.match(
   await read(
-    "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+    "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
   ),
-  /wajo-blog-admin-route[\s\S]*?\.secondary[\s\S]*?display:\s*none\s*!important/,
+  /portal-blog-admin-route[\s\S]*?\.secondary[\s\S]*?display:\s*none\s*!important/,
   "The Blog editor must remove its contextual sidebar without hiding global navigation.",
 );
 
@@ -191,8 +191,8 @@ const sandbox = {
   window: {},
   document: { readyState: "loading", addEventListener() {} },
 };
-vm.runInNewContext(script, sandbox, { filename: "wajo-admin-forms.js" });
-const rules = sandbox.window.WajoAdminFormRules;
+vm.runInNewContext(script, sandbox, { filename: "portal-admin-forms.js" });
+const rules = sandbox.window.PortalAdminFormRules;
 assert.ok(
   rules,
   "Conditional form rules must be exposed for deterministic validation.",
@@ -217,15 +217,15 @@ for (const [pathname, expectedEditorial, expectedBlog] of editorialRouteCases) {
       window: routeWindow,
       document: { readyState: "loading", addEventListener() {} },
     },
-    { filename: `wajo-editorial-route-${pathname.replace(/\W+/g, "-")}.js` },
+    { filename: `portal-editorial-route-${pathname.replace(/\W+/g, "-")}.js` },
   );
   assert.equal(
-    routeWindow.WajoEditorialAdminRoutes.isEditorialRoute(),
+    routeWindow.PortalEditorialAdminRoutes.isEditorialRoute(),
     expectedEditorial,
     `Unexpected editorial route classification for ${pathname}`,
   );
   assert.equal(
-    routeWindow.WajoEditorialAdminRoutes.isBlogRoute(),
+    routeWindow.PortalEditorialAdminRoutes.isBlogRoute(),
     expectedBlog,
     `Unexpected Blog route classification for ${pathname}`,
   );
@@ -264,14 +264,14 @@ for (const [pathname, expectedBlog] of [
   vm.runInNewContext(
     script,
     { window: routeWindow, document: routeDocument, URLSearchParams },
-    { filename: `wajo-editorial-layout-${pathname.replace(/\W+/g, "-")}.js` },
+    { filename: `portal-editorial-layout-${pathname.replace(/\W+/g, "-")}.js` },
   );
   assert.ok(
-    bodyClasses.has("wajo-pages-admin-route"),
+    bodyClasses.has("portal-pages-admin-route"),
     `${pathname} must receive the shared editorial layout class`,
   );
   assert.equal(
-    bodyClasses.has("wajo-blog-admin-route"),
+    bodyClasses.has("portal-blog-admin-route"),
     expectedBlog,
     `${pathname} must receive only the correct Blog-specific layout modifier`,
   );
@@ -400,7 +400,7 @@ const tagString = makeControl("tag_string", "", []);
 vm.runInNewContext(
   script,
   { window: liveWindow, document: liveDocument, URLSearchParams },
-  { filename: "wajo-admin-forms-runtime.js" },
+  { filename: "portal-admin-forms-runtime.js" },
 );
 assert.equal(
   portalType.value,
@@ -482,7 +482,7 @@ liveWindow.location = {
 vm.runInNewContext(
   script,
   { window: liveWindow, document: liveDocument, URLSearchParams },
-  { filename: "wajo-admin-forms-prefill.js" },
+  { filename: "portal-admin-forms-prefill.js" },
 );
 assert.equal(
   portalType.value,
@@ -516,7 +516,7 @@ for (const [type, expectedTag] of [
   ["geospasial", ""],
 ]) {
   tagString.value = "topik-lain";
-  tagString.dataset.wajoManagedPortalTag = "";
+  tagString.dataset.portalManagedPortalTag = "";
   portalType.value = "dataset";
   liveWindow.location = {
     pathname: "/dataset/new",
@@ -525,7 +525,7 @@ for (const [type, expectedTag] of [
   vm.runInNewContext(
     script,
     { window: liveWindow, document: liveDocument, URLSearchParams },
-    { filename: `wajo-admin-prefill-${type}.js` },
+    { filename: `portal-admin-prefill-${type}.js` },
   );
   assert.equal(
     portalType.value,
@@ -540,13 +540,13 @@ for (const [type, expectedTag] of [
 }
 // Legacy FE records may have only a managed public tag and no portal_type extra.
 tagString.value = "topik-lama, portal-infografik";
-tagString.dataset.wajoManagedPortalTag = "";
+tagString.dataset.portalManagedPortalTag = "";
 portalType.value = "dataset";
 liveWindow.location = { pathname: "/dataset/infografik-lama/edit", search: "" };
 vm.runInNewContext(
   script,
   { window: liveWindow, document: liveDocument, URLSearchParams },
-  { filename: "wajo-admin-legacy-tag-inference.js" },
+  { filename: "portal-admin-legacy-tag-inference.js" },
 );
 assert.equal(
   portalType.value,
@@ -585,7 +585,7 @@ assert.equal(
 
 // A child resource inherits a sensible resource role from its parent dataset.
 const resourceWindow = {
-  location: { pathname: "/dataset/infografik-wajo/resource/new", search: "" },
+  location: { pathname: "/dataset/infografik-sample/resource/new", search: "" },
 };
 const inheritedRole = {
   ...resourceRole,
@@ -601,8 +601,8 @@ const resourceDocument = {
     return id === "field-portal_resource_role" ? inheritedRole : null;
   },
   querySelector(selector) {
-    return selector.includes("wajo-admin-shell")
-      ? { dataset: { wajoPackagePortalType: "infografik" } }
+    return selector.includes("portal-admin-shell")
+      ? { dataset: { portalPackagePortalType: "infografik" } }
       : null;
   },
   querySelectorAll() {
@@ -612,7 +612,7 @@ const resourceDocument = {
 vm.runInNewContext(
   script,
   { window: resourceWindow, document: resourceDocument, URLSearchParams },
-  { filename: "wajo-admin-resource-role.js" },
+  { filename: "portal-admin-resource-role.js" },
 );
 assert.equal(
   inheritedRole.value,
@@ -673,10 +673,10 @@ vm.runInNewContext(
     document: groupDocument,
     URLSearchParams,
   },
-  { filename: "wajo-admin-thematic-group.js" },
+  { filename: "portal-admin-thematic-group.js" },
 );
 assert.equal(
-  groupForm.dataset.wajoEntityForm,
+  groupForm.dataset.portalEntityForm,
   "thematic-category",
   "Group form should be clearly classified as a thematic category.",
 );

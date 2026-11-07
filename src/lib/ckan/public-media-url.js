@@ -16,7 +16,7 @@ export function getPublicOrganizationImageUrl(organization = {}) {
   const candidates = [
     organization.image_display_url,
     organization.image_url,
-    // Older Wajo schemas mistakenly stored the image in the generic `url` field.
+    // Older schemas mistakenly stored the image in the generic `url` field.
     organization.url,
   ];
 

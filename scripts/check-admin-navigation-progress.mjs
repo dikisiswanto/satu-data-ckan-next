@@ -3,21 +3,21 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const base = await readFile(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/base.html",
   "utf8",
 );
 const script = await readFile(
-  "deploy/ckan/theme/ckanext/wajo_theme/public/wajo-admin-navigation-progress.js",
+  "deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-navigation-progress.js",
   "utf8",
 );
 const css = await readFile(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
   "utf8",
 );
 const build = await readFile("scripts/check-build.py", "utf8");
 
-assert.match(base, /wajo-admin-navigation-progress\.js\?v=/);
-assert.match(script, /\.wajo-admin-shell, \.wajo-login-frame/);
+assert.match(base, /portal-admin-navigation-progress\.js\?v=/);
+assert.match(script, /\.portal-admin-shell, \.portal-login-frame/);
 assert.match(script, /event\.defaultPrevented/);
 assert.match(script, /event\.metaKey/);
 assert.match(script, /event\.ctrlKey/);
@@ -29,10 +29,10 @@ assert.match(
 );
 assert.match(script, /data-no-navigation-progress/);
 assert.match(script, /FALLBACK_MS = 12000/);
-assert.match(css, /\.wajo-admin-navigation-progress/);
+assert.match(css, /\.portal-admin-navigation-progress/);
 assert.match(css, /pointer-events: none/);
 assert.match(css, /prefers-reduced-motion: reduce/);
-assert.match(build, /wajo-admin-navigation-progress\.js/);
+assert.match(build, /portal-admin-navigation-progress\.js/);
 
 process.stdout.write(
   "CKAN admin navigation progress preserves native navigation, skips non-navigation actions, and respects reduced motion.\n",

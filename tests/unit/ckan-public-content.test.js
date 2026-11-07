@@ -81,11 +81,11 @@ const indicatorPackage = {
   id: "package-id-ipm",
   name: "indikator-ipm",
   title: "Indeks Pembangunan Manusia",
-  notes: "Indeks pembangunan manusia Kabupaten Wajo.",
+  notes: "Indeks pembangunan manusia Kabupaten Contoh.",
   state: "active",
   private: false,
   tags: [{ name: "portal-indikator", display_name: "portal-indikator" }],
-  organization: { name: "bappeda-wajo", title: "Bappeda Wajo" },
+  organization: { name: "bappeda-sample", title: "Bappeda Contoh" },
   extras: [
     { key: "portal_unit", value: "poin" },
     { key: "portal_formula", value: "metode resmi" },
@@ -115,7 +115,7 @@ const infographicPackage = {
   extras: [
     { key: "portal_category", value: "Kesehatan" },
     { key: "portal_period", value: "2025" },
-    { key: "portal_attribution", value: "Dinas Kesehatan Wajo" },
+    { key: "portal_attribution", value: "Dinas Kesehatan Contoh" },
   ],
   resources: [
     {
@@ -226,13 +226,13 @@ describe("native CKAN objects for indicators", () => {
     expect(
       normalizeObservation({
         period: 2024,
-        region: "Wajo",
+        region: "Contoh",
         value: "75.42",
         unit: "poin",
       }),
     ).toMatchObject({
       period: "2024",
-      region: "Wajo",
+      region: "Contoh",
       value: "75.42",
       numericValue: 75.42,
       unit: "poin",
@@ -423,10 +423,10 @@ describe("CKAN field helpers", () => {
     );
     expect(
       publicResourceUrl(
-        "https://ckan.example.go.id/file/public-download/groups/logo-wajo.png",
+        "https://ckan.example.go.id/file/public-download/groups/logo-sample.png",
       ),
     ).toBe(
-      "https://data.example.go.id/file/public-download/groups/logo-wajo.png",
+      "https://data.example.go.id/file/public-download/groups/logo-sample.png",
     );
     expect(
       publicResourceUrl(
@@ -570,9 +570,9 @@ describe("public organization facet queries", () => {
           action === "organization_list"
             ? [
                 {
-                  name: "bappeda-wajo",
-                  title: "Bappeda Wajo",
-                  display_name: "Bappeda Wajo",
+                  name: "bappeda-sample",
+                  title: "Bappeda Contoh",
+                  display_name: "Bappeda Contoh",
                   state: "active",
                 },
               ]
@@ -582,8 +582,8 @@ describe("public organization facet queries", () => {
                   organization: {
                     items: [
                       {
-                        name: "bappeda-wajo",
-                        display_name: "Bappeda Wajo",
+                        name: "bappeda-sample",
+                        display_name: "Bappeda Contoh",
                         count: 1,
                       },
                     ],
@@ -597,7 +597,7 @@ describe("public organization facet queries", () => {
     expect(response.unavailable).toBe(false);
     // CKAN organization_list(all_fields=true) returns organization objects,
     // not a list of organization-name strings. Keep the fixture contract explicit.
-    expect(response.data[0].name).toBe("bappeda-wajo");
+    expect(response.data[0].name).toBe("bappeda-sample");
     expect(response.data[0].public_content_counts).toEqual({
       datasets: 1,
       indicators: 1,
@@ -692,7 +692,7 @@ describe("public portal summary sourced from CKAN", () => {
         const filter = params.get("fq") || "";
         let result;
         if (action === "organization_list") {
-          result = ["bappeda-wajo"];
+          result = ["bappeda-sample"];
         } else if (
           filter.includes(buildPortalContentDiscoveryFilter("indicator"))
         ) {

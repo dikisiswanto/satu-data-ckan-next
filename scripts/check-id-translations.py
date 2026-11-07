@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-I18N_DIR = ROOT / "deploy/ckan/theme/ckanext/wajo_theme/i18n/id/LC_MESSAGES"
+I18N_DIR = ROOT / "deploy/ckan/theme/ckanext/portal_theme/i18n/id/LC_MESSAGES"
 PO = I18N_DIR / "ckan.po"
 EXTENSION_POS = {
     path.stem: path
@@ -133,7 +133,7 @@ def main() -> None:
     # Verify every literal gettext key used by our own Jinja templates against
     # the correct domain. CKAN core templates use ckan; Pages/Blog templates
     # use ckanext-pages. This catches regressions that catalog-only checks miss.
-    template_root = ROOT / "deploy/ckan/theme/ckanext/wajo_theme/templates"
+    template_root = ROOT / "deploy/ckan/theme/ckanext/portal_theme/templates"
     template_key_pattern = re.compile(r"_\(\s*(['\"])(.*?)\1\s*\)")
     for template_path in sorted(template_root.rglob("*.html")):
         domain = "ckanext-pages" if "ckanext_pages" in template_path.parts else "ckan"
@@ -202,11 +202,11 @@ def main() -> None:
             "Manage public data visuals": "Kelola visualisasi data publik",
             "Page actions": "Aksi halaman",
             "Revisions": "Revisi",
-            "Wajo Regency One Data Portal": "Portal Satu Data Kabupaten Wajo",
-            "Wajo Regency One Data Portal — Dashboard": "Portal Satu Data Kabupaten Wajo — Ringkasan",
-            "Wajo Regency coat of arms": "Lambang Kabupaten Wajo",
-            "One Data Portal of Wajo Regency": "Portal Satu Data Kabupaten Wajo",
-            "Official data portal of Wajo Regency Government": "Portal data resmi Pemerintah Kabupaten Wajo",
+            "Example Regency One Data Portal": "Portal Satu Data",
+            "Example Regency One Data Portal — Dashboard": "Portal Satu Data — Ringkasan",
+            "Example Regency coat of arms": "Lambang Daerah",
+            "One Data Portal of Example Regency": "Portal Satu Data",
+            "Official data portal of Example Regency Government": "Portal data resmi pemerintah daerah",
             "GOVERNMENT DATA MANAGEMENT": "PENGELOLAAN DATA PEMERINTAH",
             "A trusted workspace for regional data.": "Ruang kerja tepercaya untuk pengelolaan data daerah.",
             "Manage catalogue records, publications, and portal information in one secure workspace.": "Kelola katalog data, publikasi, dan informasi portal dalam satu ruang kerja yang aman.",
@@ -218,7 +218,7 @@ def main() -> None:
             "ADMINISTRATOR ACCESS": "AKSES PENGELOLA",
             "Sign in with your CKAN account to continue.": "Masuk menggunakan akun CKAN Anda untuk melanjutkan.",
             "Access is limited to authorized data managers.": "Akses hanya diberikan kepada pengelola data yang berwenang.",
-            "One Data Portal · Wajo Regency Government": "Portal Satu Data · Pemerintah Kabupaten Wajo",
+            "One Data Portal · Example Regency Government": "Portal Satu Data · Pemerintah Daerah",
             "Open navigation": "Buka navigasi",
             "System settings": "Pengaturan sistem",
             "System Administrator": "Administrator sistem",
@@ -326,7 +326,7 @@ def main() -> None:
     module = __import__("importlib.util").util.module_from_spec(spec)
     assert spec and spec.loader
     spec.loader.exec_module(module)
-    with tempfile.TemporaryDirectory(prefix="wajo-id-catalog-merge-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="portal-id-catalog-merge-") as tmp:
         locale_root = Path(tmp)
         base_path = locale_root / "id/LC_MESSAGES/ckan.mo"
         base_path.parent.mkdir(parents=True)
@@ -340,9 +340,9 @@ def main() -> None:
         with base_path.open("rb") as handle:
             merged = read_mo(handle)
         if merged.get("Dashboard").string != "Dasbor":
-            ERRORS.append("Wajo translation must override an upstream translation for the same msgid.")
+            ERRORS.append("portal translation must override an upstream translation for the same msgid.")
         if merged.get("Core-only label").string != "Label inti":
-            ERRORS.append("Compiler must preserve upstream Indonesian messages absent from Wajo PO.")
+            ERRORS.append("Compiler must preserve upstream Indonesian messages absent from portal PO.")
         import gettext
         with base_path.open("rb") as handle:
             runtime_catalog = gettext.GNUTranslations(handle)
@@ -445,7 +445,7 @@ def main() -> None:
         ):
             if runtime_catalog.gettext(source) != expected:
                 ERRORS.append(f"Compiled core gettext label {source!r} must be {expected!r}.")
-        extension_output = locale_root / "wajo-theme-i18n"
+        extension_output = locale_root / "portal-theme-i18n"
         compiled_extensions = module.compile_extension_catalogs(PO, extension_output)
         if len(compiled_extensions) != len(EXTENSION_POS):
             ERRORS.append("Compiler must produce every maintained Indonesian extension gettext domain.")
@@ -463,9 +463,9 @@ def main() -> None:
         with merged_extension_path.open("rb") as handle:
             merged_extension = read_mo(handle)
         if merged_extension.get("Blog").string != "Berita dan artikel":
-            ERRORS.append("Wajo extension translation must override upstream translations for the same msgid.")
+            ERRORS.append("portal extension translation must override upstream translations for the same msgid.")
         if merged_extension.get("Upstream-only page label").string != "Label halaman dari upstream":
-            ERRORS.append("Extension compiler must preserve upstream Indonesian messages absent from Wajo PO.")
+            ERRORS.append("Extension compiler must preserve upstream Indonesian messages absent from portal PO.")
 
         # An upstream extension may ship a PO instead of a compiled MO.
         upstream_po_path = locale_root / "upstream-pages-po/id/LC_MESSAGES/ckanext-pages.po"
@@ -483,7 +483,7 @@ def main() -> None:
         if po_merged.get("PO-only page label").string != "Label PO upstream":
             ERRORS.append("Extension compiler must also preserve upstream Indonesian PO catalogs.")
 
-        # A fuzzy Wajo translation must not shadow a valid upstream string.
+        # A fuzzy portal translation must not shadow a valid upstream string.
         fuzzy_source = locale_root / "fixture-theme/ckanext-pages.po"
         fuzzy_source.parent.mkdir(parents=True, exist_ok=True)
         fuzzy_catalog = Catalog(locale="id", domain="ckanext-pages")
@@ -497,7 +497,7 @@ def main() -> None:
         with fuzzy_merged_path.open("rb") as handle:
             fuzzy_merged = read_mo(handle)
         if fuzzy_merged.get("Upstream-only page label").string != "Label halaman dari upstream":
-            ERRORS.append("Fuzzy Wajo extension entries must not replace valid upstream Indonesian messages.")
+            ERRORS.append("Fuzzy portal extension entries must not replace valid upstream Indonesian messages.")
 
         for domain, expected_msgid, expected_msgstr in (
             ("ckanext-harvest", "Harvest Sources", "Sumber pengambilan data"),

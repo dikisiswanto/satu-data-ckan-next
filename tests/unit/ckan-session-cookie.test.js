@@ -13,7 +13,7 @@ describe("CKAN session cookie forwarding", () => {
   it("extracts only the CKAN session cookie from a browser Cookie header", () => {
     expect(
       getCkanSessionCookieValue(
-        "next-auth=not-forwarded; wajo_ckan_session=signed.value-123; analytics=also-not-forwarded",
+        "next-auth=not-forwarded; portal_ckan_session=signed.value-123; analytics=also-not-forwarded",
       ),
     ).toBe("signed.value-123");
     expect(buildCkanSessionCookieHeader("signed.value-123")).toBe(
@@ -28,7 +28,7 @@ describe("CKAN session cookie forwarding", () => {
     expect(normalizeCkanSessionCookieValue("x".repeat(4097))).toBeNull();
     expect(
       getCkanSessionCookieValue(
-        "wajo_ckan_session=valid; wajo_ckan_session=second",
+        "portal_ckan_session=valid; portal_ckan_session=second",
       ),
     ).toBe("valid");
   });
@@ -44,7 +44,7 @@ describe("CKAN session cookie forwarding", () => {
         "organization",
       ]);
       expect(options.headers.get("cookie")).toBe(
-        "wajo_ckan_session=signed.session",
+        "portal_ckan_session=signed.session",
       );
       expect(options.cache).toBe("no-store");
       return Response.json({
@@ -70,7 +70,7 @@ describe("CKAN session cookie forwarding", () => {
   it("forwards the CKAN cookie to CKAN but never forwards arbitrary browser cookies", async () => {
     const fetcher = vi.fn(async (_url, options) => {
       expect(options.headers.get("cookie")).toBe(
-        "wajo_ckan_session=signed.session",
+        "portal_ckan_session=signed.session",
       );
       expect(options.headers.get("authorization")).toBeNull();
       expect(options.cache).toBe("no-store");

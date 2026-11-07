@@ -1,4 +1,6 @@
-export const DATASET_VIEW_COOKIE_NAME = "wajo_dataset_view";
+export const DATASET_VIEW_COOKIE_NAME = "portal_dataset_view";
+export const LEGACY_DATASET_VIEW_COOKIE_NAME =
+  process.env.NEXT_PUBLIC_LEGACY_DATASET_VIEW_COOKIE_NAME || "";
 export const DATASET_VIEW_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 export function normalizeDatasetView(value) {
@@ -6,7 +8,11 @@ export function normalizeDatasetView(value) {
 }
 
 export function getDatasetViewPreference(cookieStore) {
-  const value = cookieStore?.get?.(DATASET_VIEW_COOKIE_NAME)?.value;
+  const value =
+    cookieStore?.get?.(DATASET_VIEW_COOKIE_NAME)?.value ??
+    (LEGACY_DATASET_VIEW_COOKIE_NAME
+      ? cookieStore?.get?.(LEGACY_DATASET_VIEW_COOKIE_NAME)?.value
+      : undefined);
   return normalizeDatasetView(value);
 }
 

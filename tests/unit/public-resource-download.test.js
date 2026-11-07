@@ -7,7 +7,7 @@ import { GET } from "@/app/(public)/dataset/[slug]/resource/[resourceId]/downloa
 
 const datasetId = "9c70ae22-cd50-4e14-8887-d7574abfface";
 const resourceId = "3c2e4f10-6c61-4a2c-a3db-b96db879889c";
-const filename = "menara-telekomunikasi-di-kabupaten-wajo-tahun-2025.xlsx";
+const filename = "menara-telekomunikasi-di-kabupaten-portal-tahun-2025.xlsx";
 const downloadPath = `/dataset/${datasetId}/resource/${resourceId}/download/${filename}`;
 
 function fixtures({
@@ -373,7 +373,7 @@ describe("public CKAN resource download", () => {
     });
     const upstreamFetch = vi.fn(async (_url, options) => {
       expect(options.headers.get("cookie")).toBe(
-        "wajo_ckan_session=signed-admin-session",
+        "portal_ckan_session=signed-admin-session",
       );
       return new Response("authorized-private-resource", {
         status: 200,
@@ -386,7 +386,7 @@ describe("public CKAN resource download", () => {
     vi.stubGlobal("fetch", upstreamFetch);
     const response = await GET(
       new Request(`https://data.silirdev.com${downloadPath}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-admin-session" },
+        headers: { Cookie: "portal_ckan_session=signed-admin-session" },
       }),
       {
         params: Promise.resolve({ slug: datasetId, resourceId, filename }),
@@ -405,7 +405,7 @@ describe("public CKAN resource download", () => {
     fixtures({ privateDataset: true });
     const upstreamFetch = vi.fn(async (_url, options) => {
       expect(options.headers.get("cookie")).toBe(
-        "wajo_ckan_session=signed-admin-session",
+        "portal_ckan_session=signed-admin-session",
       );
       return new Response("private-xlsx", {
         status: 200,
@@ -419,7 +419,7 @@ describe("public CKAN resource download", () => {
     const response = await GET(
       new Request(`https://data.silirdev.com${downloadPath}`, {
         headers: {
-          Cookie: "analytics=ignore; wajo_ckan_session=signed-admin-session",
+          Cookie: "analytics=ignore; portal_ckan_session=signed-admin-session",
         },
       }),
       {
@@ -442,7 +442,7 @@ describe("public CKAN resource download", () => {
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
       new Request(`https://data.silirdev.com${downloadPath}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-admin-session" },
+        headers: { Cookie: "portal_ckan_session=signed-admin-session" },
       }),
       {
         params: Promise.resolve({ slug: datasetId, resourceId, filename }),
@@ -469,7 +469,7 @@ describe("public CKAN resource download", () => {
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
       new Request(`https://data.silirdev.com${downloadPath}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-admin-session" },
+        headers: { Cookie: "portal_ckan_session=signed-admin-session" },
       }),
       {
         params: Promise.resolve({ slug: datasetId, resourceId, filename }),
@@ -514,14 +514,14 @@ describe("public CKAN resource download", () => {
       "fetch",
       vi.fn(async (_url, options) => {
         expect(options.headers.get("cookie")).toBe(
-          "wajo_ckan_session=signed-admin-session",
+          "portal_ckan_session=signed-admin-session",
         );
         return new Response("not authorized", { status: 403 });
       }),
     );
     const response = await GET(
       new Request(`https://data.silirdev.com${downloadPath}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-admin-session" },
+        headers: { Cookie: "portal_ckan_session=signed-admin-session" },
       }),
       {
         params: Promise.resolve({ slug: datasetId, resourceId, filename }),
@@ -539,7 +539,7 @@ describe("public CKAN resource download", () => {
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
       new Request(`https://data.silirdev.com${downloadPath}`, {
-        headers: { Cookie: "wajo_ckan_session=signed-admin-session" },
+        headers: { Cookie: "portal_ckan_session=signed-admin-session" },
       }),
       {
         params: Promise.resolve({ slug: datasetId, resourceId, filename }),
@@ -580,7 +580,7 @@ describe("public CKAN resource download", () => {
     vi.stubGlobal("fetch", fetcher);
     const response = await GET(
       new Request(`https://data.silirdev.com${downloadPath}`, {
-        headers: { Cookie: "wajo_ckan_session=forged-or-expired-session" },
+        headers: { Cookie: "portal_ckan_session=forged-or-expired-session" },
       }),
       {
         params: Promise.resolve({ slug: datasetId, resourceId, filename }),

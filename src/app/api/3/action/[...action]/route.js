@@ -42,7 +42,8 @@ function getAllowedOrigins() {
   const configured =
     process.env.PUBLIC_API_CORS_ORIGINS ||
     process.env.PUBLIC_SITE_ORIGIN ||
-    "https://data.wajokab.go.id";
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "";
   return new Set(
     configured
       .split(",")

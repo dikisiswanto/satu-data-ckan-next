@@ -62,12 +62,12 @@ Baris kedua
 Untuk menyisipkan foto di artikel, gunakan gambar Markdown:
 
 ```markdown
-![Kegiatan di Kabupaten Wajo](/uploads/page_images/kegiatan.webp)
+![Contoh kegiatan instansi](/uploads/page_images/kegiatan.webp)
 ```
 
 Kartu berita mengambil gambar Markdown pertama. Jika artikel tidak memiliki gambar Markdown yang valid, kartu menampilkan ikon artikel bawaan. `og_image` tetap digunakan untuk Open Graph; gambar Markdown menjadi fallback metadata sosial.
 
-Gunakan tombol **Unggah gambar** pada editor Markdown. File disimpan sebagai File entity CKAN dengan owner `wajo_media/public-editorial-media`. Hanya PNG, JPEG, GIF, dan WebP hingga 8 MiB yang diterima. SVG/HTML tidak disajikan sebagai gambar.
+Gunakan tombol **Unggah gambar** pada editor Markdown. File disimpan sebagai File entity CKAN dengan owner `portal_media/public-editorial-media`. Hanya PNG, JPEG, GIF, dan WebP hingga 8 MiB yang diterima. SVG/HTML tidak disajikan sebagai gambar.
 
 URL gambar harus HTTPS atau path media CKAN yang didukung. Next.js memeriksa referensi konten publik, owner, MIME, signature, dan ukuran sebelum menyajikan media. Jangan membuka seluruh FileStore untuk akses anonim.
 
@@ -89,13 +89,13 @@ Contoh singkat:
 [
   {
     "type": "hero",
-    "title": "Satu Data Wajo",
-    "description": "Data resmi Kabupaten Wajo."
+    "title": "Satu Data",
+    "description": "Data resmi instansi."
   },
   {
     "type": "dataset_links",
     "title": "Dataset pilihan",
-    "items": [{ "slug": "data-sekolah-wajo" }]
+    "items": [{ "slug": "data-sekolah-sample" }]
   }
 ]
 ```
@@ -113,7 +113,7 @@ Footer menampilkan tautan laman yang ditandai **Tampilkan di menu**, tautan `/in
 
 ## Penerapan
 
-`wajo_pages` dan `wajo_theme` harus terdaftar sebelum `pages` dan `activity` pada `CKAN__PLUGINS`. CKAN 2.12 membalik urutan iterasi `IConfigurer` dan `ITemplateHelpers`; karena itu plugin yang lebih awal memiliki prioritas helper dan template. Urutan ini wajib agar helper `render_content` Wajo menggantikan helper bawaan `ckanext-pages` dan template Wajo mewarisi shell Midnight Blue tanpa rekursi. Bootstrap mengatur urutan plugin secara kanonis; jalankan ulang `bootstrap-upstream.sh` sebelum rebuild CKAN bila memperbarui penerapan lama. Jalankan migrasi awal/upgrade Pages melalui:
+`portal_pages` dan `portal_theme` harus terdaftar sebelum `pages` dan `activity` pada `CKAN__PLUGINS`. CKAN 2.12 membalik urutan iterasi `IConfigurer` dan `ITemplateHelpers`; karena itu plugin yang lebih awal memiliki prioritas helper dan template. Urutan ini wajib agar helper `render_content` portal menggantikan helper bawaan `ckanext-pages` dan template portal mewarisi shell Midnight Blue tanpa rekursi. Bootstrap mengatur urutan plugin secara kanonis; jalankan ulang `bootstrap-upstream.sh` sebelum rebuild CKAN bila memperbarui penerapan lama. Jalankan migrasi awal/upgrade Pages melalui:
 
 ```bash
 ckan db upgrade -p pages
@@ -124,5 +124,5 @@ Simpan `.env.ckan` secara privat. Jangan mengaktifkan `ckanext.pages.allow_html`
 ## Rujukan terkait
 
 - [Lokalisasi admin CKAN](LOKALISASI-ADMIN-CKAN.md)
-- [Panduan Wajo Admin](PANDUAN-ADMIN-WAJO.md)
+- [Panduan Portal Admin](PANDUAN-ADMIN.md)
 - [Indeks dokumentasi](INDEX.md)

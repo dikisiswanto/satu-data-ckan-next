@@ -14,13 +14,13 @@ const datasetCard = await read("src/components/dataset-card.jsx");
 const publicCss = await read("src/app/styles/public-layout-stability.css");
 const organizationCss = await read("src/app/styles/public-organizations.css");
 const adminBase = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/base.html",
 );
 const adminProgress = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/public/wajo-admin-navigation-progress.js",
+  "deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-navigation-progress.js",
 );
 const adminCss = await read(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
 );
 const e2e = await read("tests/e2e/public-portal.spec.js");
 
@@ -114,7 +114,7 @@ assert.match(
   /@media \(max-width: 639px\)[\s\S]*?\.organization-directory-summary[\s\S]*?display: none !important/,
 );
 
-assert.match(adminBase, /wajo-admin-navigation-progress\.js/);
+assert.match(adminBase, /portal-admin-navigation-progress\.js/);
 assert.match(adminProgress, /event\.defaultPrevented/);
 assert.match(adminProgress, /target\.origin !== window\.location\.origin/);
 assert.match(
@@ -122,7 +122,7 @@ assert.match(
   /target\.pathname === window\.location\.pathname[\s\S]*?return false/,
 );
 assert.match(adminProgress, /data-no-navigation-progress/);
-assert.match(adminCss, /\.wajo-admin-navigation-progress/);
+assert.match(adminCss, /\.portal-admin-navigation-progress/);
 assert.match(adminCss, /prefers-reduced-motion: reduce/);
 assert.match(e2e, /dataset card\/list preference persists/);
 assert.match(e2e, /complex dataset filters preserve the selected layout/);

@@ -19,7 +19,7 @@ for line in Path(sys.argv[1]).read_text().splitlines():
 PYENV
 )"
 fi
-CKAN_HOST="${CKAN_HOST:-ckan.wajokab.go.id}"
+CKAN_HOST="${CKAN_HOST:-ckan.example.go.id}"
 
 for name in "$CKAN_CONTAINER" "$NGINX_CONTAINER" "$CADDY_CONTAINER" "$CLOUDFLARED_CONTAINER"; do
   if ! docker inspect "$name" >/dev/null 2>&1; then

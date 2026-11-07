@@ -27,7 +27,7 @@ describe("public editorial media proxy", () => {
       content_type: "image/png",
       size: png.byteLength,
       owner_info: {
-        owner_type: "wajo_media",
+        owner_type: "portal_media",
         owner_id: "public-editorial-media",
       },
     });
@@ -70,7 +70,7 @@ describe("public editorial media proxy", () => {
       content_type: "image/png",
       size: png.byteLength,
       owner_info: {
-        owner_type: "wajo_media",
+        owner_type: "portal_media",
         owner_id: "public-editorial-media",
       },
     });

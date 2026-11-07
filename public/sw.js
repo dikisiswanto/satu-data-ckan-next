@@ -1,11 +1,11 @@
-const CACHE_NAME = "portal-satu-data-static-v5";
+const CACHE_NAME = "portal-satu-data-static-v6";
 const OFFLINE_URL = "/offline.html";
 const STATIC_PREFIXES = ["/icons/", "/_next/static/"];
 const PUBLIC_IMAGE_ASSETS = new Set([
-  "/logo-kabupaten-wajo.webp",
-  "/wajo-hero-panorama.webp",
+  "/icons/portal.svg",
   "/portal-social.svg",
 ]);
+const PUBLIC_IMAGE_EXTENSION = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
 const MAX_CACHED_ASSETS = 140;
 const MAX_CACHEABLE_ASSET_BYTES = 2 * 1024 * 1024;
 
@@ -27,7 +27,7 @@ self.addEventListener("activate", (event) => {
           keys
             .filter(
               (key) =>
-                (key.startsWith("satu-data-wajo-") ||
+                (key.startsWith("satu-data-portal-") ||
                   key.startsWith("satu-data-static-") ||
                   key.startsWith("portal-satu-data-static-")) &&
                 key !== CACHE_NAME,
@@ -42,7 +42,8 @@ self.addEventListener("activate", (event) => {
 function isPublicAsset(url) {
   return (
     STATIC_PREFIXES.some((prefix) => url.pathname.startsWith(prefix)) ||
-    PUBLIC_IMAGE_ASSETS.has(url.pathname)
+    PUBLIC_IMAGE_ASSETS.has(url.pathname) ||
+    PUBLIC_IMAGE_EXTENSION.test(url.pathname)
   );
 }
 
@@ -150,10 +151,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Small public images use stale-while-revalidate: show a cached image
-  // immediately, but refresh it in the background while online. API routes,
-  // CKAN file proxy endpoints, and editorial upload URLs are deliberately not
-  // part of this allowlist.
+  // Small same-origin public image assets use stale-while-revalidate: show a
+  // cached image immediately, but refresh it in the background while online.
+  // The response MIME/size/cache-control checks below prevent HTML, API routes,
+  // private responses, and oversized files from entering the static cache.
   const refresh = fetchAndCacheAsset(request).catch(() => Response.error());
   event.waitUntil(refresh.then(() => undefined));
   event.respondWith(

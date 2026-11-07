@@ -1,5 +1,0 @@
-wajo_theme:
-  output: wajo-theme/%(version)s-wajo-theme.css
-  contents:
-    - css/wajo-theme.css
-    - css/wajo-admin-design-system.css

@@ -95,7 +95,7 @@ describe("CKAN visibility facade: public vs session-authorized", () => {
     const response = await request(
       "package_show",
       "dataset-private",
-      "analytics=ignored; wajo_ckan_session=signed-admin-session; other=ignored",
+      "analytics=ignored; portal_ckan_session=signed-admin-session; other=ignored",
     );
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("private, no-store");
@@ -128,7 +128,7 @@ describe("CKAN visibility facade: public vs session-authorized", () => {
     const response = await request(
       "resource_show",
       "resource-1",
-      "wajo_ckan_session=signed-member-session",
+      "portal_ckan_session=signed-member-session",
     );
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("private, no-store");
@@ -149,7 +149,7 @@ describe("CKAN visibility facade: public vs session-authorized", () => {
     const response = await request(
       "resource_show",
       "resource-private",
-      "wajo_ckan_session=signed-member-session",
+      "portal_ckan_session=signed-member-session",
     );
     expect(response.status).toBe(404);
     expect(ckanAction.mock.calls.map(([action]) => action)).toEqual([
@@ -164,7 +164,7 @@ describe("CKAN visibility facade: public vs session-authorized", () => {
     const response = await request(
       "package_show",
       "dataset-private",
-      "wajo_ckan_session=forged-or-expired-cookie",
+      "portal_ckan_session=forged-or-expired-cookie",
     );
     expect(response.status).toBe(404);
   });
@@ -215,7 +215,7 @@ describe("CKAN visibility facade: public vs session-authorized", () => {
     const response = await request(
       "package_show",
       "dataset-public",
-      "wajo_ckan_session=signed-but-not-resource-authorized",
+      "portal_ckan_session=signed-but-not-resource-authorized",
     );
     expect(response.status).toBe(200);
     const body = await response.json();

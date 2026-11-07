@@ -79,7 +79,7 @@ assert.match(
 assert.match(route, /Dataset atau resource tidak tersedia untuk publik/);
 assert.match(route, /text\/html/);
 const exampleDownloadPath =
-  "/dataset/9c70ae22-cd50-4e14-8887-d7574abfface/resource/3c2e4f10-6c61-4a2c-a3db-b96db879889c/download/menara-telekomunikasi-di-kabupaten-wajo-tahun-2025.xlsx";
+  "/dataset/9c70ae22-cd50-4e14-8887-d7574abfface/resource/3c2e4f10-6c61-4a2c-a3db-b96db879889c/download/menara-telekomunikasi-di-kabupaten-portal-tahun-2025.xlsx";
 const expectedCaddyPattern =
   /^\/dataset\/[^/]+\/resource\/[a-fA-F0-9-]{16,64}\/download\/[^/]+\/?$/;
 assert.match(
@@ -199,7 +199,7 @@ assert.doesNotMatch(
   /new URL\(\`\/file\/\$\{encodeURIComponent\(fileId\)\}/,
 );
 const sidebar = await readFile(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/wajo_theme/sidebar.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/portal_theme/sidebar.html",
   "utf8",
 );
 assert.doesNotMatch(
@@ -229,7 +229,7 @@ assert.match(publicResourceUrls, /api\/public\/ckan-file/);
 assert.match(publicResourceUrls, /publicGroupMatch/);
 
 const editor = await readFile(
-  "deploy/ckan/theme/ckanext/wajo_theme/public/wajo-markdown-editor.js",
+  "deploy/ckan/theme/ckanext/portal_theme/public/portal-markdown-editor.js",
   "utf8",
 );
 assert.match(editor, /Tabel/);
@@ -243,27 +243,27 @@ assert.match(
 );
 assert.match(editor, /textarea\[name='body'\]/);
 const base = await readFile(
-  "deploy/ckan/theme/ckanext/wajo_theme/templates/base.html",
+  "deploy/ckan/theme/ckanext/portal_theme/templates/base.html",
   "utf8",
 );
-assert.match(base, /wajo-markdown-editor\.js/);
-const csrf = /wajo-media-csrf[\s\S]*csrf_input/;
+assert.match(base, /portal-markdown-editor\.js/);
+const csrf = /portal-media-csrf[\s\S]*csrf_input/;
 assert.match(
   base,
   csrf,
   "The Markdown media uploader must reuse CKAN's native CSRF token.",
 );
 const css = await readFile(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
   "utf8",
 );
 const compactCss = css.replace(/\s+/g, " ");
 assert.match(
   compactCss,
-  /\.wajo-login-frame \{[^}]*width: min\(calc\(100% - 2rem\), 460px\)/,
+  /\.portal-login-frame \{[^}]*width: min\(calc\(100% - 2rem\), 460px\)/,
 );
 assert.match(css, /input\[type="file"\]::file-selector-button/);
-assert.match(css, /wajo-file-preview/);
+assert.match(css, /portal-file-preview/);
 
 const fileCascadeBootstrap = await readFile(
   "deploy/ckan/bootstrap-upstream.sh",
@@ -384,10 +384,10 @@ const envSync = await readFile("deploy/ckan/sync-env.py", "utf8");
 assert.match(envSync, /CKAN___SESSION_COOKIE_DOMAIN/);
 assert.match(envSync, /CKAN___SESSION_COOKIE_SECURE/);
 assert.match(envSync, /CKAN_SESSION_COOKIE_NAME.*cookie_name/);
-assert.match(envSync, /wajo_ckan_session/);
+assert.match(envSync, /portal_ckan_session/);
 assert.match(envSync, /must share the same parent DNS zone/);
 const envExample = await readFile(".env.ckan.example", "utf8");
-assert.match(envExample, /^CKAN_SESSION_COOKIE_NAME=wajo_ckan_session$/m);
+assert.match(envExample, /^CKAN_SESSION_COOKIE_NAME=portal_ckan_session$/m);
 const composeOverride = await readFile(
   "deploy/ckan/docker-compose.override.yml",
   "utf8",
@@ -441,7 +441,7 @@ assert.match(
   "An authorized CKAN session must be sent when the GeoJSON preview loads a private resource",
 );
 const geoCss = await readFile(
-  "deploy/ckan/theme/ckanext/wajo_theme/assets/css/wajo-admin-design-system.css",
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
   "utf8",
 );
 const geoCssRules = geoCss.replace(/\/\*[\s\S]*?\*\//g, "");

@@ -1,4 +1,4 @@
-# Dokumentasi API Publik — Portal Satu Data Kabupaten Wajo
+# Dokumentasi API Publik — Portal Satu Data
 
 Dokumen ini mendeskripsikan **facade API yang benar-benar diekspos oleh aplikasi Next.js**. Facade meneruskan beberapa action baca CKAN 2.12.1 dengan allowlist, validasi parameter, batas ukuran request, penyamaran URL unduhan, dan envelope JSON CKAN. Ini bukan proxy untuk seluruh Action API CKAN.
 
@@ -6,18 +6,18 @@ Dokumen ini mendeskripsikan **facade API yang benar-benar diekspos oleh aplikasi
 
 API adalah alamat yang bisa dibuka aplikasi lain untuk meminta data secara otomatis. Contoh request berikut dapat diuji langsung melalui browser:
 
-- **Cari dataset:** <https://data.wajokab.go.id/api/3/action/package_search?q=pendidikan&rows=5>
-- **Periksa layanan:** <https://data.wajokab.go.id/api/3/action/status_show>
-- **Lihat katalog dengan tampilan biasa:** <https://data.wajokab.go.id/dataset>
+- **Cari dataset:** <https://data.example.go.id/api/3/action/package_search?q=pendidikan&rows=5>
+- **Periksa layanan:** <https://data.example.go.id/api/3/action/status_show>
+- **Lihat katalog dengan tampilan biasa:** <https://data.example.go.id/dataset>
 
 Hasil API berupa JSON. Cari `success`: jika bernilai `true`, data utama berada di `result`; jika `false`, pesan masalah biasanya berada di `error.message`. Istilah yang sering dipakai: **dataset** adalah kumpulan informasi, **resource** adalah file/tabel di dalam dataset, **ID** adalah kode unik, dan **DataStore** adalah layanan untuk membaca baris pada resource tabular yang sudah diaktifkan.
 
-Untuk dokumentasi yang disusun bertahap dengan tombol contoh yang bisa dibuka, gunakan laman publik **[/api-data](https://data.wajokab.go.id/api-data)**. Dokumen ini melengkapi laman tersebut dengan kontrak teknis yang lebih rinci.
+Untuk dokumentasi yang disusun bertahap dengan tombol contoh yang bisa dibuka, gunakan laman publik **[/api-data](https://data.example.go.id/api-data)**. Dokumen ini melengkapi laman tersebut dengan kontrak teknis yang lebih rinci.
 
 ## 1. Alamat dasar (Base URL) dan akses
 
 ```text
-https://data.wajokab.go.id/api/3/action
+https://data.example.go.id/api/3/action
 ```
 
 Semua action publik tidak memerlukan API key. Gunakan hanya untuk membaca metadata atau data yang memang tersedia bagi publik. Admin CKAN adalah antarmuka terpisah dan harus tetap dilindungi autentikasi.
@@ -120,7 +120,7 @@ Nilai numerik harus berupa bilangan bulat non-negatif. Nilai di atas batas akan 
 Contoh:
 
 ```bash
-curl -sS 'https://data.wajokab.go.id/api/3/action/package_search?q=pendidikan&rows=20&start=0'
+curl -sS 'https://data.example.go.id/api/3/action/package_search?q=pendidikan&rows=20&start=0'
 ```
 
 `q` menerima teks/frasa sederhana hingga 160 karakter: huruf Unicode, angka, spasi, `_`, `.`, `,`, apostrof, dan tanda hubung. Facade mengubah teks tersebut menjadi literal frasa yang di-quote sebelum meneruskannya ke CKAN. `*:*` didukung untuk pencarian seluruh katalog. Sintaks Lucene/Solr, field query seperti `title:*`, operator, colon, wildcard bebas, dan sintaks lanjutan lain ditolak.
@@ -134,7 +134,7 @@ curl -sS 'https://data.wajokab.go.id/api/3/action/package_search?q=pendidikan&ro
 Contoh:
 
 ```bash
-curl -sS 'https://data.wajokab.go.id/api/3/action/datastore_search?resource_id=RESOURCE_ID&limit=10&offset=0'
+curl -sS 'https://data.example.go.id/api/3/action/datastore_search?resource_id=RESOURCE_ID&limit=10&offset=0'
 ```
 
 Untuk halaman berikutnya, tingkatkan `offset` sebesar jumlah baris yang telah diminta. Facade membatasi satu permintaan hingga 100 baris dan offset 100.000. Parameter `q`, `filters`, `sort`, `fields`, dan query DataStore lanjutan lainnya tidak diterima agar endpoint publik tetap terbatas. Field, records, dan total yang dikembalikan mengikuti keadaan tabel DataStore di CKAN.
@@ -143,19 +143,19 @@ Untuk halaman berikutnya, tingkatkan `offset` sebesar jumlah baris yang telah di
 
 ```bash
 # Metadata dataset
-curl -sS 'https://data.wajokab.go.id/api/3/action/package_show?id=nama-dataset'
+curl -sS 'https://data.example.go.id/api/3/action/package_show?id=nama-dataset'
 
 # Daftar organisasi
-curl -sS 'https://data.wajokab.go.id/api/3/action/organization_list?all_fields=true&limit=1000'
+curl -sS 'https://data.example.go.id/api/3/action/organization_list?all_fields=true&limit=1000'
 
 # Facet katalog, tanpa mengunduh baris dataset
-curl -sS 'https://data.wajokab.go.id/api/3/action/package_search?q=%2A%3A%2A&rows=0&facets=true'
+curl -sS 'https://data.example.go.id/api/3/action/package_search?q=%2A%3A%2A&rows=0&facets=true'
 
 # Riwayat perubahan dataset
-curl -sS 'https://data.wajokab.go.id/api/3/action/package_activity_list?id=nama-dataset&limit=8&offset=0'
+curl -sS 'https://data.example.go.id/api/3/action/package_activity_list?id=nama-dataset&limit=8&offset=0'
 
 # Metadata resource
-curl -sS 'https://data.wajokab.go.id/api/3/action/resource_show?id=RESOURCE_ID'
+curl -sS 'https://data.example.go.id/api/3/action/resource_show?id=RESOURCE_ID'
 ```
 
 ID resource biasanya tersedia pada array `resources` dalam hasil `package_show`; gunakan ID tersebut sebagai `resource_id` saat membaca DataStore. Resource yang berstatus privat/nonaktif dihilangkan dari daftar resource tertanam pada hasil `package_show` dan `package_search`. Activity API juga tidak mengembalikan field `user`, `user_id`, atau `activity_user_id` agar endpoint publik tidak menjadi jalur untuk menemukan identitas staf internal.
@@ -165,7 +165,7 @@ ID resource biasanya tersedia pada array `resources` dalam hasil `package_show`;
 Portal disiapkan untuk kemungkinan diambil oleh harvester CKAN lain, tanpa membuka hostname administrasi. Alamat sumber yang perlu didaftarkan pada harvester adalah:
 
 ```text
-https://data.wajokab.go.id
+https://data.example.go.id
 ```
 
 Jangan menggunakan `CKAN_HOST` (misalnya `https://ckan.silirdev.com`); hostname tersebut khusus administrasi. Gunakan `PUBLIC_HOST` (misalnya `https://data.silirdev.com`) sebagai alamat harvesting publik. Harvester CKAN standar memanggil `package_search` dengan `rows`, `start`, `sort=id asc`, lalu memakai filter `fq` untuk membatasi organisasi/grup atau mengambil metadata yang berubah sejak proses sebelumnya. Facade publik kini mendukung subset parameter tersebut secara terbatas. Action baca seperti `package_show`, `organization_show`, dan `group_show` tetap tersedia untuk metadata yang bersifat publik.
@@ -173,16 +173,16 @@ Jangan menggunakan `CKAN_HOST` (misalnya `https://ckan.silirdev.com`); hostname 
 Contoh request awal:
 
 ```bash
-curl -sS 'https://data.wajokab.go.id/api/3/action/package_search?rows=100&start=0&sort=id%20asc'
+curl -sS 'https://data.example.go.id/api/3/action/package_search?rows=100&start=0&sort=id%20asc'
 ```
 
 Contoh request perubahan sejak 1 Januari 2026 (tanggal ini hanya contoh pengujian; untuk sinkronisasi inkremental, gunakan checkpoint UTC dari sinkronisasi terakhir yang berhasil):
 
 ```bash
-curl -sS 'https://data.wajokab.go.id/api/3/action/package_search?rows=100&start=0&sort=id%20asc&fq=metadata_modified%3A%5B2026-01-01T00%3A00%3A00Z%20TO%20*%5D'
+curl -sS 'https://data.example.go.id/api/3/action/package_search?rows=100&start=0&sort=id%20asc&fq=metadata_modified%3A%5B2026-01-01T00%3A00%3A00Z%20TO%20*%5D'
 ```
 
-API publik tidak memerlukan API key untuk metadata publik. Server-to-server harvesting tidak memerlukan CORS browser. Untuk aplikasi browser dari origin lain, CORS harus dibuka eksplisit melalui `PUBLIC_API_CORS_ORIGINS`, daftar origin HTTPS dipisahkan koma; jangan mengaktifkan wildcard secara default. Dataset privat dan action mutasi tetap tidak tersedia. Bila pihak SDI memilih metode DCAT/RDF, gunakan endpoint ekspor DCAT publik (`/catalog.rdf`, `/catalog.ttl`, atau `/catalog.jsonld`) dan cocokkan profil metadata yang diwajibkan oleh harvester tujuan. Dukungan teknis ini menyiapkan jalur koneksi; **belum berarti sumber Wajo telah didaftarkan atau lulus uji penerimaan SDI**.
+API publik tidak memerlukan API key untuk metadata publik. Server-to-server harvesting tidak memerlukan CORS browser. Untuk aplikasi browser dari origin lain, CORS harus dibuka eksplisit melalui `PUBLIC_API_CORS_ORIGINS`, daftar origin HTTPS dipisahkan koma; jangan mengaktifkan wildcard secara default. Dataset privat dan action mutasi tetap tidak tersedia. Bila pihak SDI memilih metode DCAT/RDF, gunakan endpoint ekspor DCAT publik (`/catalog.rdf`, `/catalog.ttl`, atau `/catalog.jsonld`) dan cocokkan profil metadata yang diwajibkan oleh harvester tujuan. Dukungan teknis ini menyiapkan jalur koneksi; **belum berarti sumber instansi telah didaftarkan atau lulus uji penerimaan SDI**.
 
 ## 6. Bentuk data utama
 

@@ -1,7 +1,12 @@
-export const PWA_PROMOTION_STORAGE_KEY = "wajo:pwa-install-promotion:v1";
-export const PWA_PROMOTION_VISIT_KEY = "wajo:pwa-install-promotion:visit";
-export const PWA_PROMOTION_PAGES_KEY = "wajo:pwa-install-promotion:pages";
-export const PWA_PROMOTION_OFFERED_KEY = "wajo:pwa-install-promotion:offered";
+export const PWA_PROMOTION_STORAGE_KEY = "portal:pwa-install-promotion:v1";
+export const PWA_PROMOTION_VISIT_KEY = "portal:pwa-install-promotion:visit";
+export const PWA_PROMOTION_PAGES_KEY = "portal:pwa-install-promotion:pages";
+export const PWA_PROMOTION_OFFERED_KEY = "portal:pwa-install-promotion:offered";
+const LEGACY_PWA_STORAGE_PREFIX = (
+  process.env.NEXT_PUBLIC_LEGACY_PWA_STORAGE_PREFIX || ""
+).trim();
+const legacyPwaKey = (suffix) =>
+  LEGACY_PWA_STORAGE_PREFIX ? `${LEGACY_PWA_STORAGE_PREFIX}:${suffix}` : "";
 export const PWA_PROMOTION_MIN_VISITS = 2;
 export const PWA_PROMOTION_MIN_PAGE_VIEWS = 3;
 export const PWA_PROMOTION_DISMISS_MS = 14 * 24 * 60 * 60 * 1000;
@@ -33,7 +38,9 @@ export function normalizePwaPromotionState(value) {
 
 export function readPwaPromotionState(storage) {
   try {
-    const raw = storage?.getItem(PWA_PROMOTION_STORAGE_KEY);
+    const raw =
+      storage?.getItem(PWA_PROMOTION_STORAGE_KEY) ??
+      (legacyPwaKey("v1") ? storage?.getItem(legacyPwaKey("v1")) : null);
     return raw
       ? normalizePwaPromotionState(JSON.parse(raw))
       : { ...DEFAULT_STATE };
@@ -60,8 +67,13 @@ export function recordPwaPromotionEngagement(storage, session, pathname) {
   let visitRecorded = false;
   let seenPaths = [];
   try {
-    visitRecorded = session?.getItem(PWA_PROMOTION_VISIT_KEY) === "1";
-    const rawPaths = session?.getItem(PWA_PROMOTION_PAGES_KEY);
+    visitRecorded =
+      session?.getItem(PWA_PROMOTION_VISIT_KEY) === "1" ||
+      (legacyPwaKey("visit") &&
+        session?.getItem(legacyPwaKey("visit")) === "1");
+    const rawPaths =
+      session?.getItem(PWA_PROMOTION_PAGES_KEY) ??
+      (legacyPwaKey("pages") ? session?.getItem(legacyPwaKey("pages")) : null);
     const parsed = rawPaths ? JSON.parse(rawPaths) : [];
     seenPaths = Array.isArray(parsed)
       ? parsed.filter(

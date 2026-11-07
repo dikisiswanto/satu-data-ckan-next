@@ -1,0 +1,39 @@
+version: 1
+groups:
+  - annotation: Konfigurasi peta dasar ckanext-spatial
+    options:
+      - key: ckanext.spatial.common_map.type
+        default: custom
+        example: custom
+        description: Jenis peta dasar bersama yang digunakan oleh viewer geospasial CKAN.
+      - key: ckanext.spatial.common_map.custom.url
+        default: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        example: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        description: Templat URL tile XYZ untuk peta dasar kustom. Gunakan penyedia tile sesuai ketentuan dan atribusinya.
+      - key: ckanext.spatial.common_map.attribution
+        default: "© OpenStreetMap contributors"
+        example: "© OpenStreetMap contributors"
+        description: Atribusi yang ditampilkan pada peta dasar.
+
+  - annotation: Identitas dan integrasi portal
+    options:
+      - key: ckanext.portal_theme.admin_host
+        default: ""
+        example: "ckan.example.go.id"
+        description: Hostname khusus admin CKAN yang hanya dapat diakses setelah login.
+      - key: ckanext.portal_theme.public_revalidate_url
+        default: ""
+        example: "http://nextjs:3000/api/internal/ckan/revalidate"
+        description: URL internal untuk invalidasi cache frontend setelah perubahan data CKAN.
+      - key: ckanext.portal_theme.public_revalidate_secret
+        default: ""
+        example: ""
+        description: Rahasia bersama untuk menandatangani webhook invalidasi cache; jangan publikasikan nilainya.
+      - key: ckanext.portal_theme.media_owner_type
+        default: portal_media
+        example: portal_media
+        description: Tipe owner khusus untuk berkas gambar editorial yang dapat dibaca publik.
+      - key: ckanext.portal_theme.media_owner_id
+        default: public-editorial-media
+        example: public-editorial-media
+        description: ID owner khusus untuk berkas gambar editorial yang dapat dibaca publik.

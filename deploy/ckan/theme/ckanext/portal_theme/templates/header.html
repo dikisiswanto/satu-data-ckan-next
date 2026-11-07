@@ -1,0 +1,49 @@
+{% ckan_extends %}
+{% from "portal_theme/icon.html" import portal_icon %}
+
+{# Portal Admin top bar. Native CKAN routes, user identity and CSRF logout remain intact. #}
+{% block header_wrapper %}
+  <header class="portal-admin-topbar">
+    <div class="portal-admin-topbar__inner">
+      <a class="portal-admin-brand" href="{{ h.url_for('portal_admin.index') }}" aria-label="{{ g.site_title }} — {{ _('Dashboard') }}">
+        <span class="portal-admin-brand__mark">
+          <img src="{{ g.site_logo or '/icons/portal.svg' }}" alt="{{ g.site_title }}" width="42" height="48" fetchpriority="high" />
+        </span>
+        <span class="portal-admin-brand__copy">
+          <strong>{{ g.site_title }}</strong>
+          <small>{{ g.site_description }}</small>
+        </span>
+      </a>
+
+      <div class="portal-admin-topbar__actions">
+        <button class="portal-admin-menu-toggle btn" type="button" data-bs-toggle="collapse" data-bs-target="#portal-admin-sidebar" aria-controls="portal-admin-sidebar" aria-expanded="false" aria-label="{{ _('Open navigation') }}">
+          {{ portal_icon('menu') }}
+        </button>
+        <a class="portal-admin-public-link" href="{{ g.site_url }}" target="_blank" rel="noopener noreferrer">
+          {{ portal_icon('external-link') }}
+          <span>{{ _('Open public portal') }}</span>
+        </a>
+        {% if c.userobj %}
+          <div class="portal-admin-user">
+            <span class="portal-admin-user__avatar">{{ h.user_image((c.user if c and c.user else ''), size=30) }}</span>
+            <span class="portal-admin-user__identity">
+              <strong>{{ c.userobj.display_name or c.userobj.name }}</strong>
+              <small>{{ _('System Administrator') if c.userobj.sysadmin else _('Data manager') }}</small>
+            </span>
+          </div>
+          {% if c.userobj.sysadmin %}
+            <a class="portal-admin-icon-button" href="{{ h.url_for('admin.index') }}" aria-label="{{ _('System settings') }}" title="{{ _('System settings') }}">
+              {{ portal_icon('sliders') }}
+            </a>
+          {% endif %}
+          <form class="portal-admin-logout" action="{{ h.url_for('user.logout') }}" method="post">
+            {{ h.csrf_input() }}
+            <button class="portal-admin-icon-button" type="submit" aria-label="{{ _('Log out') }}" title="{{ _('Log out') }}">
+              {{ portal_icon('log-out') }}
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+{% endblock %}

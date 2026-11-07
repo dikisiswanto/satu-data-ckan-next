@@ -6,7 +6,7 @@ from pathlib import Path
 
 MODULE = (
     Path(__file__).resolve().parents[1]
-    / "deploy/ckan/theme/ckanext/wajo_theme/publisher_analytics.py"
+    / "deploy/ckan/theme/ckanext/portal_theme/publisher_analytics.py"
 )
 SPEC = importlib.util.spec_from_file_location("publisher_analytics", MODULE)
 MODULE_OBJECT = importlib.util.module_from_spec(SPEC)

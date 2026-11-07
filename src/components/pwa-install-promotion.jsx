@@ -108,8 +108,15 @@ function canOfferPromotion({ engagement, platform, installPrompt }) {
 
   const sessionStorage = getBrowserStorage("sessionStorage");
   try {
-    if (sessionStorage?.getItem(PWA_PROMOTION_OFFERED_KEY) === "1")
+    const legacyPrefix =
+      process.env.NEXT_PUBLIC_LEGACY_PWA_STORAGE_PREFIX || "";
+    const legacyOfferedKey = legacyPrefix ? `${legacyPrefix}:offered` : "";
+    if (
+      sessionStorage?.getItem(PWA_PROMOTION_OFFERED_KEY) === "1" ||
+      (legacyOfferedKey && sessionStorage?.getItem(legacyOfferedKey) === "1")
+    ) {
       return false;
+    }
     sessionStorage?.setItem(PWA_PROMOTION_OFFERED_KEY, "1");
   } catch {
     // If storage is blocked, the current in-memory snapshot still limits visibility.
@@ -217,10 +224,8 @@ export function PwaInstallPromotion() {
 
     const hideForSession = () => {
       try {
-        getBrowserStorage("sessionStorage")?.setItem(
-          PWA_PROMOTION_OFFERED_KEY,
-          "1",
-        );
+        const sessionStorage = getBrowserStorage("sessionStorage");
+        sessionStorage?.setItem(PWA_PROMOTION_OFFERED_KEY, "1");
       } catch {
         // The external snapshot still hides the promotion for this mounted page.
       }

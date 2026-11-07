@@ -31,7 +31,7 @@ describe("CKAN CSV preview session authorization", () => {
     });
     const fetcher = vi.fn(async (_url, options) => {
       expect(options.headers.Cookie).toBe(
-        "wajo_ckan_session=signed-organization-member",
+        "portal_ckan_session=signed-organization-member",
       );
       return new Response("name,value\nA,1\nB,2\n", {
         status: 200,
@@ -44,7 +44,7 @@ describe("CKAN CSV preview session authorization", () => {
       new Request(
         `https://data.silirdev.com/api/public/resource-preview?resource_id=${resourceId}`,
         {
-          headers: { Cookie: "wajo_ckan_session=signed-organization-member" },
+          headers: { Cookie: "portal_ckan_session=signed-organization-member" },
         },
       ),
     );
@@ -72,7 +72,7 @@ describe("CKAN CSV preview session authorization", () => {
       new Request(
         `https://data.silirdev.com/api/public/resource-preview?resource_id=${resourceId}`,
         {
-          headers: { Cookie: "wajo_ckan_session=signed-organization-member" },
+          headers: { Cookie: "portal_ckan_session=signed-organization-member" },
         },
       ),
     );
@@ -101,7 +101,7 @@ describe("CKAN CSV preview session authorization", () => {
       new Request(
         `https://data.silirdev.com/api/public/resource-preview?resource_id=${resourceId}`,
         {
-          headers: { Cookie: "wajo_ckan_session=signed-organization-member" },
+          headers: { Cookie: "portal_ckan_session=signed-organization-member" },
         },
       ),
     );

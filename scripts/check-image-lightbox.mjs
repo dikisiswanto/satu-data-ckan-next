@@ -186,7 +186,7 @@ assert.match(
 const e2e = await read("tests/e2e/public-portal.spec.js");
 assert.match(
   e2e,
-  /dataset image previews open in a zoomable lightbox[\s\S]*Perbesar gambar: Denah titik sekolah Kabupaten Wajo[\s\S]*150%[\s\S]*Escape/,
+  /dataset image previews open in a zoomable lightbox[\s\S]*Perbesar gambar: Denah titik sekolah Kabupaten Contoh[\s\S]*150%[\s\S]*Escape/,
   "Dataset image lightbox must have browser coverage for open, zoom and Escape close.",
 );
 assert.match(

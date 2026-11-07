@@ -4,13 +4,13 @@ import { parseMarkdown } from "@/lib/markdown/parse-markdown";
 describe("Markdown renderer parser", () => {
   it("supports GFM tables and column alignment", () => {
     const [table] = parseMarkdown(
-      "| Nama | Nilai |\n| :--- | ---: |\n| Wajo | 42 |",
+      "| Nama | Nilai |\n| :--- | ---: |\n| Contoh | 42 |",
     );
     expect(table).toMatchObject({
       type: "table",
       headers: ["Nama", "Nilai"],
       alignments: ["left", "right"],
-      rows: [["Wajo", "42"]],
+      rows: [["Contoh", "42"]],
     });
   });
 
