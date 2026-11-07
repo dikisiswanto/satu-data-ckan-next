@@ -109,7 +109,7 @@ test.describe("public route layout stability", () => {
   });
 });
 
-test("Pahami Data illustration stays visible below the copy on mobile", async ({
+test("data-service copy uses the available mobile width without decorative chart artwork", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -117,30 +117,16 @@ test("Pahami Data illustration stays visible below the copy on mobile", async ({
   await page.goto("/", { waitUntil: "networkidle" });
   const card = page.locator(".home-feature-visualization");
   const copy = card.locator(".home-feature-copy");
-  const art = card.locator(".home-data-art");
   await expect(card).toBeVisible();
   await expect(copy).toBeVisible();
-  await expect(art).toBeVisible();
-  const [cardBox, copyBox, artBox, position] = await Promise.all([
+  await expect(card.locator(".home-data-art")).toHaveCount(0);
+  const [cardBox, copyBox] = await Promise.all([
     card.boundingBox(),
     copy.boundingBox(),
-    art.boundingBox(),
-    art.evaluate((element) => getComputedStyle(element).position),
   ]);
   expect(cardBox, "feature card must have a measurable frame").not.toBeNull();
   expect(copyBox, "feature copy must have a measurable frame").not.toBeNull();
-  expect(artBox, "illustration must have a measurable frame").not.toBeNull();
-  expect(position, "mobile illustration must be in document flow").toBe(
-    "relative",
-  );
-  expect(
-    artBox.y,
-    "illustration must not overlap the copy",
-  ).toBeGreaterThanOrEqual(copyBox.y + copyBox.height - 1);
-  expect(artBox.x).toBeGreaterThanOrEqual(cardBox.x);
-  expect(artBox.x + artBox.width).toBeLessThanOrEqual(
-    cardBox.x + cardBox.width + 1,
-  );
+  expect(copyBox.width).toBeGreaterThan(cardBox.width * 0.8);
 });
 
 test("public interior pages receive a subtle one-time scroll reveal", async ({

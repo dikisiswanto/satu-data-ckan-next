@@ -1,97 +1,8 @@
-/* One-time entrance for the desktop hero. Loading fallbacks stay still so the
-   resolved server content does not replay a second entrance after hydration. */
-.home-hero-copy > * {
-  opacity: 0;
-  animation: portal-copy-enter 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.home-hero-copy > :nth-child(1) {
-  animation-delay: 70ms;
-}
-.home-hero-copy > :nth-child(2) {
-  animation-delay: 150ms;
-}
-.home-hero-copy > :nth-child(3) {
-  animation-delay: 230ms;
-}
-.home-hero-copy > :nth-child(4) {
-  animation-delay: 310ms;
-}
-.home-hero-copy > :nth-child(5) {
-  animation-delay: 390ms;
-}
-.home-hero--loading .home-hero-copy > * {
-  animation: none !important;
-  opacity: 1;
-  transform: none;
-}
-.home-hero-visual {
-  animation: portal-visual-enter 850ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
-}
-.home-visual-mark {
-  animation: portal-mark-enter 760ms cubic-bezier(0.22, 1, 0.36, 1) 420ms both;
-}
-.home-visual-caption {
-  animation: portal-caption-enter 680ms cubic-bezier(0.22, 1, 0.36, 1) 500ms
-    both;
-}
-@keyframes portal-copy-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 12px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-@keyframes portal-visual-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 14px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-@keyframes portal-mark-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(-50%, calc(-50% + 10px), 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(-50%, -50%, 0);
-  }
-}
-@keyframes portal-caption-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(50%, 8px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(50%, 0, 0);
-  }
-}
-@keyframes portal-chip-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 9px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-/* Server Suspense placeholder stays still; only resolved data gets one entrance. */
+/* Server Suspense placeholder stays still and reserves the resolved geometry. */
 .home-hero-visual--loading,
 .home-hero-visual--loading * {
   animation: none !important;
   opacity: 1 !important;
-  transform: none !important;
-  translate: none !important;
 }
 
 /* One layout owner for the homepage hero, background, copy, and illustration. */
@@ -103,7 +14,7 @@ body:has(.public-home) .home-hero {
   border: 0;
   padding: clamp(5.1rem, 6.5vw, 5.8rem) 0 1rem;
   color: #fff;
-  background-color: #123650;
+  background-color: var(--app-brand-navy);
   background-image: none;
 }
 
@@ -112,7 +23,7 @@ body:has(.public-home) .home-hero {
   z-index: -2;
   inset: 0;
   overflow: hidden;
-  background: #123650;
+  background: var(--app-brand-navy);
 }
 .home-hero-background img {
   object-fit: cover;
@@ -132,20 +43,6 @@ body:has(.public-home) .home-hero::before {
       rgb(8 35 55 / 58%) 100%
     ),
     linear-gradient(0deg, rgb(6 28 46 / 30%), rgb(6 28 46 / 5%));
-}
-
-body:has(.public-home) .home-hero-pattern {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.16;
-  background-image: radial-gradient(
-    rgb(255 255 255 / 32%) 0.7px,
-    transparent 0.7px
-  );
-  background-size: 22px 22px;
-  mask-image: linear-gradient(90deg, transparent 35%, #000 100%);
 }
 
 .home-hero-inner {
@@ -286,200 +183,119 @@ body:has(.public-home) .home-hero-pattern {
   border: 0;
   border-radius: 0;
   background: radial-gradient(
-    ellipse at 50% 46%,
-    rgb(116 190 213 / 19%),
-    transparent 58%
+    ellipse at 50% 44%,
+    rgb(100 188 204 / 16%),
+    transparent 66%
   );
   box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 
-.home-orbit {
+/* A quiet atlas/network motif makes the hero specific to a regional data portal. */
+.home-atlas-visual {
   position: absolute;
-  top: 43%;
-  left: 50%;
-  aspect-ratio: 1;
-  border: 1px solid rgb(220 242 250 / 19%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0.15rem -0.45rem 2.45rem;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 1;
 }
 
-.home-orbit-one {
-  width: min(82%, 21rem);
-  border-style: solid;
-  transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-22deg);
-  animation: portal-orbit-spin 28s linear infinite;
+.home-atlas-visual svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-.home-orbit-two {
-  width: min(62%, 16rem);
-  border-color: rgb(207 235 245 / 30%);
-  border-style: dashed;
-  transform: translate(-50%, -50%) rotateX(68deg) rotateZ(38deg);
-  animation: portal-orbit-spin-reverse 22s linear infinite;
+.home-atlas-contours path {
+  fill: none;
+  stroke: rgb(195 229 240 / 24%);
+  stroke-width: 1.25;
 }
 
-.home-scene-grid {
-  position: absolute;
-  inset: 7% 8% 12%;
-  border: 1px solid rgb(211 238 250 / 10%);
-  border-radius: 50%;
-  background-image:
-    linear-gradient(rgb(211 238 250 / 8%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(211 238 250 / 8%) 1px, transparent 1px);
-  background-size: 26px 26px;
-  mask-image: radial-gradient(ellipse at center, #000 4%, transparent 68%);
-  transform: perspective(680px) rotateX(64deg) rotateZ(-16deg)
-    translateY(1.5rem);
-  opacity: 0.7;
+.home-atlas-connections path {
+  fill: none;
+  stroke: rgb(139 226 212 / 56%);
+  stroke-dasharray: 4 8;
+  stroke-linecap: round;
+  stroke-width: 1.4;
 }
 
-.home-scene-cube {
-  --cube-size: 8.5rem;
-  --cube-half: 4.25rem;
-  position: relative;
-  width: var(--cube-size);
-  height: var(--cube-size);
-  transform-style: preserve-3d;
-  animation: portal-cube-drift 15s ease-in-out infinite;
-}
-
-.home-scene-cube__face {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  box-sizing: border-box;
-  width: var(--cube-size);
-  height: var(--cube-size);
-  place-items: center;
-  border: 1px solid rgb(27 52 64 / 24%);
-  border-radius: 0;
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 28%),
-    0 8px 20px rgb(2 18 34 / 10%);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.home-scene-cube__face svg {
-  width: 2.65rem;
-  height: 2.65rem;
-  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 28%));
-}
-
-.home-scene-cube__front {
-  color: #164b70;
-  background: linear-gradient(145deg, #eaf5ff, #cfe5f7);
-  transform: translateZ(var(--cube-half));
-}
-.home-scene-cube__back {
-  color: #4d3d83;
-  background: linear-gradient(145deg, #f1edff, #ddd5fa);
-  transform: rotateY(180deg) translateZ(var(--cube-half));
-}
-.home-scene-cube__right {
-  color: #17604b;
-  background: linear-gradient(145deg, #e8f8ef, #ccebd9);
-  transform: rotateY(90deg) translateZ(var(--cube-half));
-}
-.home-scene-cube__left {
-  color: #82511b;
-  background: linear-gradient(145deg, #fff5df, #f4dfb4);
-  transform: rotateY(-90deg) translateZ(var(--cube-half));
-}
-.home-scene-cube__top {
-  color: #285b36;
-  background: linear-gradient(145deg, #edf8e9, #d4ebca);
-  transform: rotateX(90deg) translateZ(var(--cube-half));
-}
-.home-scene-cube__bottom {
-  color: #873b4c;
-  background: linear-gradient(145deg, #fff0f0, #f3d3d8);
-  transform: rotateX(-90deg) translateZ(var(--cube-half));
-}
-
-.home-scene-spark {
-  position: absolute;
-  z-index: 2;
-  width: 0.55rem;
-  height: 0.55rem;
-  border: 1px solid rgb(227 248 255 / 75%);
-  border-radius: 50%;
-  background: #9de6e2;
-  box-shadow: 0 0 18px 5px rgb(111 215 222 / 30%);
-}
-.home-scene-spark-one {
-  top: 22%;
-  left: 27%;
-  animation: portal-spark-float 5.5s ease-in-out infinite;
-}
-.home-scene-spark-two {
-  right: 23%;
-  bottom: 27%;
-  width: 0.38rem;
-  height: 0.38rem;
-  animation: portal-spark-float 6.8s ease-in-out -2s infinite;
-}
-
-@keyframes portal-orbit-spin {
-  from {
-    transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-22deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotateX(68deg) rotateZ(338deg);
-  }
-}
-@keyframes portal-orbit-spin-reverse {
-  from {
-    transform: translate(-50%, -50%) rotateX(68deg) rotateZ(38deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-322deg);
-  }
-}
-@keyframes portal-cube-drift {
-  0%,
-  100% {
-    transform: rotateX(-16deg) rotateY(-24deg) translateY(0);
-  }
-  50% {
-    transform: rotateX(18deg) rotateY(26deg) translateY(-0.55rem);
-  }
-}
-@keyframes portal-spark-float {
-  0%,
-  100% {
-    translate: 0 0;
-    opacity: 0.65;
-  }
-  50% {
-    translate: 0 -12px;
-    opacity: 1;
-  }
+.home-atlas-nodes circle {
+  fill: #a9e6d6;
+  stroke: rgb(14 54 77 / 68%);
+  stroke-width: 2.2;
 }
 
 .home-visual-mark {
   position: absolute;
   top: 43%;
   left: 50%;
-  display: grid;
-  width: 10rem;
-  aspect-ratio: 1;
-  place-items: center;
-  perspective: 900px;
-  transform-style: preserve-3d;
-  border: 0;
-  border-radius: 0;
-  color: #e8f6ff;
-  background: transparent;
-  filter: drop-shadow(0 12px 28px rgb(2 18 34 / 28%));
-  transform: translate(-50%, -50%);
+  display: flex;
+  width: 8rem;
+  height: 8rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid rgb(224 245 248 / 88%);
+  border-radius: 1.4rem;
+  color: #163c56;
+  background: linear-gradient(145deg, #f5fcff 0%, #dceff5 100%);
+  box-shadow:
+    0 24px 52px rgb(2 18 34 / 24%),
+    0 4px 12px rgb(2 18 34 / 12%),
+    inset 0 1px 0 rgb(255 255 255 / 90%);
+  transform: translate(-50%, -50%) rotate(-4deg);
 }
 
-.home-visual-mark svg {
-  width: 2.9rem;
-  height: 2.9rem;
+.home-visual-mark-icon {
+  display: grid;
+  width: 3.65rem;
+  height: 3.65rem;
+  place-items: center;
+  border: 1px solid #c5e1e8;
+  border-radius: 1rem;
+  color: #1b6580;
+  background: #fff;
+  box-shadow: 0 5px 14px rgb(19 68 90 / 9%);
+}
+
+.home-visual-mark-label {
+  color: #315c70;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+/* Keep the hero's hierarchy in its real content and live catalog links. */
+.home-hero-copy > *,
+.home-hero-visual,
+.home-visual-mark,
+.home-visual-caption,
+.home-visual-chip {
+  animation: none !important;
+  opacity: 1;
+  translate: none;
+}
+
+.home-visual-chip-top-left,
+.home-visual-chip-top-right,
+.home-visual-chip-bottom-left,
+.home-visual-chip-bottom-right {
+  --chip-bg: #eaf2ff;
+  --chip-border: #c9dced;
+  --chip-ink: #19476f;
+  --chip-muted: #49647d;
+}
+
+.home-hero-kicker {
+  gap: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .home-visual-caption {
@@ -535,14 +351,6 @@ body:has(.public-home) .home-hero-pattern {
   color: rgb(255 255 255 / 74%);
 }
 
-.home-live-dot {
-  width: 0.6rem;
-  height: 0.6rem;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: #76ddb0;
-}
-
 .home-visual-chip {
   position: absolute;
   z-index: 4;
@@ -574,22 +382,15 @@ body:has(.public-home) .home-hero-pattern {
   max-width: 11.5rem;
   pointer-events: auto;
   transition:
-    transform 220ms ease,
-    box-shadow 220ms ease,
-    border-color 220ms ease;
-  animation:
-    portal-chip-enter 650ms cubic-bezier(0.22, 1, 0.36, 1)
-      var(--chip-enter-delay, 560ms) both,
-    portal-metric-float 6.8s ease-in-out var(--chip-float-delay, 1.45s) infinite
-      both;
+    border-color 140ms ease,
+    background-color 140ms ease;
 }
 .home-visual-chip:hover,
 .home-visual-chip:focus-visible {
   z-index: 6;
   border-color: #9fc8e2;
-  box-shadow: 0 18px 36px rgb(2 18 34 / 30%);
-  transform: translateY(-4px) scale(1.025);
-  animation-play-state: paused;
+  box-shadow: 0 14px 28px rgb(2 18 34 / 24%);
+  transform: translateY(-2px);
 }
 .home-visual-chip-top-left {
   top: 1.25rem;
@@ -604,33 +405,27 @@ body:has(.public-home) .home-hero-pattern {
 .home-visual-chip-top-right {
   top: 1.25rem;
   right: 0.1rem;
-  --chip-enter-delay: 590ms;
-  --chip-float-delay: 2.05s;
-  --chip-bg: #e9f7ef;
-  --chip-border: #c0e2cf;
-  --chip-ink: #1b5840;
-  --chip-muted: #4a6d5d;
+  --chip-bg: #e5f6f1;
+  --chip-border: #bce3d8;
+  --chip-ink: #185b50;
+  --chip-muted: #456e67;
 }
 .home-visual-chip-bottom-left {
   right: auto;
   bottom: 5.4rem;
   left: 0.1rem;
-  --chip-enter-delay: 680ms;
-  --chip-float-delay: 1.75s;
-  --chip-bg: #f0edff;
-  --chip-border: #d4cdf5;
-  --chip-ink: #4d3e82;
-  --chip-muted: #655d83;
+  --chip-bg: #eaf3ff;
+  --chip-border: #bfd5f2;
+  --chip-ink: #19476f;
+  --chip-muted: #49647d;
 }
 .home-visual-chip-bottom-right {
   right: 0.1rem;
   bottom: 5.4rem;
-  --chip-enter-delay: 770ms;
-  --chip-float-delay: 2.35s;
-  --chip-bg: #fff4e3;
-  --chip-border: #f0d9b4;
-  --chip-ink: #80531f;
-  --chip-muted: #796247;
+  --chip-bg: #e5f6f1;
+  --chip-border: #bce3d8;
+  --chip-ink: #185b50;
+  --chip-muted: #456e67;
 }
 .home-visual-chip {
   border-color: var(--chip-border, #d5e3ed);
@@ -645,15 +440,6 @@ body:has(.public-home) .home-hero-pattern {
 }
 .home-visual-chip small {
   color: var(--chip-muted, #526777);
-}
-@keyframes portal-metric-float {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-  50% {
-    translate: 0 -5px;
-  }
 }
 .home-visual-chip-top:not(.home-visual-chip-top-left):not(
     .home-visual-chip-top-right
@@ -833,27 +619,18 @@ body:has(.public-home) .home-hero-pattern {
   .home-hero-visual *::after {
     animation: none !important;
     transition: none !important;
-    transform: none !important;
-    translate: none !important;
     opacity: 1 !important;
     will-change: auto !important;
   }
-  .home-hero-visual .home-scene-cube__front {
-    transform: translateZ(var(--cube-half)) !important;
-  }
-  .home-hero-visual .home-scene-cube__back {
-    transform: rotateY(180deg) translateZ(var(--cube-half)) !important;
-  }
-  .home-hero-visual .home-scene-cube__right {
-    transform: rotateY(90deg) translateZ(var(--cube-half)) !important;
-  }
-  .home-hero-visual .home-scene-cube__left {
-    transform: rotateY(-90deg) translateZ(var(--cube-half)) !important;
-  }
-  .home-hero-visual .home-scene-cube__top {
-    transform: rotateX(90deg) translateZ(var(--cube-half)) !important;
-  }
-  .home-hero-visual .home-scene-cube__bottom {
-    transform: rotateX(-90deg) translateZ(var(--cube-half)) !important;
-  }
+}
+
+/* The hero is intentionally static. Live catalog links provide the useful
+   visual information; ornamental entrance and floating effects are omitted. */
+.home-hero-copy > *,
+.home-hero-visual,
+.home-visual-caption,
+.home-visual-chip {
+  animation: none !important;
+  opacity: 1 !important;
+  translate: none;
 }

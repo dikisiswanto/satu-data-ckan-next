@@ -36,7 +36,7 @@ export default function HelpPage() {
         description={`Belum menemukan informasi yang dibutuhkan? Ajukan permintaan informasi publik melalui ${siteConfig.ppidName}.`}
       />
       <div className="mt-8 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
-        <section className="rounded-2xl border border-[#e1eaf1] bg-[linear-gradient(145deg,_#f1f7ff_0%,_#ffffff_72%)] p-5 shadow-[0_8px_30px_rgb(24_58_68_/_4%)] sm:p-8">
+        <section className="rounded-xl border border-[#e1eaf1] bg-[#f7fafc] p-5 sm:p-8">
           <span className="grid size-12 place-items-center rounded-xl bg-[#e8f1ff] text-[#1d5fa7]">
             <ClipboardList size={22} aria-hidden="true" />
           </span>

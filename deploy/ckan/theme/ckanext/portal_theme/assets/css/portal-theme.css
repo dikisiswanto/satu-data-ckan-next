@@ -76,8 +76,8 @@ textarea {
   top: 0;
   z-index: 100;
   border-bottom: 1px solid rgb(255 255 255 / 9%);
-  background: linear-gradient(112deg, #102b23 0%, #153d2f 58%, #1a4c39 100%);
-  color: #f6fbf8;
+  background: #fff;
+  color: var(--portal-forest-950);
   box-shadow: 0 8px 26px rgb(16 43 35 / 13%);
 }
 .portal-admin-topbar__inner {
@@ -684,21 +684,8 @@ textarea {
   border: 1px solid #d7e6dc;
   border-radius: var(--portal-radius-lg);
   padding: clamp(1.4rem, 3vw, 2.2rem);
-  background: linear-gradient(116deg, #fff 0%, #f2f8f4 62%, #e7f1e9 100%);
-  box-shadow: var(--portal-shadow-sm);
-}
-.portal-dashboard__welcome::after {
-  position: absolute;
-  right: -62px;
-  bottom: -140px;
-  width: 330px;
-  height: 330px;
-  border: 1px solid rgb(36 105 77 / 12%);
-  border-radius: 50%;
-  content: "";
-  box-shadow:
-    0 0 0 28px rgb(36 105 77 / 3%),
-    0 0 0 58px rgb(36 105 77 / 2%);
+  background: #fff;
+  box-shadow: none;
 }
 .portal-dashboard__welcome > div:first-child {
   position: relative;
@@ -726,21 +713,6 @@ textarea {
   color: #60736a;
   font-size: 0.9rem;
   line-height: 1.65;
-}
-.portal-dashboard__welcome-mark {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  width: 104px;
-  height: 104px;
-  flex: 0 0 104px;
-  place-items: center;
-  border: 1px solid rgb(36 105 77 / 12%);
-  border-radius: 1.5rem;
-  background: linear-gradient(145deg, #fff, #e4f0e8);
-  color: var(--portal-forest-700);
-  font-size: 2.5rem;
-  box-shadow: 0 12px 28px rgb(36 105 77 / 9%);
 }
 .portal-dashboard__section-heading {
   display: flex;
@@ -1042,18 +1014,7 @@ textarea {
   min-height: 100svh;
   align-items: center;
   padding: clamp(1.5rem, 5vh, 3.5rem) 1rem;
-  background:
-    radial-gradient(
-      ellipse at 12% 12%,
-      rgb(47 128 94 / 10%),
-      transparent 34rem
-    ),
-    radial-gradient(
-      ellipse at 88% 88%,
-      rgb(177 139 61 / 9%),
-      transparent 30rem
-    ),
-    var(--portal-canvas);
+  background: var(--portal-canvas);
 }
 .login-main:has(#field-login) #content {
   width: 100%;
@@ -1246,13 +1207,6 @@ textarea {
     min-height: 0;
     padding: 1.3rem;
   }
-  .portal-dashboard__welcome-mark {
-    width: 62px;
-    height: 62px;
-    flex-basis: 62px;
-    border-radius: 0.9rem;
-    font-size: 1.6rem;
-  }
   .portal-dashboard__welcome p {
     font-size: 0.82rem;
   }
@@ -1286,9 +1240,6 @@ textarea {
   }
   .portal-admin-topbar__actions {
     margin-left: auto;
-  }
-  .portal-dashboard__welcome-mark {
-    display: none;
   }
   .portal-dashboard__metrics {
     grid-template-columns: 1fr 1fr;
@@ -1730,17 +1681,6 @@ body {
   font-size: 0.84rem;
   line-height: 1.6;
 }
-.portal-dashboard__welcome-mark {
-  width: 76px;
-  height: 76px;
-  flex-basis: 76px;
-  border-color: #e5eee8;
-  border-radius: 0.7rem;
-  background: #f3f8f4;
-  color: #397454;
-  box-shadow: none;
-  font-size: 1.9rem;
-}
 .portal-dashboard__section-heading h2,
 .portal-dashboard-panel__header h2 {
   color: #29382f;
@@ -1900,9 +1840,6 @@ body {
   .portal-admin-workspace .main {
     padding: 0.9rem 0.75rem 2rem;
   }
-  .portal-dashboard__welcome-mark {
-    display: none;
-  }
   .portal-dashboard__metrics {
     gap: 0.55rem;
   }
@@ -1976,9 +1913,6 @@ body {
 }
 .portal-admin-nav__item.is-active > .fa {
   color: #28744c;
-}
-.portal-dashboard__welcome-mark .fa {
-  font-size: 2.6rem;
 }
 .portal-metric-card__icon .fa,
 .portal-dashboard-quicklinks__icon .fa,

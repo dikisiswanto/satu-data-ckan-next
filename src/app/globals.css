@@ -31,6 +31,18 @@
   color: var(--color-ink);
 }
 
+/* CMS detail pages use the page's own reading column. Do not wrap editorial
+   copy in another bordered, padded card. */
+.public-interior-page:has(.cms-document) .public-page-heading {
+  border: 0;
+  padding-bottom: 0;
+}
+.cms-document {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
 /* Accessible, responsive Markdown tables shared by public CMS pages. */
 .cms-markdown__table-wrap {
   max-width: 100%;

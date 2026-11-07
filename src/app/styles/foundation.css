@@ -21,10 +21,14 @@
   --app-text: #1b3440;
   --app-text-muted: #586d76;
   --app-border: #d8e2e4;
-  --app-primary: #1d5fa7;
+  --app-brand-navy: #123650;
+  --app-brand-blue: #1d5fa7;
+  --app-brand-teal: #23785f;
+  --app-brand-ochre: #91621f;
+  --app-primary: var(--app-brand-blue);
   --app-primary-foreground: #ffffff;
   --app-accent: #eaf2ff;
-  --app-focus: #1d5fa7;
+  --app-focus: var(--app-brand-blue);
   --app-radius-control: 0.625rem;
   --app-radius-card: 0.75rem;
   /* Shared type scale: keep public and authenticated portal content aligned. */

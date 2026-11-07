@@ -304,7 +304,7 @@ export function PwaInstallPromotion() {
           <AppWindow size={22} strokeWidth={1.8} />
         </span>
         <div className="pwa-install-promotion__copy">
-          <p className="pwa-install-promotion__eyebrow">Akses lebih praktis</p>
+          <p className="pwa-install-promotion__eyebrow">Pemasangan aplikasi</p>
           <h2>{siteConfig.shortName}</h2>
           <p className="pwa-install-promotion__description">
             Buka katalog dan informasi data langsung dari layar utama.

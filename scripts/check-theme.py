@@ -15,6 +15,7 @@ PACKAGE = THEME / "ckanext/portal_theme"
 PLUGIN = PACKAGE / "plugin.py"
 SETUP = THEME / "setup.py"
 BASE = PACKAGE / "templates/base.html"
+BACK_TO_TOP = PACKAGE / "public/portal-admin-back-to-top.js"
 HEADER = PACKAGE / "templates/header.html"
 PAGE = PACKAGE / "templates/page.html"
 CSS = PACKAGE / "assets/css/portal-theme.css"
@@ -56,6 +57,7 @@ def read(path: Path) -> str:
 plugin_source = read(PLUGIN)
 setup_source = read(SETUP)
 base_source = read(BASE)
+back_to_top_source = read(BACK_TO_TOP)
 header_source = read(HEADER)
 page_source = read(PAGE)
 css_source = read(CSS)
@@ -76,7 +78,7 @@ require("position: relative !important" in login_fix and "position: absolute !im
 require("padding-inline: 3.25rem 2.9rem !important" in login_fix, "Teks input login/password harus memiliki ruang kiri dari ikon dan ruang kanan untuk affordance browser.")
 require("align-content: safe center" in login_fix and "min-height: 100svh" in login_fix, "Area login harus memakai tinggi viewport dan aman dipusatkan tanpa memotong konten.")
 require("portal-login-benefits" not in page_source and "portal-login-identity__status" not in page_source, "Kolom identitas login harus ringkas dan tidak dipenuhi daftar teks tambahan.")
-require('msgid "Manage official datasets and portal content."' in read(INDONESIAN_PO), "Copy ringkas login harus memiliki terjemahan Bahasa Indonesia.")
+require('msgid "Sign in to manage datasets, organizations, and portal content."' in read(INDONESIAN_PO), "Copy ringkas login harus memiliki terjemahan Bahasa Indonesia.")
 
 # The CI failure mode seen in practice is a newer checker committed without the
 # matching design-system stylesheet. In a Git checkout, require the exact theme
@@ -172,7 +174,7 @@ icon_map = dict(icon_pairs)
 valid_free_solid_glyphs = {
     "gauge-high", "database", "building", "tags", "file-lines", "arrows-rotate",
     "folder", "users", "gear", "bars", "arrow-up-right-from-square", "sliders",
-    "right-from-bracket", "chart-bar", "angle-right", "plus", "lightbulb",
+    "right-from-bracket", "chart-bar", "angle-right", "plus",
     "newspaper", "book", "chart-line", "image", "table", "server",
     "cloud-arrow-down", "shield", "check", "circle-check", "circle-exclamation",
     "triangle-exclamation", "circle-info", "map", "map-location-dot", "pen-to-square", "pencil", "eye",
@@ -185,6 +187,9 @@ for glyph in ("gauge-high", "building", "image", "file-lines", "newspaper", "fol
 for retired_glyph in ("building-o", "file-text-o", "newspaper-o", "picture-o", "folder-open-o", "line-chart", "sign-out", "tachometer"):
     require(f"'{retired_glyph}'" not in icon_source, f"Nama glyph Font Awesome lama harus diganti: {retired_glyph}.")
 require("fonts.googleapis.com/css2?family=Inter" in base_source and "fonts.gstatic.com" in base_source and "display=swap" in base_source, "CKAN admin harus memuat Google Font Inter dengan preconnect dan display swap.")
+require("portal-admin-back-to-top.js" in base_source, "Base CKAN harus memuat kontrol kembali ke atas untuk halaman admin.")
+require('aria-label", "Kembali ke bagian atas halaman"' in back_to_top_source and 'window.scrollTo({' in back_to_top_source, "Kontrol kembali ke atas CKAN harus memiliki nama aksesibel dan aksi scroll yang nyata.")
+require("radial-gradient" not in design_system_source and "linear-gradient" not in design_system_source, "Portal Admin harus menghindari gradient dekoratif pada dashboard dan login.")
 # CKAN 2.12 FileStore must be enabled and backed by the persistent upstream ckan_storage volume.
 for upload_setting in (
     "CKAN__UPLOADS_ENABLED=true",
@@ -251,7 +256,7 @@ require('"portal_theme"' in bootstrap_source, "Plugin theme Portal harus didafta
 require("portal-admin-shell" in page_source and 'portal_theme/sidebar.html' in page_source and "{{ super() }}" in page_source, "Page shell harus menambahkan sidebar secara aditif tanpa mengganti konten core CKAN.")
 require(all(token in page_source for token in ("portal-login-identity", "portal-login-panel", "portal-login-native", "{{ super() }}")), "Login harus memiliki layout autentikasi modern dan tetap membungkus form native CKAN.")
 require("field-login" not in page_source and "field-password" not in page_source, "Template login tidak boleh mengganti field autentikasi native CKAN.")
-require("_('A trusted workspace for regional data.')" in page_source and "_('Access is limited to authorized data managers.')" in page_source, "Copy halaman login harus menggunakan gettext katalog Bahasa Indonesia.")
+require("_('Manage official data and publications.')" in page_source and "_('Access is limited to authorized data managers.')" in page_source, "Copy halaman login harus menggunakan gettext katalog Bahasa Indonesia.")
 require(re.search(r"{%-?\s*block\s+footer\s*-?%}\s*{%-?\s*endblock\s*-?%}", page_source) is not None, "Footer admin harus dihilangkan dari shell CKAN.")
 
 # Verify WebAssets bundle name and its CSS file are consistent.
@@ -347,6 +352,8 @@ actual_templates = sorted(path.relative_to(PACKAGE / "templates").as_posix() for
 require(actual_templates == ["base.html", "ckanext_pages/base_form.html", "ckanext_pages/blog.html", "ckanext_pages/blog_revisions_preview.html", "ckanext_pages/page.html", "ckanext_pages/page_revisions_preview.html", "header.html", "home/snippets/about_text.html", "home/snippets/promoted.html", "page.html", "portal_theme/context_help.html", "portal_theme/dashboard.html", "portal_theme/data_preview.html", "portal_theme/icon.html", "portal_theme/sidebar.html", "scheming/display_snippets/markdown.html"], "Theme boleh mengganti shell bersama, form dan detail CKAN Pages/Blog, tampilan Markdown Scheming, dashboard/sidebar serta snippet beranda; route dan modul CKAN lain tetap native.")
 CMS_FORM = PACKAGE / "templates/ckanext_pages/base_form.html"
 dashboard_source = read(DASHBOARD)
+require("portal-dashboard__welcome-mark" not in dashboard_source and "portal-login-identity__watermark" not in page_source, "Dashboard dan login tidak boleh menambahkan ornamen identitas yang tidak membawa informasi.")
+require("portal_icon('arrow-right')" not in dashboard_source, "Tautan dashboard tidak boleh memakai panah dekoratif berulang.")
 data_preview_source = read(DATA_PREVIEW)
 require("Portal Data portal" not in sidebar_source and "Kabupaten portal" not in sidebar_source and "portal-admin-sidebar__context" not in sidebar_source and "portal-admin-sidebar__footer" not in sidebar_source, "Sidebar admin harus langsung dimulai dari grup menu tanpa identitas tambahan atau footer.")
 require("portal-admin-nav__children" in sidebar_source and "Add information page" in sidebar_source and "Add news article" in sidebar_source, "Aksi tambah CMS harus berada tepat di bawah menu parent-nya.")

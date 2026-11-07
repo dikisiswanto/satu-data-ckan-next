@@ -4,7 +4,7 @@
   gap: 1.25rem;
   border: 1px solid #dce6eb;
   border-radius: 1.25rem;
-  background: linear-gradient(135deg, #f7fafb 0%, #ffffff 65%, #f2f7f8 100%);
+  background: #fff;
   padding: clamp(1rem, 2.5vw, 1.5rem);
 }
 
@@ -201,7 +201,7 @@
 
 .organization-directory-card {
   border-color: #dce6eb;
-  background: linear-gradient(180deg, #fff 0%, #fff 78%, #fbfcfd 100%);
+  background: #fff;
 }
 
 .organization-directory-card h3 a {

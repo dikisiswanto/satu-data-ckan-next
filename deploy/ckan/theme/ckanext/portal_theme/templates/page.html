@@ -18,7 +18,7 @@
     </div>
   {% else %}
     <div class="portal-login-frame">
-      <section class="portal-login-identity" aria-label="{{ _('Official management workspace') }}">
+      <section class="portal-login-identity" aria-label="{{ _('Portal management access') }}">
         <a class="portal-login-brand" href="{{ g.site_url }}" aria-label="{{ g.site_title }}">
           <span class="portal-login-brand__mark">
             <img src="{{ g.site_logo or '/icons/portal.svg' }}" alt="{{ g.site_title }}" width="58" height="68" />
@@ -30,21 +30,19 @@
         </a>
 
         <div class="portal-login-identity__content">
-          <span class="portal-login-identity__eyebrow">{{ _('GOVERNMENT DATA MANAGEMENT') }}</span>
-          <h1>{{ _('A trusted workspace for regional data.') }}</h1>
-          <p>{{ _('Manage official datasets and portal content.') }}</p>
+          <span class="portal-login-identity__eyebrow">{{ _('Government data management') }}</span>
+          <h1>{{ _('Manage official data and publications.') }}</h1>
+          <p>{{ _('Sign in to manage datasets, organizations, and portal content.') }}</p>
         </div>
-        <div class="portal-login-identity__watermark" aria-hidden="true">{{ g.site_title }}</div>
       </section>
 
       <section class="portal-login-panel" aria-label="{{ _('Administrator access') }}">
         <div class="portal-login-panel__heading">
-          <span>{{ _('ADMINISTRATOR ACCESS') }}</span>
-          <p>{{ _('Sign in with your CKAN account to continue.') }}</p>
+          <span>{{ _('Sign in to Portal Management') }}</span>
+          <p>{{ _('Use the CKAN account assigned to you.') }}</p>
         </div>
         <div class="portal-login-native">{{ super() }}</div>
         <div class="portal-login-footnote">
-          <span aria-hidden="true">{{ '◆' }}</span>
           <p>{{ _('Access is limited to authorized data managers.') }}</p>
         </div>
         <p class="portal-login-copyright">{{ g.site_title }}</p>

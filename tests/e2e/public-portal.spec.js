@@ -41,7 +41,7 @@ test("homepage category metric opens a searchable category directory without add
   page,
 }) => {
   await page.goto("/");
-  const categoryMetric = page.locator(".home-stats .home-stat-violet");
+  const categoryMetric = page.locator(".home-stats .home-stat-categories");
   await expect(categoryMetric).toHaveAttribute("href", "/kategori");
   await categoryMetric.click();
   await expect(page).toHaveURL(/\/kategori$/);
@@ -105,6 +105,16 @@ test("hero artwork and summary counts never duplicate each other across breakpoi
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
   await expect(page.locator(".home-hero-visual")).toBeVisible();
+  await expect(page.locator(".home-atlas-visual svg")).toBeVisible();
+  await expect(page.locator(".home-atlas-visual")).toHaveAttribute(
+    "aria-hidden",
+    "true",
+  );
+  await expect(page.locator(".home-atlas-contours path")).toHaveCount(5);
+  await expect(page.locator(".home-atlas-nodes circle")).toHaveCount(9);
+  await expect(page.locator(".home-visual-mark-label")).toHaveText(
+    "DATA TERPADU",
+  );
   await expect(page.locator(".home-stats-wrap")).toBeHidden();
 
   await page.setViewportSize({ width: 900, height: 900 });

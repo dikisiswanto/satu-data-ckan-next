@@ -157,7 +157,7 @@ export default async function InformasiDetailPage({ params }) {
           </div>
         </figure>
       ) : null}
-      <article className="cms-document mt-8 rounded-2xl border border-line bg-white p-5 sm:p-8 lg:p-10">
+      <article className="cms-document mt-8">
         <CmsPageBody page={page} />
       </article>
       <script

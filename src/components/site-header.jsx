@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Search, LockKeyhole, Menu, X, ArrowUpRight } from "lucide-react";
+import { Search, LockKeyhole, Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavigationLink } from "@/components/ui/navigation-link";
 import { cn } from "@/lib/utils";
@@ -109,7 +109,7 @@ export function SiteHeader() {
         <Link
           href="/"
           className="flex min-w-0 items-center gap-2 rounded-md sm:gap-3"
-          aria-label={`${siteConfig.name} — Beranda`}
+          aria-label={`${siteConfig.name}, Beranda`}
         >
           <span className="flex size-11 shrink-0 items-center justify-center">
             <Image
@@ -236,7 +236,6 @@ export function SiteHeader() {
                       )}
                     >
                       <span>{link.label}</span>
-                      <ArrowUpRight size={14} aria-hidden="true" />
                     </NavigationLink>
                   );
                 })}

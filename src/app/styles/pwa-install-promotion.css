@@ -18,8 +18,6 @@
     0 2px 8px rgb(15 43 57 / 7%);
   color: #1b3440;
   animation: pwa-promotion-enter 220ms ease-out both;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
 }
 
 .pwa-install-promotion__header {
@@ -37,7 +35,7 @@
   place-items: center;
   border: 1px solid #d5e4ed;
   border-radius: 0.85rem;
-  background: linear-gradient(145deg, #edf5fa, #e4f0f6);
+  background: #eaf2ff;
   color: #174f72;
 }
 
@@ -51,9 +49,9 @@
   color: #527080;
   font-size: 0.68rem;
   font-weight: 750;
-  letter-spacing: 0.075em;
+  letter-spacing: 0;
   line-height: 1.3;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .pwa-install-promotion__copy h2 {

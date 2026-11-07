@@ -65,6 +65,21 @@ for (const route of ["berita", "informasi"]) {
     "public-dynamic-heading",
     "CMS detail fallback must reserve the heading geometry",
   );
+  const detailSource = read(page);
+  if (
+    /className="cms-document[^\"]*(?:border|p-\d|sm:p-|lg:p-)/.test(
+      detailSource,
+    )
+  ) {
+    failures.push(
+      `${route}/[slug]: editorial detail body must not add a card border or inner padding`,
+    );
+  }
+  requireText(
+    page,
+    "<CmsPageBody page={page} />",
+    `${route}/[slug] must render the original CMS body without a decorative wrapper`,
+  );
   if (route === "informasi")
     requireText(
       page,
@@ -94,6 +109,27 @@ for (const route of ["berita", "informasi"]) {
     }
   }
 }
+
+requireText(
+  "src/components/public-layout.jsx",
+  "<BackToTop />",
+  "public pages must expose the accessible back-to-top control",
+);
+requireText(
+  "src/components/back-to-top.jsx",
+  'aria-label="Kembali ke bagian atas halaman"',
+  "public back-to-top control must have an accessible name",
+);
+requireText(
+  "src/components/back-to-top.jsx",
+  "prefers-reduced-motion: reduce",
+  "public back-to-top must respect reduced-motion preferences",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-back-to-top.js",
+  'aria-label", "Kembali ke bagian atas halaman"',
+  "CKAN back-to-top control must have an accessible name",
+);
 
 requireText(
   "src/app/(public)/publikasi/[slug]/page.jsx",
@@ -290,19 +326,19 @@ requireText(
 );
 requireText(
   "src/app/styles/public-responsive.css",
-  ".public-app-shell .home-feature-visualization .home-data-art",
-  "mobile Pahami Data illustration needs a dedicated responsive layout",
+  ".public-app-shell .home-feature-visualization .home-feature-copy",
+  "mobile data-service copy must use the full available width",
 );
 requireText(
   "src/app/styles/public-responsive.css",
-  "position: relative;",
-  "mobile Pahami Data artwork must remain in document flow",
+  "max-width: 100%;",
+  "mobile data-service copy must not reserve space for removed decorative artwork",
 );
-requireText(
-  "src/app/styles/public-responsive.css",
-  "grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr)",
-  "mobile artwork must use a readable two-column composition",
-);
+if (/home-data-art/.test(read("src/app/styles/public-responsive.css"))) {
+  failures.push(
+    "mobile layout must not retain styles for the removed decorative data illustration",
+  );
+}
 
 requireText(
   "src/app/(public)/page.jsx",
@@ -341,8 +377,8 @@ requireText(
 );
 requireText(
   "src/app/styles/public-home-hero.css",
-  "z-index: 0;",
-  "hero visual pattern must stay above the background and below content",
+  ".home-hero-inner {",
+  "hero content must retain a dedicated layout layer above the background image",
 );
 requireText(
   "src/components/public-breadcrumbs.jsx",
@@ -361,13 +397,13 @@ requireText(
 );
 const homePage = read("src/app/(public)/page.jsx");
 for (const token of [
-  "PORTAL DATA TERPADU",
+  "Portal data terpadu",
   "Temukan Data,",
   "Pahami {siteConfig.regionShortName}.",
   "Cari dataset, tema, atau kata kunci…",
   'submitLabel="Cari"',
   "Coba cari",
-  "Data daerah, terhubung dalam satu portal",
+  "Katalog data resmi daerah",
   "Organisasi aktif",
   "Indikator publik",
   "Dataset terbuka",
@@ -399,11 +435,6 @@ requireText(
   "desktop metric cards must have a separate visibility rule",
 );
 requireText(
-  "src/app/styles/public-home-hero.css",
-  ".home-hero--loading .home-hero-copy > *",
-  "loading fallback must not replay the hero entrance animation",
-);
-requireText(
   "src/app/(public)/page.jsx",
   "facetsUnavailable ? null : normalizedCategories.length",
   "hero category metric must count unique normalized CKAN categories and represent unavailable facets honestly",
@@ -427,20 +458,20 @@ for (const token of [
   if (!homePage.includes(token))
     failures.push(`homepage hero: missing clickable metric position ${token}`);
 }
+const heroMotionCss = read("src/app/styles/public-home-hero.css");
+if (
+  /portal-chip-enter|portal-metric-float|portal-copy-enter|portal-visual-enter/.test(
+    heroMotionCss,
+  )
+) {
+  failures.push(
+    "homepage hero must not use staggered entrance or perpetual floating animations",
+  );
+}
 requireText(
   "src/app/styles/public-home-hero.css",
-  "portal-chip-enter 650ms",
-  "hero metric cards must animate in before floating",
-);
-requireText(
-  "src/app/styles/public-home-hero.css",
-  "portal-metric-float 6.8s",
-  "hero metric cards must float gently after entrance",
-);
-requireText(
-  "src/app/styles/public-home-hero.css",
-  "--chip-float-delay",
-  "hero metric cards must stagger the float phase",
+  "animation: none !important",
+  "homepage hero must remain still and avoid unnecessary motion",
 );
 requireText(
   "src/components/public-scroll-manager.jsx",
@@ -549,8 +580,23 @@ requireText(
 );
 requireText(
   "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
-  "--portal-color-primary: #1d5fa7",
+  "--portal-color-blue: #1d5fa7",
   "Admin primary color must match the public portal design token",
+);
+requireText(
+  "src/app/styles/foundation.css",
+  "--app-brand-navy: #123650",
+  "Public surfaces must expose the shared civic-data navy token",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+  "--portal-color-navy: #123650",
+  "Admin and public surfaces must use the same civic-data navy",
+);
+requireText(
+  "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
+  ".portal-admin-topbar::after",
+  "Admin topbar must use the restrained atlas/network identity motif",
 );
 requireText(
   "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",

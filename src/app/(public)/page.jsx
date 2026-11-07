@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
 import {
-  ArrowRight,
   ArrowUpRight,
   BarChart3,
   Building2,
@@ -67,56 +66,47 @@ const topics = [
     label: "Kependudukan",
     query: "kependudukan penduduk",
     icon: UsersRound,
-    tone: "blue",
   },
   {
     label: "Pendidikan",
     query: "pendidikan sekolah",
     icon: GraduationCap,
-    tone: "green",
   },
-  { label: "Kesehatan", query: "kesehatan", icon: HeartPulse, tone: "rose" },
+  { label: "Kesehatan", query: "kesehatan", icon: HeartPulse },
   {
     label: "Ekonomi",
     query: "ekonomi perdagangan",
     icon: BarChart3,
-    tone: "violet",
   },
   {
     label: "Pertanian",
     query: "pertanian perikanan",
     icon: Sprout,
-    tone: "emerald",
   },
   {
     label: "Infrastruktur",
     query: "infrastruktur jalan",
     icon: Network,
-    tone: "cyan",
   },
   {
     label: "Wilayah & Geospasial",
     query: "wilayah geospasial",
     icon: MapPinned,
-    tone: "amber",
   },
   {
     label: "Lingkungan Hidup",
     query: "lingkungan hidup",
     icon: Leaf,
-    tone: "emerald",
   },
   {
     label: "Sosial",
     query: "sosial kesejahteraan",
     icon: UsersRound,
-    tone: "violet",
   },
   {
     label: "Pemerintahan",
     query: "pemerintahan",
     icon: Building2,
-    tone: "blue",
   },
 ];
 
@@ -126,25 +116,21 @@ function displayStat(value) {
     : new Intl.NumberFormat("id-ID").format(value);
 }
 
-function DatasetPreviewCard({ dataset, index }) {
+function DatasetPreviewCard({ dataset }) {
   const topic = topics.find((item) =>
     `${ckanPackageCategory(dataset)} ${dataset.title || ""} ${dataset.notes || ""}`
       .toLowerCase()
       .includes(item.label.toLowerCase()),
   );
   const Icon = topic?.icon || FileText;
-  const tone = topic?.tone || "blue";
   return (
     <article data-public-list-item="true" className="home-dataset-card group">
       <div
-        className={`home-dataset-art home-dataset-art-${tone}`}
+        className="home-dataset-art"
+        data-category-topic={topic?.label || "umum"}
         aria-hidden="true"
       >
-        <span className="home-dataset-art-grid" />
-        <span className="home-dataset-art-icon">
-          <Icon size={26} strokeWidth={1.8} />
-        </span>
-        <span className="home-dataset-index">0{index + 1}</span>
+        <Icon size={29} strokeWidth={1.7} />
       </div>
       <div className="home-dataset-body">
         <p className="home-dataset-category">{ckanPackageCategory(dataset)}</p>
@@ -231,12 +217,10 @@ function HomeHeroContent({
           className="object-cover"
         />
       </div>
-      <div className="home-hero-pattern" aria-hidden="true" />
       <div className="page-container home-hero-inner">
         <div className="home-hero-copy">
           <p className="home-hero-kicker">
-            <span />{" "}
-            {`PORTAL DATA TERPADU ${siteConfig.regionName.toUpperCase()}`}
+            {`Portal data terpadu ${siteConfig.regionName}`}
           </p>
           <h1>
             Temukan Data,
@@ -270,48 +254,42 @@ function HomeHeroContent({
           role="group"
           aria-label="Akses cepat ke data publik"
         >
-          <div className="home-orbit home-orbit-one" aria-hidden="true" />
-          <div className="home-orbit home-orbit-two" aria-hidden="true" />
-          <div className="home-scene-grid" aria-hidden="true" />
-          <div
-            className="home-scene-spark home-scene-spark-one"
-            aria-hidden="true"
-          />
-          <div
-            className="home-scene-spark home-scene-spark-two"
-            aria-hidden="true"
-          />
+          <div className="home-atlas-visual" aria-hidden="true">
+            <svg viewBox="0 0 480 400" focusable="false">
+              <g className="home-atlas-contours">
+                <path d="M38 210C74 118 155 70 239 76c76 5 149 52 196 116" />
+                <path d="M26 240C72 151 143 106 224 108c86 2 163 48 221 116" />
+                <path d="M40 273C95 190 154 151 229 148c89-4 154 31 205 89" />
+                <path d="M76 306c50-65 104-99 164-105 71-7 125 17 165 61" />
+                <path d="M112 337c38-44 81-68 129-72 52-4 93 10 125 39" />
+              </g>
+              <g className="home-atlas-connections">
+                <path d="M105 120 190 164 286 116 373 178 330 274 220 302 134 246 190 164 220 302" />
+                <path d="M286 116 278 218 373 178M105 120 134 246 58 282" />
+              </g>
+              <g className="home-atlas-nodes">
+                <circle cx="105" cy="120" r="6" />
+                <circle cx="190" cy="164" r="7" />
+                <circle cx="286" cy="116" r="6" />
+                <circle cx="373" cy="178" r="7" />
+                <circle cx="278" cy="218" r="5" />
+                <circle cx="330" cy="274" r="6" />
+                <circle cx="220" cy="302" r="7" />
+                <circle cx="134" cy="246" r="5" />
+                <circle cx="58" cy="282" r="4" />
+              </g>
+            </svg>
+          </div>
           <div className="home-visual-mark" aria-hidden="true">
-            <div className="home-scene-cube">
-              <span className="home-scene-cube__face home-scene-cube__front">
-                <Database size={42} strokeWidth={1.7} aria-hidden="true" />
-              </span>
-              <span className="home-scene-cube__face home-scene-cube__back">
-                <BarChart3 size={42} strokeWidth={1.7} aria-hidden="true" />
-              </span>
-              <span className="home-scene-cube__face home-scene-cube__right">
-                <MapPinned size={42} strokeWidth={1.7} aria-hidden="true" />
-              </span>
-              <span className="home-scene-cube__face home-scene-cube__left">
-                <Network size={42} strokeWidth={1.7} aria-hidden="true" />
-              </span>
-              <span className="home-scene-cube__face home-scene-cube__top">
-                <FileText size={42} strokeWidth={1.7} aria-hidden="true" />
-              </span>
-              <span className="home-scene-cube__face home-scene-cube__bottom">
-                <FileChartColumn
-                  size={42}
-                  strokeWidth={1.7}
-                  aria-hidden="true"
-                />
-              </span>
-            </div>
+            <span className="home-visual-mark-icon">
+              <Database size={38} strokeWidth={1.7} aria-hidden="true" />
+            </span>
+            <span className="home-visual-mark-label">DATA TERPADU</span>
           </div>
           <div className="home-visual-caption">
-            <span className="home-live-dot" />
             <span>
               <strong>{siteConfig.shortName}</strong>
-              <small>Data daerah, terhubung dalam satu portal</small>
+              <small>Katalog data resmi daerah</small>
             </span>
           </div>
           <div
@@ -402,7 +380,7 @@ function HomeHeroContent({
       </div>
       <div className="page-container home-stats-wrap">
         <section className="home-stats" aria-label="Ringkasan data publik">
-          <Link href="/dataset" className="home-stat home-stat-blue">
+          <Link href="/dataset" className="home-stat home-stat-datasets">
             <span className="home-stat-icon">
               <Database size={22} aria-hidden="true" />
             </span>
@@ -419,9 +397,8 @@ function HomeHeroContent({
               </strong>
               <small>Dataset terbuka</small>
             </span>
-            <ArrowRight size={17} aria-hidden="true" />
           </Link>
-          <Link href="/kategori" className="home-stat home-stat-violet">
+          <Link href="/kategori" className="home-stat home-stat-categories">
             <span className="home-stat-icon">
               <FileText size={22} aria-hidden="true" />
             </span>
@@ -440,9 +417,8 @@ function HomeHeroContent({
               </strong>
               <small>Kategori</small>
             </span>
-            <ArrowRight size={17} aria-hidden="true" />
           </Link>
-          <Link href="/statistik" className="home-stat home-stat-green">
+          <Link href="/statistik" className="home-stat home-stat-indicators">
             <span className="home-stat-icon">
               <FileChartColumn size={22} aria-hidden="true" />
             </span>
@@ -459,9 +435,11 @@ function HomeHeroContent({
               </strong>
               <small>Indikator statistik</small>
             </span>
-            <ArrowRight size={17} aria-hidden="true" />
           </Link>
-          <Link href="/organisasi" className="home-stat home-stat-green">
+          <Link
+            href="/organisasi"
+            className="home-stat home-stat-organizations"
+          >
             <span className="home-stat-icon">
               <Building2 size={22} aria-hidden="true" />
             </span>
@@ -478,7 +456,6 @@ function HomeHeroContent({
               </strong>
               <small>Perangkat daerah</small>
             </span>
-            <ArrowRight size={17} aria-hidden="true" />
           </Link>
         </section>
         <p className="home-stats-note">
@@ -722,7 +699,7 @@ function HomeCategoryCards({ categories = [], unavailable = false }) {
           </p>
         </div>
         <Link href="/kategori" className="home-section-link">
-          Semua kategori <ArrowRight size={16} aria-hidden="true" />
+          Semua kategori
         </Link>
       </div>
       {normalizedCategories.length ? (
@@ -743,9 +720,6 @@ function HomeCategoryCards({ categories = [], unavailable = false }) {
                 <span className="home-topic-name">{category.name}</span>
                 <span className="home-topic-count">
                   <strong>{displayStat(category.count)}</strong> dataset
-                </span>
-                <span className="home-topic-arrow">
-                  <ArrowUpRight size={16} aria-hidden="true" />
                 </span>
               </Link>
             );
@@ -845,7 +819,7 @@ async function HomeLatestDatasetsSection() {
           <p>Dataset yang baru ditambahkan atau diperbarui.</p>
         </div>
         <Link href="/dataset" className="home-section-link">
-          Lihat semua dataset <ArrowRight size={16} aria-hidden="true" />
+          Lihat semua dataset
         </Link>
       </div>
       {datasetResult.unavailable ? (
@@ -866,19 +840,15 @@ async function HomeLatestDatasetsSection() {
                 Coba lagi
               </Link>
               <Link href="/dataset" className="home-section-link">
-                Buka katalog dataset <ArrowRight size={15} aria-hidden="true" />
+                Buka katalog dataset
               </Link>
             </div>
           </div>
         </div>
       ) : datasets.length ? (
         <div className="home-dataset-grid">
-          {datasets.map((dataset, index) => (
-            <DatasetPreviewCard
-              key={dataset.id}
-              dataset={dataset}
-              index={index}
-            />
+          {datasets.map((dataset) => (
+            <DatasetPreviewCard key={dataset.id} dataset={dataset} />
           ))}
         </div>
       ) : (
@@ -899,8 +869,7 @@ async function HomeLatestDatasetsSection() {
                 href="/organisasi"
                 className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#1d5fa7] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#174f8b]"
               >
-                Jelajahi perangkat daerah{" "}
-                <ArrowRight size={15} aria-hidden="true" />
+                Jelajahi perangkat daerah
               </Link>
               <Link
                 href="/bantuan"
@@ -929,7 +898,7 @@ function HomeIndicatorHighlights({ indicators = [] }) {
           <p>Nilai terbaru dari indikator yang telah dipublikasikan.</p>
         </div>
         <Link href="/statistik" className="home-section-link">
-          Lihat semua indikator <ArrowRight size={16} aria-hidden="true" />
+          Lihat semua indikator
         </Link>
       </div>
       {indicators.length ? (
@@ -1020,7 +989,7 @@ function HomeEditorialHighlights({ infographics = [], publications = [] }) {
           </p>
         </div>
         <Link href="/publikasi" className="home-section-link">
-          Semua publikasi <ArrowRight size={16} aria-hidden="true" />
+          Semua publikasi
         </Link>
       </div>
       <div className="grid gap-6 xl:grid-cols-2 home-editorial-grid">
@@ -1197,7 +1166,7 @@ function HomeCKANHighlightsSkeleton() {
             <p>Nilai terbaru dari indikator yang telah dipublikasikan.</p>
           </div>
           <span className="home-section-link" aria-hidden="true">
-            Lihat semua indikator <ArrowRight size={16} />
+            Lihat semua indikator
           </span>
         </div>
         <div className="public-loading-grid-sm grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -1226,7 +1195,7 @@ function HomeCKANHighlightsSkeleton() {
             </p>
           </div>
           <span className="home-section-link" aria-hidden="true">
-            Semua publikasi <ArrowRight size={16} />
+            Semua publikasi
           </span>
         </div>
         <div className="grid gap-6 xl:grid-cols-2 home-editorial-grid">
@@ -1314,7 +1283,7 @@ async function HomeCmsNewsHighlights() {
           </p>
         </div>
         <Link href="/informasi" className="home-section-link">
-          Pusat informasi <ArrowRight size={16} aria-hidden="true" />
+          Pusat informasi
         </Link>
       </div>
       {posts.length ? (
@@ -1359,7 +1328,7 @@ function HomeCmsNewsHighlightsSkeleton() {
           </p>
         </div>
         <span className="home-section-link" aria-hidden="true">
-          Pusat informasi <ArrowRight size={16} />
+          Pusat informasi
         </span>
       </div>
       <div className="public-loading-grid-three grid gap-4 md:grid-cols-3">
@@ -1395,7 +1364,7 @@ function HomeLatestDatasetsSkeleton() {
           <p>Dataset yang baru ditambahkan atau diperbarui.</p>
         </div>
         <Link href="/dataset" className="home-section-link">
-          Lihat semua dataset <ArrowRight size={16} aria-hidden="true" />
+          Lihat semua dataset
         </Link>
       </div>
       <div className="home-dataset-grid public-loading-grid-sm">
@@ -1456,38 +1425,19 @@ export default function HomePage() {
               <span className="home-feature-icon">
                 <BarChart3 size={21} aria-hidden="true" />
               </span>
-              <p className="eyebrow">PAHAMI DATA</p>
-              <h2>Data yang lebih mudah dipahami.</h2>
+              <p className="eyebrow">Statistik publik</p>
+              <h2>Indikator dan visualisasi statistik</h2>
               <p>
-                Jelajahi indikator statistik dan temukan konteks di balik angka
-                melalui halaman statistik publik.
+                Bandingkan indikator, baca tren, dan telusuri infografik yang
+                diterbitkan oleh perangkat daerah.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/statistik" className="home-feature-button">
-                  Jelajahi statistik <ArrowRight size={16} aria-hidden="true" />
+                  Jelajahi statistik
                 </Link>
                 <Link href="/infografik" className="home-format-link">
-                  Lihat infografik <ArrowRight size={16} aria-hidden="true" />
+                  Lihat infografik
                 </Link>
-              </div>
-            </div>
-            <div className="home-data-art" aria-hidden="true">
-              <div className="home-data-art-tile home-data-art-tile-dataset">
-                <Database size={22} strokeWidth={1.8} />
-                <span className="home-data-art-line home-data-art-line-long" />
-                <span className="home-data-art-line" />
-              </div>
-              <div className="home-data-art-tile home-data-art-tile-statistic">
-                <FileChartColumn size={22} strokeWidth={1.8} />
-                <span className="home-data-art-dots">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-              </div>
-              <div className="home-data-art-tile home-data-art-tile-map">
-                <MapPinned size={22} strokeWidth={1.8} />
-                <span className="home-data-art-line home-data-art-line-long" />
               </div>
             </div>
           </article>
@@ -1495,15 +1445,14 @@ export default function HomePage() {
             <span className="home-feature-icon">
               <FileText size={21} aria-hidden="true" />
             </span>
-            <p className="eyebrow">DATA TERBUKA</p>
-            <h2>Gunakan data sesuai kebutuhan.</h2>
+            <p className="eyebrow">Katalog data</p>
+            <h2>Unduh data sesuai format.</h2>
             <p>
-              Periksa informasi, periode, sumber, dan berkas pada setiap dataset
-              untuk mengetahui format dan cakupan datanya.
+              Setiap dataset memuat metadata, periode, sumber, dan berkas yang
+              tersedia. Periksa cakupannya sebelum digunakan.
             </p>
             <Link href="/dataset" className="home-format-link">
-              Telusuri berkas dataset{" "}
-              <ArrowRight size={16} aria-hidden="true" />
+              Telusuri berkas dataset
             </Link>
             <div className="home-format-badges" aria-label="Contoh format data">
               <span>CSV</span>

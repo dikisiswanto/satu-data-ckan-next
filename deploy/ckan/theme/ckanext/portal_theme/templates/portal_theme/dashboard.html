@@ -11,15 +11,14 @@
   <section class="portal-dashboard" aria-labelledby="portal-dashboard-title">
     <div class="portal-dashboard__welcome">
       <div>
-        <span class="portal-dashboard__eyebrow">{{ g.site_title|upper }}</span>
+        <span class="portal-dashboard__eyebrow">{{ _('Portal overview') }}</span>
         <h1 id="portal-dashboard-title">{{ _('Welcome back') }}, {{ c.userobj.display_name or c.userobj.name }}</h1>
         <p>{{ g.site_description }}</p>
       </div>
-      <div class="portal-dashboard__welcome-mark" aria-hidden="true">{{ portal_icon('chart') }}</div>
     </div>
 
     <div class="portal-dashboard__section-heading">
-      <div><span class="portal-dashboard__eyebrow">{{ _('CATALOG OVERVIEW') }}</span><h2>{{ _('Data overview') }}</h2></div>
+      <div><span class="portal-dashboard__eyebrow">{{ _('Catalog overview') }}</span><h2>{{ _('Data overview') }}</h2></div>
       <a href="{{ g.site_url }}" target="_blank" rel="noopener noreferrer">{{ _('Open public portal') }} {{ portal_icon('arrow-up-right') }}</a>
     </div>
 
@@ -28,50 +27,50 @@
         <span class="portal-metric-card__icon">{{ portal_icon('database') }}</span>
         <span class="portal-metric-card__label">{{ _('General datasets') }}</span>
         <strong>{{ portal_admin_stats.datasets if portal_admin_stats.datasets is not none else '—' }}</strong>
-        <small>{{ _('View dataset catalog') }} {{ portal_icon('arrow-right') }}</small>
+        <small>{{ _('View dataset catalog') }}</small>
       </a>
       <a class="portal-metric-card portal-metric-card--blue" href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.indicators) }}">
         <span class="portal-metric-card__icon">{{ portal_icon('chart-line') }}</span>
         <span class="portal-metric-card__label">{{ _('Indicators') }}</span>
         <strong>{{ portal_admin_stats.indicators if portal_admin_stats.indicators is not none else '—' }}</strong>
-        <small>{{ _('View indicators') }} {{ portal_icon('arrow-right') }}</small>
+        <small>{{ _('View indicators') }}</small>
       </a>
       <a class="portal-metric-card portal-metric-card--purple" href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.infographics) }}">
         <span class="portal-metric-card__icon">{{ portal_icon('image') }}</span>
         <span class="portal-metric-card__label">{{ _('Infographics') }}</span>
         <strong>{{ portal_admin_stats.infographics if portal_admin_stats.infographics is not none else '—' }}</strong>
-        <small>{{ _('View infographics') }} {{ portal_icon('arrow-right') }}</small>
+        <small>{{ _('View infographics') }}</small>
       </a>
       <a class="portal-metric-card portal-metric-card--gold" href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.publications) }}">
         <span class="portal-metric-card__icon">{{ portal_icon('book') }}</span>
         <span class="portal-metric-card__label">{{ _('Publications') }}</span>
         <strong>{{ portal_admin_stats.publications if portal_admin_stats.publications is not none else '—' }}</strong>
-        <small>{{ _('View publications') }} {{ portal_icon('arrow-right') }}</small>
+        <small>{{ _('View publications') }}</small>
       </a>
       <a class="portal-metric-card portal-metric-card--gold" href="{{ h.url_for(h.default_group_type('organization') ~ '.index') }}">
         <span class="portal-metric-card__icon">{{ portal_icon('building') }}</span>
         <span class="portal-metric-card__label">{{ _('Organizations') }}</span>
         <strong>{{ portal_admin_stats.organizations if portal_admin_stats.organizations is not none else '—' }}</strong>
-        <small>{{ _('View organizations') }} {{ portal_icon('arrow-right') }}</small>
+        <small>{{ _('View organizations') }}</small>
       </a>
       <a class="portal-metric-card portal-metric-card--blue" href="{{ h.url_for(h.default_group_type('group') ~ '.index') }}">
         <span class="portal-metric-card__icon">{{ portal_icon('tags') }}</span>
         <span class="portal-metric-card__label">{{ _('Data categories') }}</span>
         <strong>{{ portal_admin_stats.groups if portal_admin_stats.groups is not none else '—' }}</strong>
-        <small>{{ _('View categories') }} {{ portal_icon('arrow-right') }}</small>
+        <small>{{ _('View categories') }}</small>
       </a>
       <a class="portal-metric-card portal-metric-card--purple" href="{{ h.url_for('dashboard.datasets') }}">
         <span class="portal-metric-card__icon">{{ portal_icon('folder') }}</span>
         <span class="portal-metric-card__label">{{ _('My datasets') }}</span>
         <strong>{{ portal_admin_stats.my_datasets if portal_admin_stats.my_datasets is not none else '—' }}</strong>
-        <small>{{ _('Manage your datasets') }} {{ portal_icon('arrow-right') }}</small>
+        <small>{{ _('Manage your datasets') }}</small>
       </a>
     </div>
 
     <section class="portal-dashboard-panel portal-dashboard-publishers" aria-labelledby="portal-publisher-analytics-title">
       <div class="portal-dashboard-panel__header">
-        <div><span class="portal-dashboard__eyebrow">{{ _('PUBLISHING ACTIVITY') }}</span><h2 id="portal-publisher-analytics-title">{{ _('Publishing by organization') }}</h2></div>
-        <a href="{{ h.url_for(h.default_group_type('organization') ~ '.index') }}">{{ _('All organizations') }} {{ portal_icon('arrow-right') }}</a>
+        <div><span class="portal-dashboard__eyebrow">{{ _('Publishing activity') }}</span><h2 id="portal-publisher-analytics-title">{{ _('Publishing by organization') }}</h2></div>
+        <a href="{{ h.url_for(h.default_group_type('organization') ~ '.index') }}">{{ _('All organizations') }}</a>
       </div>
       <p class="portal-dashboard-publishers__note">{{ _('Counts include public records only, are split by content type, and are not the raw CKAN package_count.') }}</p>
       {% if portal_admin_publisher_analytics_available and portal_admin_publisher_rows %}
@@ -104,8 +103,8 @@
     <div class="portal-dashboard__grid">
       <section class="portal-dashboard-panel portal-dashboard-panel--recent">
         <div class="portal-dashboard-panel__header">
-          <div><span class="portal-dashboard__eyebrow">{{ _('CATALOG UPDATES') }}</span><h2>{{ _('Recent datasets') }}</h2></div>
-          <a href="{{ h.url_for(dataset_type ~ '.search') }}">{{ _('All datasets') }} {{ portal_icon('arrow-right') }}</a>
+          <div><span class="portal-dashboard__eyebrow">{{ _('Catalog updates') }}</span><h2>{{ _('Recent datasets') }}</h2></div>
+          <a href="{{ h.url_for(dataset_type ~ '.search') }}">{{ _('All datasets') }}</a>
         </div>
         {% if portal_admin_recent_datasets %}
           <div class="table-responsive">
@@ -129,7 +128,7 @@
       </section>
 
       <aside class="portal-dashboard-panel portal-dashboard-panel--actions">
-        <div class="portal-dashboard-panel__header"><div><span class="portal-dashboard__eyebrow">{{ _('QUICK ACCESS') }}</span><h2>{{ _('Start working') }}</h2></div></div>
+        <div class="portal-dashboard-panel__header"><div><span class="portal-dashboard__eyebrow">{{ _('Quick access') }}</span><h2>{{ _('Start working') }}</h2></div></div>
         <div class="portal-dashboard-quicklinks">
           {% if h.check_access('package_create') %}
             <div class="portal-dashboard-create-heading">
@@ -155,23 +154,23 @@
             </div>
           {% endif %}
           {% if h.check_access('organization_create') %}
-            <a href="{{ h.url_for(h.default_group_type('organization') ~ '.new') }}"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('building') }}</span><span><strong>{{ _('Create organization') }}</strong><small>{{ _('Manage government agencies') }}</small></span>{{ portal_icon('arrow-right') }}</a>
+          <a href="{{ h.url_for(h.default_group_type('organization') ~ '.new') }}"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('building') }}</span><span><strong>{{ _('Create organization') }}</strong><small>{{ _('Manage government agencies') }}</small></span></a>
           {% endif %}
           {% if h.check_access('group_create') %}
-            <a href="{{ h.url_for(h.default_group_type('group') ~ '.new') }}"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('tags') }}</span><span><strong>{{ _('Create a thematic category') }}</strong><small>{{ _('Group datasets by topic') }}</small></span>{{ portal_icon('arrow-right') }}</a>
+          <a href="{{ h.url_for(h.default_group_type('group') ~ '.new') }}"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('tags') }}</span><span><strong>{{ _('Create a thematic category') }}</strong><small>{{ _('Group datasets by topic') }}</small></span></a>
           {% endif %}
           {% if h.check_access('ckanext_pages_list') %}
-            <a href="/pages"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('file-text') }}</span><span><strong>{{ _('Manage portal pages') }}</strong><small>{{ _('Profiles, policies, and evergreen information') }}</small></span>{{ portal_icon('arrow-right') }}</a>
-            <a href="/blog"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('newspaper') }}</span><span><strong>{{ _('Write a news article') }}</strong><small>{{ _('News, announcements, and articles') }}</small></span>{{ portal_icon('arrow-right') }}</a>
+            <a href="/pages"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('file-text') }}</span><span><strong>{{ _('Manage portal pages') }}</strong><small>{{ _('Profiles, policies, and evergreen information') }}</small></span></a>
+            <a href="/blog"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('newspaper') }}</span><span><strong>{{ _('Write a news article') }}</strong><small>{{ _('News, announcements, and articles') }}</small></span></a>
           {% endif %}
-          <a href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.publications) }}"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('book') }}</span><span><strong>{{ _('Publications & reports') }}</strong><small>{{ _('Manage publication-type datasets') }}</small></span>{{ portal_icon('arrow-right') }}</a>
-          <a href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.indicators) }}"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('chart-line') }}</span><span><strong>{{ _('Indicators & statistics') }}</strong><small>{{ _('Manage dataset-based indicators') }}</small></span>{{ portal_icon('arrow-right') }}</a>
-          <a href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.infographics) }}"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('image') }}</span><span><strong>{{ _('Infographics') }}</strong><small>{{ _('Manage public data visuals') }}</small></span>{{ portal_icon('arrow-right') }}</a>
+          <a href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.publications) }}"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('book') }}</span><span><strong>{{ _('Publications & reports') }}</strong><small>{{ _('Manage publication-type datasets') }}</small></span></a>
+          <a href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.indicators) }}"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('chart-line') }}</span><span><strong>{{ _('Indicators & statistics') }}</strong><small>{{ _('Manage dataset-based indicators') }}</small></span></a>
+          <a href="{{ h.url_for(dataset_type ~ '.search', q=portal_admin_portal_fqs.infographics) }}"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('image') }}</span><span><strong>{{ _('Infographics') }}</strong><small>{{ _('Manage public data visuals') }}</small></span></a>
           {% if h.check_access('harvest_source_list') %}
-            <a href="/harvest"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('refresh') }}</span><span><strong>{{ _('Data harvesting') }}</strong><small>{{ _('Refresh external data sources') }}</small></span>{{ portal_icon('arrow-right') }}</a>
+            <a href="/harvest"><span class="portal-dashboard-quicklinks__icon">{{ portal_icon('refresh') }}</span><span><strong>{{ _('Data harvesting') }}</strong><small>{{ _('Refresh external data sources') }}</small></span></a>
           {% endif %}
         </div>
-        <div class="portal-dashboard-tip">{{ portal_icon('lightbulb') }}<p><strong>{{ _('Publishing reminder') }}</strong>{{ _('Check the title, description, owning organization, license, and resources before publishing a dataset.') }}</p></div>
+        <div class="portal-dashboard-tip"><p><strong>{{ _('Publishing reminder') }}</strong>{{ _('Check the title, description, owning organization, license, and resources before publishing a dataset.') }}</p></div>
       </aside>
     </div>
   </section>

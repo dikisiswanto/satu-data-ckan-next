@@ -1,8 +1,8 @@
 /* Cross-portal quality pass: consistent controls, focus visibility and page rhythm. */
 :root {
-  --brand-navy: #173b5b;
-  --brand-blue: #1d5fa7;
-  --brand-teal: #1d5fa7;
+  --brand-navy: var(--app-brand-navy);
+  --brand-blue: var(--app-brand-blue);
+  --brand-teal: var(--app-brand-teal);
   --brand-border: #d5e0e8;
   --brand-muted: #526777;
   --brand-focus-ring: rgb(36 109 229 / 24%);
@@ -154,14 +154,8 @@ body:has(.public-home)
   color: #647887;
 }
 
-/* Avoid mixing saturated green and blue as competing primary colors on the home page. */
-.home-stat-green .home-stat-icon {
-  background-color: #e8f1ff !important;
-  color: #1d5fa7 !important;
-}
-
 .home-empty-datasets {
-  background: linear-gradient(135deg, #f1f7ff 0%, #ffffff 75%) !important;
+  background: #fff !important;
 }
 
 /* The home header overlays the hero instead of consuming vertical space. */

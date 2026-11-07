@@ -33,12 +33,12 @@ const examples = {
 
 export const metadata = {
   title: `API Data Terbuka | ${siteConfig.shortName}`,
-  description: `Pelajari cara mencari dataset, membaca metadata, dan mengambil data tabel ${siteConfig.regionName} melalui API publik. Tersedia daftar endpoint, parameter, contoh, dan batas akses.`,
+  description: `Dokumentasi CKAN Action API untuk pengembang dan organisasi yang mengintegrasikan katalog data ${siteConfig.regionName}. Referensi endpoint, parameter, format JSON, dan ketentuan akses.`,
   ...getCanonicalMetadata("/api-data"),
   ...getSocialMetadata({
     path: "/api-data",
     title: `API Data Terbuka | ${siteConfig.shortName}`,
-    description: `Panduan integrasi data ${siteConfig.regionName}: endpoint, parameter, contoh permintaan, struktur JSON, dan aturan akses.`,
+    description: `Referensi integrasi katalog data ${siteConfig.regionName} melalui CKAN Action API, termasuk endpoint, parameter, contoh HTTP, respons JSON, dan ketentuan akses.`,
   }),
 };
 
@@ -164,7 +164,7 @@ function ApiSection({ id, number, title, description, children }) {
       aria-labelledby={`${id}-title`}
     >
       <div className="mb-5 flex items-start gap-3 sm:gap-4">
-        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-xs font-bold text-primary">
+        <span className="mt-1 shrink-0 font-mono text-xs font-semibold tabular-nums text-primary">
           {number}
         </span>
         <div className="min-w-0">
@@ -199,78 +199,61 @@ function Field({ name, value }) {
 
 export default function ApiDocsPage() {
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#edf4f6_0%,#fff_22rem)]">
+    <main className="min-h-screen bg-canvas">
       <div className="page-container py-8 sm:py-12 lg:py-14">
         <PageHeading
-          eyebrow="Integrasi dan pemanfaatan data"
+          eyebrow="Dokumentasi integrasi"
           title="API Data Terbuka"
-          description={`Temukan dataset, baca metadata, dan ambil isi tabel ${siteConfig.regionName} melalui API publik. Hasil dikirim dalam format JSON dengan struktur CKAN, sehingga dapat digunakan oleh aplikasi, analisis, dan visualisasi.`}
+          description={`Dokumentasi teknis untuk pengembang aplikasi, integrator sistem, dan organisasi yang akan menggunakan katalog data ${siteConfig.regionName}. API menyediakan akses baca ke metadata dataset, organisasi, kategori, resource, dan tabel DataStore melalui CKAN Action API.`}
           className="mb-7 border-0 pb-0 sm:mb-9"
         />
 
-        <Card
-          as="section"
-          className="mb-6 rounded-2xl p-5 shadow-subtle sm:p-7"
+        <section
+          id="ringkasan"
+          className="mb-8 border-y border-line py-6 sm:py-7"
           aria-labelledby="api-quickstart-title"
         >
-          <div className="max-w-3xl">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
-              Mulai menggunakan API
-            </p>
-            <h2
-              id="api-quickstart-title"
-              className="mt-2 text-xl font-semibold tracking-tight text-ink sm:text-2xl"
-            >
-              Hubungkan aplikasi Anda ke data terbuka
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-muted sm:text-base">
-              API adalah cara bagi aplikasi untuk meminta data dari portal. Anda
-              dapat menggunakannya untuk mencari dataset, membaca detail,
-              melihat organisasi penerbit, atau mengambil baris dari tabel.
-              Hasilnya dikirim sebagai JSON, yaitu format data terstruktur yang
-              mudah dibaca dan diproses oleh aplikasi.
-            </p>
-          </div>
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            <Card as="article" className="rounded-xl border-0 bg-canvas p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-muted">
-                Langkah 1
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.9fr)] lg:items-start lg:gap-10">
+            <div className="max-w-2xl">
+              <h2
+                id="api-quickstart-title"
+                className="text-xl font-semibold tracking-tight text-ink sm:text-2xl"
+              >
+                Mulai integrasi
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-muted sm:text-base">
+                Gunakan permintaan HTTP GET ke endpoint CKAN berikut. Endpoint
+                baca untuk data publik tidak memerlukan API key. Respons
+                dikembalikan sebagai JSON dengan penanda <code>success</code>
+                dan isi pada <code>result</code>.
               </p>
-              <h3 className="mt-2 text-sm font-semibold text-ink">
-                Tentukan informasi yang dibutuhkan
-              </h3>
-              <p className="mt-1 text-sm leading-5 text-muted">
-                Cari dataset, baca metadata, lihat organisasi penerbit, atau
-                ambil isi tabel yang tersedia.
+              <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="font-semibold text-ink">Metode</dt>
+                  <dd className="mt-1 text-muted">GET untuk membaca data</dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-ink">Autentikasi</dt>
+                  <dd className="mt-1 text-muted">
+                    Tidak diperlukan untuk data publik
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-ink">Format respons</dt>
+                  <dd className="mt-1 text-muted">JSON, struktur CKAN</dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-ink">Versi API</dt>
+                  <dd className="mt-1 text-muted">CKAN Action API v3</dd>
+                </div>
+              </dl>
+            </div>
+            <div className="min-w-0">
+              <p className="mb-2 text-sm font-semibold text-ink">
+                Contoh permintaan
               </p>
-            </Card>
-            <Card as="article" className="rounded-xl border-0 bg-canvas p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-muted">
-                Langkah 2
-              </p>
-              <h3 className="mt-2 text-sm font-semibold text-ink">
-                Kirim permintaan
-              </h3>
-              <p className="mt-1 text-sm leading-5 text-muted">
-                Buka tautan contoh di halaman ini atau kirim permintaan GET dari
-                aplikasi Anda. Anda dapat mencoba endpoint data publik tanpa API
-                key.
-              </p>
-            </Card>
-            <Card as="article" className="rounded-xl border-0 bg-canvas p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-muted">
-                Langkah 3
-              </p>
-              <h3 className="mt-2 text-sm font-semibold text-ink">
-                Olah hasil JSON
-              </h3>
-              <p className="mt-1 text-sm leading-5 text-muted">
-                Periksa nilai <code>success</code>. Jika bernilai{" "}
-                <code>true</code>, data berada di <code>result</code>. Jika{" "}
-                bernilai <code>false</code>, baca pesan kesalahan di{" "}
-                <code>error.message</code>.
-              </p>
-            </Card>
+              <CodeBlock>{examples.search}</CodeBlock>
+            </div>
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
             <Button
@@ -279,7 +262,7 @@ export default function ApiDocsPage() {
               rel="noopener noreferrer"
               variant="primary"
             >
-              Coba pencarian dataset{" "}
+              Uji endpoint pencarian{" "}
               <ArrowUpRight size={15} aria-hidden="true" />
             </Button>
             <Button
@@ -288,23 +271,21 @@ export default function ApiDocsPage() {
               rel="noopener noreferrer"
               variant="outline"
             >
-              Periksa status layanan{" "}
-              <ArrowUpRight size={15} aria-hidden="true" />
+              Periksa status API <ArrowUpRight size={15} aria-hidden="true" />
             </Button>
             <Button href="/dataset" variant="ghost">
-              Cari dataset di portal{" "}
+              Jelajahi katalog dataset{" "}
               <ArrowUpRight size={15} aria-hidden="true" />
             </Button>
           </div>
-        </Card>
+        </section>
 
         <section
-          id="ringkasan"
-          className="scroll-mt-28 grid gap-3 sm:grid-cols-3"
+          className="scroll-mt-28 grid gap-3 border-b border-line pb-5 sm:grid-cols-3"
           aria-label="Ringkasan API"
         >
-          <Card className="flex gap-3 rounded-2xl p-4 shadow-subtle sm:p-5">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+          <div className="flex gap-3 border-b border-line py-4 sm:border-b-0 sm:border-r sm:pr-5">
+            <span className="mt-0.5 shrink-0 text-primary">
               <ShieldCheck size={20} aria-hidden="true" />
             </span>
             <div>
@@ -314,9 +295,9 @@ export default function ApiDocsPage() {
                 mengubahnya.
               </p>
             </div>
-          </Card>
-          <Card className="flex gap-3 rounded-2xl p-4 shadow-subtle sm:p-5">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-700">
+          </div>
+          <div className="flex gap-3 border-b border-line py-4 sm:border-b-0 sm:border-r sm:px-5">
+            <span className="mt-0.5 shrink-0 text-primary">
               <Braces size={20} aria-hidden="true" />
             </span>
             <div>
@@ -326,9 +307,9 @@ export default function ApiDocsPage() {
                 melindungi informasi sensitif.
               </p>
             </div>
-          </Card>
-          <Card className="flex gap-3 rounded-2xl p-4 shadow-subtle sm:p-5">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-700">
+          </div>
+          <div className="flex gap-3 py-4 sm:pl-5">
+            <span className="mt-0.5 shrink-0 text-primary">
               <Code2 size={20} aria-hidden="true" />
             </span>
             <div>
@@ -338,7 +319,7 @@ export default function ApiDocsPage() {
                 izin akun tetap diperiksa oleh CKAN.
               </p>
             </div>
-          </Card>
+          </div>
         </section>
 
         <nav
@@ -388,7 +369,7 @@ export default function ApiDocsPage() {
             </nav>
           </aside>
 
-          <div className="min-w-0 rounded-2xl border border-line bg-white px-5 py-7 shadow-[0_8px_32px_rgb(15_35_50_/_0.04)] sm:px-8 sm:py-9">
+          <div className="min-w-0 bg-white px-0 py-6 sm:py-8">
             <ApiSection
               id="respons"
               number="01"
@@ -571,7 +552,7 @@ export default function ApiDocsPage() {
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-sky-950">
                     Jika katalog ini perlu disalin atau disinkronkan ke portal
-                    lain, daftarkan alamat publik portal sebagai sumber CKAN—
+                    lain, daftarkan alamat publik portal sebagai sumber CKAN,
                     bukan alamat khusus admin. API mendukung pengambilan
                     bertahap hingga 100 dataset per permintaan, urutan stabil{" "}
                     <code>id asc</code>, serta filter perubahan metadata yang

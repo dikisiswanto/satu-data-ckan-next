@@ -174,7 +174,11 @@ def main() -> int:
 
     # Core design tokens: compare parsed custom-property values, not punctuation.
     expected_tokens = {
-        "--portal-color-primary": "#1d5fa7",
+        "--portal-color-primary": "var(--portal-color-blue)",
+        "--portal-color-blue": "#1d5fa7",
+        "--portal-color-navy": "#123650",
+        "--portal-color-teal": "#23785f",
+        "--portal-color-ochre": "#91621f",
         "--portal-color-ink": "#1b3440",
         "--portal-color-muted": "#586d76",
         "--portal-color-canvas": "#f5f7f6",
@@ -221,6 +225,13 @@ def main() -> int:
         ".table tbody tr:hover", ".portal-datastore__layout", ".portal-admin-shell .fa",
     ):
         require(has_selector(admin_rules, selector), f"Required CSS selector is missing: {selector}.")
+
+    # Shared civic-data identity across public hero, login and admin shell.
+    require(has_decl(design_rules, ".portal-admin-topbar", "background", "var(--portal-color-navy)", important=True), "Admin topbar must use the same navy identity as the public hero.")
+    require(has_decl(design_rules, ".portal-login-identity", "background", "var(--portal-color-navy)", important=True), "Login identity panel must use the shared public/admin navy.")
+    require(has_decl(design_rules, ".portal-dashboard__welcome", "background", "var(--portal-color-navy)"), "Admin dashboard welcome surface must carry the shared navy identity.")
+    require(has_decl(design_rules, ".portal-dashboard__metrics", "gap", "0.6rem"), "Admin metrics must remain compact rather than adopting public-card spacing.")
+    require(has_decl(design_rules, ".portal-metric-card", "min-height", "108px"), "Admin metric cards must retain compact dashboard density.")
 
     # Dashboard sizing must remain full width and aligned with the design token.
     require(has_decl(admin_rules, ".portal-dashboard", "width", "100%"), "Dashboard must remain full width.")

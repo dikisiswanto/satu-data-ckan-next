@@ -8,6 +8,10 @@ const ROUTES = [
   "/publikasi",
   "/organisasi",
   "/berita",
+  "/informasi",
+  "/api-data",
+  "/berita/pembaruan-katalog-data",
+  "/informasi/panduan-portal",
 ];
 
 test.describe("public accessibility baseline", () => {
@@ -100,6 +104,75 @@ test.describe("public accessibility baseline", () => {
     await expect(page.locator("a.skip-link")).toHaveAttribute(
       "href",
       "#konten-utama",
+    );
+  });
+
+  test("back-to-top is named, keyboard-operable, and returns the page to its start", async ({
+    page,
+  }) => {
+    await page.goto("/dataset");
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+
+    const control = page.getByRole("button", {
+      name: "Kembali ke bagian atas halaman",
+    });
+    await expect(control).toBeVisible();
+    await control.focus();
+    await expect(control).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY))
+      .toBeLessThan(80);
+  });
+
+  test("news and information details do not add a bordered padded card around CMS copy", async ({
+    page,
+  }) => {
+    for (const route of [
+      "/berita/pembaruan-katalog-data",
+      "/informasi/panduan-portal",
+    ]) {
+      await page.goto(route);
+      const article = page.locator("article.cms-document");
+      await expect(article).toBeVisible();
+      const style = await article.evaluate((element) => {
+        const computed = getComputedStyle(element);
+        return {
+          borderTopWidth: computed.borderTopWidth,
+          borderRightWidth: computed.borderRightWidth,
+          borderBottomWidth: computed.borderBottomWidth,
+          borderLeftWidth: computed.borderLeftWidth,
+          paddingTop: computed.paddingTop,
+          paddingRight: computed.paddingRight,
+          paddingBottom: computed.paddingBottom,
+          paddingLeft: computed.paddingLeft,
+        };
+      });
+      expect(Object.values(style)).toEqual([
+        "0px",
+        "0px",
+        "0px",
+        "0px",
+        "0px",
+        "0px",
+        "0px",
+        "0px",
+      ]);
+    }
+  });
+
+  test("API documentation metadata identifies developer and organization integrations", async ({
+    page,
+  }) => {
+    await page.goto("/api-data");
+    await expect(page).toHaveTitle(/API Data Terbuka/);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      "content",
+      /pengembang dan organisasi/,
+    );
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      /\/api-data$/,
     );
   });
 });

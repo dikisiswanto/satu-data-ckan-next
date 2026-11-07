@@ -10,6 +10,10 @@ const script = await readFile(
   "deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-navigation-progress.js",
   "utf8",
 );
+const backToTop = await readFile(
+  "deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-back-to-top.js",
+  "utf8",
+);
 const css = await readFile(
   "deploy/ckan/theme/ckanext/portal_theme/assets/css/portal-admin-design-system.css",
   "utf8",
@@ -17,6 +21,7 @@ const css = await readFile(
 const build = await readFile("scripts/check-build.py", "utf8");
 
 assert.match(base, /portal-admin-navigation-progress\.js\?v=/);
+assert.match(base, /portal-admin-back-to-top\.js\?v=/);
 assert.match(script, /\.portal-admin-shell, \.portal-login-frame/);
 assert.match(script, /event\.defaultPrevented/);
 assert.match(script, /event\.metaKey/);
@@ -32,6 +37,10 @@ assert.match(script, /FALLBACK_MS = 12000/);
 assert.match(css, /\.portal-admin-navigation-progress/);
 assert.match(css, /pointer-events: none/);
 assert.match(css, /prefers-reduced-motion: reduce/);
+assert.match(backToTop, /\.portal-admin-shell/);
+assert.match(backToTop, /aria-label/);
+assert.match(backToTop, /window\.scrollTo\(/);
+assert.match(backToTop, /prefers-reduced-motion: reduce/);
 assert.match(build, /portal-admin-navigation-progress\.js/);
 
 process.stdout.write(

@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PublicBreadcrumbs } from "@/components/public-breadcrumbs";
 import { PwaInstallPromotion } from "@/components/pwa-install-promotion";
+import { BackToTop } from "@/components/back-to-top";
 
 export function PublicLayout({ children }) {
   return (
@@ -17,6 +18,7 @@ export function PublicLayout({ children }) {
         {children}
       </div>
       <SiteFooter />
+      <BackToTop />
       <Suspense fallback={null}>
         <PwaInstallPromotion />
       </Suspense>

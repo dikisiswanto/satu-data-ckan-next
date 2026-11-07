@@ -202,7 +202,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
 
   return (
     <main>
-      <section className="relative z-10 [overflow:visible] border-b border-[#d9e1dc] bg-[linear-gradient(135deg,#eef3ee_0%,#edf4f6_60%,#f7f9fb_100%)] has-[details[open]]:z-40">
+      <section className="relative z-10 [overflow:visible] border-b border-[#d9e1dc] bg-[#f4f7f8] has-[details[open]]:z-40">
         <div className="page-container py-10 sm:py-14">
           <PageHeading {...publicPageCopy.dataset} />
           <form action="/dataset" method="get" role="search" className="mt-8">

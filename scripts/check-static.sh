@@ -25,6 +25,12 @@ run_check python3 scripts/check-public-hero.py
 run_check python3 scripts/test-theme-css-formatting.py
 run_check node scripts/check-admin-forms.mjs
 run_check node scripts/check-admin-navigation-progress.mjs
+run_check node --check deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-back-to-top.js
+run_check node scripts/test-admin-back-to-top.mjs
+run_check node --check tests/e2e/public-accessibility.spec.js
+for e2e_file in tests/e2e/*.spec.js; do
+  run_check node --check "$e2e_file"
+done
 run_check node scripts/check-geojson-component.mjs
 run_check node scripts/check-exclusion-contract.mjs
 run_check node scripts/check-public-media.mjs
@@ -52,5 +58,6 @@ run_check node scripts/check-api.mjs
 run_check node scripts/check-project.mjs
 run_check node scripts/check-imports.mjs
 run_check node scripts/check-layout.mjs
+run_check node scripts/check-public-seo-a11y.mjs
 
 printf '\nStatic validation passed.\n'

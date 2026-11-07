@@ -27,7 +27,7 @@
 
 .public-interior-page {
   @apply relative isolate;
-  background: linear-gradient(180deg, #f4f8fa 0%, #ffffff 19rem, #ffffff 100%);
+  background: #fff;
 }
 
 .public-interior-page > .public-page-heading,
@@ -60,7 +60,7 @@
 }
 
 .organization-detail-page .organization-detail-band {
-  background: linear-gradient(135deg, #eef5f7 0%, #f8fbfc 68%, #eaf3f1 100%);
+  background: #f4f7f8;
 }
 
 @media (max-width: 639px) {
@@ -98,7 +98,7 @@
 
 /* A calm, full-width empty state that still gives visitors a useful next step. */
 .home-empty-datasets {
-  @apply flex w-full flex-col items-start gap-5 rounded-2xl bg-gradient-to-br from-[#f1f7ff] via-white to-[#f1faf7] p-6 sm:flex-row sm:items-center sm:p-8;
+  @apply flex w-full flex-col items-start gap-5 rounded-xl bg-white p-6 sm:flex-row sm:items-center sm:p-8;
   border: 1px solid #e1eaf1;
 }
 
@@ -112,6 +112,45 @@
 
 .home-empty-datasets p:not(.eyebrow) {
   @apply mt-2 max-w-2xl text-sm leading-6 text-[#526777];
+}
+
+.public-back-to-top {
+  position: fixed;
+  z-index: 80;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  display: inline-grid;
+  width: 2.875rem;
+  height: 2.875rem;
+  place-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: 0.625rem;
+  color: #fff;
+  background: var(--app-primary);
+  box-shadow: 0 2px 8px rgb(15 35 50 / 16%);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    transform 140ms ease;
+}
+
+.public-back-to-top:hover {
+  background: #174f8c;
+  transform: translateY(-2px);
+}
+
+.public-back-to-top:focus-visible {
+  outline: 3px solid var(--app-focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-back-to-top {
+    transition: none;
+  }
+  .public-back-to-top:hover {
+    transform: none;
+  }
 }
 
 @media (max-width: 639px) {

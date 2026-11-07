@@ -81,6 +81,7 @@ test("public homepage exposes measurable LCP, CLS, and bounded first-party resou
   expect(heroImage.naturalWidth).toBeGreaterThan(0);
 
   expect(result.firstPartyScriptCount).toBeGreaterThan(0);
+  if (result.lcp !== null) expect(result.lcp).toBeGreaterThan(0);
   expect(result.cls).toBeLessThanOrEqual(0.1);
   // This smoke budget catches accidental blocking scripts without pretending to replace Lighthouse.
   expect(result.firstPartyScriptDuration).toBeLessThan(15_000);
@@ -166,7 +167,7 @@ test("PWA install promotion waits for engagement and respects a manual dismissal
   await page.goto("/", { waitUntil: "domcontentloaded" });
   const promotion = page.locator('[data-pwa-install-promotion="true"]');
   await expect(promotion).toBeVisible();
-  await expect(promotion).toContainText("Akses lebih praktis");
+  await expect(promotion).toContainText("Pemasangan aplikasi");
   await expect(promotion).toContainText("Buka katalog dan informasi data");
 
   await promotion

@@ -101,10 +101,7 @@ if (apiRoute.includes('assert(["id", "include_data"])')) {
 }
 
 const narrativeChecks = [
-  [
-    "quick-start guidance",
-    /Hubungkan aplikasi Anda ke data terbuka[\s\S]*Coba pencarian dataset/,
-  ],
+  ["quick-start guidance", /Mulai integrasi[\s\S]*Uji endpoint pencarian/],
   [
     "accurate validation example",
     /Parameter 'include_private' tidak tersedia pada API publik/,

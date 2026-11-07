@@ -2548,11 +2548,20 @@ msgstr "GAMBARAN KATALOG"
 msgid "Data overview"
 msgstr "Ringkasan data"
 
+msgid "Portal overview"
+msgstr "Ringkasan portal"
+
+msgid "Catalog overview"
+msgstr "Ringkasan katalog"
+
 msgid "CATALOG UPDATES"
 msgstr "PEMBARUAN KATALOG"
 
 msgid "Recent datasets"
 msgstr "Dataset terbaru"
+
+msgid "Catalog updates"
+msgstr "Pembaruan katalog"
 
 msgid "Dataset name"
 msgstr "Nama dataset"
@@ -2568,6 +2577,9 @@ msgstr "AKSES CEPAT"
 
 msgid "Start working"
 msgstr "Mulai pekerjaan"
+
+msgid "Quick access"
+msgstr "Akses cepat"
 
 msgid "General dataset"
 msgstr "Dataset umum"
@@ -2745,6 +2757,9 @@ msgstr "AKTIVITAS PENERBITAN"
 msgid "Publishing by organization"
 msgstr "Penerbitan menurut organisasi"
 
+msgid "Publishing activity"
+msgstr "Aktivitas penerbitan"
+
 msgid "All organizations"
 msgstr "Semua organisasi"
 
@@ -2779,17 +2794,17 @@ msgstr "Portal Satu Data"
 msgid "Official data portal of Example Regency Government"
 msgstr "Portal data resmi pemerintah daerah"
 
-msgid "GOVERNMENT DATA MANAGEMENT"
+msgid "Government data management"
 msgstr "PENGELOLAAN DATA PEMERINTAH"
 
-msgid "A trusted workspace for regional data."
-msgstr "Ruang kerja tepercaya untuk pengelolaan data daerah."
+msgid "Manage official data and publications."
+msgstr "Kelola data dan publikasi resmi."
 
 msgid "Manage catalogue records, publications, and portal information in one secure workspace."
 msgstr "Kelola katalog data, publikasi, dan informasi portal dalam satu ruang kerja yang aman."
 
-msgid "Manage official datasets and portal content."
-msgstr "Kelola dataset resmi dan konten portal."
+msgid "Sign in to manage datasets, organizations, and portal content."
+msgstr "Masuk untuk mengelola dataset, organisasi, dan konten portal."
 
 msgid "Organize official datasets and metadata."
 msgstr "Atur dataset resmi beserta metadatanya."
@@ -2800,17 +2815,17 @@ msgstr "Kelola publikasi dan informasi untuk masyarakat."
 msgid "Support accountable, data-driven decisions."
 msgstr "Dukung pengambilan keputusan berbasis data yang akuntabel."
 
-msgid "Official management workspace"
-msgstr "Ruang kerja resmi pengelola data"
+msgid "Portal management access"
+msgstr "Akses pengelolaan portal"
 
 msgid "Administrator access"
 msgstr "Akses administrator"
 
-msgid "ADMINISTRATOR ACCESS"
-msgstr "AKSES PENGELOLA"
+msgid "Sign in to Portal Management"
+msgstr "Masuk ke Portal Pengelola"
 
-msgid "Sign in with your CKAN account to continue."
-msgstr "Masuk menggunakan akun CKAN Anda untuk melanjutkan."
+msgid "Use the CKAN account assigned to you."
+msgstr "Gunakan akun CKAN yang telah diberikan kepada Anda."
 
 msgid "Access is limited to authorized data managers."
 msgstr "Akses hanya diberikan kepada pengelola data yang berwenang."

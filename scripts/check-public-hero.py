@@ -59,47 +59,22 @@ def contrast_ratio(background: str, foreground: str) -> float | None:
 
 css = CSS_PATH.read_text(encoding="utf-8")
 jsx = JSX_PATH.read_text(encoding="utf-8")
+design_direction = (ROOT / "DESIGN.md").read_text(encoding="utf-8")
 rules = css_rules(css)
 
-cube = rules.get(".home-scene-cube", {})
-require(cube.get("width") == "var(--cube-size)" and cube.get("height") == "var(--cube-size)",
-        "The 3D cube must use one shared width/height dimension.")
-face = rules.get(".home-scene-cube__face", {})
-require(face.get("width") == "var(--cube-size)" and face.get("height") == "var(--cube-size)",
-        "Every cube face must use the exact cube dimensions.")
-require(face.get("box-sizing") == "border-box" and face.get("border-radius") == "0",
-        "Cube faces must meet edge-to-edge without rounded transparent gaps.")
-size_value = cube.get("--cube-size", "")
-half_value = cube.get("--cube-half", "")
-size_match = re.fullmatch(r"([0-9.]+)rem", size_value)
-half_match = re.fullmatch(r"([0-9.]+)rem", half_value)
-require(bool(size_match and half_match and abs(float(size_match.group(1)) / 2 - float(half_match.group(1))) < 0.0001),
-        "Cube depth must equal exactly half of its square face dimension.")
-
-faces = {
-    "front": "Database",
-    "back": "BarChart3",
-    "right": "MapPinned",
-    "left": "Network",
-    "top": "FileText",
-    "bottom": "FileChartColumn",
-}
-for side, icon in faces.items():
-    selector = f".home-scene-cube__{side}"
-    declarations = rules.get(selector, {})
-    require(bool(declarations.get("background")), f"Cube {side} face needs an opaque surface fill.")
-    require(bool(declarations.get("color")), f"Cube {side} face needs a deliberate icon color.")
-    require("translateZ(var(--cube-half))" in declarations.get("transform", ""),
-            f"Cube {side} face must use the same half-size depth as every other face.")
-    span_pattern = re.compile(
-        rf'<span className="home-scene-cube__face home-scene-cube__{side}"[^>]*>(.*?)</span>',
-        re.DOTALL,
-    )
-    match = span_pattern.search(jsx)
-    require(bool(match), f"Cube {side} face markup is missing.")
-    if match:
-        require(bool(re.search(rf'<{icon}(?:\s|>)', match.group(1))),
-                f"Cube {side} face must display its {icon} icon.")
+mark = rules.get(".home-visual-mark", {})
+require(mark.get("width") == "8rem" and mark.get("height") == "8rem",
+        "Hero data mark must reserve a stable square frame.")
+require("linear-gradient" in mark.get("background", "") and mark.get("color") == "#163c56",
+        "Hero data mark must use a deliberate branded surface with a readable foreground.")
+require(bool(re.search(r'<div className="home-visual-mark"[^>]*>\s*<span className="home-visual-mark-icon">\s*<Database', jsx)),
+        "Hero visual must use a clearly framed database identity mark.")
+require("home-atlas-contours" in jsx and "home-atlas-connections" in jsx and "home-atlas-nodes" in jsx,
+        "Hero must include the purposeful atlas/network motif used to express connected regional data.")
+for selector in (".home-atlas-contours path", ".home-atlas-connections path", ".home-atlas-nodes circle"):
+    require(selector in rules, f"Atlas/network motif must define a visual treatment for {selector}.")
+for retired_visual in ("home-scene-cube", "home-scene-grid", "home-scene-spark", "home-orbit"):
+    require(retired_visual not in jsx, f"Decorative hero element {retired_visual} must not be rendered.")
 
 hero_overlay = rules.get("body:has(.public-home) .home-hero::before", {})
 hero_image = rules.get(".home-hero-background img", {})
@@ -115,25 +90,48 @@ require(heading.get("color") == "#fff", "Hero heading must retain a high-contras
 require("95%" in paragraph.get("color", "") and bool(paragraph.get("text-shadow")),
         "Hero description must retain strong contrast and a subtle text shadow.")
 
-chip_tones = {
-    ".home-visual-chip-top-left": "blue",
-    ".home-visual-chip-top-right": "green",
-    ".home-visual-chip-bottom-left": "violet",
-    ".home-visual-chip-bottom-right": "amber",
-}
-seen_backgrounds: set[str] = set()
-for selector, label in chip_tones.items():
+palette_match = re.search(
+    r"\.home-visual-chip-top-left,\s*\.home-visual-chip-top-right,\s*\.home-visual-chip-bottom-left,\s*\.home-visual-chip-bottom-right\s*\{([^}]+)\}",
+    css,
+    re.DOTALL,
+)
+palette_declarations = {}
+if palette_match:
+    for declaration in tinycss2.parse_declaration_list(
+        palette_match.group(1), skip_whitespace=True, skip_comments=True
+    ):
+        if declaration.type == "declaration":
+            palette_declarations[declaration.lower_name] = tinycss2.serialize(declaration.value).strip()
+background = palette_declarations.get("--chip-bg", "")
+ink = palette_declarations.get("--chip-ink", "")
+muted = palette_declarations.get("--chip-muted", "")
+require(bool(background and ink and muted), "Floating metric links must share one defined accent palette.")
+for text_color, text_kind in ((ink, "title"), (muted, "description")):
+    ratio = contrast_ratio(background, text_color)
+    require(ratio is not None and ratio >= 4.5,
+            f"Floating metric {text_kind} contrast must be at least 4.5:1.")
+require("animation: none !important" in css and palette_match is not None,
+        "Hero motion must remain static and metric links must share a deliberate palette.")
+for selector in (".home-visual-chip-top-left", ".home-visual-chip-top-right", ".home-visual-chip-bottom-left", ".home-visual-chip-bottom-right"):
     declarations = rules.get(selector, {})
-    background = declarations.get("--chip-bg", "")
-    ink = declarations.get("--chip-ink", "")
-    muted = declarations.get("--chip-muted", "")
-    require(bool(background and ink and muted), f"The {label} floating metric card needs its own background and text palette.")
-    require(background not in seen_backgrounds, "Floating metric cards must use distinct soft background colors.")
-    seen_backgrounds.add(background)
-    for text_color, text_kind in ((ink, "title"), (muted, "description")):
-        ratio = contrast_ratio(background, text_color)
+    chip_background = declarations.get("--chip-bg", "").strip()
+    for key in ("--chip-ink", "--chip-muted"):
+        chip_color = declarations.get(key, "").strip()
+        ratio = contrast_ratio(chip_background, chip_color) if chip_background and chip_color else None
         require(ratio is not None and ratio >= 4.5,
-                f"The {label} floating card {text_kind} contrast must be at least 4.5:1.")
+                f"{selector} must preserve WCAG AA contrast for {key}.")
+require("civic data atlas" in design_direction and "standout, modern, clean" in design_direction,
+        "Public visual identity must stay specific to a regional data portal and avoid sterile minimalism.")
+require("ENERGY: **2 / 3**" in design_direction and "RHYTHM: **2 / 3**" in design_direction and "MOTION: **1 / 3**" in design_direction,
+        "Public visual direction must document the selected energy, rhythm, and motion dials.")
+require(rules.get(".home-atlas-visual", {}).get("pointer-events", "").strip() == "none",
+        "The abstract atlas/network motif must remain non-interactive and not intercept controls.")
+
+feature_styles = (ROOT / "src/app/styles/component-styles.css").read_text(encoding="utf-8")
+require("background: #173d57;" in feature_styles,
+        "The data-format feature must retain a distinct navy surface to prevent a flat all-white page rhythm.")
+require("hover:-translate-y-0/**/.5" in feature_styles and "hover:shadow-[0_12px_24px" in feature_styles,
+        "Category links must retain a restrained interactive depth cue.")
 
 if ERRORS:
     print(f"Public hero visual contract failed ({len(ERRORS)}):")
@@ -141,4 +139,4 @@ if ERRORS:
         print(f"- {error}")
     raise SystemExit(1)
 
-print("Public hero visual contract passed: six icon faces, exact cube geometry, dark image overlay, distinct card palettes, and WCAG AA text contrast.")
+print("Public hero visual contract passed: branded atlas/network motif, no generic 3D/grid/orbit artwork, dark image overlay, semantic metric palettes, and WCAG AA text contrast.")

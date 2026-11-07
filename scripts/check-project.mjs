@@ -96,6 +96,8 @@ const required = [
   "deploy/ckan/theme/ckanext/portal_theme/schemas/group.yaml",
   "deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-forms.js",
   "deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-navigation-progress.js",
+  "deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-back-to-top.js",
+  "src/components/back-to-top.jsx",
   "src/lib/dataset-view-preference.js",
   "src/lib/dataset-catalog-state.js",
   "tests/unit/dataset-catalog-state.test.js",
@@ -115,6 +117,7 @@ const required = [
   "docs/FORM-CKAN-KONTEKSTUAL.md",
   "scripts/check-build.py",
   "scripts/check-public-hero.py",
+  "scripts/check-public-seo-a11y.mjs",
   "scripts/check-base.py",
   "deploy/ckan/sync-ckan-base-source.sh",
   "deploy/ckan/prepare-ckan-base.sh",
@@ -492,8 +495,8 @@ const checks = [
   ],
   [
     "src/app/(public)/page.jsx",
-    /HomeIndicatorHighlights[\s\S]*HomeEditorialHighlights[\s\S]*getPublishedIndicatorsResult[\s\S]*getPublishedInfographicsResult[\s\S]*getPublishedPublicationsResult[\s\S]*home-data-art/,
-    "Beranda harus menyorot data CKAN dan tidak boleh memakai ilustrasi grafik dengan nilai buatan.",
+    /HomeIndicatorHighlights[\s\S]*HomeEditorialHighlights[\s\S]*getPublishedIndicatorsResult[\s\S]*getPublishedInfographicsResult[\s\S]*getPublishedPublicationsResult[\s\S]*home-feature-visualization/,
+    "Beranda harus menyorot konten CKAN dan bagian layanan yang benar-benar tersedia.",
   ],
   [
     "src/lib/data/public-publications.js",
@@ -542,7 +545,7 @@ const checks = [
   ],
   [
     "src/app/(public)/api-data/page.jsx",
-    /Hubungkan aplikasi Anda ke data terbuka[\s\S]*Coba pencarian dataset[\s\S]*Endpoint yang tersedia[\s\S]*DataStore[\s\S]*PUBLIC_API_CORS_ORIGINS/,
+    /Mulai integrasi[\s\S]*Uji endpoint pencarian[\s\S]*Endpoint yang tersedia[\s\S]*DataStore[\s\S]*PUBLIC_API_CORS_ORIGINS/,
     "Halaman API publik harus memiliki panduan awal, contoh yang dapat dibuka, daftar endpoint, penjelasan data, dan keterangan CORS yang sesuai implementasi.",
   ],
   [
@@ -914,6 +917,19 @@ const datasetDetailSource = await readFile(
   path.join(root, "src/app/(public)/dataset/[slug]/page.jsx"),
   "utf8",
 );
+const homepageSource = await readFile(
+  path.join(root, "src/app/(public)/page.jsx"),
+  "utf8",
+);
+if (
+  /home-data-art|home-scene-cube|home-scene-grid|home-scene-spark/.test(
+    homepageSource,
+  )
+) {
+  errors.push(
+    "Homepage tidak boleh memakai grafik kuantitatif fiktif atau ornamen teknologi generik; motif atlas/jaringan data yang abstrak tetap diperbolehkan sebagai identitas visual.",
+  );
+}
 if (
   datasetDetailSource.indexOf("Berkas unduhan") === -1 ||
   datasetDetailSource.indexOf('aria-labelledby="dataset-activity-heading"') ===
