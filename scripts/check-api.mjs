@@ -10,6 +10,7 @@ const apiPage = readFileSync(
   path.join(root, "src/app/(public)/api-data/page.jsx"),
   "utf8",
 );
+const apiDocs = readFileSync(path.join(root, "docs/API.md"), "utf8");
 const errors = [];
 
 function extractSet(source, declaration, label) {
@@ -99,11 +100,73 @@ if (apiRoute.includes('assert(["id", "include_data"])')) {
   );
 }
 
+const narrativeChecks = [
+  [
+    "quick-start guidance",
+    /Hubungkan aplikasi Anda ke data terbuka[\s\S]*Coba pencarian dataset/,
+  ],
+  [
+    "accurate validation example",
+    /Parameter 'include_private' tidak tersedia pada API publik/,
+  ],
+  [
+    "unsupported query syntax warning",
+    /Gunakan \*:\* untuk mencari seluruh katalog[\s\S]*sintaks Solr\/Lucene lainnya tidak didukung/,
+  ],
+  [
+    "CORS configuration explanation",
+    /PUBLIC_API_CORS_ORIGINS[\s\S]*PUBLIC_SITE_ORIGIN[\s\S]*NEXT_PUBLIC_SITE_URL/,
+  ],
+  [
+    "session-aware access explanation",
+    /Tanpa sesi CKAN[\s\S]*sesi CKAN yang valid[\s\S]*izin akun tersebut/,
+  ],
+  [
+    "read-only and cache guidance",
+    /Hanya untuk membaca data[\s\S]*Cache-Control: no-store/,
+  ],
+  [
+    "automatic portal tag guidance",
+    /portal-indikator[\s\S]*ditambahkan otomatis[\s\S]*portal-infografik[\s\S]*ditambahkan otomatis[\s\S]*portal-publikasi[\s\S]*ditambahkan otomatis/,
+  ],
+];
+for (const [label, pattern] of narrativeChecks) {
+  if (!pattern.test(apiPage))
+    errors.push(`Public API page is missing ${label}.`);
+}
+if (/Parameter 'q' tidak tersedia pada API publik/.test(apiPage)) {
+  errors.push(
+    "The API error example incorrectly identifies the valid package_search q parameter as unsupported.",
+  );
+}
+if (!/\*:\*` didukung untuk pencarian seluruh katalog/.test(apiDocs)) {
+  errors.push("docs/API.md must document the supported all-catalog q value.");
+}
+if (!/tag `portal-indikator` yang ditambahkan otomatis/.test(apiDocs)) {
+  errors.push(
+    "docs/API.md must explain that portal content tags are added by the CKAN form.",
+  );
+}
+if (!/cookie sesi CKAN yang valid/.test(apiDocs)) {
+  errors.push(
+    "docs/API.md must explain that valid CKAN browser sessions are permission-checked by CKAN.",
+  );
+}
+if (
+  /package_search` tidak dapat memilih dataset privat melalui facade/.test(
+    apiDocs,
+  )
+) {
+  errors.push(
+    "docs/API.md still describes package_search as never allowing permission-checked private records.",
+  );
+}
+
 if (errors.length) {
   console.error(`Public API contract failed (${errors.length}):`);
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
 process.stdout.write(
-  `Public API contract passed: ${routeActions.length} route actions and the public endpoint UI are aligned; visibility and activity privacy rules are enforced in code. Narrative API documentation is maintained independently.\n`,
+  `Public API contract passed: ${routeActions.length} route actions match the public page; parameter validation, session-aware visibility, CORS, cache policy, and narrative examples are checked.\n`,
 );

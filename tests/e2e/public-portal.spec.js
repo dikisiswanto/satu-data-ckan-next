@@ -776,21 +776,21 @@ test("API documentation explains the public endpoint contract in plain language"
 }) => {
   await page.goto("/api-data");
   await expect(
-    page.getByRole("heading", { name: "API data terbuka" }),
+    page.getByRole("heading", { name: "API Data Terbuka" }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {
-      name: "API itu cara aplikasi mengambil data secara otomatis",
+      name: "Hubungkan aplikasi Anda ke data terbuka",
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: /Coba pencarian contoh/i }),
+    page.getByRole("link", { name: /Coba pencarian dataset/i }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: /Cek status API/i }),
+    page.getByRole("link", { name: /Periksa status layanan/i }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Daftar endpoint" }),
+    page.getByRole("heading", { name: "Endpoint yang tersedia" }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Cari dataset berdasarkan kata kunci" }),
@@ -802,10 +802,30 @@ test("API documentation explains the public endpoint contract in plain language"
     page.getByRole("heading", { name: "Dataset", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByText(/Parameter yang tidak tercantum ditolak/i),
+    page.getByText(
+      /Hanya parameter yang tercantum pada setiap endpoint yang diterima/i,
+    ),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: /Buka katalog/i }),
+    page.getByText(/include_private.*tidak tersedia/i),
+  ).toBeVisible();
+  await expect(page.getByText(/PUBLIC_API_CORS_ORIGINS/)).toBeVisible();
+  await expect(page.getByText(/sesi CKAN yang valid/)).toBeVisible();
+  await expect(page.getByText(/Cache-Control: no-store/)).toBeVisible();
+  await expect(
+    page.getByText(/Gunakan \*:\* untuk mencari seluruh katalog/),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/portal-indikator.*ditambahkan otomatis/),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/portal-infografik.*ditambahkan otomatis/),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/portal-publikasi.*ditambahkan otomatis/),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Cari dataset", exact: true }),
   ).toHaveAttribute("href", "/dataset");
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(
@@ -877,7 +897,7 @@ test("public breadcrumbs and shared navigation make every section discoverable",
   await page.goto("/api-data");
   await expect(
     page.getByRole("heading", {
-      name: "Laman lain yang mungkin Anda perlukan",
+      name: "Jelajahi data dan informasi lainnya",
     }),
   ).toBeVisible();
   await expect(

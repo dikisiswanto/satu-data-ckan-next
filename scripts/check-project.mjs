@@ -542,8 +542,8 @@ const checks = [
   ],
   [
     "src/app/(public)/api-data/page.jsx",
-    /API membantu aplikasi mengambil data secara otomatis[\s\S]*Coba pencarian contoh[\s\S]*Coba di browser[\s\S]*DataStore/,
-    "Halaman API publik harus menyediakan pengantar manusiawi, contoh langsung, dan penjelasan istilah.",
+    /Hubungkan aplikasi Anda ke data terbuka[\s\S]*Coba pencarian dataset[\s\S]*Endpoint yang tersedia[\s\S]*DataStore[\s\S]*PUBLIC_API_CORS_ORIGINS/,
+    "Halaman API publik harus memiliki panduan awal, contoh yang dapat dibuka, daftar endpoint, penjelasan data, dan keterangan CORS yang sesuai implementasi.",
   ],
   [
     "deploy/ckan/theme/setup.py",

@@ -32,23 +32,24 @@ const examples = {
 };
 
 export const metadata = {
-  title: "API data terbuka",
-  description: `Dokumentasi lengkap API publik berbasis CKAN Action API 2.12 untuk ${siteConfig.regionName}.`,
+  title: `API Data Terbuka | ${siteConfig.shortName}`,
+  description: `Pelajari cara mencari dataset, membaca metadata, dan mengambil data tabel ${siteConfig.regionName} melalui API publik. Tersedia daftar endpoint, parameter, contoh, dan batas akses.`,
   ...getCanonicalMetadata("/api-data"),
   ...getSocialMetadata({
     path: "/api-data",
-    title: `Dokumentasi API | ${siteConfig.shortName}`,
-    description: `Endpoint, parameter, batas akses, contoh request, dan skema respons API data terbuka ${siteConfig.regionName}.`,
+    title: `API Data Terbuka | ${siteConfig.shortName}`,
+    description: `Panduan integrasi data ${siteConfig.regionName}: endpoint, parameter, contoh permintaan, struktur JSON, dan aturan akses.`,
   }),
 };
 
 const endpoints = [
   {
     name: "status_show",
-    label: "Periksa apakah API aktif",
+    label: "Periksa status layanan",
     tryExample: "",
     params: "Tidak ada",
-    description: "Memeriksa status dasar instance CKAN.",
+    description:
+      "Memeriksa apakah layanan CKAN merespons dan mengembalikan informasi status dasar. Endpoint ini tidak memerlukan parameter.",
     example: `${basePath}/status_show`,
   },
   {
@@ -57,15 +58,15 @@ const endpoints = [
     tryExample: "?q=pendidikan&rows=5",
     params: "q, rows, start, facets, sort, fq (terbatas)",
     description:
-      "Mencari dataset publik. q menerima teks/frasa biasa (maksimum 160 karakter). Untuk harvesting CKAN, sort menerima beberapa urutan yang diizinkan dan fq terbatas pada filter instansi, topik, serta perubahan metadata. Sintaks Solr bebas ditolak. rows 0–100 (default 20), start 0–1.000.000 (default 0), facets true/false (default false).",
+      "Mencari dataset dengan kata atau frasa pada parameter q (maksimal 160 karakter). Gunakan *:* untuk mencari seluruh katalog; sintaks Solr/Lucene lainnya tidak didukung. rows menentukan jumlah hasil (default 20, maksimal 100), sedangkan start menentukan posisi awal (default 0, maksimal 1.000.000). facets=true menambahkan ringkasan nilai filter. Untuk sinkronisasi katalog, sort hanya menerima id, name, atau metadata_modified dengan urutan asc/desc. Filter fq hanya menerima organisasi, topik, dan rentang perubahan metadata.",
     example: `${basePath}/package_search?q=pendidikan&rows=20&start=0`,
   },
   {
     name: "package_show",
-    label: "Baca seluruh metadata satu dataset",
+    label: "Ambil metadata satu dataset",
     params: "id (wajib)",
     description:
-      "Mengambil objek Package/dataset native CKAN berdasarkan nama atau ID. Parameter lain ditolak.",
+      "Mengambil metadata dataset berdasarkan nama unik (slug) atau ID. Informasi resource yang privat atau tidak aktif tidak disertakan. Parameter lain ditolak.",
     example: `${basePath}/package_show?id=nama-dataset`,
   },
   {
@@ -73,33 +74,33 @@ const endpoints = [
     label: "Lihat riwayat perubahan dataset",
     params: "id (wajib), limit, offset",
     description:
-      "Mengambil riwayat aktivitas dataset yang sudah dipastikan publik. limit default 8 (maksimum 31), offset default 0. Facade selalu memaksa include_hidden_activity=false dan menghapus identitas pengguna serta snapshot data internal.",
+      "Mengambil riwayat perubahan dataset yang dapat diakses oleh pemanggil. limit menentukan jumlah catatan (default 8, maksimal 31), sedangkan offset menentukan posisi awal (default 0, maksimal 100.000). Aktivitas tersembunyi, identitas pengguna, dan snapshot internal tidak disertakan.",
     example: `${basePath}/package_activity_list?id=nama-dataset&limit=8&offset=0`,
   },
   {
     name: "organization_list",
-    label: "Lihat daftar instansi/perangkat daerah",
+    label: "Lihat daftar organisasi penerbit data",
     tryExample: "?all_fields=true&limit=20",
     params: "all_fields, include_dataset_count, limit",
     description:
-      "Mengambil daftar organisasi. Kedua flag menerima boolean; default true. limit 0–1.000, default 1.000. Field pengguna dan extras tetap tidak disertakan.",
+      "Mengambil daftar organisasi yang menerbitkan dataset. all_fields dan include_dataset_count menerima true/false (default true). limit menentukan jumlah organisasi yang diminta (default dan maksimum 1.000). Informasi akun pengguna dan extras tidak disertakan.",
     example: `${basePath}/organization_list?all_fields=true&limit=1000`,
   },
   {
     name: "organization_show",
-    label: "Baca profil satu instansi",
+    label: "Baca profil satu organisasi",
     params: "id (wajib)",
     description:
-      "Mengambil detail organisasi dengan hitungan dataset bila didukung; pengguna dan extras tidak disertakan.",
+      "Mengambil metadata satu organisasi berdasarkan nama unik (slug) atau ID. Daftar dataset tertanam, informasi akun pengguna, dan extras tidak disertakan.",
     example: `${basePath}/organization_show?id=dinas-pendidikan`,
   },
   {
     name: "group_list",
-    label: "Lihat daftar topik/kategori",
+    label: "Lihat daftar topik dan kategori",
     tryExample: "?all_fields=true",
     params: "all_fields",
     description:
-      "Mengambil daftar grup/topik CKAN. all_fields menerima boolean dan default true.",
+      "Mengambil daftar topik atau kategori yang digunakan untuk mengelompokkan dataset. all_fields menerima true/false dan bernilai true secara default.",
     example: `${basePath}/group_list?all_fields=true`,
   },
   {
@@ -107,52 +108,52 @@ const endpoints = [
     label: "Baca detail satu topik",
     params: "id (wajib)",
     description:
-      "Mengambil detail satu grup/topik CKAN berdasarkan nama atau ID.",
+      "Mengambil metadata satu topik atau kategori berdasarkan nama unik (slug) atau ID.",
     example: `${basePath}/group_show?id=pendidikan`,
   },
   {
     name: "tag_list",
-    label: "Cari kata kunci yang dipakai pada dataset",
+    label: "Temukan kata kunci dataset",
     tryExample: "?query=pendidikan&all_fields=false",
     params: "query, all_fields",
     description:
-      "Mencari tag CKAN berdasarkan query opsional. all_fields menerima boolean dan default false.",
+      "Mengambil kata kunci (tag) yang sesuai dengan query bila diisi. all_fields menerima true/false dan bernilai false secara default.",
     example: `${basePath}/tag_list?query=pendidikan&all_fields=false`,
   },
   {
     name: "resource_show",
-    label: "Baca informasi satu berkas/resource",
+    label: "Baca metadata satu resource",
     params: "id (wajib)",
     description:
-      "Mengambil metadata native Resource CKAN berdasarkan ID resource.",
+      "Mengambil informasi tentang satu berkas, tautan, atau tabel di dalam dataset berdasarkan ID resource. Akses tetap mengikuti izin dataset induknya.",
     example: `${basePath}/resource_show?id=RESOURCE_ID`,
   },
   {
     name: "file_show",
-    label: "Baca metadata file CKAN 2.12",
+    label: "Baca metadata objek file",
     params: "id (wajib)",
     description:
-      "Mengambil metadata entitas File di CKAN 2.12. Ini bukan endpoint untuk mengunduh isi file; izin tetap ditegakkan oleh CKAN.",
+      "Mengambil metadata objek berkas yang dikelola CKAN 2.12. Endpoint ini tidak mengunduh isi berkas. Izin akses diperiksa oleh CKAN berdasarkan pemilik berkas serta resource atau dataset terkait.",
     example: `${basePath}/file_show?id=FILE_ID`,
   },
   {
     name: "datastore_search",
-    label: "Ambil baris dari tabel data",
+    label: "Baca isi tabel data",
     params: "resource_id (wajib), limit, offset",
     description:
-      "Mengambil baris DataStore. limit 0–100 (default 10), offset 0–100.000 (default 0). Parameter q, filters, sort, dan fields sengaja tidak diekspos.",
+      "Mengambil baris dari resource tabel yang sudah diaktifkan di DataStore. limit menentukan jumlah baris (default 10, maksimal 100), sedangkan offset menentukan posisi awal (default 0, maksimal 100.000). Filter, pengurutan, dan pemilihan kolom lanjutan belum didukung oleh API publik.",
     example: `${basePath}/datastore_search?resource_id=RESOURCE_ID&limit=10&offset=0`,
   },
 ];
 
 const nav = [
-  ["ringkasan", "Ringkasan"],
-  ["respons", "Format respons"],
-  ["endpoint", "Daftar alamat API"],
-  ["contoh", "Contoh request"],
+  ["ringkasan", "Mulai cepat"],
+  ["respons", "Alamat dan respons"],
+  ["endpoint", "Endpoint"],
+  ["contoh", "Contoh penggunaan"],
   ["data", "Struktur data"],
-  ["publikasi", "Menerbitkan konten"],
-  ["batas", "Batas akses & keamanan"],
+  ["publikasi", "Konten khusus portal"],
+  ["batas", "Akses dan keamanan"],
 ];
 
 function ApiSection({ id, number, title, description, children }) {
@@ -201,9 +202,9 @@ export default function ApiDocsPage() {
     <main className="min-h-screen bg-[linear-gradient(180deg,#edf4f6_0%,#fff_22rem)]">
       <div className="page-container py-8 sm:py-12 lg:py-14">
         <PageHeading
-          eyebrow="Integrasi untuk pengembang"
-          title="API data terbuka"
-          description={`Akses katalog data publik ${siteConfig.regionName} melalui API read-only berbasis CKAN Action API 2.12. Gunakan respons JSON native untuk mengintegrasikan dataset ke aplikasi, analisis, atau visualisasi Anda.`}
+          eyebrow="Integrasi dan pemanfaatan data"
+          title="API Data Terbuka"
+          description={`Temukan dataset, baca metadata, dan ambil isi tabel ${siteConfig.regionName} melalui API publik. Hasil dikirim dalam format JSON dengan struktur CKAN, sehingga dapat digunakan oleh aplikasi, analisis, dan visualisasi.`}
           className="mb-7 border-0 pb-0 sm:mb-9"
         />
 
@@ -214,20 +215,20 @@ export default function ApiDocsPage() {
         >
           <div className="max-w-3xl">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
-              Panduan singkat penggunaan API
+              Mulai menggunakan API
             </p>
             <h2
               id="api-quickstart-title"
               className="mt-2 text-xl font-semibold tracking-tight text-ink sm:text-2xl"
             >
-              API membantu aplikasi mengambil data secara otomatis
+              Hubungkan aplikasi Anda ke data terbuka
             </h2>
             <p className="mt-2 text-sm leading-6 text-muted sm:text-base">
-              Anggap katalog dataset sebagai tempat penyimpanan data. API
-              menyediakan alamat untuk meminta daftar dataset, rincian dataset,
-              atau isi tabel. Anda dapat membuka contoh alamat di browser untuk
-              melihat hasilnya dalam format JSON, yaitu format data terstruktur
-              yang umum digunakan aplikasi.
+              API adalah cara bagi aplikasi untuk meminta data dari portal. Anda
+              dapat menggunakannya untuk mencari dataset, membaca detail,
+              melihat organisasi penerbit, atau mengambil baris dari tabel.
+              Hasilnya dikirim sebagai JSON, yaitu format data terstruktur yang
+              mudah dibaca dan diproses oleh aplikasi.
             </p>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -236,11 +237,11 @@ export default function ApiDocsPage() {
                 Langkah 1
               </p>
               <h3 className="mt-2 text-sm font-semibold text-ink">
-                Pilih data yang dibutuhkan
+                Tentukan informasi yang dibutuhkan
               </h3>
               <p className="mt-1 text-sm leading-5 text-muted">
-                Apakah Anda ingin mencari dataset, melihat perangkat daerah,
-                atau membaca isi tabel?
+                Cari dataset, baca metadata, lihat organisasi penerbit, atau
+                ambil isi tabel yang tersedia.
               </p>
             </Card>
             <Card as="article" className="rounded-xl border-0 bg-canvas p-4">
@@ -248,11 +249,12 @@ export default function ApiDocsPage() {
                 Langkah 2
               </p>
               <h3 className="mt-2 text-sm font-semibold text-ink">
-                Buka alamat API
+                Kirim permintaan
               </h3>
               <p className="mt-1 text-sm leading-5 text-muted">
-                Buka salah satu contoh alamat API di bawah. Data yang tersedia
-                untuk umum dapat diakses tanpa kunci API.
+                Buka tautan contoh di halaman ini atau kirim permintaan GET dari
+                aplikasi Anda. Anda dapat mencoba endpoint data publik tanpa API
+                key.
               </p>
             </Card>
             <Card as="article" className="rounded-xl border-0 bg-canvas p-4">
@@ -260,11 +262,13 @@ export default function ApiDocsPage() {
                 Langkah 3
               </p>
               <h3 className="mt-2 text-sm font-semibold text-ink">
-                Gunakan hasilnya
+                Olah hasil JSON
               </h3>
               <p className="mt-1 text-sm leading-5 text-muted">
-                Data utama berada pada bagian `result`. Jika `success` bernilai
-                `false`, baca keterangan pada bagian `error`.
+                Periksa nilai <code>success</code>. Jika bernilai{" "}
+                <code>true</code>, data berada di <code>result</code>. Jika{" "}
+                bernilai <code>false</code>, baca pesan kesalahan di{" "}
+                <code>error.message</code>.
               </p>
             </Card>
           </div>
@@ -275,7 +279,7 @@ export default function ApiDocsPage() {
               rel="noopener noreferrer"
               variant="primary"
             >
-              Coba pencarian contoh{" "}
+              Coba pencarian dataset{" "}
               <ArrowUpRight size={15} aria-hidden="true" />
             </Button>
             <Button
@@ -284,7 +288,8 @@ export default function ApiDocsPage() {
               rel="noopener noreferrer"
               variant="outline"
             >
-              Cek status API <ArrowUpRight size={15} aria-hidden="true" />
+              Periksa status layanan{" "}
+              <ArrowUpRight size={15} aria-hidden="true" />
             </Button>
             <Button href="/dataset" variant="ghost">
               Cari dataset di portal{" "}
@@ -303,9 +308,10 @@ export default function ApiDocsPage() {
               <ShieldCheck size={20} aria-hidden="true" />
             </span>
             <div>
-              <p className="text-sm font-semibold">Hanya baca</p>
+              <p className="text-sm font-semibold">Hanya untuk membaca</p>
               <p className="mt-1 text-xs leading-5 text-muted">
-                API ini hanya menyediakan akses untuk membaca data.
+                Endpoint tersedia untuk melihat data, bukan membuat atau
+                mengubahnya.
               </p>
             </div>
           </Card>
@@ -314,9 +320,10 @@ export default function ApiDocsPage() {
               <Braces size={20} aria-hidden="true" />
             </span>
             <div>
-              <p className="text-sm font-semibold">JSON native CKAN</p>
+              <p className="text-sm font-semibold">Respons JSON CKAN</p>
               <p className="mt-1 text-xs leading-5 text-muted">
-                Menggunakan struktur data asli CKAN.
+                Struktur hasil mengikuti CKAN dengan penyaringan untuk
+                melindungi informasi sensitif.
               </p>
             </div>
           </Card>
@@ -325,9 +332,10 @@ export default function ApiDocsPage() {
               <Code2 size={20} aria-hidden="true" />
             </span>
             <div>
-              <p className="text-sm font-semibold">Tanpa kunci API</p>
+              <p className="text-sm font-semibold">Tanpa API key</p>
               <p className="mt-1 text-xs leading-5 text-muted">
-                Untuk data publik; aturan akses sumber data tetap berlaku.
+                Data publik dapat diakses tanpa API key. Jika memakai sesi CKAN,
+                izin akun tetap diperiksa oleh CKAN.
               </p>
             </div>
           </Card>
@@ -385,11 +393,11 @@ export default function ApiDocsPage() {
               id="respons"
               number="01"
               title="Alamat dasar dan format respons"
-              description="Semua permintaan menggunakan HTTPS dan alamat dasar yang sama dengan portal."
+              description="Gunakan alamat dasar ini untuk setiap endpoint. Pada penggunaan normal, permintaan dikirim ke domain portal publik melalui HTTPS."
             >
               <Card as="div" className="rounded-xl bg-canvas p-4">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
-                  Base URL
+                  Alamat dasar (Base URL)
                 </p>
                 <code className="break-all text-sm font-semibold text-ink">
                   {apiOrigin}
@@ -397,20 +405,21 @@ export default function ApiDocsPage() {
                 </code>
               </Card>
               <p className="text-sm leading-6 text-muted">
-                Setiap response sukses memakai HTTP 200 dan bentuk envelope
-                CKAN. Isi{" "}
+                Permintaan yang berhasil mengembalikan HTTP 200 dengan struktur
+                respons CKAN. Isi pada bagian{" "}
                 <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
                   result
                 </code>{" "}
-                berbeda sesuai action yang dipanggil.
+                berbeda sesuai endpoint yang dipanggil.
               </p>
               <CodeBlock>{`{
   "help": "https://docs.ckan.org/en/2.12/api/index.html#...",
   "success": true,
-  "result": { "...": "objek native CKAN" }
+  "result": { "...": "data sesuai endpoint CKAN" }
 }`}</CodeBlock>
               <p className="text-sm leading-6 text-muted">
-                Response gagal menggunakan{" "}
+                Jika permintaan gagal, respons menggunakan status HTTP 4xx atau
+                5xx dan JSON berisi{" "}
                 <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
                   success: false
                 </code>{" "}
@@ -424,11 +433,16 @@ export default function ApiDocsPage() {
                 </code>
                 .
               </p>
+              <p className="text-sm leading-6 text-muted">
+                Contoh berikut menunjukkan kesalahan validasi karena pemanggil
+                mengirim parameter <code>include_private</code>. Parameter ini
+                tidak termasuk parameter yang didukung API publik.
+              </p>
               <CodeBlock>{`{
   "help": "https://docs.ckan.org/en/2.12/api/index.html#...",
   "success": false,
   "error": {
-    "message": "Parameter 'q' tidak tersedia pada API publik.",
+    "message": "Parameter 'include_private' tidak tersedia pada API publik.",
     "__type": "Validation Error"
   }
 }`}</CodeBlock>
@@ -437,8 +451,8 @@ export default function ApiDocsPage() {
             <ApiSection
               id="endpoint"
               number="02"
-              title="Daftar alamat API"
-              description="Semua alamat API menggunakan metode GET untuk membaca data. Hanya parameter yang tercantum pada dokumentasi yang dapat digunakan. Parameter yang sama tidak boleh ditulis lebih dari sekali."
+              title="Endpoint yang tersedia"
+              description="Gunakan GET untuk membaca data. HEAD memeriksa respons tanpa mengembalikan isinya, sedangkan OPTIONS digunakan browser untuk pemeriksaan CORS. Metode untuk membuat, mengubah, atau menghapus data (POST, PUT, PATCH, DELETE) tidak tersedia. Hanya parameter yang tercantum pada setiap endpoint yang diterima; parameter yang sama tidak boleh dikirim berulang."
             >
               <div className="space-y-3">
                 {endpoints.map((endpoint) => (
@@ -469,7 +483,7 @@ export default function ApiDocsPage() {
                       className="mt-3 grid gap-1 rounded-lg bg-canvas px-3 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-3"
                     >
                       <dt className="py-2 text-xs font-semibold text-muted">
-                        Parameter
+                        Parameter yang diterima
                       </dt>
                       <dd className="break-words py-2 font-mono text-xs text-ink">
                         {endpoint.params}
@@ -487,12 +501,13 @@ export default function ApiDocsPage() {
                           variant="outline"
                           size="sm"
                         >
-                          Coba di browser{" "}
+                          Buka contoh{" "}
                           <ArrowUpRight size={13} aria-hidden="true" />
                         </Button>
                       ) : (
                         <span className="text-xs leading-5 text-muted">
-                          Perlu ID dari dataset/resource
+                          Isi parameter wajib, misalnya ID dataset atau
+                          resource, untuk menjalankan contoh.
                         </span>
                       )}
                     </div>
@@ -504,8 +519,8 @@ export default function ApiDocsPage() {
             <ApiSection
               id="contoh"
               number="03"
-              title="Contoh request"
-              description="Contoh dapat dijalankan dari terminal. Ganti nama dataset, ID resource, dan query sesuai kebutuhan; request akan mengembalikan JSON."
+              title="Contoh penggunaan"
+              description="Jalankan contoh berikut dari terminal yang memiliki cURL. Ganti nama dataset, ID resource, atau kata kunci dengan nilai yang sesuai. Setiap perintah meminta respons JSON dari portal."
             >
               <div className="space-y-5">
                 <div>
@@ -520,23 +535,24 @@ export default function ApiDocsPage() {
                 </div>
                 <div>
                   <h3 className="mb-2 text-sm font-semibold">
-                    Baca data tabular dengan pagination
+                    Baca tabel per halaman
                   </h3>
                   <CodeBlock>{examples.datastore}</CodeBlock>
                   <p className="mt-2 text-xs leading-5 text-muted">
-                    Naikkan offset untuk halaman berikutnya. API membatasi satu
-                    request hingga 100 baris.
+                    Untuk mengambil halaman berikutnya, tambahkan nilai offset
+                    sebesar jumlah baris yang diminta. Satu permintaan dibatasi
+                    maksimal 100 baris.
                   </p>
                 </div>
                 <div>
                   <h3 className="mb-2 text-sm font-semibold">
-                    Ambil daftar organisasi
+                    Ambil daftar organisasi penerbit data
                   </h3>
                   <CodeBlock>{examples.organizations}</CodeBlock>
                 </div>
                 <div>
                   <h3 className="mb-2 text-sm font-semibold">
-                    Ambil facet untuk filter
+                    Lihat ringkasan kategori hasil pencarian (facet)
                   </h3>
                   <CodeBlock>{examples.facets}</CodeBlock>
                 </div>
@@ -551,21 +567,21 @@ export default function ApiDocsPage() {
                   className="rounded-xl border-sky-200 bg-sky-50 p-4 text-sky-950 sm:p-5"
                 >
                   <h3 className="font-semibold text-sky-950">
-                    Integrasi katalog otomatis (harvesting)
+                    Sinkronisasi katalog otomatis (harvesting)
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-sky-950">
-                    Jika katalog data ini akan diambil oleh portal lain, gunakan
-                    alamat publik portal sebagai sumber CKAN, bukan hostname
-                    admin. API publik mendukung paginasi berukuran 100, urutan
-                    stabil <code>id asc</code>, dan filter perubahan metadata
-                    yang dibatasi. Tidak perlu API key untuk metadata publik.
-                    Kesesuaian akhir tetap perlu diuji dengan konfigurasi
-                    harvester tujuan.
+                    Jika katalog ini perlu disalin atau disinkronkan ke portal
+                    lain, daftarkan alamat publik portal sebagai sumber CKAN—
+                    bukan alamat khusus admin. API mendukung pengambilan
+                    bertahap hingga 100 dataset per permintaan, urutan stabil{" "}
+                    <code>id asc</code>, serta filter perubahan metadata yang
+                    dibatasi. Metadata publik tidak memerlukan API key. Uji
+                    konfigurasi akhir menggunakan harvester yang akan dipakai.
                   </p>
                   <div className="mt-4 space-y-3">
                     <div>
                       <p className="mb-2 text-xs font-semibold text-sky-950">
-                        Daftar dataset untuk sinkronisasi awal
+                        Pengambilan awal: daftar dataset secara bertahap
                       </p>
                       <CodeBlock className="bg-sky-950">
                         {examples.harvest}
@@ -573,16 +589,16 @@ export default function ApiDocsPage() {
                     </div>
                     <div>
                       <p className="mb-2 text-xs font-semibold text-sky-950">
-                        Contoh filter perubahan metadata
+                        Sinkronisasi berikutnya: ambil metadata yang berubah
                       </p>
                       <CodeBlock className="bg-sky-950">
                         {examples.harvestIncremental}
                       </CodeBlock>
                       <p className="mt-2 text-xs leading-5 text-sky-950">
-                        Ganti tanggal contoh dengan waktu UTC dari sinkronisasi
-                        terakhir yang berhasil. Simpan checkpoint tersebut di
-                        sisi harvester; tanggal statis hanya cocok untuk uji
-                        coba awal.
+                        Ganti waktu contoh dengan checkpoint UTC dari
+                        sinkronisasi terakhir yang berhasil. Simpan checkpoint
+                        tersebut di sisi harvester. Tanggal pada contoh hanya
+                        ilustrasi, bukan nilai yang digunakan otomatis.
                       </p>
                     </div>
                   </div>
@@ -593,37 +609,38 @@ export default function ApiDocsPage() {
             <ApiSection
               id="data"
               number="04"
-              title="Struktur data native CKAN"
-              description="Objek mengikuti struktur yang didefinisikan CKAN. Field tertentu dapat kosong, tidak ada, atau berbeda sesuai metadata yang dimasukkan oleh pengelola."
+              title="Struktur data dan istilah penting"
+              description="Respons mengikuti struktur CKAN. Kelengkapan field bergantung pada metadata yang diisi pengelola; field opsional dapat kosong, bernilai null, atau tidak muncul."
             >
               <div className="grid gap-3 sm:grid-cols-2">
                 <Card as="article" className="p-4">
                   <h3 className="font-semibold text-ink">Dataset</h3>
                   <p className="mt-1 text-sm leading-5 text-muted">
-                    Satu kumpulan informasi tentang suatu topik, misalnya jumlah
-                    sekolah per kecamatan.
+                    Kumpulan data tentang satu topik. Dataset memiliki metadata
+                    dan satu atau beberapa resource yang memuat datanya.
                   </p>
                 </Card>
                 <Card as="article" className="p-4">
                   <h3 className="font-semibold text-ink">Resource</h3>
                   <p className="mt-1 text-sm leading-5 text-muted">
-                    Berkas atau tabel di dalam dataset, misalnya CSV, XLSX, PDF,
-                    GeoJSON, atau tabel DataStore.
+                    Berkas, tautan, atau tabel yang menjadi bagian dari dataset,
+                    misalnya CSV, XLSX, PDF, atau GeoJSON.
                   </p>
                 </Card>
                 <Card as="article" className="p-4">
                   <h3 className="font-semibold text-ink">ID</h3>
                   <p className="mt-1 text-sm leading-5 text-muted">
-                    Kode unik yang menunjuk dataset, resource, atau instansi.
-                    Untuk membaca isi tabel, gunakan ID resource, bukan ID
-                    dataset.
+                    Pengenal unik untuk dataset, resource, atau organisasi.
+                    Untuk membaca isi tabel, gunakan ID resource pada parameter
+                    resource_id, bukan ID dataset.
                   </p>
                 </Card>
                 <Card as="article" className="p-4">
                   <h3 className="font-semibold text-ink">DataStore</h3>
                   <p className="mt-1 text-sm leading-5 text-muted">
-                    Penyimpanan tabel yang dapat dibaca per halaman melalui API.
-                    Resource harus diaktifkan pada DataStore terlebih dahulu.
+                    Fitur CKAN untuk membaca baris data dari resource berbentuk
+                    tabel melalui API. Resource harus lebih dahulu dimuat dan
+                    diaktifkan di DataStore.
                   </p>
                 </Card>
               </div>
@@ -648,18 +665,19 @@ export default function ApiDocsPage() {
                 </dl>
               </Card>
               <p className="text-sm leading-6 text-muted">
-                API tidak menjanjikan entitas indikator, observasi, versi
-                publikasi, registri SDI, maupun manifest GeoPortal sebagai objek
-                inti. Halaman khusus portal merakit tampilan tersebut dari
-                dataset, tag, metadata ekstra, dan resource DataStore CKAN.
+                API CKAN tidak menyediakan indikator, infografik, publikasi,
+                atau observasi sebagai jenis objek inti yang terpisah. Tampilan
+                khusus portal dibentuk dari dataset, tag, metadata tambahan, dan
+                resource DataStore. Karena itu, aplikasi integrasi perlu membaca
+                metadata dan resource CKAN sebagai sumber datanya.
               </p>
             </ApiSection>
 
             <ApiSection
               id="publikasi"
               number="05"
-              title="Panduan publikasi konten"
-              description="Kelola dataset, indikator, infografik, dan publikasi dari satu sumber metadata CKAN, tetapi tampilkan pada katalog yang sesuai agar pengunjung tidak menemukan entri ganda atau salah kategori."
+              title="Metadata untuk konten khusus portal"
+              description="Selain dataset umum, portal menyajikan indikator, infografik, serta publikasi. Ketiganya tetap dikelola sebagai metadata dan resource CKAN, lalu ditampilkan pada bagian portal yang sesuai."
             >
               <div className="space-y-4">
                 <Card
@@ -667,16 +685,16 @@ export default function ApiDocsPage() {
                   className="rounded-xl border-line bg-surface p-4 text-sm leading-6 text-ink"
                 >
                   <p className="font-semibold">
-                    Pemisahan katalog, bukan duplikasi penyimpanan
+                    Satu sumber data, beberapa tampilan
                   </p>
                   <p className="mt-1">
-                    Secara internal CKAN, ketiganya tetap memakai record
-                    Package/Dataset dan Resource. Portal membaca tipe{" "}
-                    <code>portal_type</code> serta tag khusus untuk
-                    menempatkannya pada laman Statistik, Infografik, atau
-                    Publikasi. Katalog Dataset umum tidak menampilkan ulang
-                    ketiga tipe tersebut. Izin, file, organisasi, lisensi, dan
-                    riwayat tetap dikelola CKAN.
+                    Di CKAN, seluruh konten tersebut tetap disimpan sebagai
+                    entri dataset (Package) beserta resource-nya. Portal membaca
+                    metadata <code>portal_type</code> dan tag terkait untuk
+                    menentukan apakah entri ditampilkan pada halaman Statistik,
+                    Infografik, Publikasi, atau katalog Dataset umum. Dengan
+                    cara ini, metadata, berkas, organisasi, lisensi, izin, dan
+                    riwayat tetap dikelola dari satu sumber di CKAN.
                   </p>
                 </Card>
                 <Card
@@ -686,11 +704,11 @@ export default function ApiDocsPage() {
                 >
                   <h3 className="font-semibold">Indikator statistik</h3>
                   <p className="mt-2 text-sm leading-6 text-muted">
-                    Terbitkan record CKAN bertipe{" "}
-                    <strong>Indikator statistik</strong> (ditampilkan pada laman
-                    Statistik, bukan katalog Dataset umum), tambahkan tag{" "}
-                    <code>portal-indikator</code>, lalu aktifkan DataStore untuk
-                    resource tabular dengan kolom <code>period</code> dan{" "}
+                    Untuk menampilkan indikator pada halaman Statistik, pilih
+                    tipe konten portal <strong>Indikator statistik</strong> pada
+                    formulir CKAN. Tag <code>portal-indikator</code> akan
+                    ditambahkan otomatis. Aktifkan DataStore untuk resource
+                    berbentuk tabel dengan kolom <code>period</code> dan{" "}
                     <code>value</code>. Kolom <code>region</code>,{" "}
                     <code>unit</code>, dan <code>source</code> disarankan.
                     Metadata yang dapat diisi mencakup <code>portal_unit</code>,{" "}
@@ -707,10 +725,11 @@ export default function ApiDocsPage() {
                 >
                   <h3 className="font-semibold">Infografik</h3>
                   <p className="mt-2 text-sm leading-6 text-muted">
-                    Pilih tipe <strong>Infografik</strong> (produk visual
-                    terpisah dari katalog Dataset umum), tambahkan tag{" "}
-                    <code>portal-infografik</code>, unggah resource gambar atau
-                    PDF, dan lengkapi metadata seperti{" "}
+                    Untuk menampilkan infografik terpisah dari katalog Dataset
+                    umum, pilih tipe konten portal <strong>Infografik</strong>
+                    pada formulir CKAN. Tag <code>portal-infografik</code> akan
+                    ditambahkan otomatis. Unggah gambar atau PDF sebagai
+                    resource, lalu lengkapi metadata seperti{" "}
                     <code>portal_category</code>, <code>portal_period</code>,{" "}
                     <code>portal_attribution</code>, serta{" "}
                     <code>portal_reference_period</code>.
@@ -721,13 +740,14 @@ export default function ApiDocsPage() {
                   id="publikasi-detail"
                   className="scroll-mt-28 rounded-xl p-4 sm:p-5"
                 >
-                  <h3 className="font-semibold">Publikasi & laporan</h3>
+                  <h3 className="font-semibold">Publikasi dan laporan</h3>
                   <p className="mt-2 text-sm leading-6 text-muted">
-                    Pilih tipe <strong>Publikasi/laporan</strong> (dokumen rilis
-                    terpisah dari katalog Dataset umum), tambahkan tag{" "}
-                    <code>portal-publikasi</code>, unggah dokumen publik, dan
-                    isi metadata yang relevan:{" "}
-                    <code>portal_reference_period</code>,{" "}
+                    Untuk menampilkan dokumen rilis secara terpisah dari katalog
+                    Dataset umum, pilih tipe konten portal{" "}
+                    <strong>Publikasi/laporan</strong> pada formulir CKAN. Tag{" "}
+                    <code>portal-publikasi</code> akan ditambahkan otomatis.
+                    Unggah dokumen publik sebagai resource dan isi metadata yang
+                    relevan: <code>portal_reference_period</code>,{" "}
                     <code>portal_publication_date</code>,{" "}
                     <code>portal_version</code>,{" "}
                     <code>portal_revision_note</code>,{" "}
@@ -740,59 +760,57 @@ export default function ApiDocsPage() {
             <ApiSection
               id="batas"
               number="06"
-              title="Batas akses, cache & keamanan"
-              description="API ini adalah antarmuka publik terbatas, bukan proxy generik ke seluruh CKAN Action API."
+              title="Akses, batas penggunaan, dan keamanan"
+              description="API publik hanya membuka endpoint dan parameter yang diperlukan untuk membaca data. Tidak semua fungsi CKAN tersedia melalui alamat ini."
             >
               <Card
                 as="aside"
                 className="rounded-xl border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"
               >
-                <p className="font-semibold">Tidak untuk operasi tulis</p>
+                <p className="font-semibold">Hanya untuk membaca data</p>
                 <p className="mt-1">
-                  Action membuat, mengubah, menghapus, mengunggah, dan mengelola
-                  pengguna tidak tersedia. Gunakan CKAN Admin yang dilindungi
-                  autentikasi untuk pekerjaan pengelolaan.
+                  API ini tidak menyediakan fungsi untuk membuat, mengubah,
+                  menghapus, atau mengunggah data. Pengelolaan dataset dilakukan
+                  melalui CKAN Admin dengan autentikasi dan izin yang sesuai.
                 </p>
               </Card>
               <Card as="div" className="rounded-xl px-4">
                 <dl>
                   <Field
-                    name="HTTP"
-                    value="GET, HEAD, dan OPTIONS diizinkan untuk action publik. Request mutasi dan action yang tidak dikenal ditolak."
+                    name="Metode HTTP"
+                    value="GET digunakan untuk mengambil data. HEAD memeriksa respons tanpa isi, sedangkan OPTIONS mendukung pemeriksaan CORS. POST, PUT, PATCH, DELETE, dan action di luar daftar publik ditolak."
                   />
                   <Field
-                    name="HTTP error"
-                    value="400 untuk parameter/validasi; 403 untuk akses yang ditolak; 404 untuk action atau objek yang tidak ditemukan; 502 jika upstream CKAN tidak tersedia atau gagal."
+                    name="Status kesalahan"
+                    value="400 berarti parameter tidak dikenal, berulang, atau tidak valid; 401/403 berarti autentikasi atau izin ditolak; 404 berarti action atau objek tidak ditemukan/tidak tersedia bagi pemanggil; 409 dan 422 meneruskan konflik atau validasi yang dikenali; 502 berarti layanan CKAN di belakang API tidak dapat dihubungi atau gagal merespons."
                   />
                   <Field
-                    name="Limit"
-                    value="package_search rows maksimum 100 dan start maksimum 1.000.000; DataStore limit maksimum 100 dan offset maksimum 100.000; organization_list maksimum 1.000."
+                    name="Batas hasil"
+                    value="package_search: rows maksimal 100 dan start maksimal 1.000.000. datastore_search: limit maksimal 100 baris dan offset maksimal 100.000. organization_list: maksimal 1.000 organisasi. Nilai di atas batas disesuaikan ke batas maksimum."
                   />
                   <Field
-                    name="Cache"
-                    value="status_show, daftar/detail organisasi/topik, dan tag dapat memakai shared cache singkat (s-maxage 5 detik; stale-while-revalidate 5 detik). package_search, package_show, package_activity_list, resource_show, file_show, datastore_search, dan semua respons error memakai Cache-Control: no-store agar perubahan visibilitas dataset/resource segera dihormati."
+                    name="Cache respons"
+                    value="Status layanan, daftar/detail organisasi dan topik, serta tag dapat disimpan di cache bersama selama 5 detik. Pencarian, detail dataset, aktivitas, resource, file, DataStore, dan seluruh respons error memakai Cache-Control: no-store agar perubahan izin dan visibilitas tidak tertahan oleh cache."
                   />
                   <Field
-                    name="CORS"
-                    value="Origin hanya diizinkan bila sama persis dengan PUBLIC_SITE_ORIGIN. Pemakaian same-origin tidak memerlukan konfigurasi CORS tambahan."
+                    name="Akses lintas domain (CORS)"
+                    value="Untuk aplikasi browser dari origin lain, alamat origin harus tercantum pada PUBLIC_API_CORS_ORIGINS. Isi dengan origin lengkap, termasuk skema dan port bila ada, pisahkan beberapa origin dengan koma. Jika variabel ini kosong, portal memakai PUBLIC_SITE_ORIGIN; NEXT_PUBLIC_SITE_URL menjadi nilai cadangan terakhir. Untuk production, gunakan HTTPS. Aplikasi pada origin portal yang sama tidak memerlukan konfigurasi CORS tambahan."
                   />
                   <Field
-                    name="Indexing"
-                    value="Response API menambahkan X-Robots-Tag: noindex, nofollow, noarchive dan X-Content-Type-Options: nosniff."
+                    name="Mesin pencari"
+                    value="Respons API diberi X-Robots-Tag: noindex, nofollow, noarchive agar endpoint JSON tidak diindeks sebagai halaman web. Header X-Content-Type-Options: nosniff juga diterapkan."
                   />
                   <Field
-                    name="Data privat"
-                    value="Pencarian memaksa include_private=false. Resource privat atau nonaktif disaring dari respons publik; activity tidak menyertakan identitas pengguna dan snapshot perubahan. Permission dan visibilitas CKAN tetap menjadi sumber otoritatif."
+                    name="Hak akses data"
+                    value="Tanpa sesi CKAN, pencarian hanya mengembalikan dataset publik. Jika permintaan membawa sesi CKAN yang valid, akses dataset mengikuti izin akun tersebut. Resource bertanda privat atau tidak aktif tetap disaring; riwayat aktivitas tidak menyertakan identitas pengguna maupun snapshot internal. CKAN tetap menjadi sumber utama pemeriksaan izin."
                   />
                 </dl>
               </Card>
               <p className="text-sm leading-6 text-muted">
-                Jangan mengekspos port PostgreSQL, Solr, Redis, maupun port
-                internal CKAN ke internet. Host admin harus tetap terpisah dan
-                dilindungi login CKAN serta satu gerbang perimeter: Basic Auth
-                pada mode basic_auth, atau Cloudflare Access pada mode
-                cloudflare_access. Jangan menumpuk Basic Auth di depan
-                Cloudflare Access jika tujuan Anda mengurangi prompt login.
+                API publik tidak membuka akses langsung ke database atau layanan
+                internal CKAN. Alamat administrasi tetap terpisah dan hanya
+                dapat digunakan oleh pengguna yang memiliki akses serta izin
+                pengelolaan.
               </p>
               <Button
                 href="https://docs.ckan.org/en/2.12/api/index.html"
@@ -812,17 +830,17 @@ export default function ApiDocsPage() {
             >
               <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <p className="eyebrow">Jelajahi portal</p>
+                  <p className="eyebrow">Bagian lain di portal</p>
                   <h2
                     id="api-related-pages-title"
                     className="mt-1 text-lg font-semibold text-ink"
                   >
-                    Laman lain yang mungkin Anda perlukan
+                    Jelajahi data dan informasi lainnya
                   </h2>
                 </div>
                 <p className="max-w-xl text-sm leading-6 text-muted">
-                  Temukan data melalui antarmuka publik, atau pelajari
-                  organisasi dan konten yang diterbitkan.
+                  Kembali ke katalog untuk menemukan dataset, atau lihat
+                  organisasi dan publikasi yang tersedia.
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -856,15 +874,15 @@ export default function ApiDocsPage() {
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-canvas p-4 sm:p-5">
               <div>
                 <p className="text-sm font-semibold">
-                  Mulai dari katalog publik
+                  Belum menemukan dataset yang dibutuhkan?
                 </p>
                 <p className="mt-1 text-xs leading-5 text-muted">
-                  Temukan dataset dan salin identifier yang dibutuhkan untuk
-                  request API.
+                  Telusuri katalog, pilih dataset, lalu gunakan ID-nya pada
+                  endpoint yang sesuai.
                 </p>
               </div>
               <Button href="/dataset" variant="primary">
-                Buka katalog <ArrowUpRight size={15} aria-hidden="true" />
+                Cari dataset <ArrowUpRight size={15} aria-hidden="true" />
               </Button>
             </div>
           </div>
