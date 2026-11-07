@@ -173,338 +173,156 @@ body:has(.public-home) .home-hero::before {
   background: rgb(255 255 255 / 19%);
 }
 
+/* The regional silhouette is the visual anchor; metrics float around it without cards. */
 .home-hero-visual {
   position: relative;
-  width: min(100%, 29rem);
-  min-height: 21.5rem;
+  width: min(100%, 33rem);
+  min-height: 27.5rem;
   justify-self: end;
   overflow: visible;
   isolation: isolate;
   border: 0;
   border-radius: 0;
-  background: radial-gradient(
-    ellipse at 50% 44%,
-    rgb(100 188 204 / 16%),
-    transparent 66%
-  );
+  background: transparent;
   box-shadow: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 
-/* Editorial map folio: a purposeful geographic/data artifact, not decorative node art. */
-.home-data-board {
+.home-region-map {
   position: absolute;
   z-index: 1;
-  pointer-events: none;
-  inset: 0.75rem 0.65rem 1.55rem;
-  overflow: hidden;
-  border: 1px solid rgb(227 241 240 / 92%);
-  border-radius: 1.2rem;
-  color: #173d52;
-  background: #f5f8f5;
-  box-shadow: 0 22px 48px rgb(1 17 31 / 24%);
-}
-
-.home-data-board::before {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 0.22rem;
-  content: "";
-  background: linear-gradient(
-    90deg,
-    #2b7890 0 38%,
-    #6eaa8d 38% 72%,
-    #d5a55d 72%
-  );
-}
-
-.home-data-board-map-frame {
-  position: relative;
-  display: flex;
-  width: calc(100% - 2.2rem);
-  max-width: 21rem;
-  min-height: 11.75rem;
-  flex-direction: column;
-  justify-content: space-between;
-  margin: 4.25rem auto 0;
-  border: 1px solid #dce7e4;
-  border-radius: 0.9rem;
-  padding: 0.65rem 0.8rem 0.55rem;
-  background: linear-gradient(
-    135deg,
-    rgb(255 255 255 / 96%),
-    rgb(239 246 241 / 98%)
-  );
-  box-shadow: 0 5px 15px rgb(24 61 71 / 6%);
-}
-
-.home-data-board-map-heading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.12rem;
-  text-align: center;
-  color: #234a5c;
-  font-size: 0.63rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
-.home-data-board-map-heading small {
-  color: #71858a;
-  font-size: 0.5rem;
-  font-weight: 650;
-  letter-spacing: 0.045em;
-}
-
-.home-data-map-svg {
+  top: 49%;
+  left: 53%;
   display: block;
-  width: 100%;
-  height: 8.1rem;
-  margin: 0.08rem auto 0;
-  overflow: visible;
+  width: min(59%, 19rem);
+  height: auto;
+  max-height: 96%;
+  object-fit: contain;
+  transform: translate(-50%, -50%) rotate(-2deg);
+  filter: drop-shadow(0 16px 18px rgb(1 20 34 / 18%));
+  pointer-events: none;
+  user-select: none;
 }
 
-.home-data-map-grid path {
-  fill: none;
-  stroke: #dce8e4;
-  stroke-width: 0.8;
-  stroke-dasharray: 2 5;
-}
-
-.home-data-map-region {
-  stroke: #fff;
-  stroke-linejoin: round;
-  stroke-width: 2.8;
-}
-
-.home-data-map-region-blue {
-  fill: #c9dff0;
-}
-.home-data-map-region-teal {
-  fill: #a9d5cb;
-}
-.home-data-map-region-ochre {
-  fill: #ead7b4;
-}
-.home-data-map-region-slate {
-  fill: #d7e2e4;
-}
-.home-data-map-region-blue-soft {
-  fill: #d9e8f3;
-}
-.home-data-map-region-green {
-  fill: #c6dfcf;
-}
-.home-data-map-region-teal-soft {
-  fill: #c8e4dc;
-}
-.home-data-map-region-ochre-soft {
-  fill: #f0e3ca;
-}
-
-.home-data-map-outline {
-  fill: none;
-  stroke: #668994;
-  stroke-width: 1.8;
-  stroke-linejoin: round;
-}
-
-.home-data-map-locations circle {
-  fill: #fff;
-  stroke: #1a6473;
-  stroke-width: 2.4;
-}
-
-.home-data-board-legend {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.85rem;
-  color: #5a737b;
-  font-size: 0.56rem;
-  font-weight: 650;
-}
-
-.home-data-board-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.32rem;
-}
-
-.home-data-board-legend i {
-  display: inline-block;
-  width: 0.48rem;
-  height: 0.48rem;
-  border-radius: 50%;
-}
-
-.home-data-legend-region {
-  background: #72a99b;
-}
-.home-data-legend-point {
-  background: #1a6473;
-}
-
-.home-data-board-footer {
+.home-map-caption {
   position: absolute;
+  z-index: 2;
   right: 0;
-  bottom: 0;
+  bottom: 0.55rem;
   left: 0;
-  display: flex;
-  min-height: 2.15rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  border-top: 1px solid #dce7e5;
-  color: #667c82;
-  background: #eff4f0;
-  font-size: 0.53rem;
+  margin: 0;
+  color: rgb(235 248 248 / 88%);
+  text-align: center;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 34%);
+  font-size: 0.66rem;
   font-weight: 800;
-  letter-spacing: 0.085em;
-}
-
-.home-data-board-footer i {
-  width: 0.2rem;
-  height: 0.2rem;
-  border-radius: 50%;
-  background: #87a99d;
-}
-
-/* Keep the hero's hierarchy in its real content and live catalog links. */
-.home-hero-copy > *,
-.home-hero-visual,
-.home-data-board,
-.home-visual-chip {
-  animation: none !important;
-  opacity: 1;
-  translate: none;
-}
-
-.home-visual-chip-top-left,
-.home-visual-chip-top-right,
-.home-visual-chip-bottom-left,
-.home-visual-chip-bottom-right {
-  --chip-bg: #eaf3ff;
-  --chip-border: #bfd5f2;
-  --chip-ink: #19476f;
-  --chip-muted: #49647d;
-}
-
-.home-hero-kicker {
-  gap: 0;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.home-visual-chip {
-  position: absolute;
-  z-index: 4;
-  display: flex;
-  min-width: 10.75rem;
-  align-items: center;
-  gap: 0.65rem;
-  border: 1px solid rgb(220 237 246 / 90%);
-  border-radius: 0.9rem;
-  padding: 0.7rem 0.85rem;
-  color: #1d5fa7;
-  background: #fff;
-  box-shadow: 0 13px 30px rgb(2 18 34 / 22%);
-  text-decoration: none;
-}
-
-.home-visual-chip > svg {
-  flex: 0 0 auto;
+  letter-spacing: 0.14em;
 }
 
 .home-visual-metrics {
   position: absolute;
-  inset: 0;
   z-index: 4;
+  inset: 0;
   pointer-events: none;
 }
+
 .home-visual-chip {
-  min-width: 10.2rem;
-  max-width: 11.5rem;
+  position: absolute;
+  display: flex;
+  min-width: 8.25rem;
+  max-width: 10.25rem;
+  align-items: center;
+  gap: 0.58rem;
+  border: 0;
+  border-radius: 0.35rem;
+  padding: 0.35rem 0.15rem;
+  color: #fff;
+  background: transparent;
+  box-shadow: none;
+  text-decoration: none;
   pointer-events: auto;
   transition:
-    border-color 140ms ease,
-    background-color 140ms ease;
+    transform 160ms ease,
+    opacity 160ms ease;
 }
-.home-visual-chip:hover,
-.home-visual-chip:focus-visible {
-  z-index: 6;
-  border-color: #9fc8e2;
-  box-shadow: 0 14px 28px rgb(2 18 34 / 24%);
-  transform: translateY(-2px);
-}
-.home-visual-chip-top-left {
-  top: 1.25rem;
-  left: 0.1rem;
-  --chip-enter-delay: 500ms;
-  --chip-float-delay: 1.45s;
-  --chip-bg: #eaf3ff;
-  --chip-border: #bfd5f2;
-  --chip-ink: #19476f;
-  --chip-muted: #49647d;
-}
-.home-visual-chip-top-right {
-  top: 1.25rem;
-  right: 0.1rem;
-  --chip-bg: #e5f6f1;
-  --chip-border: #bce3d8;
-  --chip-ink: #185b50;
-  --chip-muted: #456e67;
-}
-.home-visual-chip-bottom-left {
-  right: auto;
-  bottom: 5.4rem;
-  left: 0.1rem;
-  --chip-bg: #f0edff;
-  --chip-border: #d4cdf5;
-  --chip-ink: #4d3e82;
-  --chip-muted: #655d83;
-}
-.home-visual-chip-bottom-right {
-  right: 0.1rem;
-  bottom: 5.4rem;
-  --chip-bg: #fff4e3;
-  --chip-border: #ecd9b7;
-  --chip-ink: #805516;
-  --chip-muted: #765f3c;
-}
-.home-visual-chip {
-  border-color: var(--chip-border, #d5e3ed);
-  color: var(--chip-ink, #173b5b);
-  background: var(--chip-bg, #f3f7fb);
-}
+
 .home-visual-chip > svg {
-  color: var(--chip-ink, #173b5b);
+  width: 1.85rem;
+  height: 1.85rem;
+  flex: 0 0 1.85rem;
+  color: var(--chip-accent, #9bdde5);
+  filter: drop-shadow(0 2px 5px rgb(0 0 0 / 28%));
 }
+
+.home-visual-chip > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .home-visual-chip strong {
-  color: var(--chip-ink, #173b5b);
+  color: #fff;
+  font-size: 1.55rem;
+  font-weight: 780;
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  text-shadow: 0 2px 9px rgb(0 0 0 / 34%);
+  font-variant-numeric: tabular-nums;
 }
+
 .home-visual-chip small {
-  color: var(--chip-muted, #526777);
+  margin-top: 0.19rem;
+  color: rgb(239 247 249 / 92%);
+  font-size: 0.7rem;
+  font-weight: 650;
+  line-height: 1.25;
+  text-shadow: 0 1px 7px rgb(0 0 0 / 42%);
 }
-.home-visual-chip-top:not(.home-visual-chip-top-left):not(
-    .home-visual-chip-top-right
-  ) {
-  top: 1.5rem;
-  right: 0.9rem;
+
+.home-visual-chip:hover {
+  transform: translateY(-3px) scale(1.025);
 }
-.home-visual-chip-bottom:not(.home-visual-chip-bottom-left):not(
-    .home-visual-chip-bottom-right
-  ) {
-  right: 0.9rem;
-  bottom: 6.1rem;
+
+.home-visual-chip:focus-visible {
+  border-radius: 0.35rem;
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+/* Intentionally asymmetric placement gives the map a loose editorial rhythm. */
+.home-visual-chip-top-left {
+  top: 3.1rem;
+  left: -0.25rem;
+  --chip-accent: #88d9ed;
+}
+
+.home-visual-chip-top-right {
+  top: 8.2rem;
+  right: -0.2rem;
+  --chip-accent: #9be0c4;
+}
+
+.home-visual-chip-bottom-left {
+  bottom: 4.15rem;
+  left: 0.75rem;
+  --chip-accent: #d7c1ff;
+}
+
+.home-visual-chip-bottom-right {
+  right: 0.05rem;
+  bottom: 1.05rem;
+  --chip-accent: #f3ce91;
+}
+
+.home-hero-copy > *,
+.home-hero-visual,
+.home-region-map,
+.home-visual-chip {
+  animation: none !important;
+  opacity: 1;
+  translate: none;
 }
 
 .home-stats-wrap {
@@ -677,11 +495,10 @@ body:has(.public-home) .home-hero::before {
   }
 }
 
-/* The hero is intentionally static. Live catalog links provide the useful
-   visual information; ornamental entrance and floating effects are omitted. */
+/* Keep the map and live metric links stable; no perpetual decorative motion. */
 .home-hero-copy > *,
 .home-hero-visual,
-.home-data-board,
+.home-region-map,
 .home-visual-chip {
   animation: none !important;
   opacity: 1 !important;

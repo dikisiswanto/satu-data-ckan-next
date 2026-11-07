@@ -99,23 +99,39 @@ test("homepage category cards are unique and use semantically matched icons", as
   ).toHaveCount(0);
 });
 
-test("hero artwork and summary counts never duplicate each other across breakpoints", async ({
+test("hero uses a transparent regional silhouette with asymmetrically placed live statistics", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
   await expect(page.locator(".home-hero-visual")).toBeVisible();
-  const dataBoard = page.locator(".home-data-board");
-  await expect(dataBoard).toBeVisible();
-  await expect(dataBoard).toHaveAttribute("aria-hidden", "true");
-  await expect(dataBoard).toContainText("SEBARAN WILAYAH");
-  await expect(dataBoard).toContainText("ILUSTRASI LAPISAN DATA");
-  await expect(page.locator(".home-data-map-region")).toHaveCount(8);
-  await expect(page.locator(".home-data-map-locations circle")).toHaveCount(3);
-  await expect(page.locator(".home-data-board-legend")).toContainText(
-    "Titik data",
-  );
-  await expect(page.locator(".home-atlas-visual")).toHaveCount(0);
+  const map = page.locator(".home-region-map");
+  await expect(map).toBeVisible();
+  await expect(map).toHaveAttribute("src", /region-map\.svg/);
+  await expect(map).toHaveAttribute("alt", "");
+  await expect(page.locator(".home-map-caption")).toContainText("INSTANSI UJI");
+  const metrics = page.locator(".home-visual-metrics .home-visual-chip");
+  await expect(metrics).toHaveCount(4);
+  for (const selector of [
+    ".home-visual-chip-top-left",
+    ".home-visual-chip-top-right",
+    ".home-visual-chip-bottom-left",
+    ".home-visual-chip-bottom-right",
+  ]) {
+    await expect(page.locator(selector)).toBeVisible();
+  }
+  const visualStyle = await page
+    .locator(".home-hero-visual")
+    .evaluate((node) => {
+      const style = getComputedStyle(node);
+      return {
+        background: style.backgroundColor,
+        border: style.borderTopWidth,
+      };
+    });
+  expect(visualStyle.background).toBe("rgba(0, 0, 0, 0)");
+  expect(visualStyle.border).toBe("0px");
+  await expect(page.locator(".home-data-board")).toHaveCount(0);
   await expect(page.locator(".home-stats-wrap")).toBeHidden();
 
   await page.setViewportSize({ width: 900, height: 900 });
@@ -125,34 +141,6 @@ test("hero artwork and summary counts never duplicate each other across breakpoi
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator(".home-hero-visual")).toBeHidden();
   await expect(page.locator(".home-stats-wrap")).toBeVisible();
-
-  for (const width of [390, 320]) {
-    await page.setViewportSize({ width, height: 844 });
-    const layout = await page.locator(".home-stats").evaluate((grid) => {
-      const cards = [...grid.querySelectorAll(":scope > .home-stat")];
-      const rects = cards.map((card) => card.getBoundingClientRect());
-      const columns = getComputedStyle(grid)
-        .gridTemplateColumns.trim()
-        .split(/\s+/).length;
-      const rows = new Set(rects.map((rect) => Math.round(rect.top)));
-      return {
-        columns,
-        rows: rows.size,
-        widths: rects.map((rect) => rect.width),
-        lastGridColumn: getComputedStyle(cards.at(-1)).gridColumn,
-        documentWidth: document.documentElement.scrollWidth,
-        viewportWidth: window.innerWidth,
-      };
-    });
-
-    expect(layout.columns).toBe(2);
-    expect(layout.rows).toBe(2);
-    expect(
-      Math.max(...layout.widths) - Math.min(...layout.widths),
-    ).toBeLessThan(1);
-    expect(layout.lastGridColumn).toBe("auto");
-    expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
-  }
 });
 
 test("information page keeps a compact title and description rhythm", async ({

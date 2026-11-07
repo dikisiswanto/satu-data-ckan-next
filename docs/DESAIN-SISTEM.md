@@ -4,7 +4,7 @@ Dokumen ini adalah acuan visual bersama untuk frontend publik, login CKAN, dan P
 
 ## Identitas visual
 
-Portal memakai pendekatan **civic data atlas**: editorial, terstruktur, berorientasi data dan wilayah, tetapi tetap ramah untuk masyarakat umum. Karakter yang dituju adalah **standout, modern, clean, dan estetis**—bukan dashboard SaaS generik atau halaman serba putih yang datar.
+Portal memakai pendekatan **civic data atlas**: peta wilayah menjadi jangkar visual hero, dikelilingi ikon dan angka statistik aktual yang ditempatkan asimetris tanpa panel kartu. Bahasa visualnya editorial, terstruktur, berorientasi data dan wilayah, tetapi tetap ramah untuk masyarakat umum. Karakter yang dituju adalah **standout, modern, clean, dan estetis**—bukan dashboard SaaS generik atau halaman serba putih yang datar.
 
 ## Dial visual
 

@@ -62,21 +62,29 @@ jsx = JSX_PATH.read_text(encoding="utf-8")
 design_direction = (ROOT / "docs/DESAIN-SISTEM.md").read_text(encoding="utf-8")
 rules = css_rules(css)
 
-board = rules.get(".home-data-board", {})
-require(board.get("border-radius") == "1.2rem" and board.get("background") == "#f5f8f5",
-        "Hero must use a distinct, editorial folio surface rather than a generic glowing network scene.")
-require("home-data-board" in jsx and "home-data-map-svg" in jsx and "home-data-map-regions" in jsx and "home-data-map-locations" in jsx,
-        "Hero artwork must communicate regional data through a structured thematic map, boundaries, and location markers.")
-require("ILUSTRASI LAPISAN DATA" in jsx and "home-data-board-legend" in jsx,
-        "Illustrative geography must be identified as illustrative and include a meaningful legend.")
-require(len(re.findall(r'className="home-data-map-region home-data-map-region-', jsx)) == 8,
-        "The thematic map must keep its eight intentional color regions for visual hierarchy.")
-for selector in (".home-data-map-svg", ".home-data-map-grid path", ".home-data-map-outline", ".home-data-map-locations circle"):
-    require(selector in rules, f"Editorial map must define a visual treatment for {selector}.")
-require("home-atlas-contours" not in jsx and "home-atlas-connections" not in jsx and "home-atlas-nodes" not in jsx,
-        "Generic network-node artwork must not return to the homepage hero.")
-require("home-visual-mark" not in jsx and "home-visual-caption" not in jsx,
-        "The previous isolated database-logo ornament and floating caption must remain retired.")
+hero_visual = rules.get(".home-hero-visual", {})
+map_asset = ROOT / "public/illustrations/region-map.svg"
+map_asset_text = map_asset.read_text(encoding="utf-8") if map_asset.is_file() else ""
+require(hero_visual.get("background") == "transparent" and hero_visual.get("border") == "0"
+        and hero_visual.get("box-shadow") == "none",
+        "Hero artwork wrapper must remain transparent without a card or background plate.")
+require('src={siteConfig.heroMapImage}' in jsx and 'className="home-region-map"' in jsx
+        and 'className="home-map-caption"' in jsx,
+        "Hero must render the configurable regional map silhouette with a regional caption.")
+require("heroMapImage:" in (ROOT / "src/lib/site-config.js").read_text(encoding="utf-8")
+        and "NEXT_PUBLIC_HERO_MAP_IMAGE" in (ROOT / "src/lib/site-config.js").read_text(encoding="utf-8"),
+        "Regional map artwork must be configurable rather than hard-coded into the tenant identity.")
+require("viewBox=\"180 160 720 760\"" in map_asset_text
+        and "fill=\"url(#region-land)\"" in map_asset_text
+        and "stop-color=\"#EAF1D9\"" in map_asset_text,
+        "Regional map asset must be a transparent SVG silhouette with a restrained land palette.")
+require("home-data-board" not in jsx and "home-data-map-svg" not in jsx
+        and "home-atlas-contours" not in jsx and "home-atlas-connections" not in jsx,
+        "Generic map panels, fabricated subdivisions, and network-node artwork must not return.")
+require("home-map-caption" in jsx and "home-visual-chip" in jsx,
+        "The hero should pair a regional map with live statistical shortcuts.")
+for selector in (".home-region-map", ".home-map-caption", ".home-visual-chip > svg"):
+    require(selector in rules, f"Transparent regional hero needs styling for {selector}.")
 for retired_visual in ("home-scene-cube", "home-scene-grid", "home-scene-spark", "home-orbit"):
     require(retired_visual not in jsx, f"Decorative hero element {retired_visual} must not be rendered.")
 
@@ -94,36 +102,17 @@ require(heading.get("color") == "#fff", "Hero heading must retain a high-contras
 require("95%" in paragraph.get("color", "") and bool(paragraph.get("text-shadow")),
         "Hero description must retain strong contrast and a subtle text shadow.")
 
-palette_match = re.search(
-    r"\.home-visual-chip-top-left,\s*\.home-visual-chip-top-right,\s*\.home-visual-chip-bottom-left,\s*\.home-visual-chip-bottom-right\s*\{([^}]+)\}",
-    css,
-    re.DOTALL,
-)
-palette_declarations = {}
-if palette_match:
-    for declaration in tinycss2.parse_declaration_list(
-        palette_match.group(1), skip_whitespace=True, skip_comments=True
-    ):
-        if declaration.type == "declaration":
-            palette_declarations[declaration.lower_name] = tinycss2.serialize(declaration.value).strip()
-background = palette_declarations.get("--chip-bg", "")
-ink = palette_declarations.get("--chip-ink", "")
-muted = palette_declarations.get("--chip-muted", "")
-require(bool(background and ink and muted), "Floating metric links must share one defined accent palette.")
-for text_color, text_kind in ((ink, "title"), (muted, "description")):
-    ratio = contrast_ratio(background, text_color)
-    require(ratio is not None and ratio >= 4.5,
-            f"Floating metric {text_kind} contrast must be at least 4.5:1.")
-require("animation: none !important" in css and palette_match is not None,
-        "Hero motion must remain static and metric links must share a deliberate palette.")
+require("background: transparent" in css and "box-shadow: none" in css,
+        "Floating statistical links must remain unboxed over the hero image.")
 for selector in (".home-visual-chip-top-left", ".home-visual-chip-top-right", ".home-visual-chip-bottom-left", ".home-visual-chip-bottom-right"):
-    declarations = rules.get(selector, {})
-    chip_background = declarations.get("--chip-bg", "").strip()
-    for key in ("--chip-ink", "--chip-muted"):
-        chip_color = declarations.get(key, "").strip()
-        ratio = contrast_ratio(chip_background, chip_color) if chip_background and chip_color else None
-        require(ratio is not None and ratio >= 4.5,
-                f"{selector} must preserve WCAG AA contrast for {key}.")
+    require(selector in rules, f"Floating statistical link must keep its intentional asymmetric position: {selector}.")
+require("--chip-accent: #88d9ed" in css and "--chip-accent: #9be0c4" in css
+        and "--chip-accent: #d7c1ff" in css and "--chip-accent: #f3ce91" in css,
+        "Stat icons must use four restrained, distinct accent colors.")
+require("home-visual-chip strong" in css and "text-shadow" in rules.get(".home-visual-chip strong", {}),
+        "Floating metric values must remain legible over the hero photograph.")
+require("animation: none !important" in css,
+        "Hero must avoid perpetual decorative motion.")
 require("civic data atlas" in design_direction and "standout, modern, clean" in design_direction,
         "Public visual identity must stay specific to a regional data portal and avoid sterile minimalism.")
 api_page = (ROOT / "src/app/(public)/api-data/page.jsx").read_text(encoding="utf-8")
@@ -157,8 +146,8 @@ require("PUBLIC_HOME_SECTION_SELECTOR" in scroll_manager
         "Homepage sections must have a subtle one-time reveal that respects reduced-motion.")
 require("ENERGY: **2 / 3**" in design_direction and "RHYTHM: **2 / 3**" in design_direction and "MOTION: **1 / 3**" in design_direction,
         "Public visual direction must document the selected energy, rhythm, and motion dials.")
-require(board.get("pointer-events", "").strip() == "none",
-        "The editorial map board must remain decorative and not intercept the live metric links.")
+require(rules.get(".home-visual-metrics", {}).get("pointer-events") == "none",
+        "The floating metrics wrapper must not intercept pointer events outside the actual links.")
 
 feature_styles = (ROOT / "src/app/styles/component-styles.css").read_text(encoding="utf-8")
 foundation_styles = (ROOT / "src/app/styles/foundation.css").read_text(encoding="utf-8")
@@ -176,4 +165,4 @@ if ERRORS:
         print(f"- {error}")
     raise SystemExit(1)
 
-print("Public hero visual contract passed: editorial thematic-map folio, no generic network-node artwork, dark image overlay, semantic metric palettes, and WCAG AA text contrast.")
+print("Public hero visual contract passed: transparent regional map, asymmetric live metrics, no generic network-node artwork, and accessible contrast.")

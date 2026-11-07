@@ -55,6 +55,7 @@ public_subtitle = first_value(values.get("PORTAL_PUBLIC_SUBTITLE"), values.get("
 logo_path = first_value(values.get("PORTAL_LOGO_PATH"), values.get("NEXT_PUBLIC_LOGO_PATH"), values.get("CKAN__SITE_LOGO")) or "/icons/portal.svg"
 logo_alt = first_value(values.get("PORTAL_LOGO_ALT"), values.get("NEXT_PUBLIC_LOGO_ALT")) or f"Logo {brand_name}"
 hero_image = first_value(values.get("PORTAL_HERO_IMAGE"), values.get("NEXT_PUBLIC_HERO_IMAGE")) or "/portal-social.svg"
+hero_map_image = first_value(values.get("PORTAL_HERO_MAP_IMAGE"), values.get("NEXT_PUBLIC_HERO_MAP_IMAGE"))
 brand_profile = first_value(values.get("PORTAL_BRAND_PROFILE"), values.get("NEXT_PUBLIC_BRAND_PROFILE")) or "generic"
 identity = {
     "PORTAL_INSTITUTION_NAME": region_name,
@@ -150,6 +151,7 @@ derived = {
     "NEXT_PUBLIC_LOGO_PATH": logo_path,
     "NEXT_PUBLIC_LOGO_ALT": logo_alt,
     "NEXT_PUBLIC_HERO_IMAGE": hero_image,
+    "NEXT_PUBLIC_HERO_MAP_IMAGE": hero_map_image,
     "NEXT_PUBLIC_ICON_PATH": icon_path,
     "NEXT_PUBLIC_PWA_ICON_192": pwa_icon_192,
     "NEXT_PUBLIC_PWA_ICON_512": pwa_icon_512,

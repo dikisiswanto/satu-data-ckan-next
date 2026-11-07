@@ -48,6 +48,9 @@ const configuredLogoPath = (
 const configuredHeroImage = (
   process.env.NEXT_PUBLIC_HERO_IMAGE || "/portal-social.svg"
 ).trim();
+const configuredHeroMapImage = (
+  process.env.NEXT_PUBLIC_HERO_MAP_IMAGE || ""
+).trim();
 const configuredPpidName = (
   process.env.NEXT_PUBLIC_PPID_NAME || "PPID instansi"
 ).trim();
@@ -73,6 +76,7 @@ export const siteConfig = Object.freeze({
   logoPath: configuredLogoPath,
   logoAlt: (process.env.NEXT_PUBLIC_LOGO_ALT || "Logo Portal Satu Data").trim(),
   heroImage: configuredHeroImage,
+  heroMapImage: configuredHeroMapImage,
   iconPath: (process.env.NEXT_PUBLIC_ICON_PATH || "/icons/icon.svg").trim(),
   pwaIcon192: (
     process.env.NEXT_PUBLIC_PWA_ICON_192 || "/icons/icon-192.png"

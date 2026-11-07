@@ -44,7 +44,7 @@ if "PORTAL_LEGACY_PWA_STORAGE_PREFIX=" not in example:
 # Every default local asset referenced by the sample configuration must ship.
 for key in (
     "PORTAL_LOGO_PATH", "PORTAL_HERO_IMAGE", "PORTAL_ICON_PATH",
-    "PORTAL_PWA_ICON_192", "PORTAL_PWA_ICON_512",
+    "PORTAL_PWA_ICON_192", "PORTAL_PWA_ICON_512", "PORTAL_HERO_MAP_IMAGE",
 ):
     value = next(
         (line.split("=", 1)[1].strip().strip('"\'')

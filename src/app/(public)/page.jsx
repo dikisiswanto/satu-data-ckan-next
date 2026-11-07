@@ -269,84 +269,23 @@ function HomeHeroContent({
           role="group"
           aria-label="Akses cepat ke data publik"
         >
-          <div className="home-data-board" aria-hidden="true">
-            <div className="home-data-board-map-frame">
-              <div className="home-data-board-map-heading">
-                <span>SEBARAN WILAYAH</span>
-                <small>ILUSTRASI LAPISAN DATA</small>
-              </div>
-              <svg
-                className="home-data-map-svg"
-                viewBox="0 0 320 210"
-                focusable="false"
-              >
-                <g className="home-data-map-grid">
-                  <path d="M20 35H300M20 75H300M20 115H300M20 155H300M20 195H300" />
-                  <path d="M40 18V198M90 18V198M140 18V198M190 18V198M240 18V198M290 18V198" />
-                </g>
-                <g className="home-data-map-regions">
-                  <path
-                    className="home-data-map-region home-data-map-region-blue"
-                    d="M45 53 84 24 121 38 106 78 60 82 47 88 28 68Z"
-                  />
-                  <path
-                    className="home-data-map-region home-data-map-region-teal"
-                    d="M121 38 157 19 197 35 183 78 139 88 106 78Z"
-                  />
-                  <path
-                    className="home-data-map-region home-data-map-region-ochre"
-                    d="M197 35 222 28 256 66 241 103 198 98 183 78Z"
-                  />
-                  <path
-                    className="home-data-map-region home-data-map-region-slate"
-                    d="M47 88 60 82 106 78 139 88 130 130 82 140 34 119Z"
-                  />
-                  <path
-                    className="home-data-map-region home-data-map-region-blue-soft"
-                    d="M139 88 183 78 198 98 214 128 168 151 130 130Z"
-                  />
-                  <path
-                    className="home-data-map-region home-data-map-region-green"
-                    d="M34 119 82 140 84 176 64 140Z"
-                  />
-                  <path
-                    className="home-data-map-region home-data-map-region-teal-soft"
-                    d="M82 140 130 130 168 151 158 184 119 165 84 176Z"
-                  />
-                  <path
-                    className="home-data-map-region home-data-map-region-ochre-soft"
-                    d="M168 151 214 128 270 134 230 166 194 158 158 184Z"
-                  />
-                  <path
-                    className="home-data-map-outline"
-                    d="M45 53 84 24 121 38 157 19 197 35 222 28 256 66 241 103 270 134 230 166 194 158 158 184 119 165 84 176 64 140 34 119 47 88 28 68Z"
-                  />
-                </g>
-                <g className="home-data-map-locations">
-                  <circle cx="111" cy="72" r="5.5" />
-                  <circle cx="188" cy="102" r="5.5" />
-                  <circle cx="157" cy="151" r="5.5" />
-                </g>
-              </svg>
-              <div className="home-data-board-legend">
-                <span>
-                  <i className="home-data-legend-region" /> Wilayah tematik
-                </span>
-                <span>
-                  <i className="home-data-legend-point" /> Titik data
-                </span>
-              </div>
-            </div>
-            <div className="home-data-board-footer">
-              <span>DATASET</span>
-              <i />
-              <span>GEOSPASIAL</span>
-              <i />
-              <span>STATISTIK</span>
-              <i />
-              <span>PUBLIKASI</span>
-            </div>
-          </div>
+          {siteConfig.heroMapImage ? (
+            <>
+              <Image
+                src={siteConfig.heroMapImage}
+                alt=""
+                width={360}
+                height={460}
+                className="home-region-map"
+                aria-hidden="true"
+              />
+              <p className="home-map-caption" aria-hidden="true">
+                <strong>
+                  {siteConfig.regionName.toLocaleUpperCase("id-ID")}
+                </strong>
+              </p>
+            </>
+          ) : null}
           <div
             className="home-visual-metrics"
             aria-label="Ringkasan cepat portal"
@@ -355,7 +294,7 @@ function HomeHeroContent({
               href="/dataset"
               className="home-visual-chip home-visual-chip-top home-visual-chip-top-left"
             >
-              <Database size={17} aria-hidden="true" />
+              <BarChart3 size={25} strokeWidth={1.8} aria-hidden="true" />
               <span>
                 <strong className="home-metric-value">
                   {loading ? (
