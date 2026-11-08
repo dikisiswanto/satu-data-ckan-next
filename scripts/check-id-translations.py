@@ -499,9 +499,26 @@ def main() -> None:
             ("Frequency", "Frekuensi"),
             ("Frequency filter", "Filter frekuensi"),
             ("Filter by frequency", "Saring berdasarkan frekuensi"),
+            ("Type", "Jenis"),
         ):
             if runtime_catalog.gettext(source) != expected:
                 ERRORS.append(f"Compiled core gettext label {source!r} must be {expected!r}.")
+        # CKAN passes the facet title into this parameterized message. Verify
+        # the title is localized before formatting, otherwise the generic
+        # Indonesian sentence still displays "Frequency" or "Type" in English.
+        for source, expected in (("Frequency", "frekuensi"), ("Type", "jenis")):
+            facet_type = runtime_catalog.gettext(source).lower()
+            no_facet_match = runtime_catalog.gettext(
+                "There are no {facet_type} that match this search"
+            ).format(facet_type=facet_type)
+            expected_no_facet_match = (
+                f"Tidak ada {expected} yang sesuai dengan pencarian ini"
+            )
+            if no_facet_match != expected_no_facet_match:
+                ERRORS.append(
+                    f"Compiled CKAN empty-facet label for {source!r} must render "
+                    f"{expected_no_facet_match!r}, got {no_facet_match!r}."
+                )
         extension_output = locale_root / "portal-theme-i18n"
         compiled_extensions = module.compile_extension_catalogs(PO, extension_output)
         compiled_extension_names = {path.stem for path in compiled_extensions}

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Static guardrails: .env.ckan is the only deployment configuration source."""
+from __future__ import annotations
+
 from pathlib import Path
+import os
 import re
 import subprocess
 import sys
@@ -261,7 +264,7 @@ else:
                 for secret in ("CLOUDFLARE_TUNNEL_TOKEN", "CKAN_ADMIN_BASIC_AUTH_PASSWORD", "CKAN_ADMIN_BASIC_AUTH_HASH", "NEXT_PUBLIC_SITE_URL", "PUBLIC_SITE_ORIGIN", "CKANEXT__XLOADER__API_TOKEN", "CKANEXT__XLOADER__JOBS_DB__URI", "CKAN_REVALIDATE_SECRET", "CKANEXT__PORTAL_THEME__PUBLIC_REVALIDATE_URL", "CKAN_SESSION_COOKIE_NAME"):
                     if re.search(rf"^{secret}=", generated, re.M):
                         errors.append(f"Renderer env membocorkan variabel edge {secret} ke service CKAN")
-                if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__PORTAL_THEME__ADMIN_HOST=admin.example.test" not in generated or "CKAN___SESSION_COOKIE_DOMAIN=.example.test" not in generated or output.stat().st_mode & 0o777 != 0o600:
+                if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__PORTAL_THEME__ADMIN_HOST=admin.example.test" not in generated or "CKAN___SESSION_COOKIE_DOMAIN=.example.test" not in generated or (os.name != "nt" and output.stat().st_mode & 0o777 != 0o600):
                     errors.append("Renderer env harus mempertahankan konfigurasi CKAN/admin host dan menulis output dengan permission 600")
                 if re.search(r"^CKAN__SESSION_COOKIE_", generated, re.M):
                     errors.append("Flask SESSION_COOKIE settings wajib memakai CKAN___ triple underscore, bukan CKAN__")
