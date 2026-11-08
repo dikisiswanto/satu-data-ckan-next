@@ -67,17 +67,9 @@ function buildChartData(rows, columns, metricName, labelName, chartType) {
     (dataMax - dataMin || Math.max(Math.abs(dataMax), Math.abs(dataMin), 1)) *
     0.1;
   const min =
-    chartType === "bar"
-      ? dataMin < 0
-        ? dataMin - padding
-        : 0
-      : dataMin - padding;
+    chartType === "bar" ? Math.min(0, dataMin) - padding : dataMin - padding;
   const max =
-    chartType === "bar"
-      ? dataMax > 0
-        ? dataMax + padding
-        : 0
-      : dataMax + padding;
+    chartType === "bar" ? Math.max(0, dataMax) + padding : dataMax + padding;
   const span = max - min || 1;
   const width = 900;
   const height = 330;
@@ -304,6 +296,16 @@ function ResourceChart({ rows, columns, resourceId }) {
             stroke="currentColor"
             strokeOpacity="0.28"
           />
+          {chartType === "bar" ? (
+            <line
+              x1={chart.left}
+              y1={zeroY}
+              x2={chart.width - chart.right}
+              y2={zeroY}
+              stroke="currentColor"
+              strokeOpacity="0.35"
+            />
+          ) : null}
           <g clipPath={`url(#${clipId})`}>
             {chartType === "line" ? (
               <>
