@@ -207,6 +207,12 @@ export default async function DatasetDetailPage({ params }) {
   const publicResources = resources.filter((resource) =>
     publicResourceUrl(resource.url),
   );
+  const imageResources = resources.filter(
+    (resource) =>
+      ["png", "jpg", "jpeg", "webp", "gif", "avif"].includes(
+        ckanResourceFormat(resource),
+      ) && publicResourceUrl(resource.url),
+  );
   const tags = (dataset.tags || [])
     .map((tag) => tag.display_name || tag.name)
     .filter(Boolean);
@@ -649,45 +655,29 @@ export default async function DatasetDetailPage({ params }) {
                     heightClassName="h-[70vh] min-h-[420px]"
                   />
                 ))}
-              {resources.some(
-                (resource) =>
-                  ["png", "jpg", "jpeg", "webp", "gif", "avif"].includes(
-                    ckanResourceFormat(resource),
-                  ) && publicResourceUrl(resource.url),
-              ) ? (
+              {imageResources.length ? (
                 <section className="mt-6 rounded-2xl border border-line bg-white p-4 sm:p-5">
                   <h3 className="font-semibold">Pratinjau gambar</h3>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                    {resources
-                      .filter(
-                        (resource) =>
-                          [
-                            "png",
-                            "jpg",
-                            "jpeg",
-                            "webp",
-                            "gif",
-                            "avif",
-                          ].includes(ckanResourceFormat(resource)) &&
-                          publicResourceUrl(resource.url),
-                      )
-                      .slice(0, 4)
-                      .map((resource) => (
-                        <figure
-                          key={resource.id}
-                          className="overflow-hidden rounded-xl bg-slate-50"
+                  <div
+                    className={`mx-auto mt-4 grid w-full justify-items-center gap-4 ${imageResources.length === 1 ? "max-w-5xl grid-cols-1" : "sm:grid-cols-2"}`}
+                  >
+                    {imageResources.slice(0, 4).map((resource) => (
+                      <figure
+                        key={resource.id}
+                        className="mx-auto w-full max-w-3xl overflow-hidden rounded-xl bg-slate-50"
+                      >
+                        <ImageLightbox
+                          src={publicResourceUrl(resource.url)}
+                          alt={
+                            resource.description ||
+                            resource.name ||
+                            dataset.title
+                          }
+                          caption={ckanResourceName(resource)}
+                          group={`dataset-${dataset.name}`}
+                          className="bg-slate-50"
                         >
-                          <ImageLightbox
-                            src={publicResourceUrl(resource.url)}
-                            alt={
-                              resource.description ||
-                              resource.name ||
-                              dataset.title
-                            }
-                            caption={ckanResourceName(resource)}
-                            group={`dataset-${dataset.name}`}
-                            className="bg-slate-50"
-                          >
+                          <div className="flex min-h-56 items-center justify-center px-3 py-4 sm:min-h-80 sm:px-5">
                             <Image
                               src={publicResourceUrl(resource.url)}
                               alt={
@@ -698,14 +688,15 @@ export default async function DatasetDetailPage({ params }) {
                               width={1600}
                               height={1200}
                               unoptimized
-                              className="h-auto max-h-[500px] w-full object-contain"
+                              className="mx-auto h-auto max-h-[min(70vh,760px)] w-auto max-w-full object-contain object-center"
                             />
-                          </ImageLightbox>
-                          <figcaption className="p-3 text-sm text-muted">
-                            {ckanResourceName(resource)}
-                          </figcaption>
-                        </figure>
-                      ))}
+                          </div>
+                        </ImageLightbox>
+                        <figcaption className="p-3 text-center text-sm text-muted">
+                          {ckanResourceName(resource)}
+                        </figcaption>
+                      </figure>
+                    ))}
                   </div>
                 </section>
               ) : null}

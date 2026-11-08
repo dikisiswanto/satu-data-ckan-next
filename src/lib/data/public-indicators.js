@@ -145,6 +145,49 @@ function firstDefined(record, fields) {
   return null;
 }
 
+function compareObservationPeriod(left, right, direction) {
+  const periodFields = [
+    "period",
+    "periode",
+    "tahun",
+    "year",
+    "tanggal",
+    "date",
+  ];
+  const leftPeriod = firstDefined(left, periodFields);
+  const rightPeriod = firstDefined(right, periodFields);
+  if (leftPeriod === null || rightPeriod === null) return 0;
+
+  const leftNumber = Number(leftPeriod);
+  const rightNumber = Number(rightPeriod);
+  const comparison =
+    Number.isFinite(leftNumber) && Number.isFinite(rightNumber)
+      ? leftNumber - rightNumber
+      : String(leftPeriod).localeCompare(String(rightPeriod), "id", {
+          numeric: true,
+          sensitivity: "base",
+        });
+  return comparison * direction;
+}
+
+function observationPeriodField(fields = []) {
+  const aliases = ["period", "periode", "tahun", "year", "tanggal", "date"];
+  for (const alias of aliases) {
+    const field = fields.find((item) => {
+      const id = String(item?.id || "");
+      const type = String(item?.type || "").toLowerCase();
+      return (
+        id.toLowerCase() === alias &&
+        /^[a-z_][a-z0-9_]*$/i.test(id) &&
+        !type.startsWith("_") &&
+        !/array|nested|json|geometry|vector/.test(type)
+      );
+    });
+    if (field) return field.id;
+  }
+  return null;
+}
+
 export function normalizeObservation(record = {}, fallbackUnit = "") {
   const rawValue = firstDefined(record, [
     "value",
@@ -179,12 +222,36 @@ async function readObservations(
 ) {
   if (!resource?.id || resource.datastore_active !== true)
     return { records: [], total: 0, fields: [] };
-  const result = await ckanAction("datastore_search", {
+  const safeLimit = Math.min(
+    Math.max(Number(limit) || 100, 1),
+    OBSERVATION_LIMIT,
+  );
+  const direction = /\basc\s*$/i.test(sort) ? "asc" : "desc";
+  const params = {
     resource_id: resource.id,
-    limit: Math.min(Math.max(Number(limit) || 100, 1), OBSERVATION_LIMIT),
+    limit: safeLimit,
     offset: 0,
-    sort,
-  });
+    // `_id` exists on every CKAN DataStore table, unlike the optional period
+    // column whose name is supplied by each indicator's source organization.
+    sort: `_id ${direction}`,
+  };
+  let result = await ckanAction("datastore_search", params);
+  const periodField = observationPeriodField(result.fields);
+  if (periodField) {
+    try {
+      result = await ckanAction("datastore_search", {
+        ...params,
+        sort: `${periodField} ${direction}`,
+      });
+    } catch {
+      // A period field can still be unsortable in CKAN (for example, an array
+      // column). Keep the safe `_id` sample and sort it locally when possible.
+      if (Array.isArray(result.records))
+        result.records.sort((left, right) =>
+          compareObservationPeriod(left, right, direction === "asc" ? 1 : -1),
+        );
+    }
+  }
   return {
     records: Array.isArray(result.records) ? result.records : [],
     total: Number(result.total || 0),

@@ -4723,3 +4723,146 @@ body:has(.portal-login-frame) {
     border-radius: 0;
   }
 }
+
+/* CKAN's request-reset and token-reset pages use the native page template.
+   Give those forms the same clear, centered treatment as the login screen. */
+.main:has(form[action*="request_reset"]),
+.main:has(form[action*="perform_reset"]),
+.main:has(#field-confirm-password),
+.main:has(#field-password):not(:has(#field-login)) {
+  display: grid !important;
+  min-height: calc(100vh - 72px);
+  min-height: calc(100svh - 72px);
+  align-content: start;
+  justify-items: center;
+  padding: clamp(1.25rem, 4vw, 3rem) 1rem 3rem;
+  background: var(--portal-color-canvas);
+}
+.main:has(form[action*="request_reset"]) #content,
+.main:has(form[action*="perform_reset"]) #content,
+.main:has(#field-confirm-password) #content,
+.main:has(#field-password):not(:has(#field-login)) #content {
+  width: 100%;
+  max-width: 40rem;
+  margin-inline: auto;
+}
+.main:has(form[action*="request_reset"]) .row,
+.main:has(form[action*="perform_reset"]) .row,
+.main:has(#field-confirm-password) .row,
+.main:has(#field-password):not(:has(#field-login)) .row {
+  display: block;
+  margin-inline: 0;
+}
+.main:has(form[action*="request_reset"]) .primary,
+.main:has(form[action*="perform_reset"]) .primary,
+.main:has(#field-confirm-password) .primary,
+.main:has(#field-password):not(:has(#field-login)) .primary {
+  float: none;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+.main:has(form[action*="request_reset"]) .secondary,
+.main:has(form[action*="perform_reset"]) .secondary,
+.main:has(#field-confirm-password) .secondary,
+.main:has(#field-password):not(:has(#field-login)) .secondary {
+  display: none;
+}
+.main:has(form[action*="request_reset"]) .primary > .module,
+.main:has(form[action*="perform_reset"]) .primary > .module,
+.main:has(#field-confirm-password) .primary > .module,
+.main:has(#field-password):not(:has(#field-login)) .primary > .module {
+  overflow: hidden;
+  border: 1px solid var(--portal-color-border);
+  border-radius: var(--portal-radius-dialog);
+  background: var(--portal-color-surface);
+  box-shadow: var(--portal-shadow-md);
+}
+.main:has(form[action*="request_reset"]) .module-heading,
+.main:has(form[action*="perform_reset"]) .module-heading,
+.main:has(#field-confirm-password) .module-heading,
+.main:has(#field-password):not(:has(#field-login)) .module-heading {
+  margin: 0;
+  border-bottom: 1px solid var(--portal-color-border);
+  padding: 1.35rem 1.5rem 0.9rem;
+  color: var(--portal-color-navy);
+  font-size: 1.3rem;
+  font-weight: 780;
+}
+.main:has(form[action*="request_reset"]) .module-content,
+.main:has(form[action*="perform_reset"]) .module-content,
+.main:has(#field-confirm-password) .module-content,
+.main:has(#field-password):not(:has(#field-login)) .module-content {
+  padding: 1.35rem 1.5rem 1.5rem;
+}
+.main:has(form[action*="request_reset"]) .control-group,
+.main:has(form[action*="perform_reset"]) .control-group,
+.main:has(#field-confirm-password) .control-group,
+.main:has(#field-password):not(:has(#field-login)) .control-group {
+  margin-bottom: 1.1rem;
+}
+.main:has(form[action*="request_reset"]) .control-label,
+.main:has(form[action*="perform_reset"]) .control-label,
+.main:has(#field-confirm-password) .control-label,
+.main:has(#field-password):not(:has(#field-login)) .control-label {
+  margin-bottom: 0.45rem;
+  color: var(--portal-color-ink);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+.main:has(form[action*="request_reset"]) input[type="email"],
+.main:has(form[action*="perform_reset"]) input[type="password"],
+.main:has(#field-confirm-password) input,
+.main:has(#field-password):not(:has(#field-login)) input[type="password"] {
+  width: 100%;
+  min-height: var(--portal-touch-target);
+  border: 1px solid var(--portal-color-border-strong);
+  border-radius: var(--portal-radius-control);
+  padding: 0.65rem 0.8rem;
+  background: var(--portal-color-surface);
+  color: var(--portal-color-ink);
+  box-shadow: var(--portal-shadow-xs);
+}
+.main:has(form[action*="request_reset"]) input:focus-visible,
+.main:has(form[action*="perform_reset"]) input:focus-visible,
+.main:has(#field-confirm-password) input:focus-visible,
+.main:has(#field-password):not(:has(#field-login)) input:focus-visible {
+  outline: 3px solid rgb(29 95 167 / 22%);
+  outline-offset: 1px;
+  border-color: var(--portal-color-primary);
+}
+.main:has(form[action*="request_reset"]) .form-actions,
+.main:has(form[action*="perform_reset"]) .form-actions,
+.main:has(#field-confirm-password) .form-actions,
+.main:has(#field-password):not(:has(#field-login)) .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.4rem;
+  border-top: 1px solid var(--portal-color-border);
+  padding-top: 1.1rem;
+}
+.main:has(form[action*="request_reset"]) .form-actions .btn-primary,
+.main:has(form[action*="perform_reset"]) .form-actions .btn-primary,
+.main:has(#field-confirm-password) .form-actions .btn-primary,
+.main:has(#field-password):not(:has(#field-login)) .form-actions .btn-primary {
+  min-height: var(--portal-touch-target);
+  border-radius: var(--portal-radius-control);
+  padding-inline: 1.2rem;
+  font-weight: 700;
+}
+@media (max-width: 520px) {
+  .main:has(form[action*="request_reset"]),
+  .main:has(form[action*="perform_reset"]),
+  .main:has(#field-confirm-password),
+  .main:has(#field-password):not(:has(#field-login)) {
+    min-height: calc(100svh - 56px);
+    padding: 1rem 0.75rem 2rem;
+  }
+  .main:has(form[action*="request_reset"]) .module-content,
+  .main:has(form[action*="perform_reset"]) .module-content,
+  .main:has(#field-confirm-password) .module-content,
+  .main:has(#field-password):not(:has(#field-login)) .module-content {
+    padding: 1.15rem 1rem 1.25rem;
+  }
+}
