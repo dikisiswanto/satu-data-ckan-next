@@ -545,6 +545,15 @@ class PortalThemePlugin(plugins.SingletonPlugin):
                 or any(normalized.startswith(prefix) for prefix in self._STATIC_PREFIXES)
             )
 
+        def is_password_reset_route(path):
+            """Allow CKAN's public reset form and signed-token pages on admin host."""
+            normalized = (path or "/").rstrip("/").lower()
+            return (
+                normalized in {"/user/reset", "/user/request_reset"}
+                or normalized.startswith("/user/reset/")
+                or normalized.startswith("/user/perform_reset/")
+            )
+
         @app.before_request
         def require_admin_login():
             if not is_admin_request():
@@ -588,6 +597,10 @@ class PortalThemePlugin(plugins.SingletonPlugin):
             if path in self._LOGIN_PATHS:
                 if request.method in {"GET", "HEAD"} and stale_logout_target:
                     return redirect(url_for("user.login"))
+                return None
+            if is_password_reset_route(path):
+                # The reset request and signed reset-link views must render
+                # anonymously; otherwise they bounce back to login forever.
                 return None
 
             if path.startswith("/api/"):

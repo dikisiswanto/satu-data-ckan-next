@@ -207,7 +207,11 @@ const editorialProxy = await readFile(
 assert.match(editorialProxy, /file\/download/);
 assert.match(
   editorialProxy,
-  /owner\.owner_id \|\| owner\.id \|\| file\?\.owner_id/,
+  /ownerRecords = \[file\?\.owner_info, file\?\.owner\]/,
+);
+assert.match(
+  editorialProxy,
+  /ownerRecords[\s\S]*?owner\.owner_id \|\| owner\.id[\s\S]*?file\?\.owner_id/,
 );
 assert.doesNotMatch(
   editorialProxy,

@@ -63,7 +63,11 @@ assert.match(
 assert.match(files.mediaRoute, /ownerType !== MEDIA_OWNER_TYPE/);
 assert.match(
   files.mediaRoute,
-  /owner\.owner_id \|\| owner\.id \|\| file\?\.owner_id/,
+  /ownerRecords = \[file\?\.owner_info, file\?\.owner\]/,
+);
+assert.match(
+  files.mediaRoute,
+  /ownerRecords[\s\S]*?owner\.owner_id \|\| owner\.id[\s\S]*?file\?\.owner_id/,
 );
 assert.match(files.mediaRoute, /validSignature/);
 assert.match(files.mediaRoute, /redirect:\s*"manual"/);

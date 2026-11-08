@@ -82,11 +82,18 @@ async function handle(request, context) {
     );
   }
 
-  const owner = file?.owner_info || {};
-  const ownerType = owner.owner_type || file?.owner_type;
-  // CKAN 2.12 file_show serializes owner_info.id, while ORM records may
-  // expose owner.owner_id. Accept both official representations.
-  const ownerId = owner.owner_id || owner.id || file?.owner_id;
+  // CKAN may expose ownership as API `owner_info` or as a nested `owner`
+  // record. Read both shapes while still requiring an exact configured owner
+  // match before making any file public.
+  const ownerRecords = [file?.owner_info, file?.owner].filter(
+    (value) => value && typeof value === "object",
+  );
+  const ownerType =
+    ownerRecords.map((owner) => owner.owner_type || owner.type).find(Boolean) ||
+    file?.owner_type;
+  const ownerId =
+    ownerRecords.map((owner) => owner.owner_id || owner.id).find(Boolean) ||
+    file?.owner_id;
   if (
     file?.id !== fileId ||
     ownerType !== MEDIA_OWNER_TYPE ||

@@ -338,6 +338,17 @@ def main() -> None:
     run_case("internal Next.js-to-CKAN API is not gated", None, host="ckan:5000", path="/api/3/action/package_search")
     run_case("public hostname is not gated", None, host="data.example.test", path="/dataset/public-data")
     run_case("anonymous visitor may open login", None, path="/user/login")
+    run_case("anonymous visitor may request password reset", None, path="/user/reset")
+    run_case(
+        "anonymous visitor may open a signed password reset link",
+        None,
+        path="/user/reset/portal-admin",
+    )
+    run_case(
+        "legacy password reset request route remains public",
+        None,
+        path="/user/request_reset",
+    )
     run_case(
         "stale logout came_from is stripped before rendering login",
         ("REDIRECT", "/user/login"),

@@ -2946,7 +2946,7 @@ msgstr[0] "{num} anggota"
 msgid "0 Members"
 msgstr "0 anggota"
 
-msgid "The <i>data license</i> you select above only applies to the contents of any resource files that you add to this dataset. By submitting this form, you agree to release the <i>metadata</i> values that you enter into the form under the <a href=\"http://opendatacommons.org/licenses/odbl/1-0/\">Open Database License</a>.
+msgid "The <i>data license</i> you select above only applies to the contents of any resource files that you add to this dataset. By submitting this form, you agree to release the <i>metadata</i> values that you enter into the form under the <a href=\"http://opendatacommons.org/licenses/odbl/1-0/\">Open Database License</a>."
 msgstr "<i>Lisensi data</i> yang Anda pilih di atas hanya berlaku untuk isi berkas sumber daya yang ditambahkan ke dataset ini. Dengan mengirim formulir ini, Anda menyetujui bahwa nilai <i>metadata</i> yang dimasukkan ke dalam formulir dirilis berdasarkan <a href=\"http://opendatacommons.org/licenses/odbl/1-0/\">Lisensi Open Database</a>."
 
 msgid "No resources available."
