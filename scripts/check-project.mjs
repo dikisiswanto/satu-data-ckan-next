@@ -682,7 +682,7 @@ const cmsChecks = [
   ],
   [
     "src/app/api/cms/media/[filename]/route.js",
-    /recordReferencesImage[\s\S]*MAX_IMAGE_BYTES[\s\S]*matchesImageSignature[\s\S]*no-store/,
+    /recordReferencesImage[\s\S]*MAX_IMAGE_BYTES[\s\S]*detectImageMime[\s\S]*no-store/,
     "Proxy media CMS harus memeriksa referensi konten publik, ukuran, signature gambar, dan no-store.",
   ],
   [

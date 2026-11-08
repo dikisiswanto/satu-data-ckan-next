@@ -22,9 +22,15 @@ export function IndicatorTrendChart({
   const top = 20;
   const bottom = 42;
   const values = points.map((item) => item.numericValue);
-  const minValue = hasTrend ? Math.min(...values) : 0;
-  const maxValue = hasTrend ? Math.max(...values) : 0;
-  const spread = maxValue - minValue || Math.max(Math.abs(maxValue) * 0.1, 1);
+  const dataMin = hasTrend ? Math.min(...values) : 0;
+  const dataMax = hasTrend ? Math.max(...values) : 0;
+  const dataSpread = dataMax - dataMin;
+  const padding = hasTrend
+    ? (dataSpread || Math.max(Math.abs(dataMax) * 0.02, 1)) * 0.1
+    : 0;
+  const minValue = hasTrend ? dataMin - padding : 0;
+  const maxValue = hasTrend ? dataMax + padding : 0;
+  const spread = maxValue - minValue || 1;
   const x = (index) =>
     left + (index * (width - left - right)) / (points.length - 1);
   const y = (value) =>

@@ -21,12 +21,12 @@ function SummarySkeleton() {
       {items.map(([label, width]) => (
         <div
           key={label}
-          className="indicator-metadata-card rounded-xl border border-line bg-white p-4"
+          className="indicator-metadata-card rounded-xl border border-line bg-white p-4 xl:p-3"
         >
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">
             {label}
           </p>
-          <div className="indicator-metadata-value mt-2 space-y-2">
+          <div className="indicator-metadata-value mt-2 space-y-2 xl:mt-1">
             <Skeleton className={`h-4 ${width} max-w-full`} />
             <Skeleton className="h-4 w-3/4 max-w-full" />
           </div>

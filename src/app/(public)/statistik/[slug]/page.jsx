@@ -112,12 +112,12 @@ export default async function IndicatorDetailPage({ params }) {
         ].map(([label, value]) => (
           <div
             key={label}
-            className="indicator-metadata-card rounded-xl border border-line bg-white p-4"
+            className="indicator-metadata-card rounded-xl border border-line bg-white p-4 xl:p-3"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">
               {label}
             </p>
-            <p className="indicator-metadata-value mt-2 text-sm font-semibold leading-6">
+            <p className="indicator-metadata-value mt-2 text-sm font-semibold leading-6 xl:mt-1 xl:leading-5">
               {value || "Belum dicantumkan"}
             </p>
           </div>

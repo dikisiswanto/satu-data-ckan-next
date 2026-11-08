@@ -43,7 +43,7 @@ function isNumericValue(value) {
   );
 }
 
-function buildChartData(rows, columns, metricName, labelName) {
+function buildChartData(rows, columns, metricName, labelName, chartType) {
   const metric = columns.find((column) => column.name === metricName);
   if (!metric) return null;
   const sampledRows = rows.slice(0, MAX_CHART_POINTS);
@@ -61,8 +61,23 @@ function buildChartData(rows, columns, metricName, labelName) {
     }))
     .filter((item) => item.value !== null);
   if (!data.length) return null;
-  const min = Math.min(0, ...data.map((item) => item.value));
-  const max = Math.max(0, ...data.map((item) => item.value));
+  const dataMin = Math.min(...data.map((item) => item.value));
+  const dataMax = Math.max(...data.map((item) => item.value));
+  const padding =
+    (dataMax - dataMin || Math.max(Math.abs(dataMax), Math.abs(dataMin), 1)) *
+    0.1;
+  const min =
+    chartType === "bar"
+      ? dataMin < 0
+        ? dataMin - padding
+        : 0
+      : dataMin - padding;
+  const max =
+    chartType === "bar"
+      ? dataMax > 0
+        ? dataMax + padding
+        : 0
+      : dataMax + padding;
   const span = max - min || 1;
   const width = 900;
   const height = 330;
@@ -143,8 +158,9 @@ function ResourceChart({ rows, columns, resourceId }) {
     ? labelName
     : suggestedLabel?.name || columns[0]?.name;
   const chart = useMemo(
-    () => buildChartData(rows, columns, metric?.name, activeLabelName),
-    [rows, columns, metric?.name, activeLabelName],
+    () =>
+      buildChartData(rows, columns, metric?.name, activeLabelName, chartType),
+    [rows, columns, metric?.name, activeLabelName, chartType],
   );
   const clipId = `chart-clip-${String(resourceId).replace(/[^a-z0-9_-]/gi, "")}`;
 

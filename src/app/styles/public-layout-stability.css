@@ -336,6 +336,17 @@
   -webkit-line-clamp: 3;
 }
 
+@media (min-width: 1280px) {
+  .indicator-metadata-card {
+    min-block-size: 5.5rem;
+  }
+
+  .indicator-metadata-value {
+    min-block-size: 2.5rem;
+    -webkit-line-clamp: 2;
+  }
+}
+
 .public-indicator-chart-frame {
   min-block-size: 178px;
   aspect-ratio: 760 / 260;
