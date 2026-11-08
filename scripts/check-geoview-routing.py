@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Guard the split public/CKAN-host routing required by CKAN GeoView."""
+from __future__ import annotations
+
 from pathlib import Path
 import re
 
@@ -36,6 +38,7 @@ for relative in CADDYFILES:
         "i18n reverse proxy": "handle @ckanI18n {\n    header {",
         "deferred exact allowed origin": '>Access-Control-Allow-Origin "https://{$CKAN_HOST}"',
         "resource proxy route": "@ckanResourceProxy path /api/3/action/resource_proxy /api/action/resource_proxy",
+        "Leaflet static files": "/js/vendor/leaflet/*",
         "resource proxy exposed headers": '>Access-Control-Expose-Headers "Content-Length, Content-Range, Accept-Ranges, Content-Type"',
         "CKAN upstream": "reverse_proxy https://nginx:443",
     }
@@ -68,4 +71,4 @@ for relative in CADDYFILES:
 if errors:
     raise SystemExit("\n".join(errors))
 
-print("CKAN GeoView routing passed: /api/i18n and resource_proxy are forwarded to CKAN with narrowly scoped CORS for CKAN_HOST.")
+print("CKAN GeoView routing passed: /api/i18n, resource_proxy and Leaflet marker files reach CKAN; CORS stays limited to CKAN_HOST.")

@@ -56,6 +56,11 @@ logo_path = first_value(values.get("PORTAL_LOGO_PATH"), values.get("NEXT_PUBLIC_
 logo_alt = first_value(values.get("PORTAL_LOGO_ALT"), values.get("NEXT_PUBLIC_LOGO_ALT")) or f"Logo {brand_name}"
 hero_image = first_value(values.get("PORTAL_HERO_IMAGE"), values.get("NEXT_PUBLIC_HERO_IMAGE")) or "/portal-social.svg"
 hero_map_image = first_value(values.get("PORTAL_HERO_MAP_IMAGE"), values.get("NEXT_PUBLIC_HERO_MAP_IMAGE"))
+welcome_message = first_value(values.get("PORTAL_WELCOME_MESSAGE"), values.get("NEXT_PUBLIC_WELCOME_MESSAGE"))
+regent_name = first_value(values.get("PORTAL_REGENT_NAME"), values.get("NEXT_PUBLIC_REGENT_NAME"))
+regent_photo = first_value(values.get("PORTAL_REGENT_PHOTO"), values.get("NEXT_PUBLIC_REGENT_PHOTO"))
+deputy_regent_name = first_value(values.get("PORTAL_DEPUTY_REGENT_NAME"), values.get("NEXT_PUBLIC_DEPUTY_REGENT_NAME"))
+deputy_regent_photo = first_value(values.get("PORTAL_DEPUTY_REGENT_PHOTO"), values.get("NEXT_PUBLIC_DEPUTY_REGENT_PHOTO"))
 brand_profile = first_value(values.get("PORTAL_BRAND_PROFILE"), values.get("NEXT_PUBLIC_BRAND_PROFILE")) or "generic"
 identity = {
     "PORTAL_INSTITUTION_NAME": region_name,
@@ -152,6 +157,11 @@ derived = {
     "NEXT_PUBLIC_LOGO_ALT": logo_alt,
     "NEXT_PUBLIC_HERO_IMAGE": hero_image,
     "NEXT_PUBLIC_HERO_MAP_IMAGE": hero_map_image,
+    "NEXT_PUBLIC_WELCOME_MESSAGE": welcome_message,
+    "NEXT_PUBLIC_REGENT_NAME": regent_name,
+    "NEXT_PUBLIC_REGENT_PHOTO": regent_photo,
+    "NEXT_PUBLIC_DEPUTY_REGENT_NAME": deputy_regent_name,
+    "NEXT_PUBLIC_DEPUTY_REGENT_PHOTO": deputy_regent_photo,
     "NEXT_PUBLIC_ICON_PATH": icon_path,
     "NEXT_PUBLIC_PWA_ICON_192": pwa_icon_192,
     "NEXT_PUBLIC_PWA_ICON_512": pwa_icon_512,

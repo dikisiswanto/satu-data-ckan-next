@@ -128,9 +128,10 @@ for (const file of caddyFiles) {
     /header_down -X-Frame-Options[\s\S]*frame-ancestors \'self\' https:\/\/\{\$CKAN_HOST\} https:\/\/\{\$PUBLIC_HOST\}/,
     `${file}: ResourceView must allow only the first-party CKAN and portal parent frames`,
   );
-  assert.match(
-    source,
-    /@ckanViewerAssets path \/webassets\/\* \/base\/\*/,
+  assert.ok(
+    source.includes(
+      "@ckanViewerAssets path /webassets/* /base/* /static/* /fanstatic/* /js/vendor/leaflet/*",
+    ),
     `${file}: CKAN viewer assets must be served by CKAN`,
   );
   assert.match(

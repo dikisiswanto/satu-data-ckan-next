@@ -122,13 +122,7 @@ requirePattern(
 );
 
 const readme = read("README.md");
-for (const guide of [
-  "API.md",
-  "ADMIN-CKAN-DAN-CMS.md",
-  "DATASTORE-DAN-AKSES.md",
-  "DESAIN-DAN-KUALITAS-FRONTEND.md",
-  "OPERASIONAL-DEPLOYMENT.md",
-]) {
+for (const guide of ["PANDUAN-PORTAL.md", "LOKALISASI-CKAN.md"]) {
   requirePattern(
     readme,
     new RegExp(`docs/${guide.replaceAll(".", "\\.")}`),
@@ -138,9 +132,9 @@ for (const guide of [
 requirePattern(
   readme,
   /Dokumentasi proyek dipusatkan di `docs\/`/,
-  "README harus menjelaskan bahwa docs/ adalah lokasi dokumentasi kanonis dan dibatasi lima panduan",
+  "README harus menjelaskan bahwa docs/ adalah lokasi dokumentasi kanonis",
 );
-const qualityGuide = read("docs/DESAIN-DAN-KUALITAS-FRONTEND.md");
+const qualityGuide = read("docs/PANDUAN-PORTAL.md");
 requirePattern(
   qualityGuide,
   /Core Web Vitals/,

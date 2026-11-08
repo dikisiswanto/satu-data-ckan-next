@@ -11,13 +11,16 @@ ROOT = Path(__file__).resolve().parents[1]
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 SKIP_DIRS = {".git", "node_modules", ".next", "out", "dist", "build", "coverage"}
 CANONICAL_DOCS = {
-    "ADMIN-CKAN-DAN-CMS.md",
-    "API.md",
-    "DATASTORE-DAN-AKSES.md",
-    "DESAIN-DAN-KUALITAS-FRONTEND.md",
-    "OPERASIONAL-DEPLOYMENT.md",
+    "LOKALISASI-CKAN.md",
+    "PANDUAN-PORTAL.md",
 }
 RETIRED_DOCS = {
+    "docs/ADMIN-CKAN-DAN-CMS.md",
+    "docs/API.md",
+    "docs/DATASTORE-DAN-AKSES.md",
+    "docs/DESAIN-DAN-KUALITAS-FRONTEND.md",
+    "docs/OPERASIONAL-DEPLOYMENT.md",
+    "docs/SAMBUTAN-BERANDA.md",
     "docs/ADMIN-CKAN.md",
     "docs/AKSES-UNDUHAN-DATASET-PRIVAT.md",
     "docs/CONFIGURASI-INSTANSI.md",

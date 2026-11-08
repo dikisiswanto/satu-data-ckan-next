@@ -88,14 +88,14 @@ def main() -> None:
             assert compiled.is_file() and compiled.stat().st_size > 0
             extension_output = locale_root / "portal-theme-i18n"
             compiled_domains = compiler.compile_extension_catalogs(catalog_path, extension_output)
-            assert {path.name for path in compiled_domains} == {"ckanext-dcat.mo", "ckanext-harvest.mo", "ckanext-pages.mo"}
+            assert {"ckanext-dcat.mo", "ckanext-harvest.mo", "ckanext-pages.mo"}.issubset({path.name for path in compiled_domains})
             import gettext
             for domain, msgid, msgstr in (
                 ("ckanext-harvest", "Harvest Sources", "Sumber pengambilan data"),
                 ("ckanext-pages", "Add Page", "Tambah halaman"),
                 ("ckanext-dcat", "Publisher name", "Nama penerbit"),
             ):
-                with (extension_output / "id/LC_MESSAGES" / f"{domain}.mo").open("rb") as mo_file:
+                with (extension_output / domain / "id/LC_MESSAGES" / f"{domain}.mo").open("rb") as mo_file:
                     domain_translations = gettext.GNUTranslations(mo_file)
                 assert domain_translations.gettext(msgid) == msgstr
             import gettext
@@ -151,6 +151,9 @@ def main() -> None:
         assert "portal_harvest_i18n = ckanext.portal_theme.plugin:PortalHarvestTranslationPlugin" in (ckan / "theme/setup.py").read_text()
         assert "portal_pages_i18n = ckanext.portal_theme.plugin:PortalPagesTranslationPlugin" in (ckan / "theme/setup.py").read_text()
         assert "portal_dcat_i18n = ckanext.portal_theme.plugin:PortalDcatTranslationPlugin" in (ckan / "theme/setup.py").read_text()
+        assert "portal_xloader_i18n = ckanext.portal_theme.plugin:PortalXloaderTranslationPlugin" in (ckan / "theme/setup.py").read_text()
+        assert "portal_geoview_i18n = ckanext.portal_theme.plugin:PortalGeoviewTranslationPlugin" in (ckan / "theme/setup.py").read_text()
+        assert "portal_scheming_i18n = ckanext.portal_theme.plugin:PortalSchemingTranslationPlugin" in (ckan / "theme/setup.py").read_text()
         assert (ckan / "theme/ckanext/portal_theme/templates/base.html").is_file()
         assert (ckan / "theme/ckanext/portal_theme/templates/header.html").is_file()
         assert (ckan / "theme/ckanext/portal_theme/assets/css/portal-theme.css").is_file()

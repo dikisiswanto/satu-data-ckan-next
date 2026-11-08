@@ -1421,6 +1421,14 @@ function HomeLatestDatasetsSkeleton() {
 }
 
 export default function HomePage() {
+  const hasLeadershipProfile = Boolean(
+    siteConfig.welcomeMessage ||
+    siteConfig.regentName ||
+    siteConfig.regentPhoto ||
+    siteConfig.deputyRegentName ||
+    siteConfig.deputyRegentPhoto,
+  );
+
   return (
     <main className="public-home">
       <Suspense
@@ -1435,6 +1443,63 @@ export default function HomePage() {
       >
         <HomeHero />
       </Suspense>
+      {hasLeadershipProfile ? (
+        <section className="home-welcome" aria-labelledby="home-welcome-title">
+          <div className="page-container home-welcome-inner">
+            <div className="home-welcome-copy">
+              <p className="eyebrow">Sambutan pimpinan daerah</p>
+              <h2 id="home-welcome-title">
+                Sambutan pimpinan {siteConfig.regionName}
+              </h2>
+              {siteConfig.welcomeMessage ? (
+                <p>{siteConfig.welcomeMessage}</p>
+              ) : (
+                <p>
+                  Data yang terbuka membantu kita memahami keadaan daerah dan
+                  menyusun kebijakan dengan lebih baik.
+                </p>
+              )}
+            </div>
+            <div className="home-leaders" aria-label="Pimpinan daerah">
+              {[
+                {
+                  name: siteConfig.regentName,
+                  photo: siteConfig.regentPhoto,
+                  role: "Bupati",
+                },
+                {
+                  name: siteConfig.deputyRegentName,
+                  photo: siteConfig.deputyRegentPhoto,
+                  role: "Wakil Bupati",
+                },
+              ]
+                .filter((leader) => leader.photo)
+                .map((leader) => (
+                  <article className="home-leader" key={leader.role}>
+                    <Image
+                      src={leader.photo}
+                      alt={
+                        leader.name
+                          ? `${leader.name}, ${leader.role}`
+                          : leader.role
+                      }
+                      width={96}
+                      height={112}
+                      unoptimized={
+                        !leader.photo.startsWith("/") ||
+                        leader.photo.startsWith("//")
+                      }
+                    />
+                    <div>
+                      <p>{leader.role}</p>
+                      {leader.name ? <h3>{leader.name}</h3> : null}
+                    </div>
+                  </article>
+                ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
       <div className="page-container home-content">
         <Suspense fallback={<HomeLatestDatasetsSkeleton />}>
           <HomeLatestDatasetsSection />

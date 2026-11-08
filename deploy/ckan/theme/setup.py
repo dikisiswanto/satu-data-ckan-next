@@ -28,6 +28,9 @@ setup(
             "portal_harvest_i18n = ckanext.portal_theme.plugin:PortalHarvestTranslationPlugin",
             "portal_pages_i18n = ckanext.portal_theme.plugin:PortalPagesTranslationPlugin",
             "portal_dcat_i18n = ckanext.portal_theme.plugin:PortalDcatTranslationPlugin",
+            "portal_xloader_i18n = ckanext.portal_theme.plugin:PortalXloaderTranslationPlugin",
+            "portal_geoview_i18n = ckanext.portal_theme.plugin:PortalGeoviewTranslationPlugin",
+            "portal_scheming_i18n = ckanext.portal_theme.plugin:PortalSchemingTranslationPlugin",
         ],
     },
 )

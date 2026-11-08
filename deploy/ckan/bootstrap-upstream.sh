@@ -281,10 +281,10 @@ legacy_extension_prefixes = {
 legacy_institution_plugin_ids = {
     f"{prefix}_{suffix}"
     for prefix in legacy_extension_prefixes
-    for suffix in ("pages", "theme", "harvest_i18n", "pages_i18n", "dcat_i18n")
+    for suffix in ("pages", "theme", "harvest_i18n", "pages_i18n", "dcat_i18n", "xloader_i18n", "geoview_i18n", "scheming_i18n")
 }
 portal_plugins = {
-    "envvars", "portal_pages", "portal_theme", "portal_harvest_i18n", "portal_pages_i18n", "portal_dcat_i18n", "scheming_datasets", "scheming_organizations", "scheming_groups", "pages", "dcat",
+    "envvars", "portal_pages", "portal_theme", "portal_harvest_i18n", "portal_pages_i18n", "portal_dcat_i18n", "portal_xloader_i18n", "portal_geoview_i18n", "portal_scheming_i18n", "scheming_datasets", "scheming_organizations", "scheming_groups", "pages", "dcat",
     "dcat_rdf_harvester", "structured_data", "resource_proxy", "geo_view",
     "geojson_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
     "datatables_view", "image_view", "text_view", "datastore", "xloader", "activity",
@@ -297,7 +297,7 @@ for plugin in (
     "portal_pages", "portal_theme", "pages", "dcat", "dcat_rdf_harvester",
     "structured_data", "resource_proxy", "datatables_view", "image_view", "text_view",
     "geojson_view", "geo_view", "wmts_view", "shp_view", "harvest", "ckan_harvester",
-    "datastore", "xloader", "activity", "portal_harvest_i18n", "portal_pages_i18n", "portal_dcat_i18n",
+    "datastore", "xloader", "activity", "portal_harvest_i18n", "portal_pages_i18n", "portal_dcat_i18n", "portal_xloader_i18n", "portal_geoview_i18n", "portal_scheming_i18n",
 ):
     if plugin not in plugins:
         plugins.append(plugin)

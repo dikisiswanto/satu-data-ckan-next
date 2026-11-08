@@ -29,9 +29,10 @@
   }
 
   # CKAN's viewer HTML references WebAssets and CKAN static resources from
-  # root-relative URLs. Keep these asset prefixes on CKAN; Next.js owns all
+  # root-relative URLs. GeoView's Leaflet marker images are served under
+  # /js/vendor/leaflet/. Keep these asset prefixes on CKAN; Next.js owns the
   # other public paths.
-  @ckanViewerAssets path /webassets/* /base/* /static/* /fanstatic/*
+  @ckanViewerAssets path /webassets/* /base/* /static/* /fanstatic/* /js/vendor/leaflet/*
   handle @ckanViewerAssets {
     reverse_proxy https://nginx:443 {
       header_up Host {http.request.host}

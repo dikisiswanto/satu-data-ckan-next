@@ -23,16 +23,7 @@ function forbidText(source, text, message) {
   if (source.toLowerCase().includes(text.toLowerCase())) errors.push(message);
 }
 
-const docs = [
-  "README.md",
-  ...[
-    "ADMIN-CKAN-DAN-CMS.md",
-    "API.md",
-    "DATASTORE-DAN-AKSES.md",
-    "DESAIN-DAN-KUALITAS-FRONTEND.md",
-    "OPERASIONAL-DEPLOYMENT.md",
-  ].map((name) => `docs/${name}`),
-];
+const docs = ["README.md", "docs/PANDUAN-PORTAL.md", "docs/LOKALISASI-CKAN.md"];
 const docText = docs.map(read).join("\n");
 
 for (const malformed of [
@@ -57,7 +48,7 @@ for (const malformed of [
   );
 }
 
-const apiDocs = read("docs/API.md");
+const apiDocs = read("docs/PANDUAN-PORTAL.md");
 requireText(
   apiDocs,
   "Untuk pengembang dan integrator",
@@ -79,7 +70,7 @@ requireText(
   "Dokumentasi API harus menyertakan action riwayat aktivitas yang didukung.",
 );
 
-const adminDocs = read("docs/ADMIN-CKAN-DAN-CMS.md");
+const adminDocs = read("docs/PANDUAN-PORTAL.md");
 requireText(
   adminDocs,
   "resource_fields",
@@ -91,7 +82,7 @@ requireText(
   "Panduan admin harus menunjuk pemeriksaan formulir yang benar.",
 );
 
-const datastoreDocs = read("docs/DATASTORE-DAN-AKSES.md");
+const datastoreDocs = read("docs/PANDUAN-PORTAL.md");
 requireText(
   datastoreDocs,
   "`package_activity_list`",
@@ -108,7 +99,7 @@ requireText(
   "Panduan DataStore harus mempertahankan MIME type XLSX yang benar.",
 );
 
-const operationsDocs = read("docs/OPERASIONAL-DEPLOYMENT.md");
+const operationsDocs = read("docs/PANDUAN-PORTAL.md");
 requireText(
   operationsDocs,
   "Access-Control-Request-Method: GET",
@@ -120,14 +111,14 @@ requireText(
   "Contoh preflight CORS harus mempertahankan nama header standar.",
 );
 
-const instanceDocs = read("docs/ADMIN-CKAN-DAN-CMS.md");
+const instanceDocs = read("docs/PANDUAN-PORTAL.md");
 requireText(
   instanceDocs,
   "PORTAL_HERO_MAP_IMAGE",
   "Panduan konfigurasi instansi harus mencakup aset peta hero.",
 );
 
-const designDocs = read("docs/DESAIN-DAN-KUALITAS-FRONTEND.md");
+const designDocs = read("docs/PANDUAN-PORTAL.md");
 requireText(
   designDocs,
   "empat kartu statistik",

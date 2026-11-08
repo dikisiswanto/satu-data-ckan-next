@@ -173,6 +173,61 @@ def main() -> None:
 
     expected_translations = {
         "ckan": {
+            "API Docs": "Dokumentasi API",
+            "You can also access this registry using the %(api_link)s (see %(api_doc_link)s).": "Portal ini juga dapat diakses melalui %(api_link)s (lihat %(api_doc_link)s).",
+            "Add data to the dataset": "Tambahkan data ke dataset",
+            "Add data": "Tambah data",
+            "Next: Add Data": "Lanjut: Tambahkan Data",
+            "Data and Resources": "Data dan Sumber Daya",
+            "Add New Resource": "Tambah Sumber Daya Baru",
+            "Add new resource": "Tambah sumber daya baru",
+            "There is no description for this dataset": "Dataset ini belum memiliki deskripsi.",
+            "There is no description for this organization": "Organisasi ini belum memiliki deskripsi.",
+            "All Users": "Semua Pengguna",
+            "Current Sysadmins": "Administrator Sistem Saat Ini",
+            "Promote user to Sysadmin": "Jadikan pengguna administrator sistem",
+            "Promoted {} to sysadmin": "Berhasil menjadikan {} administrator sistem.",
+            "promote": "jadikan administrator sistem",
+            "New User": "Pengguna Baru",
+            "If you wish to invite a new user, enter their email address.": "Untuk mengundang pengguna baru, masukkan alamat emailnya.",
+            "What are roles?": "Apa arti peran?",
+            "Add to group": "Tambahkan ke grup",
+            "Reorder resources": "Atur ulang urutan sumber daya",
+            "Unpublish": "Batalkan publikasi",
+            "View dataset": "Lihat dataset",
+            "Clear Upload": "Hapus unggahan",
+            "Follow": "Ikuti",
+            "follow": "ikuti",
+            "Unfollow": "Berhenti mengikuti",
+            "Add Organization": "Tambah Organisasi",
+            "Add organization": "Tambah organisasi",
+            "Profile picture URL": "URL foto profil",
+            "Confirm Password": "Konfirmasi kata sandi",
+            "Old Password": "Kata sandi lama",
+            "Change details": "Ubah detail",
+            "Create a Group": "Buat grup",
+            "Save Group": "Simpan grup",
+            ("{num} Member", "{num} Members"): "{num} anggota",
+            "0 Members": "0 anggota",
+            "The <i>data license</i> you select above only applies to the contents of any resource files that you add to this dataset. By submitting this form, you agree to release the <i>metadata</i> values that you enter into the form under the <a href=\"http://opendatacommons.org/licenses/odbl/1-0/\">Open Database License</a>.": "<i>Lisensi data</i> yang Anda pilih di atas hanya berlaku untuk isi berkas sumber daya yang ditambahkan ke dataset ini. Dengan mengirim formulir ini, Anda menyetujui bahwa nilai <i>metadata</i> yang dimasukkan ke dalam formulir dirilis berdasarkan <a href=\"http://opendatacommons.org/licenses/odbl/1-0/\">Lisensi Open Database</a>.",
+            "No resources available.": "Tidak ada sumber daya yang tersedia.",
+            "Step {step}": "Langkah {step}",
+            "Type": "Jenis",
+            "type": "jenis",
+            "frequency": "frekuensi",
+            "add data": "tambah data",
+            "Add Data": "Tambah Data",
+            "Forgotten your password?": "Lupa kata sandi?",
+            "News feed": "Kabar terbaru",
+            "{actor} updated the {dataset_type} {dataset}": "{actor} memperbarui {dataset_type} {dataset}",
+            "View this version": "Lihat versi ini",
+            ("{number} group found for \"{query}\"", "{number} groups found for \"{query}\""): "{number} grup ditemukan untuk \"{query}\"",
+            ("{number} group found", "{number} groups found"): "{number} grup ditemukan",
+            ("{count} member", "{count} members"): "{count} anggota",
+            "{number} dataset found": "{number} dataset ditemukan",
+            "{number} organization found": "{number} organisasi ditemukan",
+            ("{number} dataset found for \"{query}\"", "{number} datasets found for \"{query}\""): "{number} dataset ditemukan untuk \"{query}\"",
+            ("{number} organization found for \"{query}\"", "{number} organizations found for \"{query}\""): "{number} organisasi ditemukan untuk \"{query}\"",
             "Landing page": "Halaman utama",
             "Site Title": "Nama portal",
             "Administer CKAN": "Administrasi CKAN",
@@ -229,6 +284,7 @@ def main() -> None:
             "Welcome back": "Selamat datang kembali",
         },
         "ckanext-pages": {
+            " <p>Add blog articles to CKAN here.</p> ": " <p>Kelola berita dan artikel portal melalui halaman ini.</p> ",
             "Blog": "Berita dan artikel",
             "Add Blog Article": "Tambah artikel berita",
             "Edit Blog Article": "Ubah artikel berita",
@@ -277,7 +333,7 @@ def main() -> None:
             "Harvest will start shortly. Refresh this page for updates.",
             "Cannot create new harvest jobs on inactive sources. First, please change the source status to 'active'.",
             "A harvest job has already been scheduled for this source", "Harvest source cleared", "No content found",
-            "Harvest job not found", "No jobs yet for this source", "User {0} not authorized to create harvest sources",
+            "Harvest job not found", "No harvests found", "No jobs yet for this source", "User {0} not authorized to create harvest sources",
             "User not authorized to create a job for source {0}", "Only sysadmins can create harvest jobs for all sources",
             "Only the sysadmins can create harvest objects", "User {0} not authorized to delete harvest source {1}",
             "User {0} not authorized to read harvest source {1}", "User {0} not authorized to see jobs from source {1}",
@@ -448,7 +504,8 @@ def main() -> None:
                 ERRORS.append(f"Compiled core gettext label {source!r} must be {expected!r}.")
         extension_output = locale_root / "portal-theme-i18n"
         compiled_extensions = module.compile_extension_catalogs(PO, extension_output)
-        if len(compiled_extensions) != len(EXTENSION_POS):
+        compiled_extension_names = {path.stem for path in compiled_extensions}
+        if not set(EXTENSION_POS).issubset(compiled_extension_names):
             ERRORS.append("Compiler must produce every maintained Indonesian extension gettext domain.")
         # Extension domains must merge, not replace, the upstream extension .mo.
         upstream_extension_path = locale_root / "upstream-pages/id/LC_MESSAGES/ckanext-pages.mo"
@@ -502,12 +559,13 @@ def main() -> None:
 
         for domain, expected_msgid, expected_msgstr in (
             ("ckanext-harvest", "Harvest Sources", "Sumber pengambilan data"),
+            ("ckanext-harvest", "No harvests found", "Tidak ada proses pengambilan data yang ditemukan."),
             ("ckanext-harvest", "Frequency filter", "Filter frekuensi"),
             ("ckanext-pages", "Add Page", "Tambah halaman"),
             ("ckanext-dcat", "Publisher name", "Nama penerbit"),
             ("ckanext-dcat", "Frequency filter", "Filter frekuensi"),
         ):
-            path = extension_output / "id/LC_MESSAGES" / f"{domain}.mo"
+            path = extension_output / domain / "id/LC_MESSAGES" / f"{domain}.mo"
             if not path.is_file():
                 ERRORS.append(f"Compiled extension catalog is missing: {domain}.mo")
                 continue

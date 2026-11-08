@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import json
 import logging
+from pathlib import Path
 import time
 import uuid
 from urllib.parse import urlsplit, urlunsplit
@@ -100,7 +101,14 @@ class PortalPagesSchemaPlugin(plugins.SingletonPlugin):
         return schema
 
 
-class PortalHarvestTranslationPlugin(plugins.SingletonPlugin, DefaultTranslation):
+class PortalDomainTranslation(DefaultTranslation):
+    """Keep each managed gettext domain in its own CKAN ITranslation directory."""
+
+    def i18n_directory(self):
+        return str(Path(__file__).resolve().parent / "i18n" / self.i18n_domain())
+
+
+class PortalHarvestTranslationPlugin(plugins.SingletonPlugin, PortalDomainTranslation):
     """Load the maintained Indonesian catalog for ckanext-harvest UI strings."""
 
     plugins.implements(plugins.ITranslation)
@@ -109,7 +117,7 @@ class PortalHarvestTranslationPlugin(plugins.SingletonPlugin, DefaultTranslation
         return "ckanext-harvest"
 
 
-class PortalPagesTranslationPlugin(plugins.SingletonPlugin, DefaultTranslation):
+class PortalPagesTranslationPlugin(plugins.SingletonPlugin, PortalDomainTranslation):
     """Load the maintained Indonesian catalog for ckanext-pages UI strings."""
 
     plugins.implements(plugins.ITranslation)
@@ -118,13 +126,40 @@ class PortalPagesTranslationPlugin(plugins.SingletonPlugin, DefaultTranslation):
         return "ckanext-pages"
 
 
-class PortalDcatTranslationPlugin(plugins.SingletonPlugin, DefaultTranslation):
+class PortalDcatTranslationPlugin(plugins.SingletonPlugin, PortalDomainTranslation):
     """Load Indonesian translations for the DCAT metadata labels."""
 
     plugins.implements(plugins.ITranslation)
 
     def i18n_domain(self):
         return "ckanext-dcat"
+
+
+class PortalXloaderTranslationPlugin(plugins.SingletonPlugin, PortalDomainTranslation):
+    """Load the merged Indonesian catalog for ckanext-xloader UI strings."""
+
+    plugins.implements(plugins.ITranslation)
+
+    def i18n_domain(self):
+        return "ckanext-xloader"
+
+
+class PortalGeoviewTranslationPlugin(plugins.SingletonPlugin, PortalDomainTranslation):
+    """Load the merged Indonesian catalog for ckanext-geoview UI strings."""
+
+    plugins.implements(plugins.ITranslation)
+
+    def i18n_domain(self):
+        return "ckanext-geoview"
+
+
+class PortalSchemingTranslationPlugin(plugins.SingletonPlugin, PortalDomainTranslation):
+    """Load the merged Indonesian catalog for ckanext-scheming UI strings."""
+
+    plugins.implements(plugins.ITranslation)
+
+    def i18n_domain(self):
+        return "ckanext-scheming"
 
 
 @toolkit.blanket.config_declarations

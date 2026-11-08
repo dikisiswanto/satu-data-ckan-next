@@ -211,9 +211,13 @@ export function SiteHeader() {
             <div
               id="site-mobile-navigation"
               hidden={!mobileMenuOpen}
-              className="header-mobile-menu absolute right-0 top-full z-50 mt-2 w-[min(21rem,calc(100vw-1.5rem))] rounded-2xl border border-line bg-surface p-2.5 text-ink shadow-[0_16px_45px_rgb(15_35_50_/_0.18)]"
+              className="header-mobile-menu absolute right-0 top-full z-50 mt-2 w-[min(23rem,calc(100vw-1.5rem))] border border-line bg-surface text-ink"
             >
-              <nav aria-label="Navigasi seluler" className="grid gap-1">
+              <p className="header-mobile-menu-label">Navigasi utama</p>
+              <nav
+                aria-label="Navigasi seluler"
+                className="header-mobile-menu-grid"
+              >
                 {publicNavigation.map((link) => {
                   const active = isActive(link);
                   const Icon = link.icon;
@@ -229,10 +233,10 @@ export function SiteHeader() {
                       title={link.label}
                       onClick={closeMobileMenu}
                       className={cn(
-                        "min-h-11 w-full justify-between rounded-xl px-3 py-2.5 text-sm font-semibold !text-ink hover:!bg-accent hover:!text-primary",
+                        "header-mobile-menu-link min-h-11 w-full justify-start gap-2.5 px-2.5 py-2 text-sm font-medium !text-ink hover:!bg-accent hover:!text-primary",
                         "[&>svg:last-child]:ml-auto focus-visible:ring-offset-1",
                         active &&
-                          "!bg-accent !text-primary !shadow-[inset_3px_0_0_var(--color-primary)]",
+                          "header-mobile-menu-link-active !text-primary",
                       )}
                     >
                       <span>{link.label}</span>
@@ -241,17 +245,18 @@ export function SiteHeader() {
                 })}
               </nav>
 
-              <div className="my-2.5 border-t border-line/70" />
-              <a
-                href={siteConfig.adminUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={closeMobileMenu}
-                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
-              >
-                <LockKeyhole size={16} aria-hidden="true" />
-                <span>Login</span>
-              </a>
+              <div className="header-mobile-menu-footer">
+                <a
+                  href={siteConfig.adminUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={closeMobileMenu}
+                  className="header-mobile-login inline-flex min-h-11 items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
+                >
+                  <LockKeyhole size={16} aria-hidden="true" />
+                  <span>Login</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>

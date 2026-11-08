@@ -96,6 +96,134 @@
   content: none;
 }
 
+/* Mobile navigation stays a compact directory, with room to scroll on short screens. */
+.header-mobile-menu {
+  max-height: calc(100svh - 5rem);
+  overflow-y: auto;
+  border-radius: 0.9rem;
+  padding: 0.7rem;
+  box-shadow: 0 14px 36px rgb(15 35 50 / 18%);
+}
+
+.header-mobile-menu-label {
+  margin: 0.2rem 0.55rem 0.65rem;
+  color: #647887;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.header-mobile-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.2rem;
+}
+
+.header-mobile-menu-link {
+  border-radius: 0.55rem !important;
+  white-space: normal !important;
+  line-height: 1.25;
+}
+
+.header-mobile-menu-link-active {
+  background: #eaf2f6 !important;
+  box-shadow: inset 2px 0 0 #1d5fa7;
+}
+
+.header-mobile-menu-footer {
+  margin-top: 0.65rem;
+  border-top: 1px solid #e1e8ed;
+  padding-top: 0.65rem;
+}
+
+.header-mobile-login {
+  width: 100%;
+  border-radius: 0.55rem;
+  background: #174566;
+}
+
+@media (max-width: 390px) {
+  .header-mobile-menu-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.home-welcome {
+  border-bottom: 1px solid #e1e8ed;
+  background: #f5f7f8;
+}
+
+.home-welcome-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2.5rem;
+  padding-block: clamp(2rem, 4vw, 3.5rem);
+}
+
+.home-welcome-copy h2 {
+  margin-top: 0.35rem;
+  color: #17364f;
+  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.home-welcome-copy > p:last-child {
+  max-width: 46rem;
+  margin-top: 0.65rem;
+  color: #526777;
+  font-size: 0.98rem;
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.home-leaders {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.home-leader {
+  display: grid;
+  width: 8rem;
+  justify-items: center;
+  gap: 0.55rem;
+  text-align: center;
+}
+
+.home-leader img {
+  width: 5rem;
+  height: 5rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgb(15 35 50 / 12%);
+}
+
+.home-leader p {
+  color: #526777;
+  font-size: 0.75rem;
+}
+
+.home-leader h3 {
+  margin-top: 0.15rem;
+  color: #17364f;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+@media (max-width: 767px) {
+  .home-welcome-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+
+  .home-leaders {
+    justify-content: flex-start;
+  }
+}
+
 /* A calm, full-width empty state that still gives visitors a useful next step. */
 .home-empty-datasets {
   @apply flex w-full flex-col items-start gap-5 rounded-xl bg-white p-6 sm:flex-row sm:items-center sm:p-8;

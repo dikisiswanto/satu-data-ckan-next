@@ -10,7 +10,7 @@ const apiPage = readFileSync(
   path.join(root, "src/app/(public)/api-data/page.jsx"),
   "utf8",
 );
-const apiDocs = readFileSync(path.join(root, "docs/API.md"), "utf8");
+const apiDocs = readFileSync(path.join(root, "docs/PANDUAN-PORTAL.md"), "utf8");
 const errors = [];
 
 function extractSet(source, declaration, label) {

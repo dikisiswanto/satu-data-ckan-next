@@ -21,6 +21,10 @@ required = {
     "portal_theme",
     "portal_harvest_i18n",
     "portal_pages_i18n",
+    "portal_dcat_i18n",
+    "portal_xloader_i18n",
+    "portal_geoview_i18n",
+    "portal_scheming_i18n",
     "dcat",
     "dcat_rdf_harvester",
     "structured_data",
@@ -63,6 +67,10 @@ try:
     for class_name, domain in (
         ("PortalHarvestTranslationPlugin", "ckanext-harvest"),
         ("PortalPagesTranslationPlugin", "ckanext-pages"),
+        ("PortalDcatTranslationPlugin", "ckanext-dcat"),
+        ("PortalXloaderTranslationPlugin", "ckanext-xloader"),
+        ("PortalGeoviewTranslationPlugin", "ckanext-geoview"),
+        ("PortalSchemingTranslationPlugin", "ckanext-scheming"),
     ):
         plugin_class = getattr(theme_plugin, class_name)
         translation_plugin = plugin_class()

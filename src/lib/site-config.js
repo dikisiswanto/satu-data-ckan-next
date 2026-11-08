@@ -77,6 +77,11 @@ export const siteConfig = Object.freeze({
   logoAlt: (process.env.NEXT_PUBLIC_LOGO_ALT || "Logo Portal Satu Data").trim(),
   heroImage: configuredHeroImage,
   heroMapImage: configuredHeroMapImage,
+  welcomeMessage: (process.env.NEXT_PUBLIC_WELCOME_MESSAGE || "").trim(),
+  regentName: (process.env.NEXT_PUBLIC_REGENT_NAME || "").trim(),
+  regentPhoto: (process.env.NEXT_PUBLIC_REGENT_PHOTO || "").trim(),
+  deputyRegentName: (process.env.NEXT_PUBLIC_DEPUTY_REGENT_NAME || "").trim(),
+  deputyRegentPhoto: (process.env.NEXT_PUBLIC_DEPUTY_REGENT_PHOTO || "").trim(),
   iconPath: (process.env.NEXT_PUBLIC_ICON_PATH || "/icons/icon.svg").trim(),
   pwaIcon192: (
     process.env.NEXT_PUBLIC_PWA_ICON_192 || "/icons/icon-192.png"

@@ -289,7 +289,14 @@ for key in (
 require("class PortalHarvestTranslationPlugin" in plugin_source and "return \"ckanext-harvest\"" in plugin_source, "Harvest extension must register its own Indonesian gettext domain.")
 require("class PortalPagesTranslationPlugin" in plugin_source and "return \"ckanext-pages\"" in plugin_source, "Pages extension must register its own Indonesian gettext domain.")
 require("class PortalDcatTranslationPlugin" in plugin_source and "return \"ckanext-dcat\"" in plugin_source, "DCAT extension must register its own Indonesian gettext domain.")
-require('"portal_harvest_i18n = ckanext.portal_theme.plugin:PortalHarvestTranslationPlugin"' in setup_source and '"portal_pages_i18n = ckanext.portal_theme.plugin:PortalPagesTranslationPlugin"' in setup_source and '"portal_dcat_i18n = ckanext.portal_theme.plugin:PortalDcatTranslationPlugin"' in setup_source, "Entry points for Harvest, Pages, and DCAT Indonesian translation domains must be installed.")
+require(all(f'"{entry}"' in setup_source for entry in (
+    "portal_harvest_i18n = ckanext.portal_theme.plugin:PortalHarvestTranslationPlugin",
+    "portal_pages_i18n = ckanext.portal_theme.plugin:PortalPagesTranslationPlugin",
+    "portal_dcat_i18n = ckanext.portal_theme.plugin:PortalDcatTranslationPlugin",
+    "portal_xloader_i18n = ckanext.portal_theme.plugin:PortalXloaderTranslationPlugin",
+    "portal_geoview_i18n = ckanext.portal_theme.plugin:PortalGeoviewTranslationPlugin",
+    "portal_scheming_i18n = ckanext.portal_theme.plugin:PortalSchemingTranslationPlugin",
+)), "Entry points for every managed Indonesian extension translation domain must be installed.")
 require("IPagesSchema" in plugin_source and "def update_pages_schema(self, schema)" in plugin_source, "Plugin Portal harus memperluas schema ckanext-pages melalui IPagesSchema.")
 require("def validate_content_blocks(key, data, errors, context)" in plugin_source and "json.loads(value)" in plugin_source and "MAX_CONTENT_BLOCK_COUNT = 16" in plugin_source, "Schema CMS harus memvalidasi JSON blocks, jumlah komponen, dan tipe yang didukung sebelum tersimpan.")
 for field in ("excerpt", "category", "seo_title", "seo_description", "og_image", "template_type", "menu_label", "menu_order", "content_blocks", "featured", "show_in_menu"):
@@ -323,14 +330,16 @@ require(
     and plugin_order.index("portal_theme") < plugin_order.index("activity"),
     "Scheming dan portal Pages harus terdaftar sebelum Pages; Portal theme harus sebelum Pages dan Activity karena CKAN membalik urutan IConfigurer/ITemplateHelpers.",
 )
-require('"portal_harvest_i18n"' in bootstrap_source and '"portal_pages_i18n"' in bootstrap_source and '"portal_dcat_i18n"' in bootstrap_source, "Bootstrap harus mengaktifkan domain terjemahan khusus Harvest, Pages, dan DCAT.")
-require(all(name in plugin_order for name in ("harvest", "portal_harvest_i18n", "pages", "portal_pages_i18n", "portal_dcat_i18n")) and plugin_order.index("harvest") < plugin_order.index("portal_harvest_i18n") and plugin_order.index("pages") < plugin_order.index("portal_pages_i18n") and "dcat" in plugin_order and plugin_order.index("dcat") < plugin_order.index("portal_dcat_i18n"), "Translation plugin harus diaktifkan bersama extension yang domain terjemahannya ditangani.")
+translation_plugins = ("portal_harvest_i18n", "portal_pages_i18n", "portal_dcat_i18n", "portal_xloader_i18n", "portal_geoview_i18n", "portal_scheming_i18n")
+require(all(f'"{name}"' in bootstrap_source for name in translation_plugins), "Bootstrap harus mengaktifkan semua domain terjemahan extension yang dikelola.")
+translation_pairs = (("harvest", "portal_harvest_i18n"), ("pages", "portal_pages_i18n"), ("dcat", "portal_dcat_i18n"), ("xloader", "portal_xloader_i18n"), ("geo_view", "portal_geoview_i18n"), ("scheming_groups", "portal_scheming_i18n"))
+require(all(extension in plugin_order and translator in plugin_order and plugin_order.index(extension) < plugin_order.index(translator) for extension, translator in translation_pairs), "Translation plugin harus aktif setelah extension yang katalog domainnya dimuat.")
 require('plugins.append("envvars")' in bootstrap_source, "envvars harus tetap menjadi plugin terakhir.")
 require('values["CKANEXT__PAGES__EDITOR"]' not in bootstrap_source and "CKANEXT__PAGES__EDITOR=markdown" not in env_source, "CKAN Pages Markdown mode must leave editor unset; the literal markdown value is truthy and triggers the upstream WYSIWYG branch.")
 workflow = "\n".join(path.read_text(encoding="utf-8") for path in (ROOT / ".github/workflows").glob("*.yml"))
 require("COPY deploy/ckan/theme/ /tmp/portal-ckan-theme/" in workflow, "Extended CKAN smoke image harus memasukkan source package portal_theme.")
 require("compile-id-translations.py" in workflow and "/tmp/compile-id-translations.py" in workflow, "Extended CKAN smoke image harus mengompilasi katalog CKAN Bahasa Indonesia.")
-require("read_mo" in TRANSLATION_COMPILER.read_text(encoding="utf-8") and "merged_catalog.add(" in TRANSLATION_COMPILER.read_text(encoding="utf-8"), "Kompilasi portal PO harus menggabungkan, bukan menimpa, katalog Bahasa Indonesia bawaan CKAN.")
+require("read_mo" in TRANSLATION_COMPILER.read_text(encoding="utf-8") and "_overlay_message_catalog(merged_catalog" in TRANSLATION_COMPILER.read_text(encoding="utf-8") and "target.add(" in TRANSLATION_COMPILER.read_text(encoding="utf-8"), "Kompilasi portal PO harus menggabungkan, bukan menimpa, katalog Bahasa Indonesia bawaan CKAN.")
 require("compile_extension_catalogs" in TRANSLATION_COMPILER.read_text(encoding="utf-8") and 'glob("ckanext-*.po")' in TRANSLATION_COMPILER.read_text(encoding="utf-8"), "Compiler harus menemukan dan menghasilkan katalog untuk domain extension terpisah.")
 require('for suffix in ("mo", "po")' in TRANSLATION_COMPILER.read_text(encoding="utf-8"), "Compiler harus menggabungkan katalog upstream extension dalam format MO maupun PO.")
 require('"fuzzy" in message.flags' in TRANSLATION_COMPILER.read_text(encoding="utf-8"), "Entri fuzzy tidak boleh menimpa pesan upstream yang telah diterjemahkan.")

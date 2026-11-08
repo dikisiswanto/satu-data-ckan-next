@@ -599,3 +599,6 @@ msgid "{number} harvest source found for \"{query}\""
 msgid_plural "{number} harvest sources found for \"{query}\""
 msgstr[0] "{number} sumber pengambilan data ditemukan untuk \"{query}\""
 
+msgid "No harvests found"
+msgstr "Tidak ada proses pengambilan data yang ditemukan."
+

@@ -59,7 +59,7 @@ def contrast_ratio(background: str, foreground: str) -> float | None:
 
 css = CSS_PATH.read_text(encoding="utf-8")
 jsx = JSX_PATH.read_text(encoding="utf-8")
-design_direction = (ROOT / "docs/DESAIN-DAN-KUALITAS-FRONTEND.md").read_text(encoding="utf-8")
+design_direction = (ROOT / "docs/PANDUAN-PORTAL.md").read_text(encoding="utf-8")
 rules = css_rules(css)
 
 hero_visual = rules.get(".home-hero-visual", {})

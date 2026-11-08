@@ -1573,9 +1573,7 @@ msgid "Purge all"
 msgstr "Hapus permanen semua"
 
 msgid "Purge deleted datasets, organizations or groups forever and irreversibly."
-msgstr ""
-"Hapus permanen dataset, organisasi, atau kategori yang sudah dihapus. Tindakan ini tidak dapat "
-"dibatalkan."
+msgstr "Hapus permanen dataset, organisasi, atau grup yang telah dihapus. Tindakan ini tidak dapat dibatalkan."
 
 msgid "Confirm Delete"
 msgstr "Konfirmasi penghapusan"
@@ -2841,3 +2839,145 @@ msgstr "Pengelola data"
 
 msgid "Welcome back"
 msgstr "Selamat datang kembali"
+
+msgid "API Docs"
+msgstr "Dokumentasi API"
+
+msgid "You can also access this registry using the %(api_link)s (see %(api_doc_link)s)."
+msgstr "Portal ini juga dapat diakses melalui %(api_link)s (lihat %(api_doc_link)s)."
+
+msgid "Add data to the dataset"
+msgstr "Tambahkan data ke dataset"
+
+msgid "Add data"
+msgstr "Tambah data"
+
+msgid "Next: Add Data"
+msgstr "Lanjut: Tambahkan Data"
+
+msgid "Data and Resources"
+msgstr "Data dan Sumber Daya"
+
+msgid "Add New Resource"
+msgstr "Tambah Sumber Daya Baru"
+
+msgid "Add new resource"
+msgstr "Tambah sumber daya baru"
+
+msgid "There is no description for this dataset"
+msgstr "Dataset ini belum memiliki deskripsi."
+
+msgid "There is no description for this organization"
+msgstr "Organisasi ini belum memiliki deskripsi."
+
+msgid "All Users"
+msgstr "Semua Pengguna"
+
+msgid "Current Sysadmins"
+msgstr "Administrator Sistem Saat Ini"
+
+msgid "Promote user to Sysadmin"
+msgstr "Jadikan pengguna administrator sistem"
+
+msgid "Promoted {} to sysadmin"
+msgstr "Berhasil menjadikan {} administrator sistem."
+
+msgid "promote"
+msgstr "jadikan administrator sistem"
+
+msgid "New User"
+msgstr "Pengguna Baru"
+
+msgid "If you wish to invite a new user, enter their email address."
+msgstr "Untuk mengundang pengguna baru, masukkan alamat emailnya."
+
+msgid "What are roles?"
+msgstr "Apa arti peran?"
+
+msgid "Add to group"
+msgstr "Tambahkan ke grup"
+
+msgid "Reorder resources"
+msgstr "Atur ulang urutan sumber daya"
+
+msgid "Unpublish"
+msgstr "Batalkan publikasi"
+
+msgid "View dataset"
+msgstr "Lihat dataset"
+
+msgid "Clear Upload"
+msgstr "Hapus unggahan"
+
+msgid "Follow"
+msgstr "Ikuti"
+
+msgid "follow"
+msgstr "ikuti"
+
+msgid "Unfollow"
+msgstr "Berhenti mengikuti"
+
+msgid "Add Organization"
+msgstr "Tambah Organisasi"
+
+msgid "Profile picture URL"
+msgstr "URL foto profil"
+
+msgid "Confirm Password"
+msgstr "Konfirmasi kata sandi"
+
+msgid "Old Password"
+msgstr "Kata sandi lama"
+
+msgid "Change details"
+msgstr "Ubah detail"
+
+msgid "Create a Group"
+msgstr "Buat grup"
+
+msgid "Save Group"
+msgstr "Simpan grup"
+
+msgid "{num} Member"
+msgid_plural "{num} Members"
+msgstr[0] "{num} anggota"
+
+msgid "0 Members"
+msgstr "0 anggota"
+
+msgid "The <i>data license</i> you select above only applies to the contents of any resource files that you add to this dataset. By submitting this form, you agree to release the <i>metadata</i> values that you enter into the form under the <a href=\"http://opendatacommons.org/licenses/odbl/1-0/\">Open Database License</a>.
+msgstr "<i>Lisensi data</i> yang Anda pilih di atas hanya berlaku untuk isi berkas sumber daya yang ditambahkan ke dataset ini. Dengan mengirim formulir ini, Anda menyetujui bahwa nilai <i>metadata</i> yang dimasukkan ke dalam formulir dirilis berdasarkan <a href=\"http://opendatacommons.org/licenses/odbl/1-0/\">Lisensi Open Database</a>."
+
+msgid "No resources available."
+msgstr "Tidak ada sumber daya yang tersedia."
+
+msgid "Step {step}"
+msgstr "Langkah {step}"
+
+msgid "Type"
+msgstr "Jenis"
+
+msgid "Forgotten your password?"
+msgstr "Lupa kata sandi?"
+
+msgid "News feed"
+msgstr "Kabar terbaru"
+
+msgid "{actor} updated the {dataset_type} {dataset}"
+msgstr "{actor} memperbarui {dataset_type} {dataset}"
+
+msgid "View this version"
+msgstr "Lihat versi ini"
+
+msgid "add data"
+msgstr "tambah data"
+
+msgid "Add Data"
+msgstr "Tambah Data"
+
+msgid "frequency"
+msgstr "frekuensi"
+
+msgid "type"
+msgstr "jenis"

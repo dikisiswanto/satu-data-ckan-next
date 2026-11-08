@@ -13,7 +13,7 @@ bash ./deploy/ckan/bootstrap-upstream.sh
 bash ./deploy/ckan/compose.sh cloudflare up -d --build
 ```
 
-Profil `cloudflare` menggunakan Cloudflare Tunnel. Gunakan profil `manual` untuk mengakses layanan melalui Caddy tanpa Tunnel. Siapkan Cloudflare Access sebelum menggunakan profil `cloudflare-access`. Jangan menghapus volume PostgreSQL, Solr, Redis, atau FileStore saat memperbarui aplikasi. Panduan lengkap tersedia di [Operasional Deployment](docs/OPERASIONAL-DEPLOYMENT.md).
+Profil `cloudflare` menggunakan Cloudflare Tunnel. Gunakan profil `manual` untuk mengakses layanan melalui Caddy tanpa Tunnel. Siapkan Cloudflare Access sebelum menggunakan profil `cloudflare-access`. Jangan menghapus volume PostgreSQL, Solr, Redis, atau FileStore saat memperbarui aplikasi. Panduan lengkap tersedia di [Operasional Deployment](docs/PANDUAN-PORTAL.md#operasional-deployment-ckan).
 
 Simpan secret hanya di `.env.ckan`. Jangan commit file tersebut ke repository. Gunakan `.env.ckan.example` sebagai acuan konfigurasi.
 
@@ -33,12 +33,7 @@ npm run build
 
 ## Dokumentasi
 
-Dokumentasi proyek dipusatkan di `docs/`. Perbarui dokumen yang sesuai sebelum menambahkan dokumen baru. Folder ini dibatasi menjadi lima panduan utama.
+Dokumentasi proyek dipusatkan di `docs/`.
 
-| Kebutuhan                                                         | Panduan                                                              |
-| ----------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Integrasi aplikasi dan penggunaan API publik                      | [API Publik](docs/API.md)                                            |
-| Pengelolaan CKAN, CMS, media, dan identitas portal                | [Administrasi CKAN dan CMS](docs/ADMIN-CKAN-DAN-CMS.md)              |
-| DataStore, sinkronisasi, serta akses dan unduhan data privat      | [DataStore dan Akses Data](docs/DATASTORE-DAN-AKSES.md)              |
-| Tampilan publik, login, Portal Admin, aksesibilitas, dan performa | [Desain dan Kualitas Frontend](docs/DESAIN-DAN-KUALITAS-FRONTEND.md) |
-| Docker, Caddy, Cloudflare Tunnel, dan pemeliharaan server         | [Operasional Deployment](docs/OPERASIONAL-DEPLOYMENT.md)             |
+- [Panduan portal](docs/PANDUAN-PORTAL.md): API, administrasi, CMS, akses data, frontend, deployment, dan sambutan beranda.
+- [Lokalisasi CKAN](docs/LOKALISASI-CKAN.md): cakupan katalog inti dan extension, audit terjemahan, serta alur `.po`, `.mo`, dan JavaScript.
