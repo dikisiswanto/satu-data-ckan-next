@@ -220,10 +220,80 @@ test("desktop hero metric cards keep their separate accent colors", async ({
     ".home-visual-chip-top-left, .home-visual-chip-top-right, .home-visual-chip-bottom-left, .home-visual-chip-bottom-right",
   );
   await expect(cards).toHaveCount(4);
-  const colors = await cards.evaluateAll((elements) =>
-    elements.map((element) => getComputedStyle(element).backgroundColor),
+  const cardStyles = await cards.evaluateAll((elements) =>
+    elements.map((element) => {
+      const style = getComputedStyle(element);
+      const background = style.backgroundColor;
+      const foreground = style.color;
+      const parse = (value) =>
+        value
+          .match(/[\d.]+/g)
+          .slice(0, 3)
+          .map(Number)
+          .map((channel) => {
+            const normalized = channel / 255;
+            return normalized <= 0.04045
+              ? normalized / 12.92
+              : ((normalized + 0.055) / 1.055) ** 2.4;
+          });
+      const [r, g, b] = parse(background);
+      const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      const [fr, fg, fb] = parse(foreground);
+      const foregroundLuminance = 0.2126 * fr + 0.7152 * fg + 0.0722 * fb;
+      const ratio =
+        (Math.max(luminance, foregroundLuminance) + 0.05) /
+        (Math.min(luminance, foregroundLuminance) + 0.05);
+      const rect = element.getBoundingClientRect();
+      const parent = element.parentElement.getBoundingClientRect();
+      return {
+        background,
+        ratio,
+        left: rect.left - parent.left,
+        top: rect.top - parent.top,
+        right: rect.right - parent.left,
+        bottom: rect.bottom - parent.top,
+        parentWidth: parent.width,
+        parentHeight: parent.height,
+      };
+    }),
   );
-  expect(new Set(colors).size).toBe(4);
+  expect(new Set(cardStyles.map((style) => style.background)).size).toBe(4);
+  for (const style of cardStyles) {
+    expect(
+      style.ratio,
+      "metric card foreground/background contrast",
+    ).toBeGreaterThanOrEqual(4.5);
+    expect(style.left).toBeGreaterThanOrEqual(0);
+    expect(style.top).toBeGreaterThanOrEqual(0);
+    expect(style.right).toBeLessThanOrEqual(style.parentWidth);
+    expect(style.bottom).toBeLessThanOrEqual(style.parentHeight);
+  }
+  for (let left = 0; left < cardStyles.length; left += 1) {
+    for (let right = left + 1; right < cardStyles.length; right += 1) {
+      const a = cardStyles[left];
+      const b = cardStyles[right];
+      const overlaps =
+        a.left < b.right &&
+        a.right > b.left &&
+        a.top < b.bottom &&
+        a.bottom > b.top;
+      expect(overlaps, "hero metric cards must not collide").toBe(false);
+    }
+  }
+  await expect(page.locator(".home-map-connectors")).toHaveAttribute(
+    "aria-hidden",
+    "true",
+  );
+  await expect(
+    page.locator(".home-map-connectors .home-map-connector"),
+  ).toHaveCount(4);
+  await expect(page.locator(".home-map-connectors .home-map-node")).toHaveCount(
+    4,
+  );
+  const animationName = await cards
+    .first()
+    .evaluate((element) => getComputedStyle(element).animationName);
+  expect(animationName).toBe("home-metric-float");
 });
 
 test("public interior pages receive a subtle one-time scroll reveal", async ({

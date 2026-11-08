@@ -21,7 +21,7 @@ export default function PublicStatisticsLoading() {
           <Skeleton className="h-4 w-full" />
         </div>
         <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-2 text-xs font-medium text-muted">
-          Data terpublikasi
+          Data yang diterbitkan
         </span>
       </div>
       <div className="public-loading-grid-md grid gap-4 md:grid-cols-2 xl:grid-cols-3">

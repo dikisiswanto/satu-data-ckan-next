@@ -231,6 +231,53 @@ describe("public CKAN File API proxy", () => {
     expect(await response.text()).toBe("private-file");
   });
 
+  it("accepts the CKAN 2.12 owner_info.id field for a resource-owned file", async () => {
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "file_show")
+        return {
+          id: fileId,
+          name: "data-menara-sample.xlsx",
+          content_type:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          owner_info: { owner_type: "resource", id: resourceId },
+        };
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: datasetId,
+          state: "active",
+          private: false,
+        };
+      if (action === "package_show")
+        return {
+          id: datasetId,
+          state: "active",
+          private: false,
+          resources: [{ id: resourceId, state: "active", private: false }],
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response("xlsx-content", {
+            status: 200,
+            headers: {
+              "content-type":
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            },
+          }),
+      ),
+    );
+    const response = await GET(
+      new Request(`https://data.example.test/api/public/ckan-file/${fileId}`),
+      params,
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("xlsx-content");
+  });
+
   it("allows a package-owned FileStore file only for the exact CKAN-authorized package", async () => {
     ckanAction.mockImplementation(async (action) => {
       if (action === "file_show")

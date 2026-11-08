@@ -274,8 +274,8 @@ function HomeHeroContent({
               <Image
                 src={siteConfig.heroMapImage}
                 alt=""
-                width={360}
-                height={460}
+                width={1200}
+                height={1360}
                 className="home-region-map"
                 aria-hidden="true"
               />
@@ -284,6 +284,34 @@ function HomeHeroContent({
                   {siteConfig.regionName.toLocaleUpperCase("id-ID")}
                 </strong>
               </p>
+              <svg
+                className="home-map-connectors"
+                viewBox="0 0 528 480"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  className="home-map-connector home-map-connector-a"
+                  d="M 180 58 C 198 58, 203 105, 226 126"
+                />
+                <path
+                  className="home-map-connector home-map-connector-b"
+                  d="M 348 132 C 337 136, 337 158, 324 180"
+                />
+                <path
+                  className="home-map-connector home-map-connector-c"
+                  d="M 172 382 C 194 373, 199 347, 228 339"
+                />
+                <path
+                  className="home-map-connector home-map-connector-d"
+                  d="M 362 430 C 346 413, 348 385, 323 365"
+                />
+                <circle className="home-map-node" cx="226" cy="126" r="4.5" />
+                <circle className="home-map-node" cx="324" cy="180" r="4.5" />
+                <circle className="home-map-node" cx="228" cy="339" r="4.5" />
+                <circle className="home-map-node" cx="323" cy="365" r="4.5" />
+              </svg>
             </>
           ) : null}
           <div
@@ -306,7 +334,7 @@ function HomeHeroContent({
                     displayStat(stats?.datasets)
                   )}
                 </strong>
-                <small>Dataset terbuka</small>
+                <small>Dataset publik</small>
               </span>
             </Link>
             <Link
@@ -325,7 +353,7 @@ function HomeHeroContent({
                     displayStat(stats?.organizations)
                   )}
                 </strong>
-                <small>Organisasi aktif</small>
+                <small>Perangkat daerah</small>
               </span>
             </Link>
             <Link
@@ -389,7 +417,7 @@ function HomeHeroContent({
                   displayStat(stats?.datasets)
                 )}
               </strong>
-              <small>Dataset terbuka</small>
+              <small>Dataset publik</small>
             </span>
           </Link>
           <Link href="/kategori" className="home-stat home-stat-categories">

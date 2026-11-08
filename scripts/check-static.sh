@@ -44,6 +44,7 @@ run_check node scripts/check-public-quality.mjs
 run_check node scripts/check-pwa.mjs
 run_check node scripts/test-service-worker.mjs
 run_check python3 scripts/check-doc-links.py
+run_check node scripts/check-copy-language.mjs
 run_check node scripts/check-public-pagination.mjs
 run_check node scripts/test-dataset-catalog-state.mjs
 run_check node scripts/check-loading-preferences.mjs

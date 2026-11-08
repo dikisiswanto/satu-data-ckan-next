@@ -84,7 +84,9 @@ async function handle(request, context) {
 
   const owner = file?.owner_info || {};
   const ownerType = owner.owner_type || file?.owner_type;
-  const ownerId = owner.owner_id || file?.owner_id;
+  // CKAN 2.12 file_show serializes owner_info.id, while ORM records may
+  // expose owner.owner_id. Accept both official representations.
+  const ownerId = owner.owner_id || owner.id || file?.owner_id;
   if (
     file?.id !== fileId ||
     ownerType !== MEDIA_OWNER_TYPE ||

@@ -128,6 +128,54 @@ describe("public CKAN resource download", () => {
     },
   );
 
+  it("accepts CKAN 2.12 owner_info.id when validating a FileStore resource download", async () => {
+    fixtures({
+      resourceUrl:
+        "https://ckan.example.test/file/c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+    });
+    ckanAction.mockImplementation(async (action) => {
+      if (action === "resource_show")
+        return {
+          id: resourceId,
+          package_id: datasetId,
+          name: filename,
+          state: "active",
+          url: "https://ckan.example.test/file/c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+          mimetype:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        };
+      if (action === "package_show")
+        return { id: datasetId, state: "active", private: false };
+      if (action === "file_show")
+        return {
+          id: "c45b4a89-ee8c-4ee0-8a58-3f5af84a708d",
+          name: filename,
+          state: "active",
+          owner_info: { owner_type: "resource", id: resourceId },
+        };
+      throw new Error(`unexpected action ${action}`);
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response("xlsx-binary", {
+            status: 200,
+            headers: {
+              "content-type":
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            },
+          }),
+      ),
+    );
+    const response = await GET(
+      new Request(`https://data.silirdev.com${downloadPath}`),
+      { params: Promise.resolve({ slug: datasetId, resourceId, filename }) },
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("xlsx-binary");
+  });
+
   it("rejects a FileStore ID whose owner does not match the requested resource", async () => {
     fixtures({
       resourceUrl:

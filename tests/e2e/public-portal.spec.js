@@ -28,7 +28,7 @@ test("homepage shows accurate public dataset, category, indicator and organizati
   const metrics = page.locator(".home-stats .home-stat");
   await expect(metrics).toHaveCount(4);
   await expect(metrics.nth(0)).toContainText("1");
-  await expect(metrics.nth(0)).toContainText("Dataset terbuka");
+  await expect(metrics.nth(0)).toContainText("Dataset publik");
   await expect(metrics.nth(1)).toContainText("1");
   await expect(metrics.nth(1)).toContainText("Kategori");
   await expect(metrics.nth(1)).toHaveAttribute("href", "/kategori");
@@ -107,7 +107,7 @@ test("hero uses a transparent regional silhouette with asymmetrically placed liv
   await expect(page.locator(".home-hero-visual")).toBeVisible();
   const map = page.locator(".home-region-map");
   await expect(map).toBeVisible();
-  await expect(map).toHaveAttribute("src", /region-map\.svg/);
+  await expect(map).toHaveAttribute("src", /region-map-outline\.webp/);
   await expect(map).toHaveAttribute("alt", "");
   await expect(page.locator(".home-map-caption")).toContainText("INSTANSI UJI");
   const metrics = page.locator(".home-visual-metrics .home-visual-chip");
@@ -132,6 +132,18 @@ test("hero uses a transparent regional silhouette with asymmetrically placed liv
   expect(visualStyle.background).toBe("rgba(0, 0, 0, 0)");
   expect(visualStyle.border).toBe("0px");
   await expect(page.locator(".home-data-board")).toHaveCount(0);
+  await expect(page.locator(".home-stats-wrap")).toBeHidden();
+
+  await page.setViewportSize({ width: 1199, height: 900 });
+  await expect(page.locator(".home-hero-visual")).toBeHidden();
+  await expect(page.locator(".home-stats-wrap")).toBeVisible();
+
+  await page.setViewportSize({ width: 1200, height: 900 });
+  await expect(page.locator(".home-hero-visual")).toBeVisible();
+  const desktopStageWidth = await page
+    .locator(".home-hero-visual")
+    .evaluate((node) => Math.round(node.getBoundingClientRect().width));
+  expect(desktopStageWidth).toBe(528);
   await expect(page.locator(".home-stats-wrap")).toBeHidden();
 
   await page.setViewportSize({ width: 900, height: 900 });

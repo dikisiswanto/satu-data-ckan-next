@@ -33,7 +33,7 @@ export default defineConfig({
         NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3100",
         NEXT_PUBLIC_CKAN_ADMIN_URL: "https://ckan.example.test",
         NEXT_PUBLIC_REGION_NAME: "Instansi Uji",
-        NEXT_PUBLIC_HERO_MAP_IMAGE: "/illustrations/region-map.svg",
+        NEXT_PUBLIC_HERO_MAP_IMAGE: "/illustrations/region-map-outline.webp",
         NEXT_PUBLIC_BRAND_PROFILE: "sample",
       },
     },

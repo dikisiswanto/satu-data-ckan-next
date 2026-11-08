@@ -51,6 +51,31 @@ describe("public editorial media proxy", () => {
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(png);
   });
 
+  it("accepts the CKAN 2.12 file_show owner_info.id representation", async () => {
+    ckanAction.mockResolvedValue({
+      id: fileId,
+      content_type: "image/png",
+      size: png.byteLength,
+      owner_info: { owner_type: "portal_media", id: "public-editorial-media" },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(png, {
+            status: 200,
+            headers: { "content-type": "image/png" },
+          }),
+      ),
+    );
+    const response = await GET(
+      new Request(`https://data.example.test/api/editorial-media/${fileId}`),
+      { params: Promise.resolve({ fileId }) },
+    );
+    expect(response.status).toBe(200);
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(png);
+  });
+
   it("does not expose other CKAN files even if their MIME type is an image", async () => {
     ckanAction.mockResolvedValue({
       id: fileId,

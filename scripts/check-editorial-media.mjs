@@ -61,6 +61,10 @@ assert.match(
   /const MEDIA_OWNER_TYPE = process\.env\.CKAN_EDITORIAL_MEDIA_OWNER_TYPE \\|\| "portal_media"/,
 );
 assert.match(files.mediaRoute, /ownerType !== MEDIA_OWNER_TYPE/);
+assert.match(
+  files.mediaRoute,
+  /owner\.owner_id \|\| owner\.id \|\| file\?\.owner_id/,
+);
 assert.match(files.mediaRoute, /validSignature/);
 assert.match(files.mediaRoute, /redirect:\s*"manual"/);
 assert.match(files.cmsPages, /isEditorialMedia/);

@@ -422,7 +422,7 @@ export default async function DatasetCatalogPage({ searchParams }) {
         ) : null}
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="eyebrow">Hasil penelusuran</p>
+            <p className="eyebrow">Hasil pencarian</p>
             <h2 className="mt-2 text-2xl font-semibold text-ink">
               {query ? `Hasil untuk “${query}”` : "Dataset yang tersedia"}
             </h2>

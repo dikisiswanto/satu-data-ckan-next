@@ -124,13 +124,9 @@ requirePattern(
 const readme = read("README.md");
 for (const guide of [
   "API.md",
-  "KUALITAS-FE-PUBLIK.md",
-  "DESAIN-SISTEM.md",
-  "ADMIN-CKAN.md",
-  "KONTEN-CMS-MEDIA.md",
-  "CONFIGURASI-INSTANSI.md",
-  "PRATINJAU-DATASTORE-DAN-SINKRONISASI.md",
-  "AKSES-UNDUHAN-DATASET-PRIVAT.md",
+  "ADMIN-CKAN-DAN-CMS.md",
+  "DATASTORE-DAN-AKSES.md",
+  "DESAIN-DAN-KUALITAS-FRONTEND.md",
   "OPERASIONAL-DEPLOYMENT.md",
 ]) {
   requirePattern(
@@ -141,10 +137,10 @@ for (const guide of [
 }
 requirePattern(
   readme,
-  /Dokumentasi teknis disimpan di `docs\/`/,
-  "README harus menjelaskan bahwa docs/ adalah lokasi dokumentasi kanonis",
+  /Dokumentasi proyek dipusatkan di `docs\/`/,
+  "README harus menjelaskan bahwa docs/ adalah lokasi dokumentasi kanonis dan dibatasi lima panduan",
 );
-const qualityGuide = read("docs/KUALITAS-FE-PUBLIK.md");
+const qualityGuide = read("docs/DESAIN-DAN-KUALITAS-FRONTEND.md");
 requirePattern(
   qualityGuide,
   /Core Web Vitals/,

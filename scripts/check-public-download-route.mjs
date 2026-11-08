@@ -39,6 +39,11 @@ assert.match(route, /ownerType === "resource"/);
 assert.match(route, /ownerType === "package"/);
 assert.match(
   route,
+  /owner\.owner_id \|\| owner\.id \|\| file\.owner_id/,
+  "CKAN 2.12 owner_info.id must be recognized when authorizing a FileStore download.",
+);
+assert.match(
+  route,
   /permission_download_file/,
   "FileStore downloads must remain behind CKAN's final permission_download_file check.",
 );
@@ -160,6 +165,11 @@ const genericFileProxy = await readFile(
   "utf8",
 );
 assert.match(genericFileProxy, /file_show/);
+assert.match(
+  genericFileProxy,
+  /owner\.owner_id \|\| owner\.id \|\| file\.owner_id/,
+  "Generic public FileStore proxy must read CKAN 2.12 owner_info.id.",
+);
 assert.match(genericFileProxy, /resource_show/);
 assert.match(genericFileProxy, /package_show/);
 assert.match(
@@ -194,6 +204,10 @@ const editorialProxy = await readFile(
   "utf8",
 );
 assert.match(editorialProxy, /file\/download/);
+assert.match(
+  editorialProxy,
+  /owner\.owner_id \|\| owner\.id \|\| file\?\.owner_id/,
+);
 assert.doesNotMatch(
   editorialProxy,
   /new URL\(\`\/file\/\$\{encodeURIComponent\(fileId\)\}/,

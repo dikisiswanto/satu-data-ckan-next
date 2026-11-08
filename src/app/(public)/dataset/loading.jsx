@@ -109,7 +109,7 @@ export default async function DatasetCatalogLoading() {
       >
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div className="min-w-0">
-            <p className="eyebrow">Hasil penelusuran</p>
+            <p className="eyebrow">Hasil pencarian</p>
             <Skeleton className="mt-2 h-8 w-72 max-w-full" />
             <Skeleton className="mt-2 h-4 w-48 max-w-full" />
           </div>

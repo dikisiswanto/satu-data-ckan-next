@@ -710,7 +710,9 @@ export function ImageLightbox({
               id={helpId}
               className="flex min-h-11 shrink-0 items-center justify-center gap-x-3 gap-y-1 border-t border-white/10 bg-slate-950/75 px-3 py-2 text-center text-[10px] leading-4 text-white/55 sm:gap-x-5 sm:text-xs"
             >
-              <span>Roda mouse / cubit untuk zoom</span>
+              <span>
+                Gunakan roda mouse atau cubit untuk memperbesar tampilan
+              </span>
               <span aria-hidden="true" className="text-white/25">
                 ·
               </span>
@@ -722,7 +724,7 @@ export function ImageLightbox({
               <span aria-hidden="true" className="text-white/25">
                 ·
               </span>
-              <span>Esc untuk menutup</span>
+              <span>Tekan Esc untuk menutup</span>
             </footer>
           </div>,
           document.body,

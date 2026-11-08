@@ -59,7 +59,7 @@ def contrast_ratio(background: str, foreground: str) -> float | None:
 
 css = CSS_PATH.read_text(encoding="utf-8")
 jsx = JSX_PATH.read_text(encoding="utf-8")
-design_direction = (ROOT / "docs/DESAIN-SISTEM.md").read_text(encoding="utf-8")
+design_direction = (ROOT / "docs/DESAIN-DAN-KUALITAS-FRONTEND.md").read_text(encoding="utf-8")
 rules = css_rules(css)
 
 hero_visual = rules.get(".home-hero-visual", {})
@@ -78,6 +78,15 @@ require("viewBox=\"180 160 720 760\"" in map_asset_text
         and "fill=\"url(#region-land)\"" in map_asset_text
         and "stop-color=\"#EAF1D9\"" in map_asset_text,
         "Regional map asset must be a transparent SVG silhouette with a restrained land palette.")
+outline_asset = ROOT / "public/illustrations/region-map-outline.webp"
+outline_bytes = outline_asset.read_bytes() if outline_asset.is_file() else b""
+example_env = (ROOT / ".env.ckan.example").read_text(encoding="utf-8")
+require(outline_bytes[:4] == b"RIFF" and outline_bytes[8:12] == b"WEBP",
+        "White regional outline must be shipped as a valid WebP asset.")
+require("PORTAL_HERO_MAP_IMAGE=/illustrations/region-map-outline.webp" in example_env,
+        "Deployment example must select the white outline map for the homepage hero.")
+require("width={1200}" in jsx and "height={1360}" in jsx,
+        "Hero map image dimensions must preserve the supplied outline proportions.")
 require("home-data-board" not in jsx and "home-data-map-svg" not in jsx
         and "home-atlas-contours" not in jsx and "home-atlas-connections" not in jsx,
         "Generic map panels, fabricated subdivisions, and network-node artwork must not return.")
@@ -103,16 +112,28 @@ require("95%" in paragraph.get("color", "") and bool(paragraph.get("text-shadow"
         "Hero description must retain strong contrast and a subtle text shadow.")
 
 require("background: transparent" in css and "box-shadow: none" in css,
-        "Floating statistical links must remain unboxed over the hero image.")
+        "Hero artwork wrapper must remain unboxed over the hero photograph.")
 for selector in (".home-visual-chip-top-left", ".home-visual-chip-top-right", ".home-visual-chip-bottom-left", ".home-visual-chip-bottom-right"):
     require(selector in rules, f"Floating statistical link must keep its intentional asymmetric position: {selector}.")
-require("--chip-accent: #88d9ed" in css and "--chip-accent: #9be0c4" in css
-        and "--chip-accent: #d7c1ff" in css and "--chip-accent: #f3ce91" in css,
-        "Stat icons must use four restrained, distinct accent colors.")
-require("home-visual-chip strong" in css and "text-shadow" in rules.get(".home-visual-chip strong", {}),
-        "Floating metric values must remain legible over the hero photograph.")
-require("animation: none !important" in css,
-        "Hero must avoid perpetual decorative motion.")
+metric_colors = [
+    rules.get(selector, {}).get("--metric-card-bg")
+    for selector in (".home-visual-chip-top-left", ".home-visual-chip-top-right", ".home-visual-chip-bottom-left", ".home-visual-chip-bottom-right")
+]
+require(len(set(metric_colors)) == 4 and all(metric_colors),
+        "Each hero statistic must have its own distinct, saturated card background.")
+for color in metric_colors:
+    ratio = contrast_ratio(color, "#ffffff") if color else None
+    require(ratio is not None and ratio >= 4.5,
+            f"Hero card background {color} must provide at least 4.5:1 contrast with white text.")
+require("home-visual-chip strong" in css and rules.get(".home-visual-chip strong", {}).get("color") == "#fff",
+        "Floating metric values must remain white and legible over saturated cards.")
+require("home-map-connectors" in jsx and "home-map-connector" in jsx and "home-map-node" in jsx,
+        "Hero statistic cards must connect visually to the regional outline using decorative paths and map nodes.")
+require("@keyframes home-metric-float" in css
+        and rules.get(".home-visual-chip", {}).get("animation", "").startswith("home-metric-float"),
+        "Hero statistic cards must use gentle vertical floating motion.")
+require("@media (prefers-reduced-motion: reduce)" in css and "animation: none !important" in css,
+        "Hero floating motion must be disabled for reduced-motion users and during loading.")
 require("civic data atlas" in design_direction and "standout, modern, clean" in design_direction,
         "Public visual identity must stay specific to a regional data portal and avoid sterile minimalism.")
 api_page = (ROOT / "src/app/(public)/api-data/page.jsx").read_text(encoding="utf-8")
@@ -144,7 +165,7 @@ require("PUBLIC_HOME_SECTION_SELECTOR" in scroll_manager
         and "public-home-section-enter" in motion_styles
         and "prefers-reduced-motion" in motion_styles,
         "Homepage sections must have a subtle one-time reveal that respects reduced-motion.")
-require("ENERGY: **2 / 3**" in design_direction and "RHYTHM: **2 / 3**" in design_direction and "MOTION: **1 / 3**" in design_direction,
+require("Energi visual: 2 / 3" in design_direction and "Ritme: 2 / 3" in design_direction and "Gerak: 1 / 3" in design_direction,
         "Public visual direction must document the selected energy, rhythm, and motion dials.")
 require(rules.get(".home-visual-metrics", {}).get("pointer-events") == "none",
         "The floating metrics wrapper must not intercept pointer events outside the actual links.")

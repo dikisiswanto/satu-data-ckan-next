@@ -37,7 +37,10 @@ export function PublicBreadcrumbs() {
 
   return (
     <div className="public-breadcrumb-band">
-      <nav aria-label="Breadcrumb" className="page-container py-2.5 sm:py-3">
+      <nav
+        aria-label="Navigasi halaman"
+        className="page-container py-2.5 sm:py-3"
+      >
         <ol className="inline-flex w-fit max-w-full min-w-0 items-center gap-1.5 overflow-x-auto rounded-lg border border-line/80 bg-white/90 px-3 py-2 text-xs text-muted shadow-sm sm:gap-2 sm:px-3.5 sm:py-2 sm:text-sm">
           {items.map((item, index) => (
             <li

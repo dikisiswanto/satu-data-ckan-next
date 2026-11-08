@@ -188,7 +188,7 @@ async function handle(request, context) {
       const ownerType = String(
         owner.owner_type || file.owner_type || "",
       ).toLowerCase();
-      const ownerId = String(owner.owner_id || file.owner_id || "");
+      const ownerId = String(owner.owner_id || owner.id || file.owner_id || "");
       if (ownerType === "resource") {
         if (!ownerId || ownerId !== resourceId)
           return errorResponse(

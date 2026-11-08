@@ -439,9 +439,9 @@ for (const token of [
   "Coba cari",
   "home-region-map",
   "home-map-caption",
-  "Organisasi aktif",
+  "Perangkat daerah",
   "Indikator publik",
-  "Dataset terbuka",
+  "Dataset publik",
   "Semua kategori",
   "Menampilkan 10 kategori dengan dataset terbanyak.",
 ]) {
@@ -456,8 +456,8 @@ requireText(
 );
 requireText(
   "src/app/styles/public-home-hero.css",
-  "@media (max-width: 1023px)",
-  "hero artwork must have a tablet breakpoint",
+  "@media (max-width: 1199px)",
+  "hero artwork must stay hidden until the connector stage can use its full desktop width",
 );
 requireText(
   "src/app/styles/public-home-hero.css",
@@ -466,7 +466,7 @@ requireText(
 );
 requireText(
   "src/app/styles/public-home-hero.css",
-  "@media (min-width: 1024px)",
+  "@media (min-width: 1200px)",
   "desktop metric cards must have a separate visibility rule",
 );
 requireText(
@@ -494,20 +494,31 @@ for (const token of [
     failures.push(`homepage hero: missing clickable metric position ${token}`);
 }
 const heroMotionCss = read("src/app/styles/public-home-hero.css");
-if (
-  /portal-chip-enter|portal-metric-float|portal-copy-enter|portal-visual-enter/.test(
-    heroMotionCss,
-  )
-) {
-  failures.push(
-    "homepage hero must not use staggered entrance or perpetual floating animations",
-  );
-}
 requireText(
   "src/app/styles/public-home-hero.css",
-  "animation: none !important",
-  "homepage hero must remain still and avoid unnecessary motion",
+  "@keyframes home-metric-float",
+  "homepage hero statistic cards must use a restrained floating motion",
 );
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "@media (prefers-reduced-motion: reduce)",
+  "homepage hero motion must respect the reduced-motion preference",
+);
+requireText(
+  "src/app/(public)/page.jsx",
+  'className="home-map-connectors"',
+  "hero statistic cards must have subtle connector paths to the configured regional map",
+);
+requireText(
+  "src/app/styles/public-home-hero.css",
+  "stroke-dasharray: 3 6",
+  "map connectors must remain light and unobtrusive rather than heavy diagram lines",
+);
+if (
+  /portal-chip-enter|portal-copy-enter|portal-visual-enter/.test(heroMotionCss)
+) {
+  failures.push("homepage hero must not use staggered entrance animations");
+}
 requireText(
   "src/components/public-scroll-manager.jsx",
   "IntersectionObserver",

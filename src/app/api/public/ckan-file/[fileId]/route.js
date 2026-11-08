@@ -101,7 +101,7 @@ async function verifyFileOwner(file, fileId, sessionCookie) {
   const ownerType = String(
     owner.owner_type || file.owner_type || "",
   ).toLowerCase();
-  const ownerId = String(owner.owner_id || file.owner_id || "");
+  const ownerId = String(owner.owner_id || owner.id || file.owner_id || "");
   if (!ownerId || (ownerType !== "resource" && ownerType !== "package"))
     return false;
 
