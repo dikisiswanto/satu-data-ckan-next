@@ -250,6 +250,8 @@ async function handle(request, context) {
       params?.filename,
       safeFilename(resource.name, `${resourceId}.bin`),
     );
+    const inlinePreviewRequested =
+      new URL(request.url).searchParams.get("preview") === "1";
     const contentType = String(
       upstream.headers.get("content-type") ||
         resource.mimetype ||
@@ -258,6 +260,22 @@ async function handle(request, context) {
       .split(";", 1)[0]
       .trim()
       .toLowerCase();
+    const declaredMime = String(resource.mimetype || "")
+      .split(";", 1)[0]
+      .trim()
+      .toLowerCase();
+    const isPdf =
+      contentType === "application/pdf" ||
+      (contentType === "application/octet-stream" &&
+        (declaredMime === "application/pdf" ||
+          String(resource.format || "")
+            .trim()
+            .toLowerCase() === "pdf" ||
+          /\.pdf$/i.test(filename)));
+    if (inlinePreviewRequested && !isPdf)
+      return errorResponse(415, "Pratinjau inline hanya tersedia untuk PDF.");
+    const responseContentType =
+      inlinePreviewRequested && isPdf ? "application/pdf" : contentType;
     // CKAN login/error HTML returned with HTTP 200 is not a downloadable file.
     // JSON and plain text are legitimate resource formats, so reject JSON only
     // when it contradicts the resource filename (e.g. an XLSX URL returning an API error).
@@ -273,8 +291,8 @@ async function handle(request, context) {
       );
     }
     const responseHeaders = new Headers({
-      "Content-Type": contentType,
-      "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      "Content-Type": responseContentType,
+      "Content-Disposition": `${inlinePreviewRequested ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(filename)}`,
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
       "X-Robots-Tag": "noindex, nofollow, noarchive",

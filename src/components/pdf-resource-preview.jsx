@@ -1,5 +1,30 @@
 import { ArrowUpRight, FileText } from "lucide-react";
 import { formatBytes } from "@/lib/utils";
+import { getPublicSiteOrigin } from "@/lib/site-config";
+
+function getPreviewUrl(value) {
+  const siteOrigin = getPublicSiteOrigin();
+  if (!siteOrigin) return value;
+
+  try {
+    const previewUrl = new URL(value, siteOrigin);
+    if (
+      previewUrl.origin !== new URL(siteOrigin).origin ||
+      !/^\/dataset\/[^/]+\/resource\/[^/]+\/download\/[^/]+\/?$/.test(
+        previewUrl.pathname,
+      )
+    ) {
+      return value;
+    }
+
+    previewUrl.searchParams.set("preview", "1");
+    return value.startsWith("/")
+      ? `${previewUrl.pathname}${previewUrl.search}${previewUrl.hash}`
+      : previewUrl.toString();
+  } catch {
+    return value;
+  }
+}
 
 export function PdfResourcePreview({
   url,
@@ -10,6 +35,7 @@ export function PdfResourcePreview({
   heightClassName = "h-[68vh] min-h-[420px]",
 }) {
   if (!url) return null;
+  const previewUrl = getPreviewUrl(url);
 
   return (
     <section
@@ -29,7 +55,7 @@ export function PdfResourcePreview({
           </div>
         </div>
         <a
-          href={url}
+          href={previewUrl}
           target="_blank"
           rel="noreferrer"
           className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg border border-line bg-white px-3 text-sm font-semibold text-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
@@ -39,7 +65,7 @@ export function PdfResourcePreview({
       </div>
       <iframe
         title={`${title}: ${fileName}`}
-        src={url}
+        src={previewUrl}
         className={`${heightClassName} w-full bg-slate-50`}
         loading="lazy"
       />
