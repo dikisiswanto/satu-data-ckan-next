@@ -101,6 +101,66 @@ describe("public editorial media proxy", () => {
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(png);
   });
 
+  it("follows same-origin FileStore redirects and detects generic image MIME", async () => {
+    ckanAction.mockResolvedValue({
+      id: fileId,
+      content_type: "application/octet-stream",
+      size: png.byteLength,
+      owner_info: {
+        owner_type: "portal_media",
+        owner_id: "public-editorial-media",
+      },
+    });
+    const fetchMock = vi.fn(async (url) => {
+      if (String(url) === `http://ckan:5000/file/download/${fileId}`)
+        return new Response(null, {
+          status: 302,
+          headers: { location: `/file/public-download/default/${fileId}.png` },
+        });
+      expect(String(url)).toBe(
+        `http://ckan:5000/file/public-download/default/${fileId}.png`,
+      );
+      return new Response(png, {
+        status: 200,
+        headers: { "content-type": "application/octet-stream" },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const response = await GET(
+      new Request(`https://data.example.test/api/editorial-media/${fileId}`),
+      { params: Promise.resolve({ fileId }) },
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("image/png");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not follow FileStore redirects to another origin", async () => {
+    ckanAction.mockResolvedValue({
+      id: fileId,
+      content_type: "image/png",
+      size: png.byteLength,
+      owner_info: {
+        owner_type: "portal_media",
+        owner_id: "public-editorial-media",
+      },
+    });
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(null, {
+          status: 302,
+          headers: { location: "https://untrusted.example/image.png" },
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const response = await GET(
+      new Request(`https://data.example.test/api/editorial-media/${fileId}`),
+      { params: Promise.resolve({ fileId }) },
+    );
+    expect(response.status).toBe(502);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("does not expose other CKAN files even if their MIME type is an image", async () => {
     ckanAction.mockResolvedValue({
       id: fileId,

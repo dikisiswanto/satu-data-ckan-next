@@ -69,8 +69,9 @@ assert.match(
   files.mediaRoute,
   /ownerRecords[\s\S]*?owner\.owner_id \|\| owner\.id[\s\S]*?file\?\.owner_id/,
 );
-assert.match(files.mediaRoute, /validSignature/);
+assert.match(files.mediaRoute, /detectImageMime/);
 assert.match(files.mediaRoute, /redirect:\s*"manual"/);
+assert.match(files.mediaRoute, /target\.origin !== origin/);
 assert.match(files.cmsPages, /isEditorialMedia/);
 assert.match(files.editor, /fetch\("\/admin\/media\/upload"/);
 assert.match(files.editor, /X-CSRFToken/);

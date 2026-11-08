@@ -24,6 +24,16 @@ msgid "%(count)s dataset found."
 msgid_plural "%(count)s datasets found."
 msgstr[0] "%(count)s dataset ditemukan."
 
+#, python-format
+msgid "%(count)s dataset found"
+msgid_plural "%(count)s datasets found"
+msgstr[0] "%(count)s dataset ditemukan"
+
+#, python-format
+msgid "%(count)s dataset found for \"%(query)s\""
+msgid_plural "%(count)s datasets found for \"%(query)s\""
+msgstr[0] "%(count)s dataset ditemukan untuk \"%(query)s\""
+
 #, python-brace-format
 msgid "A little information about my {object_type}..."
 msgstr "Informasi singkat tentang {object_type} saya..."

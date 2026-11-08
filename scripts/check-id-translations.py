@@ -225,6 +225,8 @@ def main() -> None:
             ("{number} group found", "{number} groups found"): "{number} grup ditemukan",
             ("{count} member", "{count} members"): "{count} anggota",
             "{number} dataset found": "{number} dataset ditemukan",
+            ("%(count)s dataset found", "%(count)s datasets found"): "%(count)s dataset ditemukan",
+            ('%(count)s dataset found for \"%(query)s\"', '%(count)s datasets found for \"%(query)s\"'): '%(count)s dataset ditemukan untuk \"%(query)s\"',
             "{number} organization found": "{number} organisasi ditemukan",
             ("{number} dataset found for \"{query}\"", "{number} datasets found for \"{query}\""): "{number} dataset ditemukan untuk \"{query}\"",
             ("{number} organization found for \"{query}\"", "{number} organizations found for \"{query}\""): "{number} organisasi ditemukan untuk \"{query}\"",
@@ -444,6 +446,26 @@ def main() -> None:
             ERRORS.append(
                 "Compiled core gettext percent-style plural for unfiltered dataset search must render Indonesian: "
                 f"{percent_empty_query_result!r}."
+            )
+        percent_unpunctuated_result = runtime_catalog.ngettext(
+            "%(count)s dataset found", "%(count)s datasets found", 4
+        ) % {"count": 4}
+        if percent_unpunctuated_result != "4 dataset ditemukan":
+            ERRORS.append(
+                "Compiled core gettext percent-style plural without punctuation "
+                "must render Indonesian: "
+                f"{percent_unpunctuated_result!r}."
+            )
+        percent_unpunctuated_query_result = runtime_catalog.ngettext(
+            '%(count)s dataset found for "%(query)s"',
+            '%(count)s datasets found for "%(query)s"',
+            4,
+        ) % {"count": 4, "query": "uji"}
+        if percent_unpunctuated_query_result != '4 dataset ditemukan untuk "uji"':
+            ERRORS.append(
+                "Compiled core gettext percent-style plural search with query "
+                "without punctuation must render Indonesian: "
+                f"{percent_unpunctuated_query_result!r}."
             )
         search_types = (
             ("dataset", "dataset", "dataset"),
