@@ -293,6 +293,7 @@ async function handle(request, context) {
     const responseHeaders = new Headers({
       "Content-Type": responseContentType,
       "Content-Disposition": `${inlinePreviewRequested ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      ...(inlinePreviewRequested ? { "X-Frame-Options": "SAMEORIGIN" } : {}),
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
       "X-Robots-Tag": "noindex, nofollow, noarchive",

@@ -35,6 +35,13 @@ const nextConfig = {
             : []),
         ],
       },
+      {
+        // Only validated, same-origin PDF preview responses may be framed.
+        // All other portal routes retain the global DENY policy above.
+        source: "/dataset/:slug/resource/:resourceId/download/:filename",
+        has: [{ type: "query", key: "preview", value: "1" }],
+        headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
+      },
     ];
   },
 };
