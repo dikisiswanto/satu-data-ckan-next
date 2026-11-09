@@ -21,7 +21,7 @@ export default function OrganizationDetailLoading() {
           </Link>
           <header className="public-page-heading public-dynamic-heading mb-4 flex flex-col gap-4">
             <p className="eyebrow">Profil perangkat daerah</p>
-            <Skeleton className="public-heading-title-reserved h-10 w-4/5 max-w-3xl sm:h-12" />
+            <Skeleton className="public-heading-title-reserved h-10 w-4/5 max-w-6xl sm:h-12" />
           </header>
           <div className="organization-detail-meta">
             <span>

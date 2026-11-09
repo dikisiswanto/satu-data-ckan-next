@@ -40,7 +40,7 @@
 }
 
 .public-page-heading h1 {
-  @apply max-w-4xl text-[2rem] font-semibold leading-[1.12] tracking-[-0.035em] text-ink sm:text-[2.65rem] sm:leading-[1.08];
+  @apply w-full max-w-none text-[2rem] font-semibold leading-[1.12] tracking-[-0.035em] text-ink sm:text-[2.65rem] sm:leading-[1.08];
 }
 
 .public-page-heading p:not(.eyebrow) {

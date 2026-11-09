@@ -162,9 +162,9 @@ export default function PublicIndicatorDetailLoading() {
         className="public-page-heading public-dynamic-heading mb-9 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between"
         aria-hidden="true"
       >
-        <div className="max-w-3xl space-y-3">
+        <div className="min-w-0 w-full max-w-6xl space-y-3">
           <Skeleton className="h-3 w-40" />
-          <Skeleton className="public-heading-title-reserved h-10 w-4/5 max-w-3xl sm:h-12" />
+          <Skeleton className="public-heading-title-reserved h-10 w-4/5 max-w-6xl sm:h-12" />
         </div>
       </header>
 

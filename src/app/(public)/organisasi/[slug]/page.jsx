@@ -188,6 +188,7 @@ export default async function OrganizationDetailPage({ params }) {
                 reserveTitle
                 eyebrow="Profil perangkat daerah"
                 title={org.title || org.name}
+                description={org.description || undefined}
               />
             </div>
           </div>

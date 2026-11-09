@@ -105,6 +105,7 @@ export default async function InfographicDetailPage({ params }) {
         reserveTitle
         eyebrow={item.category || "Infografik"}
         title={item.title}
+        description={item.notes || undefined}
       />
       <div className="mt-7 grid items-start gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-7">
         <section className="public-infographic-gallery space-y-5">

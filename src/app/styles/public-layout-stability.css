@@ -324,26 +324,35 @@
 
 /* Indicator detail: keep summary cards, chart and table stable across loading states. */
 .indicator-metadata-card {
-  min-block-size: 7.5rem;
+  min-block-size: 0;
+  padding: 0.85rem;
 }
 
 .indicator-metadata-value {
   display: -webkit-box;
-  min-block-size: 4.5rem;
   overflow: hidden;
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 
 @media (min-width: 1280px) {
   .indicator-metadata-card {
-    min-block-size: 5.5rem;
+    min-block-size: 0;
   }
 
   .indicator-metadata-value {
-    min-block-size: 2.5rem;
     -webkit-line-clamp: 2;
+  }
+}
+
+@media (max-width: 639px) {
+  .indicator-metadata-card {
+    padding: 0.7rem;
+  }
+
+  .indicator-metadata-value {
+    line-height: 1.35;
   }
 }
 

@@ -122,6 +122,7 @@ export default async function InformasiDetailPage({ params }) {
         reserveTitle
         eyebrow={page.category || "Informasi"}
         title={page.title}
+        description={getCmsPageDescription(page) || undefined}
       />
       <p className="public-publish-date mt-3 inline-flex min-h-5 items-center gap-2 text-xs text-muted">
         {page.publishDate ? (

@@ -17,7 +17,12 @@ export function PageHeading({
         className,
       )}
     >
-      <div className={cn("max-w-3xl", compact ? "space-y-1.5" : "space-y-3")}>
+      <div
+        className={cn(
+          "min-w-0 w-full max-w-6xl flex-1",
+          compact ? "space-y-1.5" : "space-y-3",
+        )}
+      >
         {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
         <h1
           className={cn(
