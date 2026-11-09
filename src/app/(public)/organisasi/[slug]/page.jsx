@@ -188,10 +188,14 @@ export default async function OrganizationDetailPage({ params }) {
                 reserveTitle
                 eyebrow="Profil perangkat daerah"
                 title={org.title || org.name}
-                description={org.description || undefined}
               />
             </div>
           </div>
+          {org.description ? (
+            <p className="organization-detail-description mt-4 max-w-5xl whitespace-pre-line text-sm leading-7 text-muted sm:text-base">
+              {org.description}
+            </p>
+          ) : null}
           <div className="organization-detail-meta">
             <span>
               <Building2 size={16} aria-hidden="true" /> Kode perangkat daerah:{" "}

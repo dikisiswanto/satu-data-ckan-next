@@ -929,6 +929,8 @@ CKAN 2.12.1 adalah backend otoritatif untuk dataset, resource, organisasi, DataS
 
 ## Persiapan pertama
 
+Jalankan langkah deployment dari Linux dengan Docker Engine dan Compose v2, Bash, Git, serta Python 3. Pada Windows gunakan distro WSL2 yang terhubung ke Docker Desktop dan jalankan skrip dari terminal Linux. Skrip bootstrap dan wrapper Compose berbasis Bash, sehingga PowerShell dan Command Prompt bukan lingkungan yang didukung untuk menjalankannya.
+
 ```bash
 cp .env.ckan.example .env.ckan
 # Isi PUBLIC_HOST, CKAN_HOST, CLOUDFLARE_TUNNEL_TOKEN, dan secret lain

@@ -94,7 +94,6 @@ export default async function PublicationDetailPage({ params }) {
         reserveTitle
         eyebrow={item.category || "Publikasi resmi"}
         title={item.title}
-        description={item.notes || undefined}
       />
       <div className="mt-7 grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_340px]">
         <section className="space-y-5">

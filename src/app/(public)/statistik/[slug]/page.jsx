@@ -93,9 +93,6 @@ export default async function IndicatorDetailPage({ params }) {
         reserveTitle
         eyebrow="Indikator statistik"
         title={indicator.title}
-        description={
-          indicator.metadata.definition || indicator.notes || undefined
-        }
       />
 
       <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

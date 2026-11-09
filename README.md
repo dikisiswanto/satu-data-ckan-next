@@ -4,6 +4,8 @@ Portal ini menyajikan katalog data dan informasi resmi. **CKAN 2.12.1** menjadi 
 
 ## Menyiapkan lingkungan
 
+Deployment memakai Docker Engine dengan Compose v2, Bash, Git, dan Python 3. Untuk pemeriksaan frontend gunakan Node.js `22.16.0` (lihat `.nvmrc`) dan npm yang memenuhi `package.json`. Di Windows, jalankan perintah dari WSL2 dengan integrasi Docker Desktop aktif; skrip deployment dan pemeriksaan memakai Bash dan tidak berjalan langsung di PowerShell.
+
 Jalankan perintah berikut dari root repository:
 
 ```bash
@@ -14,6 +16,8 @@ bash ./deploy/ckan/compose.sh cloudflare up -d --build
 ```
 
 Profil `cloudflare` menggunakan Cloudflare Tunnel. Gunakan profil `manual` untuk mengakses layanan melalui Caddy tanpa Tunnel. Siapkan Cloudflare Access sebelum menggunakan profil `cloudflare-access`. Jangan menghapus volume PostgreSQL, Solr, Redis, atau FileStore saat memperbarui aplikasi. Panduan lengkap tersedia di [Operasional Deployment](docs/PANDUAN-PORTAL.md#operasional-deployment-ckan).
+
+Jalankan perintah Compose melalui `deploy/ckan/compose.sh`; wrapper ini memakai checkout CKAN upstream dan environment hasil bootstrap, lalu membangun atau memverifikasi image dasar CKAN 2.12.1 sebelum menjalankan Compose. Dockerfile di root membangun frontend Next.js sebagai image produksi standalone dengan Node 22; prosesnya menjalankan `npm run build`, bukan pemeriksaan kualitas repo. Jalankan `npm run check` (pemeriksaan statis dan ESLint), `npm run test`, serta `npm run build` secara terpisah sebelum deployment. Jangan menjalankan file Compose upstream secara langsung.
 
 Simpan secret hanya di `.env.ckan`. Jangan commit file tersebut ke repository. Gunakan `.env.ckan.example` sebagai acuan konfigurasi.
 
