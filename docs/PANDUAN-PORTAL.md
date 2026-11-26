@@ -1036,7 +1036,7 @@ Pages dan Blog mendukung Markdown dan media editorial. Pengunggahan media harus 
 
 - Jangan memasukkan `.env.ckan`, token Tunnel, API key, atau cookie sesi ke Git/log.
 - CKAN tetap satu-satunya otoritas hak akses. Jangan memakai API key sysadmin di browser.
-- `resource_proxy` mengambil URL resource dari sisi server CKAN. Sediakan `CKAN_DOWNLOAD_PROXY` yang memblokir loopback, private, link-local, reserved, dan metadata-service IP setelah DNS resolution; jangan memakai open proxy. Jika belum tersedia, lihat [audit keamanan](SECURITY-AUDIT-2026-11-26.md) dan jangan menganggap CKAN 2.12.1 otomatis memfilter tujuan SSRF.
+- `resource_proxy` mengambil URL resource dari sisi server CKAN. Sediakan `CKAN_DOWNLOAD_PROXY` yang memblokir loopback, private, link-local, reserved, dan metadata-service IP setelah DNS resolution; jangan memakai open proxy. Pastikan filter diterapkan setelah resolusi DNS dan jangan menganggap CKAN 2.12.1 otomatis memfilter tujuan SSRF.
 - Perlakukan semua subdomain di bawah domain induk cookie sesi sebagai satu trust boundary. Jangan arahkan subdomain tersebut ke layanan pihak ketiga atau tenant yang tidak dipercaya.
 - Cadangkan PostgreSQL, FileStore, dan Solr sebelum perubahan skema/versi.
 - Hindari `docker compose down -v` dan perintah penghapusan volume pada produksi.
