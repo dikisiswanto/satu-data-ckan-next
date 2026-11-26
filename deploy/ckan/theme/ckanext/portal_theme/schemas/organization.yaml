@@ -17,8 +17,9 @@ fields:
     form_snippet: slug.html
     form_placeholder: dinas-kesehatan
 
-  - field_name: notes
+  - field_name: description
     label: Profil perangkat daerah
+    validators: ignore_missing unicode_safe
     form_snippet: markdown.html
     display_snippet: markdown.html
     form_placeholder: Jelaskan tugas, fungsi, dan ruang lingkup data yang dikelola perangkat daerah.

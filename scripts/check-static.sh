@@ -25,6 +25,7 @@ run_check python3 scripts/check-public-hero.py
 run_check node scripts/check-shared-theme.mjs
 run_check python3 scripts/test-theme-css-formatting.py
 run_check node scripts/check-admin-forms.mjs
+run_check python3 scripts/test-organization-description-migration.py
 run_check node scripts/check-admin-navigation-progress.mjs
 run_check node --check deploy/ckan/theme/ckanext/portal_theme/public/portal-admin-back-to-top.js
 run_check node scripts/test-admin-back-to-top.mjs

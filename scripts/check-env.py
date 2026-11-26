@@ -205,6 +205,10 @@ else:
             errors.append("sync-env.py harus memberi peringatan TLS yang akurat untuk hostname bertingkat pada Cloudflare Tunnel")
 if 'render-upstream-env.py' not in bootstrap or 'rm -f "$UPSTREAM/.env"' not in bootstrap:
     errors.append("Bootstrap harus menghasilkan env CKAN terfilter dari .env.ckan dan menghapus .env upstream independen")
+if 'SECURITY WARNING: resource_proxy is enabled without CKAN_DOWNLOAD_PROXY' not in bootstrap:
+    errors.append("Bootstrap harus memperingatkan risiko SSRF jika Resource Proxy aktif tanpa egress proxy filter")
+if "CKAN_DOWNLOAD_PROXY=" not in (root / ".env.ckan.example").read_text():
+    errors.append("Contoh environment harus mendokumentasikan konfigurasi CKAN_DOWNLOAD_PROXY untuk mitigasi SSRF")
 if 'env_file_count == 0' not in bootstrap or '.env.generated' not in bootstrap:
     errors.append("Bootstrap harus mengganti service env_file upstream menjadi .env.generated")
 if 'render-upstream-env.py' not in wrapper.read_text() or '[[ ! -e "$UPSTREAM/.env" ]]' not in wrapper.read_text():
@@ -227,6 +231,7 @@ else:
             output = tmp_path / ".env.generated"
             source.write_text(
                 "CKAN__PLUGINS=\"envvars datastore\"\n"
+                "CKAN_DOWNLOAD_PROXY=\n"
                 "CKAN_SESSION_COOKIE_NAME=portal_ckan_session\n"
                 "CKAN___SESSION_COOKIE_NAME=portal_ckan_session\n"
                 "CKAN___SESSION_COOKIE_DOMAIN=.example.test\n"
@@ -266,8 +271,24 @@ else:
                         errors.append(f"Renderer env membocorkan variabel edge {secret} ke service CKAN")
                 if "CKAN_SQLALCHEMY_URL=" not in generated or "CKANEXT__PORTAL_THEME__ADMIN_HOST=admin.example.test" not in generated or "CKAN___SESSION_COOKIE_DOMAIN=.example.test" not in generated or (os.name != "nt" and output.stat().st_mode & 0o777 != 0o600):
                     errors.append("Renderer env harus mempertahankan konfigurasi CKAN/admin host dan menulis output dengan permission 600")
+                if re.search(r"^CKAN_DOWNLOAD_PROXY=", generated, re.M):
+                    errors.append("Renderer tidak boleh meneruskan CKAN_DOWNLOAD_PROXY kosong karena itu bukan proxy aktif")
                 if re.search(r"^CKAN__SESSION_COOKIE_", generated, re.M):
                     errors.append("Flask SESSION_COOKIE settings wajib memakai CKAN___ triple underscore, bukan CKAN__")
+
+                proxy_source = tmp_path / ".env.proxy.ckan"
+                proxy_output = tmp_path / ".env.proxy.generated"
+                proxy_source.write_text(source.read_text().replace("CKAN_DOWNLOAD_PROXY=\n", "CKAN_DOWNLOAD_PROXY=http://egress-proxy:3128\n"))
+                proxy_result = subprocess.run([sys.executable, str(renderer), str(proxy_source), str(proxy_output)], capture_output=True, text=True)
+                if proxy_result.returncode != 0 or "CKAN_DOWNLOAD_PROXY=http://egress-proxy:3128" not in proxy_output.read_text():
+                    errors.append("Renderer harus meneruskan CKAN_DOWNLOAD_PROXY valid ke CKAN")
+
+                invalid_proxy_source = tmp_path / ".env.invalid-proxy.ckan"
+                invalid_proxy_output = tmp_path / ".env.invalid-proxy.generated"
+                invalid_proxy_source.write_text(source.read_text().replace("CKAN_DOWNLOAD_PROXY=\n", "CKAN_DOWNLOAD_PROXY=http://user:password@proxy.example:3128/path\n"))
+                invalid_proxy_result = subprocess.run([sys.executable, str(renderer), str(invalid_proxy_source), str(invalid_proxy_output)], capture_output=True, text=True)
+                if invalid_proxy_result.returncode == 0 or "without credentials" not in (invalid_proxy_result.stdout + invalid_proxy_result.stderr):
+                    errors.append("Renderer harus menolak proxy URL yang menyimpan kredensial atau path")
                 for upload_setting in (
                     "CKAN__UPLOADS_ENABLED=true",
                     "CKAN__FILES__STORAGE__DEFAULT__TYPE=ckan:fs",

@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { PageHeading } from "@/components/page-heading";
+import { MarkdownContent } from "@/components/cms/markdown-content";
 import { getPublicOrganizationBySlugResult } from "@/lib/data/organizations";
 import { getPublicOrganizationImageUrl } from "@/lib/ckan/public-media-url";
 import { formatDate } from "@/lib/utils";
@@ -192,9 +193,10 @@ export default async function OrganizationDetailPage({ params }) {
             </div>
           </div>
           {org.description ? (
-            <p className="organization-detail-description mt-4 max-w-5xl whitespace-pre-line text-sm leading-7 text-muted sm:text-base">
-              {org.description}
-            </p>
+            <MarkdownContent
+              content={org.description}
+              className="organization-detail-description mt-4 max-w-5xl text-sm leading-7 text-muted sm:text-base"
+            />
           ) : null}
           <div className="organization-detail-meta">
             <span>

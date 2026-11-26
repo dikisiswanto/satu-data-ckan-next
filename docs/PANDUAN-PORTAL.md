@@ -284,6 +284,19 @@ Formulir menampilkan kolom sesuai entitas dan `portal_type`, tanpa membuat packa
 - Dataset baru default ke `portal_type=dataset`; tautan pintas dapat meneruskan `?portal_type=indikator|infografik|publikasi|geospasial`.
 - Kolom lanjutan mengikuti tipe dataset. Resource tetap menggunakan `resource_fields`; `portal_resource_role` menentukan metadata dan saran format.
 - Organisasi memakai `organization.yaml`; kategori tematik memakai `group.yaml`. Kelompok tidak memiliki pemilih `portal_type`.
+- **Profil perangkat daerah menggunakan field inti `description` milik organisasi CKAN**, bukan extra `notes`. Isi Markdown yang sama dipakai oleh formulir admin, Action API (`organization_show`), direktori organisasi, SEO, dan halaman profil publik.
+- Untuk data dari rilis sebelumnya, portal tetap membaca extra `notes` sebagai fallback. Salin nilai lama ke `description` dengan `scripts/migrate-organization-descriptions.py`. Skrip default hanya dry-run, tidak pernah menimpa `description` yang sudah berisi, dan mempertahankan extra lama sebagai cadangan:
+
+  ```bash
+  export CKAN_API_URL="https://<CKAN_HOST>/api/3/action"
+  export CKAN_API_KEY="<token API sysadmin CKAN>"
+  python3 scripts/migrate-organization-descriptions.py       # periksa kandidat saja
+  python3 scripts/migrate-organization-descriptions.py --apply
+  unset CKAN_API_KEY
+  ```
+
+  Jalankan dari lingkungan yang dapat menjangkau Action API CKAN. Periksa hasil dry-run terlebih dahulu sebelum memakai `--apply`.
+
 - Kolom yang tidak relevan disembunyikan di browser, bukan dihapus dari schema/record. Tag portal diselaraskan saat tipe berubah, sedangkan tag lain dipertahankan.
 - Formulir untuk mengedit data lama menyimpulkan tipe dari tag penemuan bila metadata `portal_type` belum tersedia.
 
@@ -1023,6 +1036,8 @@ Pages dan Blog mendukung Markdown dan media editorial. Pengunggahan media harus 
 
 - Jangan memasukkan `.env.ckan`, token Tunnel, API key, atau cookie sesi ke Git/log.
 - CKAN tetap satu-satunya otoritas hak akses. Jangan memakai API key sysadmin di browser.
+- `resource_proxy` mengambil URL resource dari sisi server CKAN. Sediakan `CKAN_DOWNLOAD_PROXY` yang memblokir loopback, private, link-local, reserved, dan metadata-service IP setelah DNS resolution; jangan memakai open proxy. Jika belum tersedia, lihat [audit keamanan](SECURITY-AUDIT-2026-11-26.md) dan jangan menganggap CKAN 2.12.1 otomatis memfilter tujuan SSRF.
+- Perlakukan semua subdomain di bawah domain induk cookie sesi sebagai satu trust boundary. Jangan arahkan subdomain tersebut ke layanan pihak ketiga atau tenant yang tidak dipercaya.
 - Cadangkan PostgreSQL, FileStore, dan Solr sebelum perubahan skema/versi.
 - Hindari `docker compose down -v` dan perintah penghapusan volume pada produksi.
 - Jalankan `bash scripts/check-static.sh`, `npm run lint`, pengujian unit dan uji integrasi CKAN dan browser sebelum rilis.

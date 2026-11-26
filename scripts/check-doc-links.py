@@ -13,6 +13,7 @@ SKIP_DIRS = {".git", "node_modules", ".next", "out", "dist", "build", "coverage"
 CANONICAL_DOCS = {
     "LOKALISASI-CKAN.md",
     "PANDUAN-PORTAL.md",
+    "SECURITY-AUDIT-2026-11-26.md",
 }
 RETIRED_DOCS = {
     "docs/ADMIN-CKAN-DAN-CMS.md",

@@ -21,6 +21,8 @@ Jalankan perintah Compose melalui `deploy/ckan/compose.sh`; wrapper ini memakai 
 
 Simpan secret hanya di `.env.ckan`. Jangan commit file tersebut ke repository. Gunakan `.env.ckan.example` sebagai acuan konfigurasi.
 
+Audit keamanan source code (26 November 2026): [docs/SECURITY-AUDIT-2026-11-26.md](docs/SECURITY-AUDIT-2026-11-26.md).
+
 ## Mengembangkan dan menguji
 
 ```bash

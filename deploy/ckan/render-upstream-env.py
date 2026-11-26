@@ -10,6 +10,7 @@ own token and jobs database URI are injected only into CKAN and its worker.
 from pathlib import Path
 import re
 import sys
+from urllib.parse import urlsplit
 
 if len(sys.argv) != 3:
     raise SystemExit("usage: render-upstream-env.py .env.ckan deploy/ckan/upstream/.env.generated")
@@ -36,7 +37,29 @@ for line in source.read_text().splitlines():
     if key in seen:
         raise SystemExit(f"Duplicate environment key in canonical .env.ckan: {key}")
     seen.add(key)
-    values[key] = match.group(2).strip().strip('"').strip("'")
+    value = match.group(2).strip().strip('"').strip("'")
+    values[key] = value
+    if key == "CKAN_DOWNLOAD_PROXY":
+        # CKAN treats this as the ckan.download_proxy setting. Never emit an
+        # empty value: a blank proxy URL can be interpreted as a configured but
+        # invalid proxy by HTTP clients. Require a plain HTTP(S) proxy endpoint
+        # without credentials or path/query fragments (keep secrets out of URLs).
+        if not value:
+            continue
+        parsed_proxy = urlsplit(value)
+        if (
+            parsed_proxy.scheme not in {"http", "https"}
+            or not parsed_proxy.hostname
+            or parsed_proxy.username
+            or parsed_proxy.password
+            or parsed_proxy.path not in {"", "/"}
+            or parsed_proxy.query
+            or parsed_proxy.fragment
+        ):
+            raise SystemExit(
+                "CKAN_DOWNLOAD_PROXY must be a plain http(s) proxy URL such as "
+                "http://egress-proxy:3128 without credentials, path, query or fragment."
+            )
     rendered.append(line)
 
 if not any(line.startswith("CKAN__PLUGINS=") for line in rendered):

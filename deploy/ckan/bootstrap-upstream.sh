@@ -308,6 +308,18 @@ for plugin in (
 # Midnight Blue page.html ckan_extends chain from looping back into the Portal theme.
 plugins.append("envvars")
 values["CKAN__PLUGINS"] = '"' + " ".join(plugins) + '"'
+# Resource Proxy fetches remote resource URLs from the CKAN server. CKAN 2.12.1
+# supports ckan.download_proxy, but does not provide an SSRF-safe proxy by itself.
+# Make an absent egress filter visible during bootstrap instead of implying the
+# plugin is protected merely because the patched CKAN version is installed.
+download_proxy = values.get("CKAN_DOWNLOAD_PROXY", "").strip().strip('"').strip("'")
+if "resource_proxy" in plugins and not download_proxy:
+    print(
+        "SECURITY WARNING: resource_proxy is enabled without CKAN_DOWNLOAD_PROXY. "
+        "CKAN can fetch remote resource URLs directly; configure a filtering HTTP egress proxy "
+        "that blocks private, loopback, link-local, reserved and metadata-service IP ranges.",
+        file=sys.stderr,
+    )
 # CKAN 2.12 ships the modern Midnight Blue UI; use the supported native theme instead of a prototype theme extension.
 values["CKAN__BASE_PUBLIC_FOLDER"] = "public-midnight-blue"
 values["CKAN__BASE_TEMPLATES_FOLDER"] = "templates-midnight-blue"

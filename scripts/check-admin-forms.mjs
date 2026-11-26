@@ -31,6 +31,10 @@ const publicInfographicSource = await read(
 const publicPublicationSource = await read(
   "src/lib/data/public-publications.js",
 );
+const publicOrganizationSource = await read("src/lib/data/organizations.js");
+const organizationDetailPage = await read(
+  "src/app/(public)/organisasi/[slug]/page.jsx",
+);
 
 assert.match(
   schema,
@@ -67,6 +71,16 @@ assert.match(
 );
 assert.match(
   organizationSchema,
+  /field_name:\s*description[\s\S]{0,180}label:\s*Profil perangkat daerah[\s\S]{0,140}form_snippet:\s*markdown\.html[\s\S]{0,80}display_snippet:\s*markdown\.html/,
+  "Organization profile must edit CKAN's native description field with Markdown support.",
+);
+assert.doesNotMatch(
+  organizationSchema,
+  /field_name:\s*notes/,
+  "Organization profile must not be stored as a separate Scheming notes extra.",
+);
+assert.match(
+  organizationSchema,
   /field_name:\s*image_url[\s\S]{0,140}preset:\s*organization_url_upload/,
   "Organization logo must use CKAN's native image_url upload field.",
 );
@@ -74,6 +88,21 @@ assert.match(
   groupSchema,
   /field_name:\s*image_url[\s\S]{0,140}preset:\s*organization_url_upload/,
   "Thematic category image must use CKAN's native image_url upload field.",
+);
+assert.match(
+  publicOrganizationSource,
+  /include_extras:\s*true[\s\S]*normalizePublicOrganization/,
+  "Public organization reads must preserve legacy notes while normalizing the native description.",
+);
+assert.match(
+  publicOrganizationSource,
+  /organization\.description[\s\S]*organization\.notes[\s\S]*legacyExtraNotes/,
+  "Legacy organization notes must remain a read-only fallback during migration.",
+);
+assert.match(
+  organizationDetailPage,
+  /<MarkdownContent[\s\S]*content=\{org\.description\}/,
+  "The public organization profile must render CKAN description as Markdown.",
 );
 assert.match(
   groupSchema,
@@ -703,5 +732,5 @@ assert.ok(
   "Category help links must open the correct dynamic dataset form.",
 );
 process.stdout.write(
-  "Admin custom forms passed: CMS Page/Blog route parity, Blog contextual sidebar removal, content-type query defaults, FE discovery tags, dynamic field visibility, inherited resource roles, and thematic Group behavior verified.\n",
+  "Admin custom forms passed: organization description binding, CMS Page/Blog route parity, content-type query defaults, dynamic field visibility, and thematic Group behavior verified.\n",
 );

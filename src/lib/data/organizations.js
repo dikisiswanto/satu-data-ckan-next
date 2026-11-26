@@ -61,6 +61,49 @@ async function getOrganizationContentFacets() {
   return counts;
 }
 
+/**
+ * CKAN's native organization profile lives in `description`. Older portal
+ * schemas stored the same text as a Scheming `notes` extra; read that value as
+ * a compatibility fallback while existing organizations are migrated.
+ */
+const ORGANIZATION_EXTRA_FIELDS = [
+  "organization_code",
+  "organization_category",
+  "organization_website",
+  "organization_contact_email",
+  "organization_contact_phone",
+  "organization_data_contact",
+];
+
+export function normalizePublicOrganization(organization) {
+  if (!organization || typeof organization !== "object") return organization;
+
+  const legacyExtraNotes = Array.isArray(organization.extras)
+    ? organization.extras.find((extra) => extra?.key === "notes")?.value
+    : organization.extras && typeof organization.extras === "object"
+      ? organization.extras.notes
+      : undefined;
+  const candidates = [
+    organization.description,
+    organization.notes,
+    legacyExtraNotes,
+  ];
+  const description = candidates.find(
+    (value) => typeof value === "string" && value.trim().length > 0,
+  );
+  const publicOrganization = { ...organization };
+  delete publicOrganization.extras;
+  delete publicOrganization.notes;
+  for (const field of ORGANIZATION_EXTRA_FIELDS) {
+    delete publicOrganization[field];
+  }
+
+  return {
+    ...publicOrganization,
+    description: description || "",
+  };
+}
+
 export async function getPublicOrganizationsResult() {
   try {
     const [organizationsResult, contentFacets] = await Promise.all([
@@ -68,7 +111,7 @@ export async function getPublicOrganizationsResult() {
         all_fields: true,
         include_dataset_count: false,
         include_datasets: false,
-        include_extras: false,
+        include_extras: true,
         include_users: false,
       }),
       getOrganizationContentFacets(),
@@ -77,7 +120,8 @@ export async function getPublicOrganizationsResult() {
       Array.isArray(organizationsResult) ? organizationsResult : []
     )
       .filter((organization) => organization.state !== "deleted")
-      .map((organization) => {
+      .map((rawOrganization) => {
+        const organization = normalizePublicOrganization(rawOrganization);
         const publicContentCounts = Object.fromEntries(
           Object.entries(contentFacets).map(([kind, counts]) => [
             kind,
@@ -114,11 +158,15 @@ export const getPublicOrganizationBySlugResult = cache(
         id: name,
         include_dataset_count: false,
         include_datasets: false,
-        include_extras: false,
+        include_extras: true,
         include_users: false,
       });
+      const normalizedOrganization = normalizePublicOrganization(organization);
       return {
-        data: organization?.state === "deleted" ? null : organization,
+        data:
+          normalizedOrganization?.state === "deleted"
+            ? null
+            : normalizedOrganization,
         unavailable: false,
       };
     } catch (error) {

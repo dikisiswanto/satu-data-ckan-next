@@ -39,7 +39,11 @@ import {
   getPublicPortalStatsResult,
   getPublishedDatasetFacetsResult,
 } from "@/lib/data/public";
-import { getPublicOrganizationsResult } from "@/lib/data/organizations";
+import {
+  getPublicOrganizationsResult,
+  getPublicOrganizationBySlugResult,
+  normalizePublicOrganization,
+} from "@/lib/data/organizations";
 import {
   buildDatasetCatalogExclusionFilters,
   buildPortalContentDiscoveryFilter,
@@ -574,6 +578,7 @@ describe("public organization facet queries", () => {
                   title: "Bappeda Contoh",
                   display_name: "Bappeda Contoh",
                   state: "active",
+                  extras: [{ key: "notes", value: "Profil perangkat daerah" }],
                 },
               ]
             : {
@@ -598,6 +603,8 @@ describe("public organization facet queries", () => {
     // CKAN organization_list(all_fields=true) returns organization objects,
     // not a list of organization-name strings. Keep the fixture contract explicit.
     expect(response.data[0].name).toBe("bappeda-sample");
+    expect(response.data[0].description).toBe("Profil perangkat daerah");
+    expect(response.data[0]).not.toHaveProperty("extras");
     expect(response.data[0].public_content_counts).toEqual({
       datasets: 1,
       indicators: 1,
@@ -616,6 +623,103 @@ describe("public organization facet queries", () => {
         "organization",
       ]);
     }
+  });
+});
+
+describe("native CKAN organization descriptions", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("prefers the native description and hides legacy extras from public data", () => {
+    const normalized = normalizePublicOrganization({
+      name: "bappeda-sample",
+      description: "Profil bawaan CKAN",
+      notes: "Profil lama",
+      organization_contact_email: "kontak@instansi.go.id",
+      extras: [{ key: "notes", value: "Profil lama" }],
+    });
+
+    expect(normalized).toMatchObject({
+      name: "bappeda-sample",
+      description: "Profil bawaan CKAN",
+    });
+    expect(normalized).not.toHaveProperty("notes");
+    expect(normalized).not.toHaveProperty("extras");
+    expect(normalized).not.toHaveProperty("organization_contact_email");
+  });
+
+  it("uses a legacy notes extra when a native description has not been migrated", () => {
+    const normalized = normalizePublicOrganization({
+      name: "dinas-kesehatan",
+      description: "  ",
+      extras: [
+        { key: "organization_category", value: "dinas" },
+        { key: "notes", value: "## Profil lama\n\nTugas dan fungsi." },
+      ],
+    });
+
+    expect(normalized.description).toBe("## Profil lama\n\nTugas dan fungsi.");
+    expect(normalized).not.toHaveProperty("extras");
+  });
+
+  it("requests organization extras during transition and normalizes the legacy field", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(async (input, init) => {
+        const { url, params } = decodeActionCall([input, init]);
+        const action = url.pathname.split("/").at(-1);
+        if (action === "organization_list") {
+          expect(params.get("include_extras")).toBe("true");
+          return Response.json({
+            success: true,
+            result: [
+              {
+                id: "organization-id",
+                name: "dinas-kesehatan",
+                title: "Dinas Kesehatan",
+                extras: [{ key: "notes", value: "Profil warisan" }],
+              },
+            ],
+          });
+        }
+        return Response.json({
+          success: true,
+          result: {
+            count: 0,
+            search_facets: { organization: { items: [] } },
+          },
+        });
+      });
+
+    const response = await getPublicOrganizationsResult();
+    expect(response.unavailable).toBe(false);
+    expect(response.data[0]).toMatchObject({ description: "Profil warisan" });
+    expect(response.data[0]).not.toHaveProperty("extras");
+    expect(fetchSpy).toHaveBeenCalled();
+  });
+
+  it("requests extras for organization detail so legacy notes remain readable", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(async (input, init) => {
+        const { url, params } = decodeActionCall([input, init]);
+        expect(url.pathname).toContain("/organization_show");
+        expect(params.get("include_extras")).toBe("true");
+        return Response.json({
+          success: true,
+          result: {
+            name: "dinas-kesehatan",
+            state: "active",
+            extras: [{ key: "notes", value: "Profil detail lama" }],
+          },
+        });
+      });
+
+    const response = await getPublicOrganizationBySlugResult("dinas-kesehatan");
+    expect(response).toMatchObject({
+      unavailable: false,
+      data: { description: "Profil detail lama" },
+    });
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 });
 
